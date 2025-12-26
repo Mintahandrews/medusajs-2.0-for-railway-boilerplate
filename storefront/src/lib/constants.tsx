@@ -11,6 +11,14 @@ export const paymentInfoMap: Record<
   string,
   { title: string; icon: React.JSX.Element }
 > = {
+  pp_system_default: {
+    title: "Manual Payment",
+    icon: <CreditCard />,
+  },
+  pp_paystack_paystack: {
+    title: "Paystack",
+    icon: <Paystack />,
+  },
   pp_stripe_stripe: {
     title: "Credit card",
     icon: <CreditCard />,
@@ -26,14 +34,6 @@ export const paymentInfoMap: Record<
   pp_paypal_paypal: {
     title: "PayPal",
     icon: <PayPal />,
-  },
-  pp_paystack_paystack: {
-    title: "Paystack",
-    icon: <Paystack />,
-  },
-  pp_system_default: {
-    title: "Manual Payment",
-    icon: <CreditCard />,
   },
   // Add more payment providers here
 }
