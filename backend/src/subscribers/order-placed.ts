@@ -9,9 +9,12 @@ export default async function orderPlacedHandler({
 }: SubscriberArgs<any>) {
   const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
-  
+
   const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
-  const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+
+  if (!order) {
+    return
+  }
 
   try {
     await notificationModuleService.createNotifications({
@@ -20,11 +23,11 @@ export default async function orderPlacedHandler({
       template: EmailTemplates.ORDER_PLACED,
       data: {
         emailOptions: {
-          replyTo: 'info@example.com',
-          subject: 'Your order has been placed'
+          replyTo: 'support@letscase.com',
+          subject: 'Your Order has been Placed - Letscase'
         },
         order,
-        shippingAddress,
+        shippingAddress: order.shipping_address,
         preview: 'Thank you for your order!'
       }
     })

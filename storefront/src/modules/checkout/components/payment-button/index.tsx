@@ -330,6 +330,16 @@ const PaystackPaymentButton = ({
 
   const handlePayment = () => {
     setSubmitting(true)
+
+    const session = cart.payment_collection?.payment_sessions?.find(
+      (s) => s.status === "pending" && isPaystack(s.provider_id)
+    )
+
+    if (session?.data?.authorization_url) {
+      window.location.href = session.data.authorization_url as string
+      return
+    }
+
     onPaymentCompleted()
   }
 
