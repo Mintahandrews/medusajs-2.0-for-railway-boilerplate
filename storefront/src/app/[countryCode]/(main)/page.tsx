@@ -19,10 +19,15 @@ export default async function Home({
   params: Promise<{ countryCode: string }>
 }) {
   const { countryCode } = await params
-  const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
 
-  if (!collections || !region) {
+  if (!region) {
+    return null
+  }
+
+  const collections = await getCollectionsWithProducts(countryCode)
+
+  if (!collections) {
     return null
   }
 

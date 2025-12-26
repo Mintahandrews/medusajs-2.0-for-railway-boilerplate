@@ -87,6 +87,16 @@ export const getProductsList = cache(async function ({
         queryParams,
       }
     })
+    .catch((e) => {
+      console.error("Error fetching products:", e)
+      return {
+        response: {
+          products: [],
+          count: 0,
+        },
+        nextPage: null,
+      }
+    })
 })
 
 /**
