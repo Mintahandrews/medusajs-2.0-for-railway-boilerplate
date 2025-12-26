@@ -14,9 +14,14 @@
   --ui-fg-interactive-hover: #3B7C7C;
   --ui-bg-interactive: #4A9B9B;
   --ui-border-interactive: #4A9B9B;
+
+  /* Override "Black" Inverted Buttons (e.g., Add to Cart, Checkout) */
   --ui-button-inverted: #4A9B9B;
   --ui-button-inverted-hover: #3B7C7C;
   --ui-button-inverted-pressed: #2C5D5D;
+  --ui-bg-base-inverted: #4A9B9B;
+  --ui-bg-base-inverted-hover: #3B7C7C;
+  --ui-fg-base-inverted: #ffffff;
 
   /* Override focus/active states */
   --ui-fg-on-inverted: #ffffff;
