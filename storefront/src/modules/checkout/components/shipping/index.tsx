@@ -2,7 +2,7 @@
 
 import { RadioGroup } from "@headlessui/react"
 import { CheckCircleSolid } from "@medusajs/icons"
-import { Button, Heading, Text, clx } from "@medusajs/ui"
+import { Button, clx } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
 import Radio from "@modules/common/components/radio"
@@ -62,8 +62,7 @@ const Shipping: React.FC<ShippingProps> = ({
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
+        <h2
           className={clx(
             "flex flex-row text-3xl-regular gap-x-2 items-baseline",
             {
@@ -76,12 +75,12 @@ const Shipping: React.FC<ShippingProps> = ({
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
             <CheckCircleSolid />
           )}
-        </Heading>
+        </h2>
         {!isOpen &&
           cart?.shipping_address &&
           cart?.billing_address &&
           cart?.email && (
-            <Text>
+            <span>
               <button
                 onClick={handleEdit}
                 className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
@@ -89,7 +88,7 @@ const Shipping: React.FC<ShippingProps> = ({
               >
                 Edit
               </button>
-            </Text>
+            </span>
           )}
       </div>
       {isOpen ? (
@@ -149,16 +148,16 @@ const Shipping: React.FC<ShippingProps> = ({
           <div className="text-small-regular">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <span className="txt-medium-plus text-ui-fg-base mb-1">
                   Method
-                </Text>
-                <Text className="txt-medium text-ui-fg-subtle">
+                </span>
+                <span className="txt-medium text-ui-fg-subtle">
                   {selectedShippingMethod?.name}{" "}
                   {convertToLocale({
                     amount: selectedShippingMethod?.amount!,
                     currency_code: cart?.currency_code,
                   })}
-                </Text>
+                </span>
               </div>
             )}
           </div>

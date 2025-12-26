@@ -1,6 +1,6 @@
 "use client"
 
-import { Table, Text, clx } from "@medusajs/ui"
+import { Table, clx } from "@medusajs/ui"
 
 import { updateLineItem } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
@@ -65,12 +65,12 @@ const Item = ({ item, type = "full" }: ItemProps) => {
       </Table.Cell>
 
       <Table.Cell className="text-left">
-        <Text
+        <span
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
           {item.product_title}
-        </Text>
+        </span>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>
 
@@ -120,7 +120,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         >
           {type === "preview" && (
             <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
+              <span className="text-ui-fg-muted">{item.quantity}x </span>
               <LineItemUnitPrice item={item} style="tight" />
             </span>
           )}

@@ -1,6 +1,6 @@
 import { RadioGroup } from "@headlessui/react"
 import { InformationCircleSolid } from "@medusajs/icons"
-import { Text, Tooltip, clx } from "@medusajs/ui"
+import { Tooltip, clx } from "@medusajs/ui"
 import React from "react"
 
 import Radio from "@modules/common/components/radio"
@@ -40,9 +40,9 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
         <div className="flex items-center justify-between ">
           <div className="flex items-center gap-x-4">
             <Radio checked={selectedPaymentOptionId === paymentProviderId} />
-            <Text className="text-base-regular">
+            <span className="text-base-regular">
               {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
-            </Text>
+            </span>
             {isManual(paymentProviderId) && isDevelopment && (
               <PaymentTest className="hidden small:block" />
             )}

@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { RadioGroup } from "@headlessui/react"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
-import { Button, Container, Heading, Text, Tooltip, clx } from "@medusajs/ui"
+import { Button, Container, clx } from "@medusajs/ui"
 import { CardElement } from "@stripe/react-stripe-js"
 import { StripeCardElementOptions } from "@stripe/stripe-js"
 
@@ -116,8 +116,7 @@ const Payment = ({
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
+        <h2
           className={clx(
             "flex flex-row text-3xl-regular gap-x-2 items-baseline",
             {
@@ -128,9 +127,9 @@ const Payment = ({
         >
           Payment
           {!isOpen && paymentReady && <CheckCircleSolid />}
-        </Heading>
+        </h2>
         {!isOpen && paymentReady && (
-          <Text>
+          <span>
             <button
               onClick={handleEdit}
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
@@ -138,7 +137,7 @@ const Payment = ({
             >
               Edit
             </button>
-          </Text>
+          </span>
         )}
       </div>
       <div>
@@ -166,16 +165,16 @@ const Payment = ({
               </RadioGroup>
               {isStripe && stripeReady && (
                 <div className="mt-5 transition-all duration-150 ease-in-out">
-                  <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                  <span className="txt-medium-plus text-ui-fg-base mb-1">
                     Enter your card details:
-                  </Text>
+                  </span>
 
                   <CardElement
                     options={useOptions as StripeCardElementOptions}
                     onChange={(e) => {
                       setCardBrand(
                         e.brand &&
-                          e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
+                        e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
                       )
                       setError(e.error?.message || null)
                       setCardComplete(e.complete)
@@ -188,15 +187,15 @@ const Payment = ({
 
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <span className="txt-medium-plus text-ui-fg-base mb-1">
                 Payment method
-              </Text>
-              <Text
+              </span>
+              <span
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
                 Gift card
-              </Text>
+              </span>
             </div>
           )}
 
@@ -226,21 +225,21 @@ const Payment = ({
           {cart && paymentReady && activeSession ? (
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <span className="txt-medium-plus text-ui-fg-base mb-1">
                   Payment method
-                </Text>
-                <Text
+                </span>
+                <span
                   className="txt-medium text-ui-fg-subtle"
                   data-testid="payment-method-summary"
                 >
                   {paymentInfoMap[selectedPaymentMethod]?.title ||
                     selectedPaymentMethod}
-                </Text>
+                </span>
               </div>
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <span className="txt-medium-plus text-ui-fg-base mb-1">
                   Payment details
-                </Text>
+                </span>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
                   data-testid="payment-details-summary"
@@ -250,25 +249,25 @@ const Payment = ({
                       <CreditCard />
                     )}
                   </Container>
-                  <Text>
+                  <span>
                     {isStripeFunc(selectedPaymentMethod) && cardBrand
                       ? cardBrand
                       : "Another step will appear"}
-                  </Text>
+                  </span>
                 </div>
               </div>
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <span className="txt-medium-plus text-ui-fg-base mb-1">
                 Payment method
-              </Text>
-              <Text
+              </span>
+              <span
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
                 Gift card
-              </Text>
+              </span>
             </div>
           ) : null}
         </div>
