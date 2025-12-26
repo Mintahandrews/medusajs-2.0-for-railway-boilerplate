@@ -1,4 +1,4 @@
-import { Container, Heading, Text } from "@medusajs/ui"
+import { Container } from "@medusajs/ui"
 
 import { isStripe, paymentInfoMap } from "@lib/constants"
 import Divider from "@modules/common/components/divider"
@@ -14,41 +14,41 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
 
   return (
     <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
+      <h2 className="flex flex-row text-3xl-regular my-6">
         Payment
-      </Heading>
+      </h2>
       <div>
         {payment && (
           <div className="flex items-start gap-x-1 w-full">
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <span className="txt-medium-plus text-ui-fg-base mb-1">
                 Payment method
-              </Text>
-              <Text
+              </span>
+              <span
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method"
               >
                 {paymentInfoMap[payment.provider_id].title}
-              </Text>
+              </span>
             </div>
             <div className="flex flex-col w-2/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <span className="txt-medium-plus text-ui-fg-base mb-1">
                 Payment details
-              </Text>
+              </span>
               <div className="flex gap-2 txt-medium text-ui-fg-subtle items-center">
                 <Container className="flex items-center h-7 w-fit p-2 bg-ui-button-neutral-hover">
                   {paymentInfoMap[payment.provider_id].icon}
                 </Container>
-                <Text data-testid="payment-amount">
+                <span data-testid="payment-amount">
                   {isStripe(payment.provider_id) && payment.data?.card_last4
                     ? `**** **** **** ${payment.data.card_last4}`
                     : `${convertToLocale({
-                        amount: payment.amount,
-                        currency_code: order.currency_code,
-                      })} paid at ${new Date(
-                        payment.created_at ?? ""
-                      ).toLocaleString()}`}
-                </Text>
+                      amount: payment.amount,
+                      currency_code: order.currency_code,
+                    })} paid at ${new Date(
+                      payment.created_at ?? ""
+                    ).toLocaleString()}`}
+                </span>
               </div>
             </div>
           </div>
@@ -61,3 +61,4 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
 }
 
 export default PaymentDetails
+

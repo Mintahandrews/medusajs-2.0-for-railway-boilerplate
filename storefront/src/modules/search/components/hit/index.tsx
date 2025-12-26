@@ -1,4 +1,4 @@
-import { Container, Text } from "@medusajs/ui"
+import { Container } from "@medusajs/ui"
 
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -36,12 +36,12 @@ const Hit = ({ hit }: HitProps) => {
         />
         <div className="flex flex-col justify-between group">
           <div className="flex flex-col">
-            <Text
+            <span
               className="text-ui-fg-subtle"
               data-testid="search-result-title"
             >
               {hit.title}
-            </Text>
+            </span>
           </div>
         </div>
       </Container>
@@ -50,3 +50,4 @@ const Hit = ({ hit }: HitProps) => {
 }
 
 export default Hit
+

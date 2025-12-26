@@ -1,5 +1,4 @@
 import { ArrowUpRightMini } from "@medusajs/icons"
-import { Text } from "@medusajs/ui"
 import { Metadata } from "next"
 import Link from "next/link"
 
@@ -19,7 +18,7 @@ export default function NotFound() {
         className="flex gap-x-1 items-center group"
         href="/"
       >
-        <Text className="text-ui-fg-interactive">Go to frontpage</Text>
+        <span className="text-ui-fg-interactive">Go to frontpage</span>
         <ArrowUpRightMini
           className="group-hover:rotate-45 ease-in-out duration-150"
           color="var(--fg-interactive)"
@@ -28,3 +27,4 @@ export default function NotFound() {
     </div>
   )
 }
+

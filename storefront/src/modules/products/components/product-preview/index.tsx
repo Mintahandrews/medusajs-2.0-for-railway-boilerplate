@@ -1,4 +1,4 @@
-import { Text } from "@medusajs/ui"
+
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -50,12 +50,12 @@ export default async function ProductPreview({
         </div>
 
         <div className="p-4 flex flex-col flex-1 gap-2">
-          <Text
+          <span
             className="text-base font-medium text-ui-fg-base line-clamp-2 group-hover:text-letscase-600 transition-colors"
             data-testid="product-title"
           >
             {product.title}
-          </Text>
+          </span>
           <div className="flex items-center gap-x-2 mt-auto">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>

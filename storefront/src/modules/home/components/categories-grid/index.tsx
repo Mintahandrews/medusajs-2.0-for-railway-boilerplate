@@ -1,6 +1,5 @@
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Text } from "@medusajs/ui"
 import { ArrowRight } from "@medusajs/icons"
 
 const CategoriesGrid = () => {
@@ -35,12 +34,12 @@ const CategoriesGrid = () => {
     return (
         <div className="content-container py-16">
             <div className="flex flex-col mb-10 gap-4">
-                <Text className="text-3xl font-bold text-gray-900">
+                <h2 className="text-3xl font-bold text-gray-900">
                     Shop by Category
-                </Text>
-                <Text className="text-gray-600 max-w-lg">
+                </h2>
+                <p className="text-gray-600 max-w-lg">
                     Explore our wide range of premium tech accessories tailored to your needs.
-                </Text>
+                </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -76,3 +75,4 @@ const CategoriesGrid = () => {
 }
 
 export default CategoriesGrid
+

@@ -1,7 +1,7 @@
 "use client"
 
 import { Plus } from "@medusajs/icons"
-import { Button, Heading } from "@medusajs/ui"
+import { Button } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 import { useFormState } from "react-dom"
 
@@ -53,7 +53,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
 
       <Modal isOpen={state} close={close} data-testid="add-address-modal">
         <Modal.Title>
-          <Heading className="mb-2">Add address</Heading>
+          <h3 className="mb-2">Add address</h3>
         </Modal.Title>
         <form action={formAction}>
           <Modal.Body>

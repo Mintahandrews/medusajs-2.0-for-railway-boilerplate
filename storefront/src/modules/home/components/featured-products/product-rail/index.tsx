@@ -1,5 +1,4 @@
 import { HttpTypes } from "@medusajs/types"
-import { Text } from "@medusajs/ui"
 
 import InteractiveLink from "@modules/common/components/interactive-link"
 import ProductPreview from "@modules/products/components/product-preview"
@@ -21,7 +20,7 @@ export default function ProductRail({
     <div className="content-container py-12 small:py-24">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
         <div>
-          <Text className="text-3xl font-bold text-gray-900 mb-2">{collection.title}</Text>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{collection.title}</h2>
           {/* Optional subtitle if we had one, for now just space */}
         </div>
         <InteractiveLink href={`/collections/${collection.handle}`}>
@@ -41,3 +40,4 @@ export default function ProductRail({
     </div>
   )
 }
+

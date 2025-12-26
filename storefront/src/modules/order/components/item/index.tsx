@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
-import { Table, Text } from "@medusajs/ui"
+import { Table } from "@medusajs/ui"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
@@ -20,12 +20,12 @@ const Item = ({ item }: ItemProps) => {
       </Table.Cell>
 
       <Table.Cell className="text-left">
-        <Text
+        <span
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-name"
         >
           {item.title}
-        </Text>
+        </span>
         {item.variant && (
           <LineItemOptions variant={item.variant} data-testid="product-variant" />
         )}
@@ -34,9 +34,9 @@ const Item = ({ item }: ItemProps) => {
       <Table.Cell className="!pr-0">
         <span className="!pr-0 flex flex-col items-end h-full justify-center">
           <span className="flex gap-x-1 ">
-            <Text className="text-ui-fg-muted">
+            <span className="text-ui-fg-muted">
               <span data-testid="product-quantity">{item.quantity}</span>x{" "}
-            </Text>
+            </span>
             <LineItemUnitPrice item={item} style="tight" />
           </span>
 
@@ -48,3 +48,4 @@ const Item = ({ item }: ItemProps) => {
 }
 
 export default Item
+

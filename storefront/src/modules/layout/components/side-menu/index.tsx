@@ -2,7 +2,7 @@
 
 import { Popover, Transition } from "@headlessui/react"
 import { ArrowRightMini, XMark } from "@medusajs/icons"
-import { Text, clx, useToggleState } from "@medusajs/ui"
+import { clx, useToggleState } from "@medusajs/ui"
 import { Fragment } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -90,10 +90,10 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                           )}
                         />
                       </div>
-                      <Text className="flex justify-between txt-compact-small">
+                      <span className="flex justify-between txt-compact-small">
                         © {new Date().getFullYear()} Letscase. All rights
                         reserved.
-                      </Text>
+                      </span>
                     </div>
                   </div>
                 </Popover.Panel>

@@ -1,4 +1,3 @@
-import { Heading } from "@medusajs/ui"
 import { cookies } from "next/headers"
 
 import CartTotals from "@modules/common/components/cart-totals"
@@ -27,17 +26,16 @@ export default function OrderCompletedTemplate({
           className="flex flex-col gap-4 max-w-4xl h-full bg-white w-full py-10"
           data-testid="order-complete-container"
         >
-          <Heading
-            level="h1"
+          <h1
             className="flex flex-col gap-y-3 text-ui-fg-base text-3xl mb-4"
           >
             <span>Thank you!</span>
             <span>Your order was placed successfully.</span>
-          </Heading>
+          </h1>
           <OrderDetails order={order} />
-          <Heading level="h2" className="flex flex-row text-3xl-regular">
+          <h2 className="flex flex-row text-3xl-regular">
             Summary
-          </Heading>
+          </h2>
           <Items items={order.items} />
           <CartTotals totals={order} />
           <ShippingDetails order={order} />
@@ -48,3 +46,4 @@ export default function OrderCompletedTemplate({
     </div>
   )
 }
+
