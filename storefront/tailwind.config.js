@@ -21,6 +21,18 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
+        letscase: {
+          50: '#E8F4F4',
+          100: '#D1E9E9',
+          200: '#A3D3D3',
+          300: '#75BDBD',
+          400: '#5BA5A5',
+          500: '#4A9B9B',
+          600: '#3B7C7C',
+          700: '#2C5D5D',
+          800: '#1E3E3E',
+          900: '#0F1F1F',
+        },
         grey: {
           0: "#FFFFFF",
           5: "#F9FAFB",

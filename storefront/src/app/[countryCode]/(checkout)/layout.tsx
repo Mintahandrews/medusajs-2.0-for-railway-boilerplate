@@ -1,6 +1,5 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ChevronDown from "@modules/common/icons/chevron-down"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
 
 export default function CheckoutLayout({
   children,
@@ -17,26 +16,26 @@ export default function CheckoutLayout({
             data-testid="back-to-cart-link"
           >
             <ChevronDown className="rotate-90" size={16} />
-            <span className="mt-px hidden small:block txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base ">
+            <span className="mt-px hidden small:block txt-compact-plus text-ui-fg-subtle hover:text-letscase-500 ">
               Back to shopping cart
             </span>
-            <span className="mt-px block small:hidden txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base">
+            <span className="mt-px block small:hidden txt-compact-plus text-ui-fg-subtle hover:text-letscase-500">
               Back
             </span>
           </LocalizedClientLink>
           <LocalizedClientLink
             href="/"
-            className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
+            className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-letscase-500 uppercase"
             data-testid="store-link"
           >
-            Medusa Store
+            <img src="/LetsCase LOGO.png" alt="Letscase" className="h-8 w-auto" />
           </LocalizedClientLink>
           <div className="flex-1 basis-0" />
         </nav>
       </div>
       <div className="relative" data-testid="checkout-container">{children}</div>
       <div className="py-4 w-full flex items-center justify-center">
-        <MedusaCTA />
+        <span className="text-sm text-ui-fg-muted">© {new Date().getFullYear()} Letscase. All rights reserved.</span>
       </div>
     </div>
   )

@@ -22,10 +22,10 @@ export default async function Nav() {
           <div className="flex items-center h-full">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
+              className="flex items-center"
               data-testid="nav-store-link"
             >
-              Medusa Store
+              <img src="/LetsCase LOGO.png" alt="Letscase" className="h-10 w-auto" />
             </LocalizedClientLink>
           </div>
 
@@ -33,7 +33,7 @@ export default async function Nav() {
             <div className="hidden small:flex items-center gap-x-6 h-full">
               {process.env.NEXT_PUBLIC_FEATURE_SEARCH_ENABLED && (
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base"
+                  className="hover:text-letscase-500 transition-colors"
                   href="/search"
                   scroll={false}
                   data-testid="nav-search-link"
@@ -42,7 +42,7 @@ export default async function Nav() {
                 </LocalizedClientLink>
               )}
               <LocalizedClientLink
-                className="hover:text-ui-fg-base"
+                className="hover:text-letscase-500 transition-colors"
                 href="/account"
                 data-testid="nav-account-link"
               >
@@ -52,7 +52,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
+                  className="hover:text-letscase-500 flex gap-2 transition-colors"
                   href="/cart"
                   data-testid="nav-cart-link"
                 >
@@ -68,3 +68,4 @@ export default async function Nav() {
     </div>
   )
 }
+
