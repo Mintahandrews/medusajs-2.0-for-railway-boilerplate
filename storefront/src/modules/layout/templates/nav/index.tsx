@@ -16,10 +16,10 @@ export default async function Nav() {
           <div className="flex items-center gap-x-8">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase font-bold text-2xl tracking-wide text-black"
+              className="txt-compact-xlarge-plus hover:opacity-80 transition-opacity"
               data-testid="nav-store-link"
             >
-              cyber
+              <img src="/logo.png" alt="Letscase" className="h-[50px] w-auto object-contain" />
             </LocalizedClientLink>
 
             <div className="hidden medium:flex items-center bg-[#F5F5F5] rounded-md px-4 py-2 w-64 gap-2">

@@ -38,7 +38,8 @@ module.exports = {
           black: "#000000",
           white: "#FFFFFF",
           gray: "#F5F5F7",
-          accent: "#000000", // Main accent is black
+          accent: "#14b8a6", // Main accent color from logo
+
         }
       },
       borderRadius: {

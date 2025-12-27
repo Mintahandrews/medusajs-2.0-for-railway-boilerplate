@@ -17,7 +17,7 @@ const Hero = () => {
         </Text>
 
         <LocalizedClientLink href="/store" className="mt-6">
-          <Button variant="secondary" className="px-12 py-3 bg-transparent border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors text-base font-medium">
+          <Button variant="secondary" className="px-12 py-3 bg-transparent border border-white text-white rounded-md hover:bg-white hover:text-cyber-accent transition-colors text-base font-medium">
             Shop Now
           </Button>
         </LocalizedClientLink>

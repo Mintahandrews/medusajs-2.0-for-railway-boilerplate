@@ -10,15 +10,15 @@ export default async function Footer() {
   const { product_categories } = await getCategoriesList(0, 6)
 
   return (
-    <footer className="border-t border-ui-border-base w-full bg-black text-white py-16">
+    <footer className="border-t border-ui-border-base w-full bg-cyber-accent text-white py-16">
       <div className="content-container flex flex-col w-full">
         <div className="flex flex-col gap-y-12 xsmall:flex-row items-start justify-between">
           <div className="flex flex-col gap-6 max-w-sm">
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus text-white hover:text-gray-300 uppercase text-2xl font-bold"
+              className="txt-compact-xlarge-plus text-white hover:text-gray-100 uppercase text-2xl font-bold"
             >
-              cyber
+              Letscase
             </LocalizedClientLink>
             <Text className="text-gray-400 txt-small">
               We are a residential interior design firm located in Portland. Our boutique-studio offers more than

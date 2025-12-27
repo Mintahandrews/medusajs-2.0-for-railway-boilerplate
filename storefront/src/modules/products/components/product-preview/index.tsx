@@ -52,7 +52,7 @@ export default async function ProductPreview({
           <div className="flex items-center gap-x-2 text-xl font-semibold">
             {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
           </div>
-          <button className="w-full bg-black text-white py-3 rounded-lg mt-4 font-medium hover:bg-gray-800 transition-colors">
+          <button className="w-full bg-cyber-accent text-white py-3 rounded-lg mt-4 font-medium hover:bg-cyber-accent/80 transition-colors">
             Buy Now
           </button>
         </div>

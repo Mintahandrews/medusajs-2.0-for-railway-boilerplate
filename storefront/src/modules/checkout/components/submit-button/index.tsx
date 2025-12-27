@@ -20,7 +20,7 @@ export function SubmitButton({
   return (
     <Button
       size="large"
-      className={`w-full bg-black text-white hover:bg-gray-800 rounded-md ${className}`}
+      className={`w-full bg-cyber-accent text-white hover:bg-cyber-accent/80 rounded-md ${className}`}
       type="submit"
       isLoading={pending}
       variant={variant || "primary"}
