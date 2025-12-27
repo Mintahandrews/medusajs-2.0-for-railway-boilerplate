@@ -1,319 +1,157 @@
-<p align="center">
-  <a href="https://www.medusajs.com">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/59018053/229103275-b5e482bb-4601-46e6-8142-244f531cebdb.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
-    <img alt="Medusa logo" src="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
-    </picture>
-  </a>
-</p>
+# Next.js Full-Stack Complete eCommerce Solution
 
-<h1 align="center">
-  Medusa Next.js Starter Template
-</h1>
+A Complete and full-stack eCommerce platform built with Next.js. Launch your online store with core features like product management, secure Stripe payments, built-in custom CMS, and responsive design. Enjoy full control, lifetime free updates, and comprehensive documentation to build, develop, and scale your store effortlessly.
 
-<p align="center">
-Combine Medusa's modules for your commerce backend with the newest Next.js 14 features for a performant storefront.</p>
+#### [🌐 Visit Website](https://cozycommerce.dev/)
 
-<p align="center">
-  <a href="https://github.com/medusajs/medusa/blob/master/CONTRIBUTING.md">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome!" />
-  </a>
-  <a href="https://discord.gg/xpCwq3Kfn8">
-    <img src="https://img.shields.io/badge/chat-on%20discord-7289DA.svg" alt="Discord Chat" />
-  </a>
-  <a href="https://twitter.com/intent/follow?screen_name=medusajs">
-    <img src="https://img.shields.io/twitter/follow/medusajs.svg?label=Follow%20@medusajs" alt="Follow @medusajs" />
-  </a>
-</p>
+#### [📑 Explore Docs](https://cozycommerce.dev/docs)
 
-### Prerequisites
+#### [🚀 Live Demo](https://demo.cozycommerce.dev/)
 
-To use the [Next.js Starter Template](https://medusajs.com/nextjs-commerce/), you should have a Medusa server running locally on port 9000.
-For a quick setup, run:
+CozyCommerce is powerful full-stack, self-hosted eCommerce solution built with Next.js. Featuring one-click deployment, this platform offers seamless scalability, custom CMS integration, and secure payments—perfect for creating and managing your online store with ease.
 
-```shell
-npx create-medusa-app@latest
+This is the free Lite version of CozyCommerce, featuring a basic landing page to establish your online presence. It does not include advanced functionality or CMS features like product management or payment processing. Get a premium plan for full e-commerce tools.
+
+| ✨ Features                         | 🎁 CozyCommerce Free                 | 🔥 CozyCommerce Pro                        |
+|----------------------------------|--------------------------------|--------------------------------------|
+| Next.js Pages                    | Static                         | Dynamic Boilerplate Template         |
+| Custom CMS                       | Not Included                        | All According to Demo                |
+| eCommerce Features          | Not Included                       | Included                             |
+| Integrations (DB, Auth, etc.)    | Not Included                   | Included                             |
+| Community Support                | Included                       | Included                             |
+| Premium Email Support            | Not Included                   | Included                             |
+| Lifetime Free Updates            | Included                       | Included                             |
+
+# CozyCommerce Installation
+
+Welcome to **CozyCommerce** — a modern, high-performance ecommerce solution based on Next.js built for scalability and developer productivity.
+
+This guide will walk you through setting up the project locally and deploying it to production using Vercel. Whether you're building an e-commerce MVP or scaling an enterprise storefront, CozyCommerce offers the tools and structure to get started quickly.
+
+---
+
+## 🚧 Prerequisites
+
+Before you begin, ensure that the following tools are installed on your machine:
+
+* **[Node.js](https://nodejs.org/)** version 20.0.9 or higher
+* **[npm](https://www.npmjs.com/)** version 10.0.0 or higher
+* **[Git](https://git-scm.com/)** for version control
+
+We recommend using a version manager like [`nvm`](https://github.com/nvm-sh/nvm) to manage Node.js versions easily.
+
+---
+
+## ⚙️ Environment Setup
+
+Create a `.env` file in the root directory and add the following environment variables:
+
+```env
+NEXTAUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+SITE_URL="http://localhost:3000"
+SITE_NAME="CozyCommerce"
+GITHUB_CLIENT_SECRET="your_github_client_secret"
+GITHUB_CLIENT_ID="your_github_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+GOOGLE_CLIENT_ID="your_google_client_id"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="your_stripe_publishable_key"
+STRIPE_SECRET_KEY="your_stripe_secret_key"
+NEXT_PUBLIC_SUCCESS_URL="http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}"
+NEXT_PUBLIC_CANCEL_URL="http://localhost:3000"
+NEXT_PUBLIC_ALGOLIA_PROJECT_ID="your_algolia_project_id"
+NEXT_PUBLIC_ALGOLIA_WRITE_API_KEY="your_algolia_write_api_key"
+NEXT_PUBLIC_ALGOLIA_INDEX="your_algolia_index"
+EMAIL_SERVER_HOST="smtp.resend.com"
+EMAIL_SERVER_PORT=465
+EMAIL_SERVER_USER="resend"
+EMAIL_SERVER_PASSWORD="your_resend_api_key"
+EMAIL_FROM="your_email"
+ADMIN_EMAILS="admin@example.com"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your_cloudinary_cloud_name"
+CLOUDINARY_API_KEY="your_cloudinary_api_key"
+CLOUDINARY_API_SECRET="your_cloudinary_api_secret"
+DATABASE_URL="your_database_url"
+NEXTAUTH_SECRET="your_nextauth_secret"
+FORMBOLD_FORM_ID="your_formbold_form_id"
 ```
 
-Check out [create-medusa-app docs](https://docs.medusajs.com/create-medusa-app) for more details and troubleshooting.
+> ⚠️ **Important:** Replace the placeholder values with your actual API keys and credentials. Never commit your `.env` file to version control to protect sensitive data.
 
-# Overview
+---
 
-The Medusa Next.js Starter is built with:
+## 📦 Installation Steps
 
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Typescript](https://www.typescriptlang.org/)
-- [Medusa](https://medusajs.com/)
+Follow these steps to get the project running locally:
 
-Features include:
+1. **Install project dependencies:**
 
-- Full ecommerce support:
-  - Product Detail Page
-  - Product Overview Page
-  - Search with Algolia / MeiliSearch
-  - Product Collections
-  - Cart
-  - Checkout with PayPal and Stripe
-  - User Accounts
-  - Order Details
-- Full Next.js 14 support:
-  - App Router
-  - Next fetching/caching
-  - Server Components
-  - Server Actions
-  - Streaming
-  - Static Pre-Rendering
-- File Storage:
-  - MinIO integration (optional)
-  - Local file fallback
+   ```bash
+   npm install
+   ```
 
+2. **Generate the Prisma client (for database access):**
 
-# Quickstart
+   ```bash
+   npx prisma generate
+   ```
 
-### Setting up the environment variables
+3. **Start the development server:**
 
-Navigate into your projects directory and get your environment variables ready:
+   ```bash
+   npm run dev
+   ```
 
-```shell
-cd nextjs-starter-medusa/
-mv .env.template .env.local
-```
+Once the server is running, you can access your local store at: [http://localhost:3000](http://localhost:3000)
 
-### Install dependencies
+---
 
-Use Yarn to install all dependencies.
+## ☁️ Deployment on Vercel
 
-```shell
-yarn
-```
+Deploy your CozyCommerce store in minutes using [Vercel](https://vercel.com):
 
-### Start developing
+1. **Push your code to GitHub** (or another supported Git provider like GitLab or Bitbucket).
 
-You are now ready to start up your project.
+2. **Log in to [Vercel](https://vercel.com)** and click “Import Project.”
 
-```shell
-yarn dev
-```
+3. **Connect your Git repository**, then:
 
-### Open the code and start customizing
+   * Select **Next.js** as the framework preset.
+   * Add all required environment variables from your `.env` file under the "Environment Variables" section.
+   * For your database, use a cloud service like [Neon](https://neon.tech) and provide the connection string in `DATABASE_URL`.
 
-Your site is now running at http://localhost:8000!
+4. **Click "Deploy"** — Vercel will handle the rest, including continuous deployment on every push to your main branch.
 
-# File Storage Integration
+5. After deployment, you’ll receive a Vercel-hosted URL. You can also [add a custom domain](https://vercel.com/docs/concepts/projects/domains) if needed.
 
-By default, this starter supports MinIO for file storage with a fallback to local storage. To enable MinIO:
+---
 
-1. Add your MinIO endpoint to `.env.local`:
-```shell
-NEXT_PUBLIC_MINIO_ENDPOINT=your-minio-endpoint
-```
+## 🔌 Required Third-Party Services
 
-2. The storefront will automatically use MinIO for serving images when the endpoint is configured.
+To enable full functionality, set up the following services and add the relevant credentials to your `.env` file:
 
-No additional configuration is needed - if MinIO is not configured, the storefront will use local file storage.
+1. **[Neon](https://neon.tech)** — PostgreSQL database with serverless autoscaling.
+2. **[Cloudinary](https://cloudinary.com)** — Image storage, optimization, and delivery.
+3. **[Stripe](https://stripe.com)** — Payment processing and checkout.
+4. **[Algolia](https://www.algolia.com)** — Lightning-fast search powered by AI.
+5. **[Resend](https://resend.com)** — Transactional email delivery via SMTP or API.
+6. **[GitHub OAuth](https://github.com/settings/developers)** / [Google OAuth](https://console.cloud.google.com/apis/credentials)\*\* — Enable social login functionality.
+7. **[Formbold](https://formbold.com)** — Simple form backend for contact forms and submissions.
 
-# Payment integrations
+---
 
-By default this starter supports the following payment integrations
+## 📚 Additional Documentation
 
-- [Stripe](https://stripe.com/)
-- [Paypal](https://www.paypal.com/)
+Explore our full documentation for deeper integration guidance:
 
-To enable the integrations you need to add the following to your `.env.local` file:
+* [Database Integration](https://cozycommerce.dev/docs/database)
+* [Authentication](https://cozycommerce.dev/docs/authentication)
+* [Payment Gateways](https://cozycommerce.dev/docs/stripe)
+* [Algolia - AI-Powered Search](https://cozycommerce.dev/docs/algolia)
+* [Cloudinary - Image Hosting](https://cozycommerce.dev/docs/cloudinary)
+* [Email - Transactional/SMTP](https://cozycommerce.dev/docs/email)
+* [Admin Access](https://cozycommerce.dev/docs/admin-access)
 
-```shell
-NEXT_PUBLIC_STRIPE_KEY=<your-stripe-public-key>
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=<your-paypal-client-id>
-```
+---
 
-You will also need to setup the integrations in your Medusa server. See the [Medusa documentation](https://docs.medusajs.com) for more information on how to configure [Stripe](https://docs.medusajs.com/add-plugins/stripe) and [PayPal](https://docs.medusajs.com/add-plugins/paypal) in your Medusa project.
-
-# Search integration
-
-This starter is configured to support using the `medusa-search-meilisearch` plugin out of the box. To enable search you will need to enable the feature flag in `./store.config.json`, which you do by changing the config to this:
-
-```javascript
-{
-  "features": {
-    // other features...
-    "search": true
-  }
-}
-```
-
-Before you can search you will need to install the plugin in your Medusa server, for a written guide on how to do this – [see our documentation](https://docs.medusajs.com/add-plugins/meilisearch).
-
-The search components in this starter are developed with Algolia's `react-instant-search-hooks-web` library which should make it possible for you to seemlesly change your search provider to Algolia instead of MeiliSearch.
-
-To do this you will need to add `algoliasearch` to the project, by running
-
-```shell
-yarn add algoliasearch
-```
-
-After this you will need to switch the current MeiliSearch `SearchClient` out with a Alogolia client. To do this update `@lib/search-client`.
-
-```ts
-import algoliasearch from "algoliasearch/lite"
-
-const appId = process.env.NEXT_PUBLIC_SEARCH_APP_ID || "test_app_id" // You should add this to your environment variables
-
-const apiKey = process.env.NEXT_PUBLIC_SEARCH_API_KEY || "test_key"
-
-export const searchClient = algoliasearch(appId, apiKey)
-
-export const SEARCH_INDEX_NAME =
-  process.env.NEXT_PUBLIC_INDEX_NAME || "products"
-```
-
-Then, in `src/app/(main)/search/actions.ts`, remove the MeiliSearch code (line 10-16) and uncomment the Algolia code.
-
-```ts
-"use server"
-
-import { searchClient, SEARCH_INDEX_NAME } from "@lib/search-client"
-
-/**
- * Uses MeiliSearch or Algolia to search for a query
- * @param {string} query - search query
- */
-export async function search(query: string) {
-  const index = searchClient.initIndex(SEARCH_INDEX_NAME)
-  const { hits } = await index.search(query)
-
-  return hits
-}
-```
-
-After this you will need to set up Algolia with your Medusa server, and then you should be good to go. For a more thorough walkthrough of using Algolia with Medusa – [see our documentation](https://docs.medusajs.com/add-plugins/algolia), and the [documentation for using `react-instantsearch-hooks-web`](https://www.algolia.com/doc/guides/building-search-ui/getting-started/react-hooks/).
-
-## App structure
-
-For the new version, the main folder structure remains unchanged. The contents have changed quite a bit though.
-
-```
-.
-└── src
-    ├── app
-    ├── lib
-    ├── modules
-    ├── styles
-    ├── types
-    └── middleware.ts
-
-```
-
-### `/app` directory
-
-The app folder contains all Next.js App Router pages and layouts, and takes care of the routing.
-
-```
-.
-└── [countryCode]
-    ├── (checkout)
-        └── checkout
-    └── (main)
-        ├── account
-        │   ├── addresses
-        │   └── orders
-        │       └── details
-        │           └── [id]
-        ├── cart
-        ├── categories
-        │   └── [...category]
-        ├── collections
-        │   └── [handle]
-        ├── order
-        │   └── confirmed
-        │       └── [id]
-        ├── products
-        │   └── [handle]
-        ├── results
-        │   └── [query]
-        ├── search
-        └── store
-```
-
-The app router folder structure represents the routes of the Starter. In this case, the structure is as follows:
-
-- The root directory is represented by the `[countryCode]` folder. This indicates a dynamic route based on the country code. The this will be populated by the countries you set up in your Medusa server. The param is then used to fetch region specific prices, languages, etc.
-- Within the root directory, there two Route Groups: `(checkout)` and `(main)`. This is done because the checkout flow uses a different layout.  All other parts of the app share the same layout and are in subdirectories of the `(main)` group. Route Groups do not affect the url.
-- Each of these subdirectories may have further subdirectories. For instance, the `account` directory has `addresses` and `orders` subdirectories. The `orders` directory further has a `details` subdirectory, which itself has a dynamic `[id]` subdirectory.
-- This nested structure allows for specific routing to various pages within the application. For example, a URL like `/account/orders/details/123` would correspond to the `account > orders > details > [id]` path in the router structure, with `123` being the dynamic `[id]`.
-
-This structure enables efficient routing and organization of different parts of the Starter.
-
-### `/lib` **directory**
-
-The lib directory contains all utilities like the Medusa JS client functions, util functions, config and constants. 
-
-The most important file here is `/lib/data/index.ts`. This file defines various functions for interacting with the Medusa API, using the JS client. The functions cover a range of actions related to shopping carts, orders, shipping, authentication, customer management, regions, products, collections, and categories. It also includes utility functions for handling headers and errors, as well as some functions for sorting and transforming product data.
-
-These functions are used in different Server Actions.
-
-### `/modules` directory
-
-This is where all the components, templates and Server Actions are, grouped by section. Some subdirectories have an `actions.ts` file. These files contain all Server Actions relevant to that section of the app.
-
-### `/styles` directory
-
-`global.css` imports Tailwind classes and defines a couple of global CSS classes. Tailwind and Medusa UI classes are used for styling throughout the app.
-
-### `/types` directory
-
-Contains global TypeScript type defintions.
-
-### `middleware.ts`
-
-Next.js Middleware, which is basically an Edge function that runs before (almost) every request. In our case it enforces a `countryCode` in the url. So when a user visits any url on your storefront without a `countryCode` param, it will redirect the user to the url for the most relevant region.
-
-The region will be decided as follows:
-
-- When deployed on Vercel and you're active in the user's current country, it will use the country code from the `x-vercel-ip-country` header.
-- Else, if you have defined a `NEXT_PUBLIC_DEFAULT_REGION` environment variable, it will redirect to that.
-- Else, it will redirect the user to the first region it finds on your Medusa server.
-
-If you want to use the `countryCode` param in your code, there's two ways to do that:
-
-1. On the server in any `page.tsx` - the `countryCode` is in the `params` object:
-    
-    ```tsx
-    export default async function Page({
-      params: { countryCode },
-    }: {
-      params: { countryCode: string }
-    }) {
-      const region = await getRegion(countryCode)
-    
-    // rest of code
-    ```
-    
-2. From client components, with the `useParam` hook:
-    
-    ```tsx
-    import { useParams } from "next/navigation"
-    
-    const Component = () => {
-    	const { countryCode } = useParams()
-    	
-    	// rest of code
-    ```
-    
-
-The middleware also sets a cookie based on the onboarding status of a user. This is related to the Medusa Admin onboarding flow, and may be safely removed in your production storefront.
-
-# Resources
-
-## Learn more about Medusa
-
-- [Website](https://www.medusajs.com/)
-- [GitHub](https://github.com/medusajs)
-- [Documentation](https://docs.medusajs.com/)
-
-## Learn more about Next.js
-
-- [Website](https://nextjs.org/)
-- [GitHub](https://github.com/vercel/next.js)
-- [Documentation](https://nextjs.org/docs)
+Need help? Feel free to reach out or open an issue on the [GitHub repository](https://github.com/CozyCommerce/cozycommerce-lite). Happy coding! 🎉
