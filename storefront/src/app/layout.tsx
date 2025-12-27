@@ -1,45 +1,17 @@
-import "./css/style.css";
-import { Metadata } from "next";
-import { getSeoSettings, getSiteName } from "@/get-api-data/seo-setting";
-import { GoogleTagManager } from '@next/third-parties/google';
-import { DM_Sans } from 'next/font/google'
+import { getBaseURL } from "@lib/util/env"
+import { Metadata } from "next"
+import "styles/globals.css"
 
-const dm_sans = DM_Sans({
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  variable: "--font-body",
-  subsets: ['latin'],
-})
-
-export async function generateMetadata(): Promise<Metadata> {
-  const seoSettings = await getSeoSettings();
-  const site_name = await getSiteName();
-  return {
-    title: `${seoSettings?.siteTitle || "Home Page"} | ${site_name}`,
-    description: seoSettings?.metadescription || "Letcase - Your premium destination for tech accessories and gadgets.",
-    keywords: seoSettings?.metaKeywords || "e-commerce, online store",
-    openGraph: {
-      images: seoSettings?.metaImage ? [seoSettings.metaImage] : [],
-    },
-    icons: {
-      icon: seoSettings?.favicon || "/favicon.ico",
-      shortcut: seoSettings?.favicon || "/favicon.ico",
-      apple: seoSettings?.favicon || "/favicon.ico",
-    },
-  };
+export const metadata: Metadata = {
+  metadataBase: new URL(getBaseURL()),
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const seoSettings = await getSeoSettings();
+export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning={true} className={dm_sans.variable}>
-        {children}
-        {seoSettings?.gtmId && <GoogleTagManager gtmId={seoSettings.gtmId} />}
+    <html lang="en" data-mode="light">
+      <body>
+        <main className="relative">{props.children}</main>
       </body>
     </html>
-  );
+  )
 }
