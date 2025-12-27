@@ -5,10 +5,10 @@ const Hero = () => {
   return (
     <div className="h-[632px] w-full relative bg-[#211c24] overflow-hidden">
       <div className="content-container h-full flex flex-col justify-center items-start text-white gap-6 relative z-10">
-        <span className="text-white/40 text-2xl font-semibold">Pro. Beyond.</span>
+        <span className="text-white/40 text-xl small:text-2xl font-semibold">Pro. Beyond.</span>
         <Heading
           level="h1"
-          className="text-8xl font-thin tracking-tighter"
+          className="text-5xl small:text-8xl font-thin tracking-tighter"
         >
           IPhone 14 <span className="font-bold">Pro</span>
         </Heading>
