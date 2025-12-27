@@ -25,9 +25,9 @@ const Hit = ({ hit }: HitProps) => {
       href={`/products/${hit.handle}`}
       data-testid="search-result"
     >
-      <Container
+      <div
         key={hit.id}
-        className="flex sm:flex-col gap-2 w-full p-4 shadow-elevation-card-rest hover:shadow-elevation-card-hover items-center sm:justify-center"
+        className="flex sm:flex-col gap-2 w-full p-4 border border-gray-100 rounded-md hover:bg-gray-50 items-center sm:justify-center transition-colors"
       >
         <Thumbnail
           thumbnail={hit.thumbnail}
@@ -37,14 +37,14 @@ const Hit = ({ hit }: HitProps) => {
         <div className="flex flex-col justify-between group">
           <div className="flex flex-col">
             <Text
-              className="text-ui-fg-subtle"
+              className="text-gray-600 font-medium"
               data-testid="search-result-title"
             >
               {hit.title}
             </Text>
           </div>
         </div>
-      </Container>
+      </div>
     </LocalizedClientLink>
   )
 }

@@ -67,8 +67,8 @@ export default function SearchModal() {
               className="flex absolute flex-col h-fit w-full sm:w-fit"
               data-testid="search-modal-container"
             >
-              <div className="w-full flex items-center gap-x-2 p-4 bg-[rgba(3,7,18,0.5)] text-ui-fg-on-color backdrop-blur-2xl rounded-rounded">
-                <MagnifyingGlassMini />
+              <div className="w-full flex items-center gap-x-2 p-4 bg-white border border-gray-200 rounded-md">
+                <MagnifyingGlassMini className="text-gray-500" />
                 <SearchBox />
               </div>
               <div className="flex-1 mt-6">
