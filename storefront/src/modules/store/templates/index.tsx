@@ -27,14 +27,14 @@ const StoreTemplate = ({
         <span>{">"}</span>
         <span>Catalog</span>
         <span>{">"}</span>
-        <span className="text-black">Smartphones</span>
+        <span className="text-cyber-accent">Smartphones</span>
       </div>
 
       <div className="flex flex-col small:flex-row small:items-start" data-testid="category-container">
         <RefinementList sortBy={sort} />
         <div className="w-full">
           <div className="mb-8 flex justify-between items-center">
-            <h1 className="text-base font-medium text-gray-500">Selected Products: <span className="text-black font-semibold">85</span></h1>
+            <h1 className="text-base font-medium text-gray-500">Selected Products: <span className="text-cyber-accent font-semibold">85</span></h1>
             <div className="flex items-center gap-2">
               <SortProducts sortBy={sort} />
             </div>

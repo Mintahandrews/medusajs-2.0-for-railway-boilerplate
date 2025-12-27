@@ -46,7 +46,7 @@ export default async function ProductPreview({
           className="bg-transparent aspect-square object-contain mix-blend-multiply"
         />
         <div className="flex flex-col items-center mt-6 gap-2 w-full">
-          <Text className="text-center font-medium text-base text-black line-clamp-2 min-h-[48px]" data-testid="product-title">
+          <Text className="text-center font-medium text-base text-cyber-accent line-clamp-2 min-h-[48px]" data-testid="product-title">
             {product.title}
           </Text>
           <div className="flex items-center gap-x-2 text-xl font-semibold">

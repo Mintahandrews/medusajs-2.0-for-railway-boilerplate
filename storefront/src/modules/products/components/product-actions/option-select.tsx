@@ -38,8 +38,8 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               className={clx(
                 "transition-all duration-200",
                 isColor
-                  ? `w-8 h-8 rounded-full border-2 ${isSelected ? "border-black scale-110" : "border-transparent hover:scale-110"}`
-                  : `px-6 py-3 rounded-lg border font-medium ${isSelected ? "border-black bg-black text-white" : "border-gray-200 bg-white text-black hover:border-black"}`,
+                  ? `w-8 h-8 rounded-full border-2 ${isSelected ? "border-cyber-accent scale-110" : "border-transparent hover:scale-110"}`
+                  : `px-6 py-3 rounded-lg border font-medium ${isSelected ? "border-cyber-accent bg-cyber-accent text-white" : "border-gray-200 bg-white text-cyber-accent hover:border-cyber-accent"}`,
               )}
               style={isColor ? { backgroundColor: v?.toLowerCase() } : {}}
               disabled={disabled}

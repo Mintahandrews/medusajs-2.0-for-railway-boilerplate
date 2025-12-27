@@ -34,17 +34,17 @@ export default function ContactPage() {
                     <form className="flex flex-col gap-y-6">
                         <div className="flex flex-col gap-y-2">
                             <label className="text-sm font-medium">Name</label>
-                            <input className="w-full bg-white border border-gray-200 rounded-md h-10 px-4 focus:border-black outline-none transition-colors" placeholder="Your Name" />
+                            <input className="w-full bg-white border border-gray-200 rounded-md h-10 px-4 focus:border-cyber-accent outline-none transition-colors" placeholder="Your Name" />
                         </div>
                         <div className="flex flex-col gap-y-2">
                             <label className="text-sm font-medium">Email</label>
-                            <input className="w-full bg-white border border-gray-200 rounded-md h-10 px-4 focus:border-black outline-none transition-colors" placeholder="your@email.com" />
+                            <input className="w-full bg-white border border-gray-200 rounded-md h-10 px-4 focus:border-cyber-accent outline-none transition-colors" placeholder="your@email.com" />
                         </div>
                         <div className="flex flex-col gap-y-2">
                             <label className="text-sm font-medium">Message</label>
-                            <textarea className="w-full bg-white border border-gray-200 rounded-md p-4 min-h-[150px] focus:border-black outline-none transition-colors" placeholder="How can we help?" />
+                            <textarea className="w-full bg-white border border-gray-200 rounded-md p-4 min-h-[150px] focus:border-cyber-accent outline-none transition-colors" placeholder="How can we help?" />
                         </div>
-                        <Button className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-md">Send Message</Button>
+                        <Button className="w-full h-12 bg-cyber-accent text-white hover:bg-cyber-accent/80 rounded-md">Send Message</Button>
                     </form>
                 </div>
             </div>

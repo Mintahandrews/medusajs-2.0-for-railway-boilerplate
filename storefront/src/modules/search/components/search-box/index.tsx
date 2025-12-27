@@ -54,7 +54,7 @@ const ControlledSearchBox = ({
             type="search"
             value={value}
             onChange={onChange}
-            className="txt-compact-large h-6 placeholder:text-gray-400 placeholder:transition-colors focus:outline-none flex-1 bg-transparent text-black"
+            className="txt-compact-large h-6 placeholder:text-gray-400 placeholder:transition-colors focus:outline-none flex-1 bg-transparent text-ui-fg-base"
           />
           {value && (
             <button

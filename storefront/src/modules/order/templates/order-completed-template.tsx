@@ -29,7 +29,7 @@ export default function OrderCompletedTemplate({
         >
           <Heading
             level="h1"
-            className="flex flex-col gap-y-3 text-black text-3xl mb-4 font-bold"
+            className="flex flex-col gap-y-3 text-cyber-accent text-3xl mb-4 font-bold"
           >
             <span>Thank you!</span>
             <span>Your order was placed successfully.</span>

@@ -3,6 +3,7 @@
 @import "tailwindcss/utilities";
 
 @layer utilities {
+
   /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -13,16 +14,18 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 
-  input:focus ~ label,
-  input:not(:placeholder-shown) ~ label {
+  input:focus~label,
+  input:not(:placeholder-shown)~label {
     @apply -translate-y-2 text-xsmall-regular;
   }
 
-  input:focus ~ label {
+  input:focus~label {
     @apply left-0;
   }
 
@@ -55,7 +58,7 @@
   }
 
   .contrast-btn {
-    @apply px-6 py-3 bg-black text-white border border-black rounded-md hover:bg-gray-800 transition-colors duration-200 ease-in;
+    @apply px-6 py-3 bg-cyber-accent text-white border border-cyber-accent rounded-md hover:bg-cyber-accent/80 transition-colors duration-200 ease-in;
   }
 
   .text-xsmall-regular {

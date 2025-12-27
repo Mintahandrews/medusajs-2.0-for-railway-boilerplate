@@ -36,9 +36,9 @@ export default async function Nav() {
           </div>
 
           <div className="hidden medium:flex items-center gap-x-12">
-            <LocalizedClientLink href="/" className="hover:text-black font-medium text-ui-fg-subtle">Home</LocalizedClientLink>
-            <LocalizedClientLink href="/about" className="hover:text-black font-medium text-ui-fg-subtle">About</LocalizedClientLink>
-            <LocalizedClientLink href="/contact" className="hover:text-black font-medium text-ui-fg-subtle">Contact Us</LocalizedClientLink>
+            <LocalizedClientLink href="/" className="hover:text-cyber-accent font-medium text-ui-fg-subtle">Home</LocalizedClientLink>
+            <LocalizedClientLink href="/about" className="hover:text-cyber-accent font-medium text-ui-fg-subtle">About</LocalizedClientLink>
+            <LocalizedClientLink href="/contact" className="hover:text-cyber-accent font-medium text-ui-fg-subtle">Contact Us</LocalizedClientLink>
           </div>
 
           <div className="flex items-center gap-x-6 h-full justify-end">

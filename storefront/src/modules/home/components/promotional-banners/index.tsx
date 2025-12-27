@@ -25,7 +25,7 @@ export default function PromotionalBanners() {
                     <div className="flex flex-col gap-4 max-w-[200px]">
                         <h3 className="text-4xl font-light">Macbook <br /> <span className="font-bold">Air</span></h3>
                         <p className="text-gray-500 text-sm">The new 15-inch MacBook Air makes room for more of what you love with a spacious Liquid Retina display.</p>
-                        <Button variant="secondary" className="w-fit border-black border px-8 py-2 rounded-md hover:bg-black hover:text-white transition-colors">Shop Now</Button>
+                        <Button variant="secondary" className="w-fit border-cyber-accent border px-8 py-2 rounded-md hover:bg-cyber-accent hover:text-white transition-colors">Shop Now</Button>
                     </div>
                     <div className="w-[200px] h-[150px] bg-white flex items-center justify-center">
                         {/* Image Placeholder */}

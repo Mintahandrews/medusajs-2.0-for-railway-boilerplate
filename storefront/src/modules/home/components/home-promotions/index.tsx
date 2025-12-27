@@ -15,7 +15,7 @@ export default function HomePromotions() {
                         <h3 className="text-2xl font-light mb-2">Popular Products</h3>
                         <p className="text-xs text-gray-500 mb-6">iPad combines a magnificent 10.2-inch Retina display, incredible performance, multitasking and ease of use.</p>
                         <div className="w-full">
-                            <Button variant="secondary" className="w-full border-black border hover:bg-black hover:text-white transition-colors">Shop Now</Button>
+                            <Button variant="secondary" className="w-full border-cyber-accent border hover:bg-cyber-accent hover:text-white transition-colors">Shop Now</Button>
                         </div>
                     </div>
                 </div>

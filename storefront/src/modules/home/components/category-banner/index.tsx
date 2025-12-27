@@ -22,7 +22,7 @@ export default function CategoryBanner() {
                 </div>
                 <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-6 gap-8">
                     {categories.map((cat) => (
-                        <LocalizedClientLink key={cat.name} href={`/categories/${cat.name.toLowerCase().replace(" ", "-")}`} className="flex flex-col items-center justify-center gap-4 bg-[#EDEDED] py-6 rounded-xl hover:bg-black hover:text-white transition-colors group">
+                        <LocalizedClientLink key={cat.name} href={`/categories/${cat.name.toLowerCase().replace(" ", "-")}`} className="flex flex-col items-center justify-center gap-4 bg-[#EDEDED] py-6 rounded-xl hover:bg-cyber-accent hover:text-white transition-colors group">
                             <span className="text-4xl">{cat.icon}</span>
                             <span className="text-base font-medium">{cat.name}</span>
                         </LocalizedClientLink>
