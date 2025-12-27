@@ -6,6 +6,9 @@ import { medusa } from "./medusa"
  * Get all products with optional pagination
  */
 export async function getProducts(limit = 12, offset = 0) {
+    if (!process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY) {
+        console.warn("WARNING: NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY is missing. Requests to Medusa may fail.");
+    }
     try {
         const { products, count } = await medusa.store.product.list({
             limit,
@@ -13,7 +16,12 @@ export async function getProducts(limit = 12, offset = 0) {
         })
         return { products: products || [], count: count || 0 }
     } catch (error) {
-        console.error("Error fetching products:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR: Missing Publishable API Key. Please add NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY to your env vars.")
+        } else {
+            console.error("Error fetching products:", error)
+        }
         return { products: [], count: 0 }
     }
 }
@@ -28,7 +36,12 @@ export async function getProductByHandle(handle: string) {
         })
         return products?.[0] || null
     } catch (error) {
-        console.error("Error fetching product by handle:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR: Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching product by handle:", error)
+        }
         return null
     }
 }
@@ -41,7 +54,12 @@ export async function getProductById(productId: string) {
         const { product } = await medusa.store.product.retrieve(productId)
         return product || null
     } catch (error) {
-        console.error("Error fetching product by ID:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR: Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching product by ID:", error)
+        }
         return null
     }
 }
@@ -50,6 +68,9 @@ export async function getProductById(productId: string) {
  * Get new arrivals (most recently created products)
  */
 export async function getNewArrivals(limit = 8) {
+    if (!process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY) {
+        console.warn("WARNING: NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY missing for new arrivals.");
+    }
     try {
         const { products } = await medusa.store.product.list({
             limit,
@@ -57,7 +78,12 @@ export async function getNewArrivals(limit = 8) {
         })
         return products || []
     } catch (error) {
-        console.error("Error fetching new arrivals:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR (New Arrivals): Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching new arrivals:", error)
+        }
         return []
     }
 }
@@ -66,6 +92,9 @@ export async function getNewArrivals(limit = 8) {
  * Get best sellers (featured products or by sales if available)
  */
 export async function getBestSellers(limit = 6) {
+    if (!process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY) {
+        console.warn("WARNING: NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY missing for best sellers.");
+    }
     try {
         // For now, get featured products or latest updated
         const { products } = await medusa.store.product.list({
@@ -74,7 +103,12 @@ export async function getBestSellers(limit = 6) {
         })
         return products || []
     } catch (error) {
-        console.error("Error fetching best sellers:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR (Best Sellers): Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching best sellers:", error)
+        }
         return []
     }
 }
@@ -85,11 +119,19 @@ export async function getBestSellers(limit = 6) {
  * Get all collections (product categories)
  */
 export async function getCollections() {
+    if (!process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY) {
+        console.warn("WARNING: NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY missing for collections.");
+    }
     try {
         const { collections } = await medusa.store.collection.list()
         return collections || []
     } catch (error) {
-        console.error("Error fetching collections:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR (Collections): Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching collections:", error)
+        }
         return []
     }
 }
@@ -104,7 +146,12 @@ export async function getCollectionByHandle(handle: string) {
         })
         return collections?.[0] || null
     } catch (error) {
-        console.error("Error fetching collection:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR: Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching collection:", error)
+        }
         return null
     }
 }
@@ -120,7 +167,12 @@ export async function getProductsByCollection(collectionId: string, limit = 12) 
         })
         return products || []
     } catch (error) {
-        console.error("Error fetching products by collection:", error)
+        // @ts-ignore
+        if (error?.status === 400 && error?.message?.includes("x-publishable-api-key")) {
+            console.error("CRITICAL ERROR: Missing Publishable API Key.")
+        } else {
+            console.error("Error fetching products by collection:", error)
+        }
         return []
     }
 }
