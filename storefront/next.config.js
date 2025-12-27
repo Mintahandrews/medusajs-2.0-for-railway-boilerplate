@@ -15,6 +15,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "letscase-admin.up.railway.app",
+      },
     ],
   },
   redirects: async () => {
