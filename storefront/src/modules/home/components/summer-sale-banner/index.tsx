@@ -8,7 +8,7 @@ export default function SummerSaleBanner() {
                 <h2 className="text-6xl font-thin tracking-tighter">Big Summer <span className="font-bold">Sale</span></h2>
                 <p className="text-gray-400 max-w-md">Commodo fames justo risus id aliquet. Sed aliquet sit ipsum viverra sit eros. Magna diam amet risus wisi semper. Arcu nulla sed.</p>
                 <LocalizedClientLink href="/store">
-                    <Button className="px-10 py-3 bg-transparent border border-white text-white rounded-md hover:bg-white hover:text-cyber-accent transition-colors">Shop Now</Button>
+                    <Button className="px-10 py-3 bg-transparent border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors">Shop Now</Button>
                 </LocalizedClientLink>
             </div>
 

@@ -23,11 +23,11 @@ export default async function RelatedProducts({
   const region = await getRegion(countryCode)
 
   if (!region) {
-  const queryParams: StoreProductParamsWithTags = {}
+    return null
   }
 
   // edit this function to define your related products logic
-  const queryParams: StoreProductParamsWithTags = {}
+  const queryParams: any = {}
   if (region?.id) {
     queryParams.region_id = region.id
   }

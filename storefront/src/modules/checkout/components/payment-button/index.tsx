@@ -178,7 +178,7 @@ const StripePaymentButton = ({
         size="large"
         isLoading={submitting}
         data-testid={dataTestId}
-        className="w-full bg-cyber-accent text-white hover:bg-cyber-accent/80 rounded-md h-12"
+        className="w-full bg-black text-white hover:bg-gray-800 rounded-md h-12"
       >
         Place order
       </Button>
@@ -288,7 +288,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         onClick={handlePayment}
         size="large"
         data-testid="submit-order-button"
-        className="w-full bg-cyber-accent text-white hover:bg-cyber-accent/80 rounded-md h-12"
+        className="w-full bg-black text-white hover:bg-gray-800 rounded-md h-12"
       >
         Place order
       </Button>

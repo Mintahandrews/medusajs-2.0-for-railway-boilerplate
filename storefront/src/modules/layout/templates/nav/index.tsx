@@ -14,13 +14,18 @@ export default async function Nav() {
       <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
         <nav className="content-container flex items-center justify-between w-full h-full text-small-regular py-4">
           <div className="flex items-center gap-x-8">
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus hover:opacity-80 transition-opacity"
-              data-testid="nav-store-link"
-            >
-              <img src="/logo.png" alt="Letscase" className="h-[50px] w-auto object-contain" />
-            </LocalizedClientLink>
+            <div className="h-full flex items-center medium:hidden">
+              <SideMenu regions={regions} />
+            </div>
+            <div className="flex items-center h-full">
+              <LocalizedClientLink
+                href="/"
+                className="txt-compact-xlarge-plus hover:opacity-80 transition-opacity"
+                data-testid="nav-store-link"
+              >
+                <img src="/logo.png" alt="Letscase" className="h-[50px] w-auto object-contain" />
+              </LocalizedClientLink>
+            </div>
 
             <div className="hidden medium:flex items-center bg-[#F5F5F5] rounded-md px-4 py-2 w-64 gap-2">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,9 +41,9 @@ export default async function Nav() {
           </div>
 
           <div className="hidden medium:flex items-center gap-x-12">
-            <LocalizedClientLink href="/" className="hover:text-cyber-accent font-medium text-ui-fg-subtle">Home</LocalizedClientLink>
-            <LocalizedClientLink href="/about" className="hover:text-cyber-accent font-medium text-ui-fg-subtle">About</LocalizedClientLink>
-            <LocalizedClientLink href="/contact" className="hover:text-cyber-accent font-medium text-ui-fg-subtle">Contact Us</LocalizedClientLink>
+            <LocalizedClientLink href="/" className="hover:text-black font-medium text-ui-fg-subtle">Home</LocalizedClientLink>
+            <LocalizedClientLink href="/about" className="hover:text-black font-medium text-ui-fg-subtle">About</LocalizedClientLink>
+            <LocalizedClientLink href="/contact" className="hover:text-black font-medium text-ui-fg-subtle">Contact Us</LocalizedClientLink>
           </div>
 
           <div className="flex items-center gap-x-6 h-full justify-end">

@@ -11,6 +11,18 @@ type OptionSelectProps = {
   "data-testid"?: string
 }
 
+const getColor = (title: string) => {
+  const t = title.toLowerCase()
+  switch (t) {
+    case "deep purple": return "#4B3D52"
+    case "gold": return "#F9E5C9"
+    case "silver": return "#F5F5F0"
+    case "space black": return "#323232"
+    case "purple": return "#A020F0" // Fallback
+    default: return t
+  }
+}
+
 const OptionSelect: React.FC<OptionSelectProps> = ({
   option,
   current,
@@ -31,6 +43,8 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
       >
         {filteredOptions?.map((v) => {
           const isSelected = v === current
+          const colorCode = isColor ? getColor(v ?? "") : ""
+
           return (
             <button
               onClick={() => updateOption(option.title ?? "", v ?? "")}
@@ -38,10 +52,10 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               className={clx(
                 "transition-all duration-200",
                 isColor
-                  ? `w-8 h-8 rounded-full border-2 ${isSelected ? "border-cyber-accent scale-110" : "border-transparent hover:scale-110"}`
-                  : `px-6 py-3 rounded-lg border font-medium ${isSelected ? "border-cyber-accent bg-cyber-accent text-white" : "border-gray-200 bg-white text-cyber-accent hover:border-cyber-accent"}`,
+                  ? `w-8 h-8 rounded-full border border-gray-200 ${isSelected ? "ring-2 ring-offset-2 ring-black" : "hover:scale-110"}`
+                  : `px-6 py-3 rounded-lg border text-sm ${isSelected ? "border-black font-semibold text-black" : "border-gray-200 text-gray-600 hover:border-gray-400"}`,
               )}
-              style={isColor ? { backgroundColor: v?.toLowerCase() } : {}}
+              style={isColor ? { backgroundColor: colorCode } : {}}
               disabled={disabled}
               data-testid="option-button"
             >

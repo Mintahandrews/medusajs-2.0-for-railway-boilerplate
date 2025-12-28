@@ -14,10 +14,10 @@ type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
 }
 
-export default function OrderCompletedTemplate({
+export default async function OrderCompletedTemplate({
   order,
 }: OrderCompletedTemplateProps) {
-  const isOnboarding = cookies().get("_medusa_onboarding")?.value === "true"
+  const isOnboarding = (await cookies()).get("_medusa_onboarding")?.value === "true"
 
   return (
     <div className="py-6 min-h-[calc(100vh-64px)]">
@@ -29,7 +29,7 @@ export default function OrderCompletedTemplate({
         >
           <Heading
             level="h1"
-            className="flex flex-col gap-y-3 text-cyber-accent text-3xl mb-4 font-bold"
+            className="flex flex-col gap-y-3 text-black text-3xl mb-4 font-bold"
           >
             <span>Thank you!</span>
             <span>Your order was placed successfully.</span>

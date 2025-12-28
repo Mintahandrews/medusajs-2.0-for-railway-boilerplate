@@ -3,7 +3,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
     title: "About Us",
-    description: "Learn more about Cyber.",
+    description: "Learn more about Letscase.",
 }
 
 export default function AboutPage() {
@@ -11,10 +11,10 @@ export default function AboutPage() {
         <div className="content-container py-12 small:py-24">
             <div className="flex flex-col gap-y-12 max-w-2xl mx-auto text-center">
                 <Heading level="h1" className="text-5xl font-bold tracking-tight">
-                    About Cyber
+                    About Letscase
                 </Heading>
                 <Text className="text-lg text-ui-fg-subtle leading-relaxed">
-                    Cyber is a premier technology retailer dedicated to bringing you the most advanced and desirable electronics on the market. From the latest smartphones to high-performance computing, we curate a selection of products that define the future.
+                    Letscase is a premier technology retailer dedicated to bringing you the most advanced and desirable electronics on the market. From the latest smartphones to high-performance computing, we curate a selection of products that define the future.
                 </Text>
                 <div className="grid grid-cols-1 small:grid-cols-3 gap-8 mt-8">
                     <div className="bg-gray-50 p-6 rounded-lg">

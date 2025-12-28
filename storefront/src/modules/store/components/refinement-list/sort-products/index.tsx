@@ -42,18 +42,24 @@ const SortProducts = ({
 
   return (
     <div className="flex items-center gap-2" data-testid={dataTestId}>
-      <span className="text-sm">Sort by:</span>
-      <select
-        value={sortBy}
-        onChange={handleChange}
-        className="bg-transparent border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:border-cyber-accent"
-      >
-        {sortOptions.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          value={sortBy}
+          onChange={handleChange}
+          className="appearance-none bg-transparent pr-8 py-1 text-sm font-medium focus:outline-none cursor-pointer text-black"
+        >
+          {sortOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <span className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 9L12 15L18 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </div>
     </div>
   )
 }

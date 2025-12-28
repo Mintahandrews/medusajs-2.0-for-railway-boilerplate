@@ -10,9 +10,9 @@ import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
+  title: "Letscase - Premium Tech Store",
   description:
-    "A performant frontend ecommerce starter template with Next.js 14 and Medusa.",
+    "Your one-stop destination for premium tech gadgets, accessories, and the latest electronics.",
 }
 
 export default async function Home({
@@ -37,7 +37,7 @@ export default async function Home({
         {/* New Arrivals (First Collection) */}
         <div className="content-container my-16">
           <div className="flex gap-4 mb-6">
-            <span className="font-medium border-b-2 border-cyber-accent pb-1">New Arrival</span>
+            <span className="font-medium border-b-2 border-black pb-1">New Arrival</span>
             <span className="text-gray-500">Bestseller</span>
             <span className="text-gray-500">Featured Products</span>
           </div>

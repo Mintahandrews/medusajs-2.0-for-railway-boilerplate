@@ -14,7 +14,7 @@ export default async function FeaturedProducts({
 
   return (
     <li key={collection.id}>
-      <ul className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6">
+      <ul className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 small:gap-x-6 small:gap-y-6">
         {collection.products.slice(0, 8).map((product) => (
           <li key={product.id}>
             <ProductPreview product={product} region={region} isFeatured />
