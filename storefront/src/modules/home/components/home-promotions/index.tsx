@@ -44,14 +44,16 @@ export default function HomePromotions() {
                 </div>
 
                 {/* Card 4: Macbook Pro */}
-                <div className="bg-[#2C2C2C] text-white p-8 flex flex-col justify-between h-[360px] relative overflow-hidden group">
+                <div className="bg-teal-900 text-white p-8 flex flex-col justify-between h-[360px] relative overflow-hidden group rounded-lg">
                     <div className="z-10">
-                        <h3 className="text-2xl font-light mb-4 text-white">Macbook Pro</h3>
-                        <p className="text-xs text-gray-400 font-medium line-clamp-3">The most powerful MacBook Pro ever is here. With the blazing-fast M2 Pro or M2 Max chip.</p>
-                        <LocalizedClientLink href="/store" className="mt-6 inline-block font-medium underline decoration-1 underline-offset-4 text-white">Shop Now</LocalizedClientLink>
+                        <h3 className="text-2xl font-bold mb-4 text-white">Macbook Pro</h3>
+                        <p className="text-xs text-gray-300 font-medium line-clamp-3">The most powerful MacBook Pro ever is here. With the blazing-fast M2 Pro or M2 Max chip.</p>
+                        <LocalizedClientLink href="/store" className="mt-6 inline-block">
+                            <Button className="border-white border bg-transparent hover:bg-white hover:text-teal-900 text-white transition-colors px-6 py-2 rounded">Shop Now</Button>
+                        </LocalizedClientLink>
                     </div>
                     <div className="absolute right-[-20px] bottom-0 w-[250px] h-[200px] flex items-center justify-center">
-                        <img src="/images/macbook_pro.png" alt="Macbook Pro" className="w-full h-full object-contain" />
+                        <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop&auto=format" alt="Macbook Pro" className="w-full h-full object-contain" />
                     </div>
                 </div>
             </div>

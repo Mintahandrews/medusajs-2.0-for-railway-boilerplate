@@ -38,7 +38,7 @@ module.exports = {
           black: "#000000",
           white: "#FFFFFF",
           gray: "#F5F5F7",
-          accent: "#14b8a6", // Main accent color from logo
+          accent: "#0d9488", // Teal 600
 
         }
       },
