@@ -1,0 +1,93 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+@import "./theme.css";
+
+@layer base {
+  :root {
+    @apply bg-white text-zinc-900 antialiased;
+    text-rendering: optimizeLegibility;
+    
+    /* Letscase Brand Colors */
+    --brand-primary: 93 171 166; /* #5DABA6 - Teal */
+    --brand-secondary: 61 139 135; /* #3D8B87 - Darker Teal */
+    --brand-accent: 93 171 166; /* #5DABA6 */
+    --brand-dark: 44 62 80; /* #2C3E50 - Dark Grey */
+    --brand-light-bg: 245 245 245; /* #F5F5F5 */
+    --text-primary: 51 51 51; /* #333333 */
+    --text-secondary: 102 102 102; /* #666666 */
+    --success: 39 174 96; /* #27AE60 */
+    --error: 231 76 60; /* #E74C3C */
+    --warning: 243 156 18; /* #F39C12 */
+  }
+}
+
+@layer components {
+  /* Content container */
+  .content-container {
+    @apply max-w-[1440px] w-full mx-auto px-6;
+  }
+}
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  input:not([type="checkbox"]):focus ~ label,
+  input:not([type="checkbox"]):not(:placeholder-shown) ~ label {
+    @apply -translate-y-2 text-xs font-medium;
+  }
+
+  input:not([type="checkbox"]):focus ~ label {
+    @apply left-0;
+  }
+
+  /* input:not([type="checkbox"]):-webkit-autofill,
+  input:not([type="checkbox"]):-webkit-autofill:hover,
+  input:not([type="checkbox"]):-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    border: 1px solid #212121;
+    -webkit-text-fill-color: #212121;
+    -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+    transition: background-color 5000s ease-in-out 0s;
+  } */
+}
+
+/* Navigation menu dropdown animations */
+@keyframes dropdown-open {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes dropdown-close {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-1rem);
+  }
+}

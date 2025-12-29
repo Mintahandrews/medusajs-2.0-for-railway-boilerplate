@@ -1,32 +1,35 @@
-import { sdk } from "@lib/config"
-import { cache } from "react"
+import { sdk } from "@/lib/utils/sdk"
+import { HttpTypes } from "@medusajs/types"
 
-export const listCategories = cache(async function () {
-  return sdk.store.category
-    .list({ fields: "+category_children" }, { next: { tags: ["categories"] } })
-    .then(({ product_categories }) => product_categories)
-})
+export const listCategories = async (options?: {
+  fields?: string;
+  queryParams?: HttpTypes.StoreProductCategoryListParams;
+}): Promise<HttpTypes.StoreProductCategory[]> => {
+  const { product_categories } = await sdk.store.category.list({
+    fields: options?.fields,
+    ...options?.queryParams,
+  })
 
-export const getCategoriesList = cache(async function (
-  offset: number = 0,
-  limit: number = 100
-) {
-  return sdk.store.category.list(
-    // TODO: Look into fixing the type
-    // @ts-ignore
-    { limit, offset },
-    { next: { tags: ["categories"] } }
-  )
-})
+  return product_categories
+}
 
-export const getCategoryByHandle = cache(async function (
-  categoryHandle: string[]
-) {
+export const retrieveCategory = async ({
+  handle,
+  fields,
+}: {
+  handle: string;
+  fields?: string;
+}): Promise<HttpTypes.StoreProductCategory | null> => {
+  const product_categories = await listCategories({
+    queryParams: {
+      handle,
+      fields
+    },
+  })
 
-  return sdk.store.category.list(
-    // TODO: Look into fixing the type
-    // @ts-ignore
-    { handle: categoryHandle },
-    { next: { tags: ["categories"] } }
-  )
-})
+  if (!product_categories.length) {
+    throw new Error(`Category with handle ${handle} not found`)
+  }
+
+  return product_categories[0]
+}
