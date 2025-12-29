@@ -17,15 +17,15 @@ export default defineConfig(({ mode }) => {
 
       ...(isDev
         ? [
-            medusaAiTags({
-              enabled: true,
-              includeRuntime: true,
-            }),
-          ]
+          medusaAiTags({
+            enabled: true,
+            includeRuntime: true,
+          }),
+        ]
         : []),
 
       tanstackStart({
-        target: "netlify",
+        target: "node-server",
         customViteReactPlugin: true,
       }),
       react(),

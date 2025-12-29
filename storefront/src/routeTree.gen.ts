@@ -18,6 +18,7 @@ import { Route as CountryCodeRouteImport } from './routes/$countryCode'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CountryCodeIndexRouteImport } from './routes/$countryCode/index'
+import { Route as ApiHealthcheckRouteImport } from './routes/api/healthcheck'
 import { Route as CountryCodeStoreRouteImport } from './routes/$countryCode/store'
 import { Route as CountryCodeCheckoutRouteImport } from './routes/$countryCode/checkout'
 import { Route as CountryCodeCartRouteImport } from './routes/$countryCode/cart'
@@ -62,6 +63,11 @@ const CountryCodeIndexRoute = CountryCodeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CountryCodeRoute,
+} as any)
+const ApiHealthcheckRoute = ApiHealthcheckRouteImport.update({
+  id: '/api/healthcheck',
+  path: '/api/healthcheck',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CountryCodeStoreRoute = CountryCodeStoreRouteImport.update({
   id: '/store',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/$countryCode/cart': typeof CountryCodeCartRoute
   '/$countryCode/checkout': typeof CountryCodeCheckoutRoute
   '/$countryCode/store': typeof CountryCodeStoreRoute
+  '/api/healthcheck': typeof ApiHealthcheckRoute
   '/$countryCode/': typeof CountryCodeIndexRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/$countryCode/cart': typeof CountryCodeCartRoute
   '/$countryCode/checkout': typeof CountryCodeCheckoutRoute
   '/$countryCode/store': typeof CountryCodeStoreRoute
+  '/api/healthcheck': typeof ApiHealthcheckRoute
   '/$countryCode': typeof CountryCodeIndexRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/$countryCode/cart': typeof CountryCodeCartRoute
   '/$countryCode/checkout': typeof CountryCodeCheckoutRoute
   '/$countryCode/store': typeof CountryCodeStoreRoute
+  '/api/healthcheck': typeof ApiHealthcheckRoute
   '/$countryCode/': typeof CountryCodeIndexRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/$countryCode/cart'
     | '/$countryCode/checkout'
     | '/$countryCode/store'
+    | '/api/healthcheck'
     | '/$countryCode/'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/products/$handle'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/$countryCode/cart'
     | '/$countryCode/checkout'
     | '/$countryCode/store'
+    | '/api/healthcheck'
     | '/$countryCode'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/products/$handle'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/$countryCode/cart'
     | '/$countryCode/checkout'
     | '/$countryCode/store'
+    | '/api/healthcheck'
     | '/$countryCode/'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/products/$handle'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   StoreRoute: typeof StoreRoute
+  ApiHealthcheckRoute: typeof ApiHealthcheckRoute
 }
 export interface FileServerRoutesByFullPath {
   '/health': typeof HealthServerRoute
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$countryCode/'
       preLoaderRoute: typeof CountryCodeIndexRouteImport
       parentRoute: typeof CountryCodeRoute
+    }
+    '/api/healthcheck': {
+      id: '/api/healthcheck'
+      path: '/api/healthcheck'
+      fullPath: '/api/healthcheck'
+      preLoaderRoute: typeof ApiHealthcheckRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/$countryCode/store': {
       id: '/$countryCode/store'
@@ -362,6 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   StoreRoute: StoreRoute,
+  ApiHealthcheckRoute: ApiHealthcheckRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

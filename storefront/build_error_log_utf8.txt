@@ -1,0 +1,159 @@
+﻿
+> storefront@ build C:\Users\minta\Downloads\medusajs-2.0-for-railway-boilerplate\storefront
+> vite build
+
+[36mvite v7.1.2 [32mbuilding for production...[36m[39m
+Generated route tree in 214ms
+transforming...
+[32mΓ£ô[39m 174 modules transformed.
+node.exe : 
+[31mΓ£ù[39m Build 
+failed in 1.29s
+At C:\Users\minta\App
+Data\Roaming\npm\pnpm
+.ps1:24 char:5
++     & "node$exe"  "
+$basedir/node_modules
+/pnpm/bin/pnpm.cjs" 
+$args
++     ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31mΓ£   
+ ù[39m Build fai    
+led in 1.29s:Str    
+ing) [], RemoteE    
+xception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31m[commonjs--resol
+ver] Missing "./api" 
+specifier in "@tansta
+ck/react-start" 
+package[31m
+    at e (file:///C:/
+Users/minta/Downloads
+/medusajs-2.0-for-rai
+lway-boilerplate/stor
+efront/node_modules/.
+pnpm/vite@7.1.2_@type
+s+node@24.3_b74e7139a
+28c05de0915a9834a6e87
+24/node_modules/vite/
+dist/node/chunks/dep-
+CMEinpL-.js:9039:8)
+    at n (file:///C:/
+Users/minta/Downloads
+/medusajs-2.0-for-rai
+lway-boilerplate/stor
+efront/node_modules/.
+pnpm/vite@7.1.2_@type
+s+node@24.3_b74e7139a
+28c05de0915a9834a6e87
+24/node_modules/vite/
+dist/node/chunks/dep-
+CMEinpL-.js:9051:14)
+    at o (file:///C:/
+Users/minta/Downloads
+/medusajs-2.0-for-rai
+lway-boilerplate/stor
+efront/node_modules/.
+pnpm/vite@7.1.2_@type
+s+node@24.3_b74e7139a
+28c05de0915a9834a6e87
+24/node_modules/vite/
+dist/node/chunks/dep-
+CMEinpL-.js:9079:10)
+    at resolveExports
+OrImports (file:///C:
+/Users/minta/Download
+s/medusajs-2.0-for-ra
+ilway-boilerplate/sto
+refront/node_modules/
+.pnpm/vite@7.1.2_@typ
+es+node@24.3_b74e7139
+a28c05de0915a9834a6e8
+724/node_modules/vite
+/dist/node/chunks/dep
+-CMEinpL-.js:12174:17
+)
+    at 
+resolveDeepImport (fi
+le:///C:/Users/minta/
+Downloads/medusajs-2.
+0-for-railway-boilerp
+late/storefront/node_
+modules/.pnpm/vite@7.
+1.2_@types+node@24.3_
+b74e7139a28c05de0915a
+9834a6e8724/node_modu
+les/vite/dist/node/ch
+unks/dep-CMEinpL-.js:
+12188:22)
+    at 
+tryNodeResolve (file:
+///C:/Users/minta/Dow
+nloads/medusajs-2.0-f
+or-railway-boilerplat
+e/storefront/node_mod
+ules/.pnpm/vite@7.1.2
+_@types+node@24.3_b74
+e7139a28c05de0915a983
+4a6e8724/node_modules
+/vite/dist/node/chunk
+s/dep-CMEinpL-.js:120
+59:17)
+    at 
+Object.handler (file:
+///C:/Users/minta/Dow
+nloads/medusajs-2.0-f
+or-railway-boilerplat
+e/storefront/node_mod
+ules/.pnpm/vite@7.1.2
+_@types+node@24.3_b74
+e7139a28c05de0915a983
+4a6e8724/node_modules
+/vite/dist/node/chunk
+s/dep-CMEinpL-.js:118
+94:16)
+    at 
+Object.handler (file:
+///C:/Users/minta/Dow
+nloads/medusajs-2.0-f
+or-railway-boilerplat
+e/storefront/node_mod
+ules/.pnpm/vite@7.1.2
+_@types+node@24.3_b74
+e7139a28c05de0915a983
+4a6e8724/node_modules
+/vite/dist/node/chunk
+s/dep-CMEinpL-.js:344
+37:13)
+    at file:///C:/Use
+rs/minta/Downloads/me
+dusajs-2.0-for-railwa
+y-boilerplate/storefr
+ont/node_modules/.pnp
+m/rollup@4.50.0/node_
+modules/rollup/dist/e
+s/shared/node-entry.j
+s:22395:40
+    at async PluginDr
+iver.hookFirstAndGetP
+lugin (file:///C:/Use
+rs/minta/Downloads/me
+dusajs-2.0-for-railwa
+y-boilerplate/storefr
+ont/node_modules/.pnp
+m/rollup@4.50.0/node_
+modules/rollup/dist/e
+s/shared/node-entry.j
+s:22277:28)[39m
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

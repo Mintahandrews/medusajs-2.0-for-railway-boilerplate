@@ -6,7 +6,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:prod": "pnpm build && pnpm preview",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@medusajs/icons": "2.11.3-preview-20251103060142",
