@@ -1,152 +1,140 @@
-import { sdk } from "@/lib/utils/sdk"
+import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
+import { cache } from "react"
+import { getRegion } from "./regions"
+import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { sortProducts } from "@lib/util/sort-products"
+
+export const getProductsById = cache(async function ({
+  ids,
+  regionId,
+}: {
+  ids: string[]
+  regionId: string
+}) {
+  return sdk.store.product
+    .list(
+      {
+        id: ids,
+        region_id: regionId,
+        fields: "*variants.calculated_price,+variants.inventory_quantity",
+      },
+      { next: { tags: ["products"] } }
+    )
+    .then(({ products }) => products)
+})
+
+export const getProductByHandle = cache(async function (
+  handle: string,
+  regionId: string
+) {
+  return sdk.store.product
+    .list(
+      {
+        handle,
+        region_id: regionId,
+        fields: "*variants.calculated_price,+variants.inventory_quantity",
+      },
+      { next: { tags: ["products"] } }
+    )
+    .then(({ products }) => products[0])
+})
+
+export const getProductsList = cache(async function ({
+  pageParam = 1,
+  queryParams,
+  countryCode,
+}: {
+  pageParam?: number
+  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+  countryCode: string
+}): Promise<{
+  response: { products: HttpTypes.StoreProduct[]; count: number }
+  nextPage: number | null
+  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+}> {
+  const limit = queryParams?.limit || 12
+  const validPageParam = Math.max(pageParam, 1);
+  const offset = (validPageParam - 1) * limit
+  const region = await getRegion(countryCode)
+
+  if (!region) {
+    return {
+      response: { products: [], count: 0 },
+      nextPage: null,
+    }
+  }
+  return sdk.store.product
+    .list(
+      {
+        limit,
+        offset,
+        region_id: region.id,
+        fields: "*variants.calculated_price",
+        ...queryParams,
+      },
+      { next: { tags: ["products"] } }
+    )
+    .then(({ products, count }) => {
+      const nextPage = count > offset + limit ? pageParam + 1 : null
+
+      return {
+        response: {
+          products,
+          count,
+        },
+        nextPage: nextPage,
+        queryParams,
+      }
+    })
+})
 
 /**
- * Lists products with pagination support and filtering options.
- * 
- * @param page_param - The page number to fetch (defaults to 1)
- * @param query_params - Optional query parameters for filtering, sorting, and field selection
- * @param region_id - Optional region ID to get region-specific pricing and availability
- * @returns Promise that resolves to an object containing products array, total count, and next page number
- * 
- * @example
- * ```typescript
- * // Get first page of products
- * const { products, count, next_page } = await listProducts({
- *   region_id: 'reg_us'
- * });
- * 
- * // Get products with filtering
- * const { products } = await listProducts({
- *   page_param: 1,
- *   query_params: {
- *     limit: 20,
- *     offset: 0,
- *     collection_id: ['col_123'],
- *     category_id: ['cat_456'],
- *     q: 'search term',
- *     order: '-created_at'
- *   },
- *   region_id: 'reg_eu'
- * });
- * 
- * // Get products with specific fields
- * const { products } = await listProducts({
- *   query_params: {
- *     fields: '*variants, *images, *collection, *tags',
- *     limit: 10
- *   },
- *   region_id: 'reg_gb'
- * });
- * 
- * // Get next page
- * if (next_page) {
- *   const nextPageData = await listProducts({
- *     page_param: next_page,
- *     query_params,
- *     region_id
- *   });
- * }
- * ```
+ * This will fetch 100 products to the Next.js cache and sort them based on the sortBy parameter.
+ * It will then return the paginated products based on the page and limit parameters.
  */
-export const listProducts = async ({
-  page_param = 1,
-  query_params,
-  region_id,
+export const getProductsListWithSort = cache(async function ({
+  page = 0,
+  queryParams,
+  sortBy = "created_at",
+  countryCode,
 }: {
-  page_param?: number;
-  query_params?: HttpTypes.StoreProductListParams;
-  region_id?: string;
+  page?: number
+  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+  sortBy?: SortOptions
+  countryCode: string
 }): Promise<{
-  products: HttpTypes.StoreProduct[];
-  count: number;
-  next_page: number | null;
-}> => {
-  const limit = query_params?.limit || 12
-  const _page_param = Math.max(page_param, 1)
-  const offset = _page_param === 1 ? 0 : (_page_param - 1) * limit
+  response: { products: HttpTypes.StoreProduct[]; count: number }
+  nextPage: number | null
+  queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
+}> {
+  const limit = queryParams?.limit || 12
 
-  const response = await sdk.store.product.list({
-    limit,
-    offset,
-    region_id,
-    ...query_params,
+  const {
+    response: { products, count },
+  } = await getProductsList({
+    pageParam: 0,
+    queryParams: {
+      ...queryParams,
+      limit: 100,
+    },
+    countryCode,
   })
 
-  const next_page = offset + limit < response.count ? _page_param + 1 : null
+  const sortedProducts = sortProducts(products, sortBy)
+
+  const pageParam = (page - 1) * limit
+
+  const nextPage = count > pageParam + limit ? pageParam + limit : null
+
+  const paginatedProducts = sortedProducts.slice(pageParam, pageParam + limit)
 
   return {
-    products: response.products,
-    count: response.count,
-    next_page,
+    response: {
+      products: paginatedProducts,
+      count,
+    },
+    nextPage,
+    queryParams,
   }
-}
-
-/**
- * Retrieves a single product by its handle with optional region-specific data.
- * 
- * @param handle - The product handle (slug) to retrieve
- * @param region_id - Optional region ID to get region-specific pricing and availability
- * @param fields - Optional fields to include in the response
- * @returns Promise that resolves to the product data
- * @throws Error if product with the given handle is not found
- * 
- * @example
- * ```typescript
- * // Get product by handle
- * const product = await retrieveProduct({
- *   handle: 'awesome-t-shirt',
- *   region_id: 'reg_us'
- * });
- * 
- * // Get product with specific fields
- * const product = await retrieveProduct({
- *   handle: 'awesome-t-shirt',
- *   region_id: 'reg_eu',
- *   fields: '*variants, *images, *options, *options.values, *collection, *tags'
- * });
- * 
- * // Get product with inventory data
- * const product = await retrieveProduct({
- *   handle: 'awesome-t-shirt',
- *   region_id: 'reg_gb',
- *   fields: '*variants, +variants.inventory_quantity, +variants.manage_inventory, +variants.allow_backorder'
- * });
- * 
- * // Get product with price. Must start the fields with `*variants.calculated_price`
- * const product = await retrieveProduct({
- *   handle: 'awesome-t-shirt',
- *   region_id: 'reg_gb',
- *   fields: '*variants.calculated_price, handle'
- * });
- * 
- * // Handle errors
- * try {
- *   const product = await retrieveProduct({ handle: 'non-existent-product' });
- * } catch (error) {
- *   console.error('Product not found:', error.message);
- * }
- * ```
- */
-export const retrieveProduct = async ({
-  handle,
-  region_id,
-  fields,
-}: {
-  handle: string;
-  region_id?: string;
-  fields?: string;
-}): Promise<HttpTypes.StoreProduct> => {
-  const { products } = await sdk.store.product.list({
-    handle: handle,
-    region_id,
-    fields: fields ||
-      "*variants, +variants.inventory_quantity, +variants.manage_inventory, +variants.allow_backorder, *images, *options, *options.values, *collection, *tags",
-  })
-
-  if (!products || products.length === 0) {
-    throw new Error(`Product with handle ${handle} not found`)
-  }
-
-  return products[0]
-}
+})

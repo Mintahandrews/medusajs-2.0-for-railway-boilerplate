@@ -1,35 +1,48 @@
-import { sdk } from "@/lib/utils/sdk"
+import { sdk } from "@lib/config"
+import medusaError from "@lib/util/medusa-error"
+import { cache } from "react"
 import { HttpTypes } from "@medusajs/types"
 
-export const listRegions = async ({
-  fields,
-}: {
-  fields?: string;
-} = {}): Promise<HttpTypes.StoreRegion[]> => {
-  const { regions } = await sdk.store.region.list({ fields })
-  return regions
-}
+export const listRegions = cache(async function () {
+  return sdk.store.region
+    .list({}, { next: { tags: ["regions"] } })
+    .then(({ regions }) => regions)
+    .catch(medusaError)
+})
 
-export const retrieveRegion = async ({
-  id,
-  fields,
-}: {
-  id: string;
-  fields?: string;
-}): Promise<HttpTypes.StoreRegion> => {
-  const { region } = await sdk.store.region.retrieve(id, { fields })
-  return region
-}
+export const retrieveRegion = cache(async function (id: string) {
+  return sdk.store.region
+    .retrieve(id, {}, { next: { tags: ["regions"] } })
+    .then(({ region }) => region)
+    .catch(medusaError)
+})
 
-export const getRegion = async ({
-  country_code,
-  fields,
-}: {
-  country_code: string;
-  fields?: string;
-}): Promise<HttpTypes.StoreRegion | null> => {
-    const regions = await listRegions({ fields })
-    return regions.find(region => 
-      region.countries?.some(country => country.iso_2 === country_code.toLowerCase())
-    ) || null
-}
+const regionMap = new Map<string, HttpTypes.StoreRegion>()
+
+export const getRegion = cache(async function (countryCode: string) {
+  try {
+    if (regionMap.has(countryCode)) {
+      return regionMap.get(countryCode)
+    }
+
+    const regions = await listRegions()
+
+    if (!regions) {
+      return null
+    }
+
+    regions.forEach((region) => {
+      region.countries?.forEach((c) => {
+        regionMap.set(c?.iso_2 ?? "", region)
+      })
+    })
+
+    const region = countryCode
+      ? regionMap.get(countryCode)
+      : regionMap.get("us")
+
+    return region
+  } catch (e: any) {
+    return null
+  }
+})
