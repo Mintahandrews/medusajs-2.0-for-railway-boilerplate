@@ -2,6 +2,7 @@ import { Text } from "@medusajs/ui"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import WishlistButton from "@modules/common/components/wishlist-button"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import { getProductsById } from "@lib/data/products"
@@ -32,12 +33,25 @@ export default async function ProductPreview({
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
       <div data-testid="product-wrapper">
-        <Thumbnail
-          thumbnail={product.thumbnail}
-          images={product.images}
-          size="full"
-          isFeatured={isFeatured}
-        />
+        <div className="relative">
+          <div className="absolute right-3 top-3 z-10">
+            <WishlistButton
+              item={{
+                id: product.id!,
+                handle: product.handle!,
+                title: product.title,
+                image: product.thumbnail || product.images?.[0]?.url || null,
+                price: cheapestPrice?.calculated_price || undefined,
+              }}
+            />
+          </div>
+          <Thumbnail
+            thumbnail={product.thumbnail}
+            images={product.images}
+            size="full"
+            isFeatured={isFeatured}
+          />
+        </div>
         <div className="flex txt-compact-medium mt-4 justify-between">
           <Text className="text-ui-fg-subtle" data-testid="product-title">
             {product.title}

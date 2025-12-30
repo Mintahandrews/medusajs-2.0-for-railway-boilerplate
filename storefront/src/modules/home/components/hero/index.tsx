@@ -1,4 +1,3 @@
-import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 
@@ -10,7 +9,7 @@ const Hero = () => {
           className="relative overflow-hidden rounded-[28px] border border-grey-20 bg-cover bg-center px-6 py-10 small:px-12 small:py-0 small:h-[560px] flex items-center"
           style={{ backgroundImage: "url('/hero.jpg')" }}
         >
-          <div className="absolute inset-0 bg-white/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/45 to-white/5" />
           <div className="relative z-10 w-full grid grid-cols-1 small:grid-cols-2 items-center gap-10">
             <div className="animate-fade-in-left">
               <h1 className="text-[36px] small:text-[56px] leading-[1.2] font-bold tracking-[-0.02em] text-grey-90 max-w-[600px]">
@@ -43,18 +42,7 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="flex justify-center small:justify-end animate-fade-in-right">
-              <div className="relative w-full max-w-[560px] h-[360px] small:h-[560px]">
-                <Image
-                  src="https://images.unsplash.com/photo-1695048133142-1a2043614d6d?w=1200&auto=format&fit=crop&q=80"
-                  alt="Premium iPhone accessories by Letscase"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 560px"
-                  className="object-contain drop-shadow-sm"
-                  priority
-                />
-              </div>
-            </div>
+            <div className="hidden small:block" />
           </div>
         </div>
       </div>

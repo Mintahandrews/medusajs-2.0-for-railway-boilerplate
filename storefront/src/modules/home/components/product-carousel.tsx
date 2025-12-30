@@ -5,6 +5,7 @@ import { useMemo, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import WishlistButton from "@modules/common/components/wishlist-button"
 
 type CarouselItem =
   | {
@@ -50,7 +51,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
     <div className="relative">
       <button
         type="button"
-        className="hidden small:flex absolute -left-5 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full border border-grey-20 bg-white text-grey-50 shadow-md z-10 hover:border-grey-40 hover:text-grey-90 transition duration-300"
+        className="hidden small:flex absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
         aria-label="Previous"
         onClick={() => scrollByCards("left")}
       >
@@ -58,7 +59,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
       </button>
       <button
         type="button"
-        className="hidden small:flex absolute -right-5 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10"
+        className="hidden small:flex absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
         aria-label="Next"
         onClick={() => scrollByCards("right")}
       >
@@ -67,7 +68,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
 
       <div
         ref={viewportRef}
-        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
+        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2 small:px-24"
       >
         {normalized.slice(0, 8).map((item) => (
           <LocalizedClientLink
@@ -76,13 +77,24 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
             className="group snap-start shrink-0 w-[260px] small:w-[280px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block"
           >
             <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
+              <div className="absolute right-3 top-3 z-10">
+                <WishlistButton
+                  item={{
+                    id: item.id,
+                    handle: item.href.replace("/products/", ""),
+                    title: item.title,
+                    image: item.image,
+                    price: item.price,
+                  }}
+                />
+              </div>
               <div className="relative aspect-square w-full">
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
                   sizes="280px"
-                  className="object-contain p-6"
+                  className="object-contain"
                 />
               </div>
             </div>

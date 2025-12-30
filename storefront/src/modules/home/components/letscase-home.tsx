@@ -3,15 +3,16 @@ import Image from "next/image"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import GridIcon from "@modules/common/icons/grid"
+import HeadsetIcon from "@modules/common/icons/headset"
+import LaptopIcon from "@modules/common/icons/laptop"
+import MonitorIcon from "@modules/common/icons/monitor"
+import PhoneIcon from "@modules/common/icons/phone"
+import PlugIcon from "@modules/common/icons/plug"
+import ShoppingBagIcon from "@modules/common/icons/shopping-bag"
+import WatchIcon from "@modules/common/icons/watch"
 import {
   Check,
-  Cable,
-  Headphones,
-  Watch,
-  Monitor,
-  Mouse,
-  Smartphone,
-  Grid,
   ChevronRight
 } from "lucide-react"
 
@@ -89,14 +90,14 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
 
 function iconForCategory(name: string) {
   const n = (name || "").toLowerCase()
-  if (n.includes("cable") || n.includes("charg")) return Cable
-  if (n.includes("headphone") || n.includes("audio")) return Headphones
-  if (n.includes("watch")) return Watch
-  if (n.includes("screen") || n.includes("protector") || n.includes("phone"))
-    return Smartphone
-  if (n.includes("monitor") || n.includes("display")) return Monitor
-  if (n.includes("mouse")) return Mouse
-  return Grid
+  if (n.includes("charger") || n.includes("charg") || n.includes("cable")) return PlugIcon
+  if (n.includes("headphone") || n.includes("headset") || n.includes("ear") || n.includes("audio")) return HeadsetIcon
+  if (n.includes("watch")) return WatchIcon
+  if (n.includes("case") || n.includes("phone") || n.includes("screen") || n.includes("protector")) return PhoneIcon
+  if (n.includes("laptop") || n.includes("comput") || n.includes("mac") || n.includes("ipad")) return LaptopIcon
+  if (n.includes("monitor") || n.includes("display")) return MonitorIcon
+  if (n.includes("shirt") || n.includes("sweat") || n.includes("pant") || n.includes("short") || n.includes("merch")) return ShoppingBagIcon
+  return GridIcon
 }
 
 function ShopByCategory({ categories }: { categories: any[] }) {
@@ -134,9 +135,9 @@ function ShopByCategory({ categories }: { categories: any[] }) {
                 <LocalizedClientLink
                   key={c.label}
                   href={c.href}
-                  className="shrink-0 flex flex-col items-center text-center min-w-[84px]"
+                  className="group shrink-0 flex flex-col items-center text-center min-w-[84px]"
                 >
-                  <div className="h-12 w-12 rounded-full border border-grey-20 bg-white flex items-center justify-center text-grey-90">
+                  <div className="h-12 w-12 rounded-full border border-grey-20 bg-white flex items-center justify-center text-grey-90 group-hover:bg-brand group-hover:border-brand group-hover:text-white transition-colors">
                     <Icon size={20} />
                   </div>
                   <div className="mt-3 text-[12px] font-medium text-grey-90 leading-[1.2]">
@@ -171,16 +172,8 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
     <div className="py-10">
       <div className="grid grid-cols-1 small:grid-cols-2 gap-8">
         <div className="relative overflow-hidden rounded-[24px] border border-grey-20 bg-grey-10 min-h-[420px]">
-          <div className="absolute inset-0">
-            <Image
-              src={p1Image}
-              alt={p1?.title || "Featured product"}
-              fill
-              className="object-contain p-10 small:p-12"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          </div>
-          <div className="relative z-10 p-8 small:p-10 max-w-[360px]">
+          <div className="grid grid-cols-1 small:grid-cols-2 items-center gap-8 h-full p-8 small:p-10">
+            <div className="max-w-[360px]">
             <div className="text-[22px] small:text-[26px] font-bold text-grey-90 mb-2">
               {p1?.title}
             </div>
@@ -194,20 +187,23 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
               <span>Shop Collection</span>
               <ChevronRight size={16} />
             </LocalizedClientLink>
+            </div>
+
+            <div className="relative h-[240px] small:h-[360px] w-full">
+              <Image
+                src={p1Image}
+                alt={p1?.title || "Featured product"}
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
           </div>
         </div>
 
         <div className="relative overflow-hidden rounded-[24px] border border-grey-20 bg-grey-10 min-h-[420px]">
-          <div className="absolute inset-0">
-            <Image
-              src={p2Image}
-              alt={p2?.title || "Featured product"}
-              fill
-              className="object-contain p-10 small:p-12"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          </div>
-          <div className="relative z-10 p-8 small:p-10 max-w-[360px]">
+          <div className="grid grid-cols-1 small:grid-cols-2 items-center gap-8 h-full p-8 small:p-10">
+            <div className="max-w-[360px]">
             <div className="text-[22px] small:text-[26px] font-bold text-grey-90 mb-2">
               {p2?.title}
             </div>
@@ -221,6 +217,17 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
               <span>Shop Collection</span>
               <ChevronRight size={16} />
             </LocalizedClientLink>
+            </div>
+
+            <div className="relative h-[240px] small:h-[360px] w-full">
+              <Image
+                src={p2Image}
+                alt={p2?.title || "Featured product"}
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
           </div>
         </div>
       </div>
