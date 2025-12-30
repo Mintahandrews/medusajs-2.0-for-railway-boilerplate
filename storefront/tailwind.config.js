@@ -21,6 +21,10 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
+        brand: {
+          DEFAULT: "#5DABA6",
+          dark: "#3D8B87",
+        },
         grey: {
           0: "#FFFFFF",
           5: "#F9FAFB",
@@ -79,6 +83,16 @@ module.exports = {
           "0%": {
             opacity: "0",
             transform: "translateX(10px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
+        "fade-in-left": {
+          "0%": {
+            opacity: "0",
+            transform: "translateX(-10px)",
           },
           "100%": {
             opacity: "1",
@@ -145,6 +159,8 @@ module.exports = {
         ring: "ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite",
         "fade-in-right":
           "fade-in-right 0.3s cubic-bezier(0.5, 0, 0.5, 1) forwards",
+        "fade-in-left":
+          "fade-in-left 0.3s cubic-bezier(0.5, 0, 0.5, 1) forwards",
         "fade-in-top": "fade-in-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",
         "fade-out-top":
           "fade-out-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",

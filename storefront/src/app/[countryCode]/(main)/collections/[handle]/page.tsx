@@ -21,49 +21,63 @@ type Props = {
 export const PRODUCT_LIMIT = 12
 
 export async function generateStaticParams() {
-  const { collections } = await getCollectionsList()
+  try {
+    const { collections } = await getCollectionsList()
 
-  if (!collections) {
+    if (!collections?.length) {
+      return []
+    }
+
+    const countryCodes = await listRegions().then(
+      (regions: StoreRegion[]) =>
+        regions
+          ?.map((r) => r.countries?.map((c) => c.iso_2))
+          .flat()
+          .filter(Boolean) as string[]
+    )
+
+    if (!countryCodes?.length) {
+      return []
+    }
+
+    const collectionHandles = collections
+      .map((collection: StoreCollection) => collection.handle)
+      .filter(Boolean) as string[]
+
+    return countryCodes
+      .map((countryCode: string) =>
+        collectionHandles.map((handle: string) => ({
+          countryCode,
+          handle,
+        }))
+      )
+      .flat()
+  } catch {
+    // Backend not reachable during build (common in CI/local builds).
+    // Returning [] disables SSG for this route; pages will render at runtime.
     return []
   }
-
-  const countryCodes = await listRegions().then(
-    (regions: StoreRegion[]) =>
-      regions
-        ?.map((r) => r.countries?.map((c) => c.iso_2))
-        .flat()
-        .filter(Boolean) as string[]
-  )
-
-  const collectionHandles = collections.map(
-    (collection: StoreCollection) => collection.handle
-  )
-
-  const staticParams = countryCodes
-    ?.map((countryCode: string) =>
-      collectionHandles.map((handle: string | undefined) => ({
-        countryCode,
-        handle,
-      }))
-    )
-    .flat()
-
-  return staticParams
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const collection = await getCollectionByHandle(params.handle)
+  try {
+    const collection = await getCollectionByHandle(params.handle)
 
-  if (!collection) {
-    notFound()
+    if (!collection) {
+      notFound()
+    }
+
+    return {
+      title: `${collection.title} | Medusa Store`,
+      description: `${collection.title} collection`,
+    } as Metadata
+  } catch {
+    // If backend is down during build, keep metadata generation from crashing.
+    return {
+      title: "Collection | Medusa Store",
+      description: "Collection",
+    }
   }
-
-  const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
-  } as Metadata
-
-  return metadata
 }
 
 export default async function CollectionPage({ params, searchParams }: Props) {

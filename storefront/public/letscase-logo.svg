@@ -1,0 +1,8 @@
+<svg width="220" height="64" viewBox="0 0 220 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Letscase</title>
+  <circle cx="32" cy="32" r="26" fill="#5DABA6"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#3D8B87" stroke-width="2"/>
+  <text x="32" y="38" text-anchor="middle" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">LC</text>
+  <text x="72" y="30" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="22" font-weight="700" fill="#111827">Letscase</text>
+  <text x="72" y="48" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="10" font-weight="600" letter-spacing="0.16em" fill="#6B7280">LETS CASE</text>
+</svg>

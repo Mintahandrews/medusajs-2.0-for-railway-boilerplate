@@ -4,6 +4,7 @@ import { cache } from "react"
 import { getRegion } from "./regions"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { sortProducts } from "@lib/util/sort-products"
+import { getProductPrice } from "@lib/util/get-product-price"
 
 export const getProductsById = cache(async function ({
   ids,
@@ -97,11 +98,15 @@ export const getProductsListWithSort = cache(async function ({
   page = 0,
   queryParams,
   sortBy = "created_at",
+  onlyDiscounted,
+  defaultDiscountSort,
   countryCode,
 }: {
   page?: number
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
   sortBy?: SortOptions
+  onlyDiscounted?: boolean
+  defaultDiscountSort?: boolean
   countryCode: string
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
@@ -123,16 +128,65 @@ export const getProductsListWithSort = cache(async function ({
 
   const sortedProducts = sortProducts(products, sortBy)
 
+  const discountedProducts = onlyDiscounted
+    ? sortedProducts.filter((product) => {
+        try {
+          const { cheapestPrice } = getProductPrice({ product })
+          if (!cheapestPrice) {
+            return false
+          }
+
+          return (
+            cheapestPrice.price_type === "sale" ||
+            cheapestPrice.original_price_number > cheapestPrice.calculated_price_number
+          )
+        } catch {
+          return false
+        }
+      })
+    : sortedProducts
+
+  const discountSortedProducts =
+    onlyDiscounted && defaultDiscountSort
+      ? discountedProducts
+          .map((product) => {
+            try {
+              const { cheapestPrice } = getProductPrice({ product })
+              const discount = cheapestPrice
+                ? Number(cheapestPrice.percentage_diff) || 0
+                : 0
+              const createdAt = product.created_at
+                ? new Date(product.created_at).getTime()
+                : 0
+              return { product, discount, createdAt }
+            } catch {
+              const createdAt = product.created_at
+                ? new Date(product.created_at).getTime()
+                : 0
+              return { product, discount: 0, createdAt }
+            }
+          })
+          .sort((a, b) => {
+            if (b.discount !== a.discount) {
+              return b.discount - a.discount
+            }
+            return b.createdAt - a.createdAt
+          })
+          .map((x) => x.product)
+      : discountedProducts
+
   const pageParam = (page - 1) * limit
 
-  const nextPage = count > pageParam + limit ? pageParam + limit : null
+  const effectiveCount = onlyDiscounted ? discountSortedProducts.length : count
 
-  const paginatedProducts = sortedProducts.slice(pageParam, pageParam + limit)
+  const nextPage = effectiveCount > pageParam + limit ? pageParam + limit : null
+
+  const paginatedProducts = discountSortedProducts.slice(pageParam, pageParam + limit)
 
   return {
     response: {
       products: paginatedProducts,
-      count,
+      count: effectiveCount,
     },
     nextPage,
     queryParams,

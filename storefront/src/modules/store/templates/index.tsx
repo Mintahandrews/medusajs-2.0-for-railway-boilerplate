@@ -9,13 +9,16 @@ import PaginatedProducts from "./paginated-products"
 const StoreTemplate = ({
   sortBy,
   page,
+  onSale,
   countryCode,
 }: {
   sortBy?: SortOptions
   page?: string
+  onSale?: boolean
   countryCode: string
 }) => {
   const pageNumber = page ? parseInt(page) : 1
+  const defaultDiscountSort = !!onSale && !sortBy
   const sort = sortBy || "created_at"
 
   return (
@@ -26,12 +29,14 @@ const StoreTemplate = ({
       <RefinementList sortBy={sort} />
       <div className="w-full">
         <div className="mb-8 text-2xl-semi">
-          <h1 data-testid="store-page-title">All products</h1>
+          <h1 data-testid="store-page-title">{onSale ? "Deals" : "All products"}</h1>
         </div>
         <Suspense fallback={<SkeletonProductGrid />}>
           <PaginatedProducts
             sortBy={sort}
             page={pageNumber}
+            onSale={onSale}
+            defaultDiscountSort={defaultDiscountSort}
             countryCode={countryCode}
           />
         </Suspense>

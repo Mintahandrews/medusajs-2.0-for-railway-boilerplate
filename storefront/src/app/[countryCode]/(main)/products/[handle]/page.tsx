@@ -10,60 +10,72 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  const countryCodes = await listRegions().then(
-    (regions) =>
-      regions
-        ?.map((r) => r.countries?.map((c) => c.iso_2))
-        .flat()
-        .filter(Boolean) as string[]
-  )
-
-  if (!countryCodes) {
-    return null
-  }
-
-  const products = await Promise.all(
-    countryCodes.map((countryCode) => {
-      return getProductsList({ countryCode })
-    })
-  ).then((responses) =>
-    responses.map(({ response }) => response.products).flat()
-  )
-
-  const staticParams = countryCodes
-    ?.map((countryCode) =>
-      products.map((product) => ({
-        countryCode,
-        handle: product.handle,
-      }))
+  try {
+    const countryCodes = await listRegions().then(
+      (regions) =>
+        regions
+          ?.map((r) => r.countries?.map((c) => c.iso_2))
+          .flat()
+          .filter(Boolean) as string[]
     )
-    .flat()
 
-  return staticParams
+    if (!countryCodes?.length) {
+      return []
+    }
+
+    const products = await Promise.all(
+      countryCodes.map((countryCode) => getProductsList({ countryCode }))
+    ).then((responses) =>
+      responses.map(({ response }) => response.products).flat()
+    )
+
+    return countryCodes
+      .map((countryCode) =>
+        products
+          .map((product) => product.handle)
+          .filter(Boolean)
+          .map((handle) => ({
+            countryCode,
+            handle,
+          }))
+      )
+      .flat()
+  } catch {
+    // Backend not reachable during build (common in CI/local builds).
+    // Returning [] disables SSG for this route; pages will render at runtime.
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { handle } = params
-  const region = await getRegion(params.countryCode)
+  try {
+    const { handle } = params
+    const region = await getRegion(params.countryCode)
 
-  if (!region) {
-    notFound()
-  }
+    if (!region) {
+      notFound()
+    }
 
-  const product = await getProductByHandle(handle, region.id)
+    const product = await getProductByHandle(handle, region.id)
 
-  if (!product) {
-    notFound()
-  }
+    if (!product) {
+      notFound()
+    }
 
-  return {
-    title: `${product.title} | Medusa Store`,
-    description: `${product.title}`,
-    openGraph: {
+    return {
       title: `${product.title} | Medusa Store`,
       description: `${product.title}`,
-      images: product.thumbnail ? [product.thumbnail] : [],
-    },
+      openGraph: {
+        title: `${product.title} | Medusa Store`,
+        description: `${product.title}`,
+        images: product.thumbnail ? [product.thumbnail] : [],
+      },
+    }
+  } catch {
+    return {
+      title: "Product | Medusa Store",
+      description: "Product",
+    }
   }
 }
 

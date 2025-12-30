@@ -16,30 +16,40 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  const product_categories = await listCategories()
+  try {
+    const product_categories = await listCategories()
 
-  if (!product_categories) {
+    if (!product_categories?.length) {
+      return []
+    }
+
+    const countryCodes = await listRegions().then((regions: StoreRegion[]) =>
+      (regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat() || []).filter(
+        Boolean
+      )
+    )
+
+    if (!countryCodes?.length) {
+      return []
+    }
+
+    const categoryHandles = product_categories
+      .map((category: any) => category.handle)
+      .filter(Boolean)
+
+    return countryCodes
+      .map((countryCode: string) =>
+        categoryHandles.map((handle: string) => ({
+          countryCode,
+          category: [handle],
+        }))
+      )
+      .flat()
+  } catch {
+    // Backend not reachable during build (common in CI/local builds).
+    // Returning [] disables SSG for this route; pages will render at runtime.
     return []
   }
-
-  const countryCodes = await listRegions().then((regions: StoreRegion[]) =>
-    regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
-  )
-
-  const categoryHandles = product_categories.map(
-    (category: any) => category.handle
-  )
-
-  const staticParams = countryCodes
-    ?.map((countryCode: string | undefined) =>
-      categoryHandles.map((handle: any) => ({
-        countryCode,
-        category: [handle],
-      }))
-    )
-    .flat()
-
-  return staticParams
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -64,7 +74,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     }
   } catch (error) {
-    notFound()
+    // Backend not reachable during build: avoid crashing the build.
+    return {
+      title: "Category | Medusa Store",
+      description: "Category",
+    }
   }
 }
 

@@ -1,14 +1,15 @@
 import { Metadata } from "next"
 
-import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import LetscaseHome from "@modules/home/components/letscase-home"
+import { listCategories } from "@lib/data/categories"
 import { getCollectionsWithProducts } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
+  title: "Letscase Ghana - Premium Phone Cases & Tech Accessories",
   description:
-    "A performant frontend ecommerce starter template with Next.js 14 and Medusa.",
+    "Shop authentic iPhone cases, Android accessories, laptop bags, chargers and more in Accra. Fast delivery across Ghana. Free shipping over GH₵200.",
 }
 
 export default async function Home({
@@ -19,6 +20,7 @@ export default async function Home({
   const { countryCode } = await params
   const collections = await getCollectionsWithProducts(countryCode)
   const region = await getRegion(countryCode)
+  const categories = await listCategories().catch(() => [] as any[])
 
   if (!collections || !region) {
     return null
@@ -27,11 +29,11 @@ export default async function Home({
   return (
     <>
       <Hero />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div>
+      <LetscaseHome
+        collections={collections}
+        region={region}
+        categories={categories}
+      />
     </>
   )
 }
