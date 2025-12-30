@@ -134,12 +134,24 @@ export default async function Nav() {
               <SideMenu regions={regions} />
             </div>
 
-            <DesktopNav
-              megaCategories={megaCategories}
-              trendingCollectionsCol1={trendingCollectionsCol1}
-              trendingCollectionsCol2={trendingCollectionsCol2}
-              exploreLinks={exploreLinks}
-            />
+            <Suspense
+              fallback={
+                <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
+                  <span className="pb-1 border-b-2 border-transparent">Home</span>
+                  <span className="pb-1 border-b-2 border-transparent">Shop</span>
+                  <span className="pb-1 border-b-2 border-transparent">Products</span>
+                  <span className="pb-1 border-b-2 border-transparent">Deals</span>
+                  <span className="pb-1 border-b-2 border-transparent">About Us</span>
+                </div>
+              }
+            >
+              <DesktopNav
+                megaCategories={megaCategories}
+                trendingCollectionsCol1={trendingCollectionsCol1}
+                trendingCollectionsCol2={trendingCollectionsCol2}
+                exploreLinks={exploreLinks}
+              />
+            </Suspense>
           </div>
 
           <div className="flex items-center justify-center">
