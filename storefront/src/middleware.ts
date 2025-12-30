@@ -84,6 +84,19 @@ async function getCountryCode(
   }
 }
 
+function stripLeadingCountryCode(pathname: string, regionMap: Map<string, unknown>) {
+  const segments = pathname.split("/").filter(Boolean)
+  const first = (segments[0] || "").toLowerCase()
+
+  // If the first path segment looks like a country code but isn't a valid one,
+  // strip it so we can redirect to the default region cleanly.
+  if (first && first.length === 2 && /^[a-z]{2}$/.test(first) && !regionMap.has(first)) {
+    return "/" + segments.slice(1).join("/")
+  }
+
+  return pathname
+}
+
 /**
  * Middleware to handle region selection and onboarding status.
  */
@@ -99,8 +112,13 @@ export async function middleware(request: NextRequest) {
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
+  const normalizedPathname = stripLeadingCountryCode(
+    request.nextUrl.pathname,
+    regionMap as unknown as Map<string, unknown>
+  )
+
   const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
+    countryCode && normalizedPathname.split("/")[1]?.includes(countryCode)
 
   // check if one of the country codes is in the url
   if (
@@ -111,8 +129,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+  const redirectPath = normalizedPathname === "/" ? "" : normalizedPathname
 
   const queryString = request.nextUrl.search ? request.nextUrl.search : ""
 
