@@ -135,7 +135,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
-                  <span className="pb-1 border-b-2 border-transparent hover:text-brand hover:border-black transition-colors duration-200 cursor-pointer">Home</span>
+                  <span className="pb-1 border-b-2 border-transparent hover:text-brand hover:border-brand transition-colors duration-200 cursor-pointer">Home</span>
                   <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Shop</span>
                   <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Trending Gear</span>
                   <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Deals</span>
@@ -154,7 +154,14 @@ export default async function Nav() {
 
           <div className="flex items-center justify-center">
             <LocalizedClientLink href="/" data-testid="nav-store-link">
-              <span className="text-[20px] small:text-[24px] font-bold tracking-tight text-grey-90">Letscase</span>
+              <Image
+                src="/logo.png"
+                alt="Letscase"
+                width={180}
+                height={44}
+                className="h-7 w-auto small:h-8"
+                priority
+              />
             </LocalizedClientLink>
           </div>
 
@@ -176,7 +183,7 @@ export default async function Nav() {
               className="hidden small:inline-flex text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
               aria-label="Wishlist"
             >
-              <Heart size={22} className={undefined} />
+              <Heart size={22} />
             </LocalizedClientLink>
 
             <LocalizedClientLink
@@ -185,7 +192,7 @@ export default async function Nav() {
               data-testid="nav-account-link"
               aria-label="Account"
             >
-              <User size={22} className={undefined} />
+              <User size={22} />
             </LocalizedClientLink>
 
             <Suspense

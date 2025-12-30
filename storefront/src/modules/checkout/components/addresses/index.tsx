@@ -95,12 +95,11 @@ const Addresses = ({
         <div>
           <div className="text-small-regular">
             {cart && cart.shipping_address ? (
-              <div className="flex items-start gap-x-8">
-                <div className="flex items-start gap-x-1 w-full">
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="shipping-address-summary"
-                  >
+              <div className="grid grid-cols-1 small:grid-cols-3 gap-8">
+                <div
+                  className="flex flex-col"
+                  data-testid="shipping-address-summary"
+                >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Shipping Address
                     </Text>
@@ -119,12 +118,12 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.country_code?.toUpperCase()}
                     </Text>
-                  </div>
+                </div>
 
-                  <div
-                    className="flex flex-col w-1/3 "
-                    data-testid="shipping-contact-summary"
-                  >
+                <div
+                  className="flex flex-col"
+                  data-testid="shipping-contact-summary"
+                >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Contact
                     </Text>
@@ -134,12 +133,12 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.email}
                     </Text>
-                  </div>
+                </div>
 
-                  <div
-                    className="flex flex-col w-1/3"
-                    data-testid="billing-address-summary"
-                  >
+                <div
+                  className="flex flex-col"
+                  data-testid="billing-address-summary"
+                >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Billing Address
                     </Text>
@@ -167,7 +166,6 @@ const Addresses = ({
                         </Text>
                       </>
                     )}
-                  </div>
                 </div>
               </div>
             ) : (

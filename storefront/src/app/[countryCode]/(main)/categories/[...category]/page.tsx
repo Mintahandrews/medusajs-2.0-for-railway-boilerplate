@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `${title} category.`
 
     return {
-      title: `${title} | Medusa Store`,
+      title: `${title} | Letscase`,
       description,
       alternates: {
         canonical: `${params.category.join("/")}`,
@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch (error) {
     // Backend not reachable during build: avoid crashing the build.
     return {
-      title: "Category | Medusa Store",
+      title: "Category | Letscase",
       description: "Category",
     }
   }

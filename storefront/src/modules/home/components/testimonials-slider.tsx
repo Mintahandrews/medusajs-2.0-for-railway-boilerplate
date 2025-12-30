@@ -2,6 +2,13 @@
 
 import Image from "next/image"
 import { useMemo, useState } from "react"
+import {
+  BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
+  Quote,
+  Star,
+} from "lucide-react"
 
 type Testimonial = {
   name: string
@@ -9,14 +16,6 @@ type Testimonial = {
   avatarUrl: string
   text: string
   verified?: boolean
-}
-
-function CheckBadge() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#10B981]">
-      <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-    </svg>
-  )
 }
 
 export default function TestimonialsSlider() {
@@ -90,20 +89,19 @@ export default function TestimonialsSlider() {
         <div className="mt-10 flex items-center justify-center gap-4">
           <button
             type="button"
-            className="h-10 w-10 rounded-full border border-grey-20 bg-white text-grey-90 hover:bg-brand hover:text-white hover:border-brand transition duration-300 disabled:opacity-50"
+            className="h-10 w-10 rounded-full border border-grey-20 bg-white text-grey-90 hover:border-grey-40 transition duration-300 disabled:opacity-50"
             aria-label="Previous"
             disabled={index === 0}
             onClick={() => setIndex((i) => Math.max(0, i - 1))}
           >
-            ←
+            <ChevronLeft size={18} />
           </button>
           <button
             type="button"
-            className="h-10 w-10 rounded-full bg-black text-white hover:bg-brand transition duration-300 disabled:opacity-50"
-            aria-label="Next"
+            className="h-10 w-10 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 disabled:opacity-50"
             onClick={() => setIndex((i) => (i + 1) % items.length)}
           >
-            →
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
@@ -114,8 +112,9 @@ export default function TestimonialsSlider() {
 function TestimonialCard({ item }: { item: Testimonial }) {
   return (
     <div className="relative rounded-[16px] border border-grey-20 bg-grey-5 p-8 h-full transition duration-300 hover:shadow-md">
-      <div className="absolute right-8 top-8 text-grey-20 text-[60px] leading-none font-serif opacity-50">
-        “
+      <div className="absolute right-8 top-8 flex items-center gap-1 text-grey-30">
+        <Quote size={20} />
+        <Quote size={20} />
       </div>
       <div className="flex items-center gap-4 mb-6">
         <div className="relative h-12 w-12">
@@ -131,14 +130,18 @@ function TestimonialCard({ item }: { item: Testimonial }) {
             <div className="text-[16px] font-semibold text-grey-90">
               {item.name}
             </div>
-            {item.verified && <CheckBadge />}
+            {item.verified ? (
+              <BadgeCheck size={16} className="text-brand" />
+            ) : null}
           </div>
           <div className="text-[12px] text-grey-50">{item.role}</div>
         </div>
       </div>
 
-      <div className="flex gap-1 text-[#F59E0B] text-[16px] mb-4">
-        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+      <div className="flex items-center gap-1 text-yellow-400 mb-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star key={i} size={16} fill="currentColor" />
+        ))}
       </div>
       <p className="text-[15px] leading-[1.7] text-grey-60">
         {item.text}

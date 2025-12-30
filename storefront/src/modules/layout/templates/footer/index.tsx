@@ -1,5 +1,6 @@
 import { Text, clx } from "@medusajs/ui"
 import { ArrowUp, Facebook, Instagram, Twitter, Youtube } from "lucide-react"
+import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
@@ -10,7 +11,13 @@ export default async function Footer() {
         <div className="py-14 small:py-16 grid grid-cols-1 small:grid-cols-4 gap-10 small:gap-12">
           <div>
             <LocalizedClientLink href="/" className="inline-block">
-              <span className="text-[18px] font-bold text-grey-90">Letscase</span>
+              <Image
+                src="/logo.png"
+                alt="Letscase"
+                width={160}
+                height={40}
+                className="h-7 w-auto"
+              />
             </LocalizedClientLink>
             <p className="mt-4 text-[14px] text-grey-50 leading-[1.6] max-w-[280px]">
               We provide top-quality mobile and computer accessories designed for
@@ -136,7 +143,7 @@ export default async function Footer() {
           </div>
           <a
             href="#top"
-            className="h-11 w-11 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-black hover:text-white transition"
+            className="h-11 w-11 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-brand hover:text-white transition"
             aria-label="Back to top"
           >
             <ArrowUp size={18} />

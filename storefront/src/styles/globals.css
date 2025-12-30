@@ -3,6 +3,32 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+:root {
+  --bg-interactive: rgba(93, 171, 166, 1);
+  --bg-interactive-hover: rgba(61, 139, 135, 1);
+  --bg-interactive-pressed: rgba(61, 139, 135, 1);
+
+  --fg-interactive: rgba(93, 171, 166, 1);
+  --fg-interactive-hover: rgba(61, 139, 135, 1);
+
+  --border-interactive: rgba(93, 171, 166, 1);
+  --border-interactive-hover: rgba(61, 139, 135, 1);
+  --border-interactive-pressed: rgba(61, 139, 135, 1);
+}
+
+.dark {
+  --bg-interactive: rgba(93, 171, 166, 1);
+  --bg-interactive-hover: rgba(61, 139, 135, 1);
+  --bg-interactive-pressed: rgba(61, 139, 135, 1);
+
+  --fg-interactive: rgba(93, 171, 166, 1);
+  --fg-interactive-hover: rgba(61, 139, 135, 1);
+
+  --border-interactive: rgba(93, 171, 166, 1);
+  --border-interactive-hover: rgba(61, 139, 135, 1);
+  --border-interactive-pressed: rgba(61, 139, 135, 1);
+}
+
 @layer utilities {
 
   /* Chrome, Safari and Opera */
@@ -59,7 +85,7 @@
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+    @apply px-4 py-2 border border-brand rounded-full hover:bg-brand hover:text-white transition-colors duration-200 ease-in;
   }
 
   .text-xsmall-regular {

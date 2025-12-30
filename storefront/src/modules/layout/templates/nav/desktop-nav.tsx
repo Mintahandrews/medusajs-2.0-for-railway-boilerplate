@@ -10,6 +10,7 @@ import Laptop from "@modules/common/icons/laptop"
 import Plug from "@modules/common/icons/plug"
 import Headset from "@modules/common/icons/headset"
 import Grid from "@modules/common/icons/grid"
+import { ChevronRight } from "lucide-react"
 
 type LinkItem = { name: string; href: string }
 
@@ -40,7 +41,7 @@ function iconForCategory(name: string) {
 
 function navLinkClass(active: boolean) {
   return active
-    ? "pb-1 border-b-2 border-black text-grey-90"
+      ? "pb-1 border-b-2 border-brand text-grey-90"
     : "pb-1 border-b-2 border-transparent text-grey-90 hover:text-brand"
 }
 
@@ -105,9 +106,10 @@ export default function DesktopNav(props: {
                                 </div>
                                 <LocalizedClientLink
                                   href={c.href}
-                                  className="mt-1 inline-block text-[12px] font-semibold text-grey-90 hover:text-brand"
+                                  className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-grey-90 hover:text-brand"
                                 >
-                                  View all →
+                                  <span>View all</span>
+                                  <ChevronRight size={14} />
                                 </LocalizedClientLink>
                               </div>
                             </div>

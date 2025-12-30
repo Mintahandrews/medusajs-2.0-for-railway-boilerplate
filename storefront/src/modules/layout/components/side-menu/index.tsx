@@ -153,7 +153,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                 show={open}
                 as={Fragment}
               >
-                <div className="fixed inset-0 z-50">
+                <div className="fixed inset-0 z-[80]">
                   <Transition.Child
                     as={Fragment}
                     enter="transition ease-out duration-200"

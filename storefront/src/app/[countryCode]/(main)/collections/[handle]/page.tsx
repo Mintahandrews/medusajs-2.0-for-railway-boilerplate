@@ -68,13 +68,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     return {
-      title: `${collection.title} | Medusa Store`,
+      title: `${collection.title} | Letscase`,
       description: `${collection.title} collection`,
     } as Metadata
   } catch {
     // If backend is down during build, keep metadata generation from crashing.
     return {
-      title: "Collection | Medusa Store",
+      title: "Collection | Letscase",
       description: "Collection",
     }
   }

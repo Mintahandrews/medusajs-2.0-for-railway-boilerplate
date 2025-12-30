@@ -1,12 +1,16 @@
 import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowRight, ArrowUpRight } from "lucide-react"
 
 const Hero = () => {
   return (
     <section className="w-full bg-white">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8 small:py-10">
-        <div className="relative overflow-hidden rounded-[28px] border border-grey-20 bg-grey-10 px-6 py-10 small:px-12 small:py-0 small:h-[560px] flex items-center">
+        <div
+          className="relative overflow-hidden rounded-[28px] border border-grey-20 bg-cover bg-center px-6 py-10 small:px-12 small:py-0 small:h-[560px] flex items-center"
+          style={{ backgroundImage: "url('/hero.jpg')" }}
+        >
+          <div className="absolute inset-0 bg-white/70" />
           <div className="relative z-10 w-full grid grid-cols-1 small:grid-cols-2 items-center gap-10">
             <div className="animate-fade-in-left">
               <h1 className="text-[36px] small:text-[56px] leading-[1.2] font-bold tracking-[-0.02em] text-grey-90 max-w-[600px]">
@@ -26,7 +30,7 @@ const Hero = () => {
                   className="inline-flex items-center justify-between px-6 h-[48px] w-[140px] rounded-full bg-white border border-grey-20 text-grey-90 text-[15px] font-medium transition duration-300 hover:border-grey-40 hover:scale-[1.02]"
                 >
                   <span>Shop Now</span>
-                  <span>→</span>
+                  <ArrowRight size={16} />
                 </LocalizedClientLink>
 
                 <LocalizedClientLink
