@@ -51,7 +51,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
     <div className="relative">
       <button
         type="button"
-        className="hidden small:flex absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
+        className="hidden small:flex absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
         aria-label="Previous"
         onClick={() => scrollByCards("left")}
       >
@@ -59,7 +59,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
       </button>
       <button
         type="button"
-        className="hidden small:flex absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
+        className="hidden small:flex absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
         aria-label="Next"
         onClick={() => scrollByCards("right")}
       >
@@ -68,13 +68,13 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
 
       <div
         ref={viewportRef}
-        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2 small:px-24"
+        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
       >
         {normalized.slice(0, 8).map((item) => (
           <LocalizedClientLink
             key={item.id}
             href={item.href}
-            className="group snap-start shrink-0 w-[260px] small:w-[280px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block"
+            className="group snap-start shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block"
           >
             <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
               <div className="absolute right-3 top-3 z-10">

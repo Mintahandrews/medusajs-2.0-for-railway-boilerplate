@@ -6,7 +6,6 @@ import ProfileEmail from "@modules/account/components/profile-email"
 import ProfileName from "@modules/account/components/profile-name"
 import ProfilePassword from "@modules/account/components/profile-password"
 
-import { notFound } from "next/navigation"
 import { listRegions } from "@lib/data/regions"
 import { getCustomer } from "@lib/data/customer"
 
@@ -20,7 +19,7 @@ export default async function Profile() {
   const regions = await listRegions()
 
   if (!customer || !regions) {
-    notFound()
+    return null
   }
 
   return (
