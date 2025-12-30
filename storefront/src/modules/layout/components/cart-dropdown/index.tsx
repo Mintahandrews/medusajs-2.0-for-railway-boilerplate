@@ -12,7 +12,7 @@ import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
-import ShoppingBag from "@modules/common/icons/shopping-bag"
+import { ShoppingBag } from "lucide-react"
 
 const CartDropdown = ({
   cart: cartState,
@@ -79,12 +79,12 @@ const CartDropdown = ({
       <Popover className="relative h-full">
         <Popover.Button className="h-full">
           <LocalizedClientLink
-            className="relative inline-flex items-center justify-center text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
+            className="relative inline-flex items-center justify-center text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110 group"
             href="/cart"
             data-testid="nav-cart-link"
             aria-label={`Cart (${totalItems})`}
           >
-            <ShoppingBag size={20} />
+            <ShoppingBag size={22} className="text-grey-90 group-hover:text-brand" />
             {totalItems > 0 && (
               <span className="absolute -top-1 -right-2 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 font-semibold text-center">
                 {totalItems}

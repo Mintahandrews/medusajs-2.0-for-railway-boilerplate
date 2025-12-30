@@ -3,8 +3,7 @@ import { Metadata } from "next"
 import Hero from "@modules/home/components/hero"
 import LetscaseHome from "@modules/home/components/letscase-home"
 import { listCategories } from "@lib/data/categories"
-import { getCollectionsWithProducts } from "@lib/data/collections"
-import { getRegion } from "@lib/data/regions"
+import { getProductsList } from "@lib/data/products"
 
 export const metadata: Metadata = {
   title: "Letscase Ghana - Premium Phone Cases & Tech Accessories",
@@ -18,20 +17,23 @@ export default async function Home({
   params: Promise<{ countryCode: string }>
 }) {
   const { countryCode } = await params
-  const collections = await getCollectionsWithProducts(countryCode)
-  const region = await getRegion(countryCode)
   const categories = await listCategories().catch(() => [] as any[])
-
-  if (!collections || !region) {
-    return null
-  }
+  const {
+    response: { products },
+  } = await getProductsList({
+    countryCode,
+    pageParam: 1,
+    queryParams: {
+      limit: 24,
+      order: "created_at",
+    },
+  }).catch(() => ({ response: { products: [], count: 0 }, nextPage: null }))
 
   return (
     <>
       <Hero />
       <LetscaseHome
-        collections={collections}
-        region={region}
+        products={products}
         categories={categories}
       />
     </>

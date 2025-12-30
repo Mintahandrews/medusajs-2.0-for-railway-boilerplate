@@ -1,10 +1,10 @@
 "use client"
 
 import { Disclosure, Popover, Transition } from "@headlessui/react"
-import { ArrowRightMini, MagnifyingGlassMini, XMark } from "@medusajs/icons"
 import { Text, clx, useToggleState } from "@medusajs/ui"
 import { Fragment, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { Menu, X, Search, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
@@ -145,22 +145,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                   aria-label={open ? "Close menu" : "Open menu"}
                 >
                   <span className="sr-only">Menu</span>
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    className="text-grey-90"
-                  >
-                    <path
-                      d="M4 7H20M4 12H20M4 17H20"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <Menu className="text-grey-90" />
                 </Popover.Button>
               </div>
 
@@ -211,7 +196,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                             aria-label="Close menu"
                             type="button"
                           >
-                            <XMark />
+                            <X />
                           </button>
                         </div>
 
@@ -233,7 +218,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                               Search products
                             </label>
                             <div className="flex h-[48px] items-center gap-x-3 rounded-[16px] border border-grey-20 bg-white px-4">
-                              <MagnifyingGlassMini className="text-grey-50" />
+                              <Search className="text-grey-50" size={20} />
                               <input
                                 id="drawer-search"
                                 type="search"
@@ -258,10 +243,11 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                                     <span className="text-[15px] font-semibold text-grey-90">
                                       Shop
                                     </span>
-                                    <ArrowRightMini
+                                    <ChevronRight
+                                      size={20}
                                       className={clx(
                                         "transition-transform duration-150 text-grey-50",
-                                        disclosureOpen ? "-rotate-90" : ""
+                                        disclosureOpen ? "rotate-90" : ""
                                       )}
                                     />
                                   </Disclosure.Button>
@@ -312,15 +298,15 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
 
                                       {!shopCategoryLinks.length && !shopCollectionLinks.length
                                         ? SHOP_LINKS.map((item) => (
-                                            <LocalizedClientLink
-                                              key={item.name}
-                                              href={item.href}
-                                              className="py-1 hover:text-grey-90"
-                                              onClick={close}
-                                            >
-                                              {item.name}
-                                            </LocalizedClientLink>
-                                          ))
+                                          <LocalizedClientLink
+                                            key={item.name}
+                                            href={item.href}
+                                            className="py-1 hover:text-grey-90"
+                                            onClick={close}
+                                          >
+                                            {item.name}
+                                          </LocalizedClientLink>
+                                        ))
                                         : null}
                                     </div>
                                   </Disclosure.Panel>
@@ -335,10 +321,11 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                                     <span className="text-[15px] font-semibold text-grey-90">
                                       Products
                                     </span>
-                                    <ArrowRightMini
+                                    <ChevronRight
+                                      size={20}
                                       className={clx(
                                         "transition-transform duration-150 text-grey-50",
-                                        disclosureOpen ? "-rotate-90" : ""
+                                        disclosureOpen ? "rotate-90" : ""
                                       )}
                                     />
                                   </Disclosure.Button>
@@ -399,10 +386,11 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                                 regions={regions}
                               />
                             )}
-                            <ArrowRightMini
+                            <ChevronRight
+                              size={20}
                               className={clx(
                                 "transition-transform duration-150 text-grey-50",
-                                toggleState.state ? "-rotate-90" : ""
+                                toggleState.state ? "rotate-90" : ""
                               )}
                             />
                           </button>

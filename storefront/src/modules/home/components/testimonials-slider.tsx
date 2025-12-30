@@ -8,6 +8,15 @@ type Testimonial = {
   role: string
   avatarUrl: string
   text: string
+  verified?: boolean
+}
+
+function CheckBadge() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#10B981]">
+      <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+    </svg>
+  )
 }
 
 export default function TestimonialsSlider() {
@@ -18,13 +27,22 @@ export default function TestimonialsSlider() {
         role: "Tech Enthusiast",
         avatarUrl: "https://i.pravatar.cc/150?img=12",
         text: "I recently purchased the wireless headphones and I'm thoroughly impressed with the sound quality and build. The noise cancellation works like a charm. Highly recommend!",
+        verified: true,
       },
       {
         name: "David Brown",
         role: "Designer",
         avatarUrl: "https://i.pravatar.cc/150?img=32",
         text: "Letscase has the best customer service! I had an issue with my order and they resolved it immediately. The product quality is top-notch and my iPhone case is perfect. Totally satisfied!",
+        verified: true,
       },
+      {
+        name: "Sarah Jenkins",
+        role: "Photographer",
+        avatarUrl: "https://i.pravatar.cc/150?img=44",
+        text: "The camera accessories are game changers. Fast delivery and excellent packaging. Will definitely buy again!",
+        verified: true,
+      }
     ],
     []
   )
@@ -34,109 +52,97 @@ export default function TestimonialsSlider() {
   return (
     <div className="py-16 small:py-20 border-t border-grey-20">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10">
-        <div className="flex items-start justify-between gap-8">
+        <div className="flex items-start justify-between gap-8 mb-12">
           <h2 className="text-[28px] small:text-[32px] font-bold text-grey-90 max-w-[520px]">
             What Our Customers
             <br />
             Are Saying
           </h2>
-          <p className="hidden small:block text-[13px] text-grey-50 max-w-[260px]">
+          <p className="hidden small:block text-[13px] text-grey-50 max-w-[260px] leading-relaxed">
             Real and heartfelt experiences from our cherished customers who trust
             and rely on us
           </p>
         </div>
 
-        <div className="mt-12 max-w-[1200px]">
-          <div className="relative overflow-hidden">
-            <div
-              className="flex transition-transform duration-300"
-              style={{ transform: `translateX(${index * -100}%)` }}
-            >
-              {items.map((t) => (
-                <div
-                  key={t.name}
-                  className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8"
-                >
-                  <div className="relative rounded-[16px] border border-grey-20 bg-grey-5 p-8">
-                    <div className="absolute right-6 top-6 text-grey-20 text-[48px] leading-none">
-                      “
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Image
-                        src={t.avatarUrl}
-                        alt={t.name}
-                        width={48}
-                        height={48}
-                        className="rounded-full border-2 border-white"
-                      />
-                      <div>
-                        <div className="text-[16px] font-semibold text-grey-90">
-                          {t.name}
-                        </div>
-                        <div className="text-[12px] text-grey-50">{t.role}</div>
-                      </div>
-                    </div>
+        <div className="relative overflow-hidden max-w-[1200px] mx-auto">
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(${index * -100}%)` }}
+          >
+            {[0, 1].map((offset) => {
+              // Logic to show pairs of testimonials. Use modulo for wrapping if needed.
+              // For now, simpler implementation: render items in pairs
+              const item1 = items[index % items.length];
+              const item2 = items[(index + 1) % items.length];
 
-                    <div className="mt-5 text-[#F59E0B] text-[16px]">★★★★★</div>
-                    <p className="mt-4 text-[15px] leading-[1.7] text-grey-60">
-                      {t.text}
-                    </p>
-                  </div>
-
-                  <div className="hidden small:block relative rounded-[16px] border border-grey-20 bg-grey-5 p-8">
-                    <div className="absolute right-6 top-6 text-grey-20 text-[48px] leading-none">
-                      “
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Image
-                        src={items[(index + 1) % items.length].avatarUrl}
-                        alt={items[(index + 1) % items.length].name}
-                        width={48}
-                        height={48}
-                        className="rounded-full border-2 border-white"
-                      />
-                      <div>
-                        <div className="text-[16px] font-semibold text-grey-90">
-                          {items[(index + 1) % items.length].name}
-                        </div>
-                        <div className="text-[12px] text-grey-50">
-                          {items[(index + 1) % items.length].role}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 text-[#F59E0B] text-[16px]">★★★★★</div>
-                    <p className="mt-4 text-[15px] leading-[1.7] text-grey-60">
-                      {items[(index + 1) % items.length].text}
-                    </p>
+              return (
+                <div key={index} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8">
+                  <TestimonialCard item={item1} />
+                  <div className="hidden small:block">
+                    <TestimonialCard item={item2} />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <button
-              type="button"
-              className="h-10 w-10 rounded-full border border-grey-20 bg-white text-grey-40 disabled:opacity-60"
-              aria-label="Previous"
-              disabled={index === 0}
-              onClick={() => setIndex(0)}
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              className="h-10 w-10 rounded-full border border-grey-20 bg-black text-white hover:bg-brand transition disabled:opacity-60"
-              aria-label="Next"
-              disabled={index === items.length - 1}
-              onClick={() => setIndex(items.length - 1)}
-            >
-              →
-            </button>
+              )
+            })}
           </div>
         </div>
+
+        <div className="mt-10 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            className="h-10 w-10 rounded-full border border-grey-20 bg-white text-grey-90 hover:bg-brand hover:text-white hover:border-brand transition duration-300 disabled:opacity-50"
+            aria-label="Previous"
+            disabled={index === 0}
+            onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            className="h-10 w-10 rounded-full bg-black text-white hover:bg-brand transition duration-300 disabled:opacity-50"
+            aria-label="Next"
+            onClick={() => setIndex((i) => (i + 1) % items.length)}
+          >
+            →
+          </button>
+        </div>
       </div>
+    </div>
+  )
+}
+
+function TestimonialCard({ item }: { item: Testimonial }) {
+  return (
+    <div className="relative rounded-[16px] border border-grey-20 bg-grey-5 p-8 h-full transition duration-300 hover:shadow-md">
+      <div className="absolute right-8 top-8 text-grey-20 text-[60px] leading-none font-serif opacity-50">
+        “
+      </div>
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative h-12 w-12">
+          <Image
+            src={item.avatarUrl}
+            alt={item.name}
+            fill
+            className="rounded-full border-2 border-white object-cover shadow-sm"
+          />
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <div className="text-[16px] font-semibold text-grey-90">
+              {item.name}
+            </div>
+            {item.verified && <CheckBadge />}
+          </div>
+          <div className="text-[12px] text-grey-50">{item.role}</div>
+        </div>
+      </div>
+
+      <div className="flex gap-1 text-[#F59E0B] text-[16px] mb-4">
+        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+      </div>
+      <p className="text-[15px] leading-[1.7] text-grey-60">
+        {item.text}
+      </p>
     </div>
   )
 }

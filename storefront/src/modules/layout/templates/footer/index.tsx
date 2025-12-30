@@ -1,3 +1,6 @@
+import { Text, clx } from "@medusajs/ui"
+import { ArrowUp, Facebook, Instagram, Twitter, Youtube } from "lucide-react"
+
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 export default async function Footer() {
@@ -14,24 +17,42 @@ export default async function Footer() {
               performance, durability, and convenience.
             </p>
             <div className="mt-6 flex items-center gap-3">
-              {[
-                { label: "Facebook", href: "https://facebook.com" },
-                { label: "Instagram", href: "https://instagram.com" },
-                { label: "X", href: "https://x.com" },
-                { label: "YouTube", href: "https://youtube.com" },
-              ].map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-9 w-9 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-brand hover:border-brand hover:text-white transition"
-                >
-                  <span className="text-[12px] font-semibold">
-                    {s.label === "Instagram" ? "IG" : s.label}
-                  </span>
-                </a>
-              ))}
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-9 w-9 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-brand hover:border-brand hover:text-white transition"
+                aria-label="Facebook"
+              >
+                <Facebook size={18} />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-9 w-9 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-brand hover:border-brand hover:text-white transition"
+                aria-label="Instagram"
+              >
+                <Instagram size={18} />
+              </a>
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-9 w-9 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-brand hover:border-brand hover:text-white transition"
+                aria-label="X (Twitter)"
+              >
+                <Twitter size={18} />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-9 w-9 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-brand hover:border-brand hover:text-white transition"
+                aria-label="YouTube"
+              >
+                <Youtube size={18} />
+              </a>
             </div>
           </div>
 
@@ -118,7 +139,7 @@ export default async function Footer() {
             className="h-11 w-11 rounded-full bg-grey-5 border border-grey-20 flex items-center justify-center text-grey-90 hover:bg-black hover:text-white transition"
             aria-label="Back to top"
           >
-            ↑
+            <ArrowUp size={18} />
           </a>
         </div>
       </div>

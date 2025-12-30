@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
-import { MagnifyingGlassMini } from "@medusajs/icons"
+import { Search } from "lucide-react"
 
 export default function DesktopSearch() {
   const router = useRouter()
@@ -26,7 +26,7 @@ export default function DesktopSearch() {
       aria-label="Search products"
     >
       <div className="flex h-[40px] items-center gap-x-2 rounded-full border border-grey-20 bg-white px-4 w-[260px] medium:w-[320px]">
-        <MagnifyingGlassMini className="text-grey-50" />
+        <Search className="text-grey-50" size={20} />
         <input
           type="search"
           inputMode="search"

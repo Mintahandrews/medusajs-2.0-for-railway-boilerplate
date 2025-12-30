@@ -35,10 +35,10 @@ export default function NewsletterSignup() {
     <div className="py-16 small:py-20 border-t border-grey-20">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10">
         <div className="mx-auto max-w-[800px] text-center">
-          <h2 className="text-[28px] small:text-[36px] font-bold text-grey-90">
+          <h2 className="text-[28px] small:text-[36px] font-bold text-grey-90 mb-4">
             Stay Updated with the Latest Tech !
           </h2>
-          <p className="mt-4 text-[15px] leading-[1.6] text-grey-50 max-w-[620px] mx-auto">
+          <p className="text-[15px] leading-[1.6] text-grey-50 max-w-[620px] mx-auto">
             Boost your favourite experiences from our cherished customers, who
             tried and only rely on us
           </p>

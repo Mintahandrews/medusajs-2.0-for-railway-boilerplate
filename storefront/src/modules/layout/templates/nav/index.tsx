@@ -5,12 +5,10 @@ import { getCollectionsList } from "@lib/data/collections"
 import { listRegions } from "@lib/data/regions"
 import { HttpTypes, StoreRegion } from "@medusajs/types"
 import Image from "next/image"
-import { MagnifyingGlassMini } from "@medusajs/icons"
+import { Search, Heart, User, ShoppingBag } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
-import Heart from "@modules/common/icons/heart"
-import User from "@modules/common/icons/user"
 import DesktopNav from "./desktop-nav"
 import DesktopSearch from "./desktop-search"
 
@@ -98,21 +96,21 @@ export default async function Nav() {
 
   const megaCategories = (topLevelCategories.length
     ? topLevelCategories.slice(0, 4).map((c) => ({
-        name: c.name as string,
-        href: `/categories/${c.handle}`,
-        children: ((c as any)?.category_children || [])
-          .filter((cc: any) => cc?.handle && cc?.name)
-          .slice(0, 6)
-          .map((cc: any) => ({
-            name: cc.name as string,
-            href: `/categories/${cc.handle}`,
-          })),
-      }))
+      name: c.name as string,
+      href: `/categories/${c.handle}`,
+      children: ((c as any)?.category_children || [])
+        .filter((cc: any) => cc?.handle && cc?.name)
+        .slice(0, 6)
+        .map((cc: any) => ({
+          name: cc.name as string,
+          href: `/categories/${cc.handle}`,
+        })),
+    }))
     : fallbackMega.map((c) => ({
-        name: c.name,
-        href: c.href,
-        children: c.children.map((n) => ({ name: n, href: "/store" })),
-      })))
+      name: c.name,
+      href: c.href,
+      children: c.children.map((n) => ({ name: n, href: "/store" })),
+    })))
 
   const trendingCollections = shopCollections
   const trendingCollectionsCol1 = trendingCollections.slice(0, 6)
@@ -137,11 +135,11 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
-                  <span className="pb-1 border-b-2 border-transparent">Home</span>
-                  <span className="pb-1 border-b-2 border-transparent">Shop</span>
-                  <span className="pb-1 border-b-2 border-transparent">Products</span>
-                  <span className="pb-1 border-b-2 border-transparent">Deals</span>
-                  <span className="pb-1 border-b-2 border-transparent">About Us</span>
+                  <span className="pb-1 border-b-2 border-transparent hover:text-brand hover:border-black transition-colors duration-200 cursor-pointer">Home</span>
+                  <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Shop</span>
+                  <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Trending Gear</span>
+                  <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Deals</span>
+                  <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">About Us</span>
                 </div>
               }
             >
@@ -156,13 +154,7 @@ export default async function Nav() {
 
           <div className="flex items-center justify-center">
             <LocalizedClientLink href="/" data-testid="nav-store-link">
-              <Image
-                src="/letscase-logo.svg"
-                alt="Letscase"
-                width={140}
-                height={40}
-                priority
-              />
+              <span className="text-[20px] small:text-[24px] font-bold tracking-tight text-grey-90">Letscase</span>
             </LocalizedClientLink>
           </div>
 
@@ -174,7 +166,7 @@ export default async function Nav() {
               aria-label="Search"
               data-testid="nav-search-link"
             >
-              <MagnifyingGlassMini />
+              <Search size={22} />
             </LocalizedClientLink>
 
             <DesktopSearch />
@@ -184,27 +176,27 @@ export default async function Nav() {
               className="hidden small:inline-flex text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
               aria-label="Wishlist"
             >
-              <Heart size={20} />
+              <Heart size={22} className={undefined} />
             </LocalizedClientLink>
 
             <LocalizedClientLink
               href="/account"
-              className="hidden small:inline-flex text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
-              aria-label="Account"
+              className="text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
               data-testid="nav-account-link"
+              aria-label="Account"
             >
-              <User size={20} />
+              <User size={22} className={undefined} />
             </LocalizedClientLink>
 
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
+                  className="hover:text-brand flex gap-2"
                   href="/cart"
-                  aria-label="Cart"
                   data-testid="nav-cart-link"
                 >
-                  <span className="sr-only">Cart</span>
+                  <ShoppingBag size={22} />
+                  <span>0</span>
                 </LocalizedClientLink>
               }
             >
