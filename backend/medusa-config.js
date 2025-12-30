@@ -15,6 +15,8 @@ import {
   STORE_CORS,
   STRIPE_API_KEY,
   STRIPE_WEBHOOK_SECRET,
+  PAYSTACK_SECRET_KEY,
+  PAYSTACK_CALLBACK_URL,
   WORKER_MODE,
   MINIO_ENDPOINT,
   MINIO_ACCESS_KEY,
@@ -117,19 +119,27 @@ const medusaConfig = {
         ]
       }
     }] : []),
-    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
+    ...((STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET) || PAYSTACK_SECRET_KEY ? [{
       key: Modules.PAYMENT,
       resolve: '@medusajs/payment',
       options: {
         providers: [
-          {
+          ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
             id: 'stripe',
             options: {
               apiKey: STRIPE_API_KEY,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
-          },
+          }] : []),
+          ...(PAYSTACK_SECRET_KEY ? [{
+            resolve: './src/modules/paystack-payment',
+            id: 'paystack',
+            options: {
+              secretKey: PAYSTACK_SECRET_KEY,
+              callbackUrl: PAYSTACK_CALLBACK_URL,
+            },
+          }] : []),
         ],
       },
     }] : [])

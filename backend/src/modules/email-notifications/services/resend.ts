@@ -34,6 +34,21 @@ export class ResendNotificationService extends AbstractNotificationProviderServi
 
   constructor({ logger }: InjectedDependencies, options: ResendNotificationServiceOptions) {
     super()
+
+    if (!options?.api_key?.trim()) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Resend notification provider is missing required option `api_key`"
+      )
+    }
+
+    if (!options?.from?.trim()) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Resend notification provider is missing required option `from`"
+      )
+    }
+
     this.config_ = {
       apiKey: options.api_key,
       from: options.from
@@ -67,7 +82,9 @@ export class ResendNotificationService extends AbstractNotificationProviderServi
       )
     }
 
-    const emailOptions = notification.data.emailOptions as NotificationEmailOptions
+    const emailOptions =
+      ((notification.data as any)?.emailOptions as NotificationEmailOptions | undefined) ??
+      ({} as NotificationEmailOptions)
 
     // Compose the message body to send via API to Resend
     const message: CreateEmailOptions = {
@@ -101,8 +118,8 @@ export class ResendNotificationService extends AbstractNotificationProviderServi
       )
       return {} // Return an empty object on success
     } catch (error) {
-      const errorCode = error.code
-      const responseError = error.response?.body?.errors?.[0]
+      const errorCode = (error as any)?.code
+      const responseError = (error as any)?.response?.body?.errors?.[0]
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to send "${notification.template}" email to ${notification.to} via Resend: ${errorCode} - ${responseError?.message ?? 'unknown error'}`

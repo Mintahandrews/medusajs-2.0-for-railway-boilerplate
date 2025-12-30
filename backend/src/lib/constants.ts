@@ -15,6 +15,16 @@ export const IS_DEV = process.env.NODE_ENV === 'development'
 export const BACKEND_URL = process.env.BACKEND_PUBLIC_URL ?? process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ?? 'http://localhost:9000'
 
 /**
+ * (optional) Public URL for the storefront (used in emails)
+ */
+export const STOREFRONT_URL = process.env.STOREFRONT_URL;
+
+/**
+ * (optional) Support email used for reply-to in notifications
+ */
+export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL;
+
+/**
  * Database URL for Postgres instance used by the backend
  */
 export const DATABASE_URL = assertValue(
@@ -83,6 +93,12 @@ export const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || process.en
  */
 export const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+
+/**
+ * (optional) Paystack secret key and default callback URL
+ */
+export const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+export const PAYSTACK_CALLBACK_URL = process.env.PAYSTACK_CALLBACK_URL;
 
 /**
  * (optional) Meilisearch configuration

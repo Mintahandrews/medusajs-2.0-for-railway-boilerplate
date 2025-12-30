@@ -281,7 +281,7 @@ export default function DesktopNav(props: {
         </div>
       </div>
 
-      <LocalizedClientLink href="/store?onSale=1" className={navLinkClass(isDeals)}>
+      <LocalizedClientLink href="/deals" className={navLinkClass(isDeals)}>
         Deals
       </LocalizedClientLink>
       <LocalizedClientLink href="/about-us" className={navLinkClass(isAbout)}>

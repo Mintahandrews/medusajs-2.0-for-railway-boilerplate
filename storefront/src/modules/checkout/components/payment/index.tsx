@@ -11,7 +11,7 @@ import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import Divider from "@modules/common/components/divider"
 import PaymentContainer from "@modules/checkout/components/payment-container"
-import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
+import { isPaystack, isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
 
@@ -89,8 +89,13 @@ const Payment = ({
         isStripeFunc(selectedPaymentMethod) && !activeSession
 
       if (!activeSession) {
+        const callbackUrl = isPaystack(selectedPaymentMethod)
+          ? `${window.location.origin}/${pathname.split("/")[1]}/checkout/paystack/verify`
+          : undefined
+
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
+          ...(callbackUrl ? { context: { callback_url: callbackUrl } } : {}),
         })
       }
 
@@ -151,14 +156,24 @@ const Payment = ({
               >
                 {availablePaymentMethods
                   .sort((a, b) => {
-                    return a.provider_id > b.provider_id ? 1 : -1
+                    const aId = a.id ?? a.provider_id
+                    const bId = b.id ?? b.provider_id
+
+                    return aId > bId ? 1 : -1
                   })
                   .map((paymentMethod) => {
+                    const paymentMethodId =
+                      paymentMethod.id ?? paymentMethod.provider_id
+
+                    if (!paymentMethodId) {
+                      return null
+                    }
+
                     return (
                       <PaymentContainer
                         paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethod.id}
-                        key={paymentMethod.id}
+                        paymentProviderId={paymentMethodId}
+                        key={paymentMethodId}
                         selectedPaymentOptionId={selectedPaymentMethod}
                       />
                     )

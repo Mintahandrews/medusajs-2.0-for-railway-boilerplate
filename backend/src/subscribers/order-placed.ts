@@ -1,7 +1,8 @@
 import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
-import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
+import { SubscriberArgs, SubscriberConfig } from '@medusajs/framework'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { STOREFRONT_URL, SUPPORT_EMAIL } from '../lib/constants'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -11,7 +12,7 @@ export default async function orderPlacedHandler({
   const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
   
   const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
-  const shippingAddress = await (orderModuleService as any).orderAddressService_.retrieve(order.shipping_address.id)
+  const shippingAddress = (order as any).shipping_address
 
   try {
     await notificationModuleService.createNotifications({
@@ -20,11 +21,16 @@ export default async function orderPlacedHandler({
       template: EmailTemplates.ORDER_PLACED,
       data: {
         emailOptions: {
-          replyTo: 'info@example.com',
-          subject: 'Your order has been placed'
+          replyTo: SUPPORT_EMAIL,
+          subject: 'Your Letscase order confirmation'
         },
         order,
         shippingAddress,
+        orderUrl: STOREFRONT_URL
+          ? `${STOREFRONT_URL}`.replace(/\/$/, '') +
+            `/${(shippingAddress?.country_code ?? 'bf').toLowerCase()}/order/confirmed/${order.id}`
+          : undefined,
+        supportEmail: SUPPORT_EMAIL,
         preview: 'Thank you for your order!'
       }
     })

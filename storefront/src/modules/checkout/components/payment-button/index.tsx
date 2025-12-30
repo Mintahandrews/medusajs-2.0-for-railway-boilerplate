@@ -9,7 +9,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { isManual, isPaypal, isPaystack, isStripe } from "@lib/constants"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -41,6 +41,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isStripe(paymentSession?.provider_id):
       return (
         <StripePaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isPaystack(paymentSession?.provider_id):
+      return (
+        <PaystackPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
@@ -257,6 +265,53 @@ const PayPalPaymentButton = ({
       </>
     )
   }
+}
+
+const PaystackPaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const session = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
+
+  const handlePayment = async () => {
+    setErrorMessage(null)
+    setSubmitting(true)
+
+    const url = session?.data?.authorization_url as string | undefined
+
+    if (!url) {
+      setErrorMessage("Missing Paystack authorization URL. Please reselect Paystack.")
+      setSubmitting(false)
+      return
+    }
+
+    window.location.href = url
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        isLoading={submitting}
+        onClick={handlePayment}
+        size="large"
+        data-testid={dataTestId}
+      >
+        Pay with Paystack
+      </Button>
+      <ErrorMessage error={errorMessage} data-testid="paystack-payment-error-message" />
+    </>
+  )
 }
 
 const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {

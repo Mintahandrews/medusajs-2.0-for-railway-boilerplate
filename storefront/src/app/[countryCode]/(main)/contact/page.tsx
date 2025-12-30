@@ -1,5 +1,8 @@
 import { Metadata } from "next"
 
+import ContactForm from "@modules/common/components/contact-form"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+
 export const metadata: Metadata = {
   title: "Contact | Letscase",
   description:
@@ -15,22 +18,59 @@ export default function ContactPage() {
         us about.
       </p>
 
-      <div className="mt-10 space-y-8">
-        <section>
-          <h2 className="text-[18px] font-semibold text-grey-90">Customer support</h2>
-          <p className="mt-2 text-[15px] leading-[1.7] text-grey-60">
-            Update this section with your preferred support channels (email, phone, WhatsApp,
-            store address) and hours.
+      <div className="mt-8 grid grid-cols-1 small:grid-cols-3 gap-4">
+        <div className="rounded-[16px] border border-grey-20 bg-white p-5">
+          <h2 className="text-[15px] font-semibold text-grey-90">Order support</h2>
+          <p className="mt-2 text-[14px] leading-[1.7] text-grey-60">
+            Track orders, update delivery details, and get help with checkout.
           </p>
-        </section>
+          <div className="mt-3">
+            <LocalizedClientLink
+              href="/order-tracking"
+              className="text-[14px] font-semibold text-ui-fg-interactive hover:underline"
+            >
+              Go to Order Tracking
+            </LocalizedClientLink>
+          </div>
+        </div>
 
-        <section>
-          <h2 className="text-[18px] font-semibold text-grey-90">Business enquiries</h2>
-          <p className="mt-2 text-[15px] leading-[1.7] text-grey-60">
-            If you’re interested in bulk orders or partnerships, reach out and we’ll respond
-            with next steps.
+        <div className="rounded-[16px] border border-grey-20 bg-white p-5">
+          <h2 className="text-[15px] font-semibold text-grey-90">Returns &amp; refunds</h2>
+          <p className="mt-2 text-[14px] leading-[1.7] text-grey-60">
+            Review eligibility and steps before starting a return.
           </p>
-        </section>
+          <div className="mt-3">
+            <LocalizedClientLink
+              href="/returns-and-refunds"
+              className="text-[14px] font-semibold text-ui-fg-interactive hover:underline"
+            >
+              View policy
+            </LocalizedClientLink>
+          </div>
+        </div>
+
+        <div className="rounded-[16px] border border-grey-20 bg-white p-5">
+          <h2 className="text-[15px] font-semibold text-grey-90">Product questions</h2>
+          <p className="mt-2 text-[14px] leading-[1.7] text-grey-60">
+            Not sure what fits your device? We’ll help you pick.
+          </p>
+          <div className="mt-3">
+            <LocalizedClientLink
+              href="/faq"
+              className="text-[14px] font-semibold text-ui-fg-interactive hover:underline"
+            >
+              Read FAQs
+            </LocalizedClientLink>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-10 rounded-[16px] border border-grey-20 bg-white p-6">
+        <h2 className="text-[18px] font-semibold text-grey-90">Send a message</h2>
+        <p className="mt-2 text-[14px] leading-[1.7] text-grey-60">
+          Fill out the form below. It will open your email app with a pre-filled message.
+        </p>
+        <ContactForm />
       </div>
     </div>
   )

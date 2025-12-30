@@ -120,7 +120,7 @@ export default async function Nav() {
     { name: "Shop all products", href: "/store" },
     { name: "Search", href: "/search" },
     { name: "About Us", href: "/about-us" },
-    { name: "Deals", href: "/store?onSale=1" },
+    { name: "Deals", href: "/deals" },
   ]
 
   return (

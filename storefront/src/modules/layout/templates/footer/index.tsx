@@ -94,7 +94,7 @@ export default async function Footer() {
             </div>
             <ul className="space-y-2 text-[14px] text-grey-50">
               {[
-                { label: "Order Tracking", href: "/account/orders" },
+                { label: "Order Tracking", href: "/order-tracking" },
                 { label: "Returns & Refunds", href: "/returns-and-refunds" },
                 { label: "Privacy Policy", href: "/privacy-policy" },
                 { label: "Terms & Conditions", href: "/terms-and-conditions" },

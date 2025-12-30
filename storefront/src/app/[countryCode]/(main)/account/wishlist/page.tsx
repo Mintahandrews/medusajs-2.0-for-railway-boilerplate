@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useMemo, useState } from "react"
 
 import WishlistButton from "@modules/common/components/wishlist-button"
 import { useWishlist } from "@lib/hooks/use-wishlist"
@@ -10,6 +11,27 @@ export default function WishlistPage() {
   const { items, clear } = useWishlist()
   const params = useParams()
   const countryCode = (params?.countryCode as string) || ""
+
+  const [copied, setCopied] = useState<null | "titles" | "json">(null)
+
+  const shareText = useMemo(() => {
+    const titles = items.map((i) => `- ${i.title}`).join("\n")
+    return `Letscase wishlist (client-only)\n\n${titles}`
+  }, [items])
+
+  const shareJson = useMemo(() => {
+    return JSON.stringify(items, null, 2)
+  }, [items])
+
+  const copy = async (type: "titles" | "json") => {
+    try {
+      await navigator.clipboard.writeText(type === "json" ? shareJson : shareText)
+      setCopied(type)
+      window.setTimeout(() => setCopied(null), 1500)
+    } catch {
+      // ignore
+    }
+  }
 
   return (
     <div className="w-full" id="top">
@@ -22,13 +44,29 @@ export default function WishlistPage() {
         </div>
 
         {items.length > 0 ? (
-          <button
-            type="button"
-            onClick={clear}
-            className="rounded-full border border-ui-border-base bg-ui-bg-base px-4 py-2 text-sm font-medium text-ui-fg-base hover:border-ui-border-interactive hover:text-ui-fg-interactive"
-          >
-            Clear
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => copy("titles")}
+              className="rounded-full border border-ui-border-base bg-ui-bg-base px-4 py-2 text-sm font-medium text-ui-fg-base hover:border-ui-border-interactive hover:text-ui-fg-interactive"
+            >
+              {copied === "titles" ? "Copied" : "Copy list"}
+            </button>
+            <button
+              type="button"
+              onClick={() => copy("json")}
+              className="rounded-full border border-ui-border-base bg-ui-bg-base px-4 py-2 text-sm font-medium text-ui-fg-base hover:border-ui-border-interactive hover:text-ui-fg-interactive"
+            >
+              {copied === "json" ? "Copied" : "Export JSON"}
+            </button>
+            <button
+              type="button"
+              onClick={clear}
+              className="rounded-full border border-ui-border-base bg-ui-bg-base px-4 py-2 text-sm font-medium text-ui-fg-base hover:border-ui-border-interactive hover:text-ui-fg-interactive"
+            >
+              Clear
+            </button>
+          </div>
         ) : null}
       </div>
 

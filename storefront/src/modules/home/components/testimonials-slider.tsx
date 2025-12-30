@@ -89,19 +89,19 @@ export default function TestimonialsSlider() {
         <div className="mt-10 flex items-center justify-center gap-4">
           <button
             type="button"
-            className="h-10 w-10 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark leading-none"
             aria-label="Previous"
             onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={18} className="block" />
           </button>
           <button
             type="button"
-            className="h-10 w-10 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 disabled:opacity-50"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark disabled:opacity-50 leading-none"
             aria-label="Next"
             onClick={() => setIndex((i) => (i + 1) % items.length)}
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={18} className="block" />
           </button>
         </div>
       </div>
