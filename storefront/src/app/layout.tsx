@@ -8,6 +8,24 @@ export const metadata: Metadata = {
     default: "Letscase",
     template: "%s | Letscase",
   },
+  openGraph: {
+    title: "Letscase",
+    siteName: "Letscase",
+    type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Letscase",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Letscase",
+    images: ["/logo.png"],
+  },
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },
