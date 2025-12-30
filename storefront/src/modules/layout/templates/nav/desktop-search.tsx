@@ -1,11 +1,13 @@
 "use client"
 
 import { FormEvent, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Search } from "lucide-react"
 
 export default function DesktopSearch() {
   const router = useRouter()
+  const params = useParams()
+  const countryCode = (params as any)?.countryCode as string | undefined
   const [value, setValue] = useState("")
 
   const handleSubmit = (e: FormEvent) => {
@@ -15,7 +17,11 @@ export default function DesktopSearch() {
       return
     }
 
-    router.push(`/results/${encodeURIComponent(q)}`)
+    router.push(
+      countryCode
+        ? `/${countryCode}/results/${encodeURIComponent(q)}`
+        : `/results/${encodeURIComponent(q)}`
+    )
   }
 
   return (

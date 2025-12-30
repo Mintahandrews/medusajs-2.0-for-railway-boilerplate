@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import {
   ChangeEvent,
   FormEvent,
@@ -39,6 +39,8 @@ const SearchBoxWrapper = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const router = useRouter()
+  const params = useParams()
+  const countryCode = (params as any)?.countryCode as string | undefined
 
   const onReset = () => {
     setValue("")
@@ -50,7 +52,7 @@ const SearchBoxWrapper = ({
 
   const onSubmit = () => {
     if (value) {
-      router.push(`/results/${value}`)
+      router.push(countryCode ? `/${countryCode}/results/${value}` : `/results/${value}`)
     }
   }
 

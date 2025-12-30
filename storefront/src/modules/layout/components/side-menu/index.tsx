@@ -3,7 +3,7 @@
 import { Disclosure, Popover, Transition } from "@headlessui/react"
 import { Text, clx, useToggleState } from "@medusajs/ui"
 import { Fragment, useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Menu, X, Search, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -19,7 +19,7 @@ import Grid from "@modules/common/icons/grid"
 
 const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "Home", href: "/", testId: "home-link" },
-  { name: "Deals", href: "/store?onSale=1", testId: "deals-link" },
+  { name: "Deals", href: "/deals", testId: "deals-link" },
   { name: "About Us", href: "/about-us", testId: "about-us-link" },
   { name: "Account", href: "/account", testId: "account-link" },
   { name: "Wishlist", href: "/account/wishlist", testId: "wishlist-link" },
@@ -44,6 +44,8 @@ const TRENDING_LINKS: Array<{ name: string; href: string }> = [
 const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
   const toggleState = useToggleState()
   const router = useRouter()
+  const params = useParams()
+  const countryCode = (params as any)?.countryCode as string | undefined
   const [categoryLinks, setCategoryLinks] = useState<
     Array<{ name: string; href: string }>
   >([])
@@ -210,7 +212,11 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                                 return
                               }
 
-                              router.push(`/results/${encodeURIComponent(q)}`)
+                              router.push(
+                                countryCode
+                                  ? `/${countryCode}/results/${encodeURIComponent(q)}`
+                                  : `/results/${encodeURIComponent(q)}`
+                              )
                               close()
                             }}
                           >

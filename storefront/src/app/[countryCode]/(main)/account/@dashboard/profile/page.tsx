@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 
 export default async function Profile() {
   const customer = await getCustomer()
-  const regions = await listRegions()
-
-  if (!customer || !regions) {
+  if (!customer) {
     return null
   }
+
+  const regions = await listRegions().catch(() => [])
 
   return (
     <div className="w-full" data-testid="profile-page-wrapper">

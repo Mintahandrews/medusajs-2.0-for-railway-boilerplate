@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 
 import OrderOverview from "@modules/account/components/order-overview"
+import { getCustomer } from "@lib/data/customer"
 import { listOrders } from "@lib/data/orders"
 
 export const metadata: Metadata = {
@@ -9,11 +10,12 @@ export const metadata: Metadata = {
 }
 
 export default async function Orders() {
-  const orders = await listOrders()
-
-  if (!orders) {
+  const customer = await getCustomer().catch(() => null)
+  if (!customer) {
     return null
   }
+
+  const orders = await listOrders().catch(() => [])
 
   return (
     <div className="w-full" data-testid="orders-page-wrapper">

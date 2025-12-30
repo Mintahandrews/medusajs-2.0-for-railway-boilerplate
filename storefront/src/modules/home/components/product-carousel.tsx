@@ -94,7 +94,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
                   alt={item.title}
                   fill
                   sizes="280px"
-                  className="object-contain"
+                  className="object-contain scale-[1.12]"
                 />
               </div>
             </div>
