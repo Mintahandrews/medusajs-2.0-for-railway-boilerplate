@@ -14,7 +14,7 @@ type ProductTabsProps = {
 const ProductTabs = ({ product }: ProductTabsProps) => {
   const tabs = [
     {
-      label: "Product Information",
+      label: "Details",
       component: <ProductInfoTab product={product} />,
     },
     {
@@ -42,37 +42,41 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 }
 
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
+  const rows: Array<{ label: string; value: string }> = [
+    { label: "Material", value: product.material ? String(product.material) : "-" },
+    {
+      label: "Country of origin",
+      value: product.origin_country ? String(product.origin_country) : "-",
+    },
+    { label: "Type", value: product.type ? String(product.type.value) : "-" },
+    { label: "Weight", value: product.weight ? `${product.weight} g` : "-" },
+    {
+      label: "Dimensions",
+      value:
+        product.length && product.width && product.height
+          ? `${product.length}L x ${product.width}W x ${product.height}H`
+          : "-",
+    },
+  ]
+
   return (
     <div className="text-small-regular py-8">
-      <div className="grid grid-cols-2 gap-x-8">
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Material</span>
-            <p>{product.material ? product.material : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Country of origin</span>
-            <p>{product.origin_country ? product.origin_country : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Type</span>
-            <p>{product.type ? product.type.value : "-"}</p>
-          </div>
+      {product.description ? (
+        <div className="text-ui-fg-subtle whitespace-pre-line mb-6">
+          {product.description}
         </div>
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Weight</span>
-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
+      ) : null}
+
+      <div className="rounded-rounded border border-ui-border-base overflow-hidden">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="grid grid-cols-1 small:grid-cols-2 gap-2 px-4 py-3 border-b border-ui-border-base last:border-b-0"
+          >
+            <div className="font-semibold text-ui-fg-base">{row.label}</div>
+            <div className="text-ui-fg-subtle">{row.value}</div>
           </div>
-          <div>
-            <span className="font-semibold">Dimensions</span>
-            <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}W x ${product.height}H`
-                : "-"}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )

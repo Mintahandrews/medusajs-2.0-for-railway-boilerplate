@@ -8,11 +8,13 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
+import WishlistButton from "@modules/common/components/wishlist-button"
 
 import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { getProductPrice } from "@lib/util/get-product-price"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -56,6 +58,23 @@ export default function ProductActions({
       return isEqual(variantOptions, options)
     })
   }, [product.variants, options])
+
+  const wishlistItem = useMemo(() => {
+    const { cheapestPrice, variantPrice } = getProductPrice({
+      product,
+      variantId: selectedVariant?.id,
+    })
+
+    const price = (selectedVariant ? variantPrice : cheapestPrice)?.calculated_price
+
+    return {
+      id: product.id!,
+      handle: product.handle!,
+      title: product.title,
+      image: product.thumbnail || product.images?.[0]?.url || null,
+      price: price || undefined,
+    }
+  }, [product, selectedVariant])
 
   // update the options when a variant is selected
   const setOptionValue = (title: string, value: string) => {
@@ -111,6 +130,16 @@ export default function ProductActions({
   return (
     <>
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
+        <div className="flex items-start justify-between gap-4">
+          <ProductPrice product={product} variant={selectedVariant} />
+          {product.id && product.handle ? (
+            <WishlistButton
+              item={wishlistItem}
+              className="h-10 w-10 rounded-rounded bg-ui-bg-base border border-ui-border-base flex items-center justify-center text-ui-fg-base hover:bg-ui-bg-subtle transition"
+            />
+          ) : null}
+        </div>
+
         <div>
           {(product.variants?.length ?? 0) > 1 && (
             <div className="flex flex-col gap-y-4">
@@ -132,8 +161,6 @@ export default function ProductActions({
             </div>
           )}
         </div>
-
-        <ProductPrice product={product} variant={selectedVariant} />
 
         <Button
           onClick={handleAddToCart}
