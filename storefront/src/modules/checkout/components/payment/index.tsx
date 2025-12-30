@@ -22,6 +22,30 @@ const Payment = ({
   cart: any
   availablePaymentMethods: any[]
 }) => {
+  const paymentSortRank = useCallback((providerId?: string) => {
+    if (!providerId) {
+      return 999
+    }
+
+    if (providerId.startsWith("pp_system_default")) {
+      return 0
+    }
+
+    if (providerId.startsWith("pp_paystack")) {
+      return 1
+    }
+
+    if (providerId.startsWith("pp_stripe")) {
+      return 2
+    }
+
+    if (providerId.startsWith("pp_paypal")) {
+      return 3
+    }
+
+    return 100
+  }, [])
+
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession: any) => paymentSession.status === "pending"
   )
@@ -159,7 +183,12 @@ const Payment = ({
                     const aId = a.id ?? a.provider_id
                     const bId = b.id ?? b.provider_id
 
-                    return aId > bId ? 1 : -1
+                    const byRank = paymentSortRank(aId) - paymentSortRank(bId)
+                    if (byRank !== 0) {
+                      return byRank
+                    }
+
+                    return String(aId).localeCompare(String(bId))
                   })
                   .map((paymentMethod) => {
                     const paymentMethodId =
