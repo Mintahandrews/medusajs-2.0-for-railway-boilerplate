@@ -11,11 +11,7 @@ import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
 import { listCategories } from "@lib/data/categories"
 import { getCollectionsList } from "@lib/data/collections"
-import Phone from "@modules/common/icons/phone"
-import Laptop from "@modules/common/icons/laptop"
-import Plug from "@modules/common/icons/plug"
-import Headset from "@modules/common/icons/headset"
-import Grid from "@modules/common/icons/grid"
+import { getCategoryIcon } from "@lib/util/category-icon"
 
 const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "Home", href: "/", testId: "home-link" },
@@ -112,27 +108,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
     return collectionLinks.length ? collectionLinks.slice(0, 8) : TRENDING_LINKS
   }, [collectionLinks])
 
-  const iconForCategory = (name: string) => {
-    const n = (name || "").toLowerCase()
-    if (n.includes("phone") || n.includes("mobile")) return Phone
-    if (
-      n.includes("comput") ||
-      n.includes("laptop") ||
-      n.includes("mac") ||
-      n.includes("ipad")
-    )
-      return Laptop
-    if (
-      n.includes("audio") ||
-      n.includes("headphone") ||
-      n.includes("ear") ||
-      n.includes("speaker")
-    )
-      return Headset
-    if (n.includes("charg") || n.includes("power") || n.includes("cable"))
-      return Plug
-    return Grid
-  }
+  const iconForCategory = (name: string) => getCategoryIcon(name)
 
   return (
     <div className="h-full">

@@ -5,11 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Phone from "@modules/common/icons/phone"
-import Laptop from "@modules/common/icons/laptop"
-import Plug from "@modules/common/icons/plug"
-import Headset from "@modules/common/icons/headset"
-import Grid from "@modules/common/icons/grid"
+import { getCategoryIcon } from "@lib/util/category-icon"
 import { ChevronRight } from "lucide-react"
 
 type LinkItem = { name: string; href: string }
@@ -26,17 +22,6 @@ function stripCountryCode(pathname: string) {
     parts.shift()
   }
   return `/${parts.join("/")}` || "/"
-}
-
-function iconForCategory(name: string) {
-  const n = (name || "").toLowerCase()
-  if (n.includes("phone") || n.includes("mobile")) return Phone
-  if (n.includes("comput") || n.includes("laptop") || n.includes("mac") || n.includes("ipad"))
-    return Laptop
-  if (n.includes("audio") || n.includes("headphone") || n.includes("ear") || n.includes("speaker"))
-    return Headset
-  if (n.includes("charg") || n.includes("power") || n.includes("cable")) return Plug
-  return Grid
 }
 
 function navLinkClass(active: boolean) {
@@ -89,7 +74,7 @@ export default function DesktopNav(props: {
                 <div className="col-span-4">
                   <div className="grid grid-cols-1 medium:grid-cols-2 gap-4">
                     {props.megaCategories.map((c) => {
-                      const Icon = iconForCategory(c.name)
+                      const Icon = getCategoryIcon(c.name)
                       return (
                         <div
                           key={c.href}

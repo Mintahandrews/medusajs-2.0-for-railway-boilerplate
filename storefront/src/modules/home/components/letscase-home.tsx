@@ -2,15 +2,8 @@ import Image from "next/image"
 
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
+import { getCategoryIcon } from "../../../lib/util/category-icon"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import GridIcon from "@modules/common/icons/grid"
-import HeadsetIcon from "@modules/common/icons/headset"
-import LaptopIcon from "@modules/common/icons/laptop"
-import MonitorIcon from "@modules/common/icons/monitor"
-import PhoneIcon from "@modules/common/icons/phone"
-import PlugIcon from "@modules/common/icons/plug"
-import ShoppingBagIcon from "@modules/common/icons/shopping-bag"
-import WatchIcon from "@modules/common/icons/watch"
 import {
   Check,
   ChevronRight
@@ -88,23 +81,16 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
   )
 }
 
-function iconForCategory(name: string) {
-  const n = (name || "").toLowerCase()
-  if (n.includes("charger") || n.includes("charg") || n.includes("cable")) return PlugIcon
-  if (n.includes("headphone") || n.includes("headset") || n.includes("ear") || n.includes("audio")) return HeadsetIcon
-  if (n.includes("watch")) return WatchIcon
-  if (n.includes("case") || n.includes("phone") || n.includes("screen") || n.includes("protector")) return PhoneIcon
-  if (n.includes("laptop") || n.includes("comput") || n.includes("mac") || n.includes("ipad")) return LaptopIcon
-  if (n.includes("monitor") || n.includes("display")) return MonitorIcon
-  if (n.includes("shirt") || n.includes("sweat") || n.includes("pant") || n.includes("short") || n.includes("merch")) return ShoppingBagIcon
-  return GridIcon
-}
-
 function ShopByCategory({ categories }: { categories: any[] }) {
   const topLevel = (categories || [])
     .filter((c) => !c?.parent_category_id && !c?.parent_category)
     .filter((c) => c?.handle && c?.name)
-    .slice(0, 6)
+    .sort((a, b) => {
+      const ar = typeof a?.rank === "number" ? a.rank : Number.MAX_SAFE_INTEGER
+      const br = typeof b?.rank === "number" ? b.rank : Number.MAX_SAFE_INTEGER
+      if (ar !== br) return ar - br
+      return String(a?.name || "").localeCompare(String(b?.name || ""))
+    })
     .map((c) => ({
       label: c.name as string,
       href: `/categories/${c.handle}`,
@@ -130,7 +116,7 @@ function ShopByCategory({ categories }: { categories: any[] }) {
         <div className="rounded-[24px] border border-grey-20 bg-grey-10 px-6 py-6">
           <div className="flex items-center justify-between gap-8 overflow-x-auto no-scrollbar">
             {items.map((c) => {
-              const Icon = iconForCategory(c.label)
+              const Icon = getCategoryIcon(c.label)
               return (
                 <LocalizedClientLink
                   key={c.label}
