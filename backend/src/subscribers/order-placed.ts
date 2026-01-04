@@ -15,6 +15,7 @@ export default async function orderPlacedHandler({
   const shippingAddress = (order as any).shipping_address
 
   try {
+    // Send confirmation to customer
     await notificationModuleService.createNotifications({
       to: order.email,
       channel: 'email',
@@ -34,6 +35,29 @@ export default async function orderPlacedHandler({
         preview: 'Thank you for your order!'
       }
     })
+
+    // Send notification to admin/support
+    if (SUPPORT_EMAIL) {
+      await notificationModuleService.createNotifications({
+        to: SUPPORT_EMAIL,
+        channel: 'email',
+        template: EmailTemplates.ORDER_PLACED,
+        data: {
+          emailOptions: {
+            replyTo: SUPPORT_EMAIL,
+            subject: 'New order received on Letscase'
+          },
+          order,
+          shippingAddress,
+          orderUrl: STOREFRONT_URL
+            ? `${STOREFRONT_URL}`.replace(/\/$/, '') +
+              `/${(shippingAddress?.country_code ?? 'bf').toLowerCase()}/order/confirmed/${order.id}`
+            : undefined,
+          supportEmail: SUPPORT_EMAIL,
+          preview: 'A new order was placed.'
+        }
+      })
+    }
   } catch (error) {
     console.error('Error sending order confirmation notification:', error)
   }

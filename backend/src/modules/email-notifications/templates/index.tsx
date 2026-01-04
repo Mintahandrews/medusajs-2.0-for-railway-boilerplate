@@ -2,10 +2,21 @@ import { ReactNode } from 'react'
 import { MedusaError } from '@medusajs/framework/utils'
 import { InviteUserEmail, INVITE_USER, isInviteUserData } from './invite-user'
 import { OrderPlacedTemplate, ORDER_PLACED, isOrderPlacedTemplateData } from './order-placed'
+import {
+  OrderShippedTemplate,
+  OrderDeliveredTemplate,
+  OrderCancelledTemplate,
+  ORDER_SHIPPED,
+  ORDER_DELIVERED,
+  ORDER_CANCELLED
+} from './order-status'
 
 export const EmailTemplates = {
   INVITE_USER,
-  ORDER_PLACED
+  ORDER_PLACED,
+  ORDER_SHIPPED,
+  ORDER_DELIVERED,
+  ORDER_CANCELLED
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -29,6 +40,13 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <OrderPlacedTemplate {...data} />
+
+    case EmailTemplates.ORDER_SHIPPED:
+      return <OrderShippedTemplate {...(data as any)} />
+    case EmailTemplates.ORDER_DELIVERED:
+      return <OrderDeliveredTemplate {...(data as any)} />
+    case EmailTemplates.ORDER_CANCELLED:
+      return <OrderCancelledTemplate {...(data as any)} />
 
     default:
       throw new MedusaError(
