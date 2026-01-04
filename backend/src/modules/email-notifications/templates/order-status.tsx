@@ -74,40 +74,6 @@ export const OrderDeliveredTemplate: React.FC<OrderStatusTemplateProps> & { Prev
 )
 
 export const OrderCancelledTemplate: React.FC<OrderStatusTemplateProps> & { PreviewProps?: OrderStatusTemplateProps } = ({ order, shippingAddress, orderUrl, supportEmail, preview = 'Your order has been cancelled.' }) => (
-
-  // Example preview data for local email previewer
-  const previewOrder = {
-    display_id: '12345',
-    created_at: new Date().toISOString(),
-    email: 'customer@example.com',
-    currency_code: 'usd',
-    summary: { raw_current_order_total: { value: 2999 } },
-    id: 'order_123',
-  }
-  const previewAddress = {
-    first_name: 'John',
-    last_name: 'Doe',
-    country_code: 'US',
-  }
-
-  OrderShippedTemplate.PreviewProps = {
-    order: previewOrder,
-    shippingAddress: previewAddress,
-    orderUrl: 'https://letscase.up.railway.app/gh/order/confirmed/order_123',
-    supportEmail: 'support@letscase.com',
-  }
-  OrderDeliveredTemplate.PreviewProps = {
-    order: previewOrder,
-    shippingAddress: previewAddress,
-    orderUrl: 'https://letscase.up.railway.app/gh/order/confirmed/order_123',
-    supportEmail: 'support@letscase.com',
-  }
-  OrderCancelledTemplate.PreviewProps = {
-    order: previewOrder,
-    shippingAddress: previewAddress,
-    orderUrl: 'https://letscase.up.railway.app/gh/order/confirmed/order_123',
-    supportEmail: 'support@letscase.com',
-  }
   <Base preview={preview}>
     <Section>
       <Text style={{ fontSize: '22px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 24px', color: '#008080' }}>
@@ -135,3 +101,7 @@ export const OrderCancelledTemplate: React.FC<OrderStatusTemplateProps> & { Prev
     </Section>
   </Base>
 )
+
+// Example preview data for local email previewer
+
+
