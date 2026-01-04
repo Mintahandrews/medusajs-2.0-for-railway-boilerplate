@@ -37,18 +37,13 @@ export const InviteUserEmail = ({
 }: InviteUserEmailProps) => {
   return (
     <Base preview={preview}>
-      <Section className="mt-[32px]">
-        <Heading as="h1" className="text-center text-black text-[20px] m-0">
-          Letscase
-        </Heading>
-      </Section>
       <Section className="text-center">
         <Text className="text-black text-[14px] leading-[24px]">
           You&apos;ve been invited to be an administrator on <strong>Letscase</strong>.
         </Text>
         <Section className="mt-4 mb-[32px]">
           <Button
-            className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline px-5 py-3"
+            className="bg-[#008080] rounded text-white text-[15px] font-semibold no-underline px-7 py-3 shadow-sm border-0 cursor-pointer"
             href={inviteLink}
           >
             Accept Invitation

@@ -85,36 +85,34 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   return (
     <Base preview={preview}>
       <Section>
-        <Text style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 30px' }}>
+        <Text style={{ fontSize: '22px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 24px', color: '#008080' }}>
           Order Confirmation
         </Text>
-
-        <Text style={{ margin: '0 0 15px' }}>
-          Dear {shippingAddress.first_name} {shippingAddress.last_name},
+        <Text style={{ margin: '0 0 15px', fontSize: '15px', color: '#222' }}>
+          Hi {shippingAddress.first_name} {shippingAddress.last_name},
         </Text>
-
-        <Text style={{ margin: '0 0 30px' }}>
-          Thank you for your recent order! Here are your order details:
+        <Text style={{ margin: '0 0 24px', color: '#222' }}>
+          Thank you for your order! Below are your order details:
         </Text>
-
-        <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px' }}>
-          Order Summary
-        </Text>
-        <Text style={{ margin: '0 0 5px' }}>
-          Order ID: {order.display_id}
-        </Text>
-        <Text style={{ margin: '0 0 5px' }}>
-          Order Date: {new Date(order.created_at).toLocaleDateString()}
-        </Text>
-        <Text style={{ margin: '0 0 20px' }}>
-          Total: {formatMoney(order.summary.raw_current_order_total.value, currencyCode)}
-        </Text>
-
+        <Section style={{ background: '#f6f8fa', borderRadius: 8, padding: 16, margin: '0 0 24px' }}>
+          <Text style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 8px', color: '#008080' }}>
+            Order Summary
+          </Text>
+          <Text style={{ margin: '0 0 4px', color: '#222' }}>
+            <strong>Order ID:</strong> {order.display_id}
+          </Text>
+          <Text style={{ margin: '0 0 4px', color: '#222' }}>
+            <strong>Date:</strong> {new Date(order.created_at).toLocaleDateString()}
+          </Text>
+          <Text style={{ margin: '0 0 4px', color: '#222' }}>
+            <strong>Total:</strong> {formatMoney(order.summary.raw_current_order_total.value, currencyCode)}
+          </Text>
+        </Section>
         {orderUrl && (
           <Section style={{ textAlign: 'center', margin: '10px 0 30px' }}>
             <Button
               href={orderUrl}
-              className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline px-5 py-3"
+              className="bg-[#008080] rounded text-white text-[15px] font-semibold no-underline px-7 py-3 shadow-sm border-0 cursor-pointer"
             >
               View your order
             </Button>
