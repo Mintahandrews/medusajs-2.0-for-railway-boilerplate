@@ -1,5 +1,5 @@
 import { RadioGroup } from "@headlessui/react"
-import { InformationCircleSolid } from "@medusajs/icons"
+import { Info } from "lucide-react"
 import { Text, Tooltip, clx } from "@medusajs/ui"
 import React from "react"
 

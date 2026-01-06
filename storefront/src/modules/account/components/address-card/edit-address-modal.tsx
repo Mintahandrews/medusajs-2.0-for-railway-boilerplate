@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { PencilSquare as Edit, Trash } from "@medusajs/icons"
+import { Pencil as Edit, Trash2 as Trash } from "lucide-react"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
 
 import useToggleState from "@lib/hooks/use-toggle-state"

@@ -1,4 +1,4 @@
-import { EllipseMiniSolid } from "@medusajs/icons"
+import { Circle } from "lucide-react"
 import { Label, RadioGroup, Text, clx } from "@medusajs/ui"
 
 type FilterRadioGroupProps = {
@@ -30,7 +30,7 @@ const FilterRadioGroup = ({
               "ml-[-23px]": i.value === value,
             })}
           >
-            {i.value === value && <EllipseMiniSolid />}
+            {i.value === value && <Circle size={8} fill="currentColor" />}
             <RadioGroup.Item
               checked={i.value === value}
               className="hidden peer"

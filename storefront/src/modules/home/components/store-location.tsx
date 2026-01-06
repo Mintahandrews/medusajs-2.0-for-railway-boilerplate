@@ -3,11 +3,11 @@
 import { MapPin, Clock, Phone, Navigation } from "lucide-react"
 
 export default function StoreLocation() {
-  // Replace with your actual Google Maps embed URL and coordinates
-  const googleMapsEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.7332776660044!2d-0.18696368523455!3d5.6037168954169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b7a773%3A0xbed14ed8650e2dd3!2sAccra%2C%20Ghana!5e0!3m2!1sen!2sus!4v1680000000000!5m2!1sen!2sus"
+  // Letscase Gh Google Maps embed URL
+  const googleMapsEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.6161134517747!2d-0.23719872501435255!3d5.623555394357509!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9906b301a3a7%3A0xc6f701e84e2fd85!2sLetsCase%20Gh!5e0!3m2!1sen!2sgh!4v1767737757252!5m2!1sen!2sgh"
   
-  // Replace with your actual Google Maps directions URL
-  const googleMapsDirectionsUrl = "https://www.google.com/maps/dir/?api=1&destination=Letscase+Ghana+Accra"
+  // Letscase Gh Google Maps directions URL
+  const googleMapsDirectionsUrl = "https://www.google.com/maps/dir/?api=1&destination=LetsCase+Gh"
 
   return (
     <div className="py-16 small:py-20 border-t border-grey-20">
@@ -51,7 +51,7 @@ export default function StoreLocation() {
                 <div className="space-y-5">
                   {/* Address */}
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shrink-0">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 shrink-0">
                       <MapPin size={22} />
                     </div>
                     <div>
@@ -68,7 +68,7 @@ export default function StoreLocation() {
 
                   {/* Hours */}
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 shrink-0">
                       <Clock size={22} />
                     </div>
                     <div>
@@ -85,7 +85,7 @@ export default function StoreLocation() {
 
                   {/* Phone */}
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 shrink-0">
                       <Phone size={22} />
                     </div>
                     <div>

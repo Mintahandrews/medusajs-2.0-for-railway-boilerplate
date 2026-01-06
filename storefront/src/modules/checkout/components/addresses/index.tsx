@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircleSolid } from "@medusajs/icons"
+import { CheckCircle2 } from "lucide-react"
 import { Heading, Text, useToggleState } from "@medusajs/ui"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -49,7 +49,7 @@ const Addresses = ({
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
         >
           Shipping Address
-          {!isOpen && <CheckCircleSolid />}
+          {!isOpen && <CheckCircle2 size={20} className="text-green-500" />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
           <Text>

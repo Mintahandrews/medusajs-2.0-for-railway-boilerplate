@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus } from "@medusajs/icons"
+import { Plus } from "lucide-react"
 import { Button, Heading } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 import { useFormState } from "react-dom"

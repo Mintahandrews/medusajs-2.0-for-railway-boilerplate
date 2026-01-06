@@ -1,6 +1,6 @@
 "use client"
 
-import { XMark } from "@medusajs/icons"
+import { X } from "lucide-react"
 import React from "react"
 
 import Help from "@modules/order/components/help"
@@ -27,7 +27,7 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
           className="flex gap-2 items-center text-ui-fg-subtle hover:text-ui-fg-base"
           data-testid="back-to-overview-button"
         >
-          <XMark /> Back to overview
+          <X /> Back to overview
         </LocalizedClientLink>
       </div>
       <div

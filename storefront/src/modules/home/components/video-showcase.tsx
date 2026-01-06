@@ -40,12 +40,8 @@ export default function VideoShowcase() {
     },
   ]
 
-  // Placeholder gradient backgrounds for thumbnails without images
-  const placeholderGradients = [
-    "from-rose-500 to-pink-600",
-    "from-violet-500 to-purple-600",
-    "from-blue-500 to-cyan-600",
-  ]
+  // Use brand theme color for all video thumbnails
+  const brandGradient = "from-brand to-brand-dark"
 
   return (
     <>
@@ -65,14 +61,14 @@ export default function VideoShowcase() {
 
           <div className="mx-auto max-w-[1200px]">
             <div className="grid grid-cols-1 small:grid-cols-3 gap-6">
-              {videos.map((video, index) => (
+              {videos.map((video) => (
                 <button
                   key={video.id}
                   onClick={() => setActiveVideo(video)}
                   className="group relative aspect-video rounded-[20px] overflow-hidden border border-grey-20 bg-grey-10 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-transparent"
                 >
                   {/* Thumbnail or Gradient Placeholder */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${placeholderGradients[index % placeholderGradients.length]}`}>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${brandGradient}`}>
                     {/* If you have actual thumbnails, use Image component here */}
                     {/* <Image src={video.thumbnail} alt={video.title} fill className="object-cover" /> */}
                   </div>

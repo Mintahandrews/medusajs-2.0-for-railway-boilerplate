@@ -32,25 +32,21 @@ function TrustBadges() {
       title: "Superior Quality",
       description: "All products are 100% authentic",
       icon: Shield,
-      gradient: "from-blue-500 to-blue-600",
     },
     {
       title: "Fast & Free Shipping",
       description: "Free delivery on orders over GH₵200",
       icon: Truck,
-      gradient: "from-green-500 to-green-600",
     },
     {
       title: "30-Day Returns",
       description: "Hassle-free returns within 30 days",
       icon: RotateCcw,
-      gradient: "from-orange-500 to-orange-600",
     },
     {
       title: "24/7 Support",
       description: "Dedicated support team available anytime",
       icon: Headphones,
-      gradient: "from-purple-500 to-purple-600",
     },
   ]
 
@@ -63,8 +59,8 @@ function TrustBadges() {
         {items.map((item) => {
           const Icon = item.icon
           return (
-            <div key={item.title} className="group relative rounded-[20px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-6 text-center transition-all duration-300 hover:shadow-lg hover:border-grey-30 hover:-translate-y-1">
-              <div className={`mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
+            <div key={item.title} className="group relative rounded-[20px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-6 text-center transition-all duration-300 hover:shadow-lg hover:border-brand hover:-translate-y-1">
+              <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Icon size={24} strokeWidth={2} />
               </div>
               <div className="text-[15px] font-semibold text-grey-90 mb-1">
@@ -125,16 +121,6 @@ function ShopByCategory({ categories }: { categories: any[] }) {
 
   const items = topLevel.length ? topLevel : fallback
 
-  // Category colors for 3D effect
-  const categoryColors = [
-    { bg: "from-rose-500 to-pink-600", shadow: "shadow-rose-500/30" },
-    { bg: "from-violet-500 to-purple-600", shadow: "shadow-violet-500/30" },
-    { bg: "from-blue-500 to-cyan-600", shadow: "shadow-blue-500/30" },
-    { bg: "from-emerald-500 to-teal-600", shadow: "shadow-emerald-500/30" },
-    { bg: "from-amber-500 to-orange-600", shadow: "shadow-amber-500/30" },
-    { bg: "from-indigo-500 to-blue-600", shadow: "shadow-indigo-500/30" },
-  ]
-
   return sectionShell(
     <div className="py-16 small:py-20">
       <div className="text-center mb-12">
@@ -150,21 +136,20 @@ function ShopByCategory({ categories }: { categories: any[] }) {
       </div>
       <div className="mx-auto max-w-[1200px]">
         <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-6 gap-4 small:gap-6">
-          {items.map((c, index) => {
+          {items.map((c) => {
             const Icon = getCategoryIcon(c.label)
-            const colorScheme = categoryColors[index % categoryColors.length]
             return (
               <LocalizedClientLink
                 key={c.label}
                 href={c.href}
-                className="group relative flex flex-col items-center text-center p-5 small:p-6 rounded-[20px] bg-white border border-grey-20 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-transparent"
+                className="group relative flex flex-col items-center text-center p-5 small:p-6 rounded-[20px] bg-white border border-grey-20 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-brand"
               >
-                {/* 3D Icon Container */}
-                <div className={`relative h-16 w-16 small:h-20 small:w-20 rounded-2xl bg-gradient-to-br ${colorScheme.bg} flex items-center justify-center text-white shadow-lg ${colorScheme.shadow} group-hover:scale-110 transition-all duration-300`}>
+                {/* 3D Icon Container with Brand Theme */}
+                <div className="relative h-16 w-16 small:h-20 small:w-20 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 group-hover:scale-110 transition-all duration-300">
                   {/* Inner glow effect */}
                   <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {/* Floating shadow for 3D effect */}
-                  <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-3 rounded-full bg-gradient-to-r ${colorScheme.bg} blur-md opacity-40 group-hover:opacity-60 transition-opacity`} />
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-3 rounded-full bg-brand blur-md opacity-40 group-hover:opacity-60 transition-opacity" />
                   <Icon size={28} className="relative z-10" />
                 </div>
                 <div className="mt-4 text-[13px] small:text-[14px] font-semibold text-grey-90 group-hover:text-brand transition-colors">
