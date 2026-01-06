@@ -28,10 +28,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon.png", type: "image/png", sizes: "32x32" },
-      { url: "/favicon.ico", sizes: "16x16" },
+      { url: "/letscase-logo.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.ico", sizes: "any" },
     ],
-    apple: [{ url: "/icon.png", type: "image/png", sizes: "180x180" }],
+    apple: [{ url: "/letscase-logo.png", type: "image/png", sizes: "180x180" }],
   },
 }
 

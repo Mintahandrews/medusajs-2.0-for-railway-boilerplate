@@ -54,7 +54,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         <Image
           src={(selected as any)?.url}
           priority
-          className="absolute inset-0"
+          className="absolute inset-0 z-0"
           alt="Product image"
           fill
           sizes="(max-width: 576px) 92vw, (max-width: 1024px) 48vw, 640px"

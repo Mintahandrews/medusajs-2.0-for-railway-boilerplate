@@ -51,22 +51,22 @@ function TrustBadges() {
   ]
 
   return sectionShell(
-    <div className="py-14 small:py-16">
-      <h2 className="text-center text-[24px] small:text-[28px] font-bold text-grey-90 mb-10">
+    <div className="py-10 small:py-16">
+      <h2 className="text-center text-[20px] small:text-[28px] font-bold text-grey-90 mb-8 small:mb-10">
         Why Shop With Us
       </h2>
-      <div className="grid grid-cols-1 small:grid-cols-2 medium:grid-cols-4 gap-6 small:gap-8">
+      <div className="grid grid-cols-1 small:grid-cols-2 medium:grid-cols-4 gap-4 small:gap-8">
         {items.map((item) => {
           const Icon = item.icon
           return (
-            <div key={item.title} className="group relative rounded-[20px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-6 text-center transition-all duration-300 hover:shadow-lg hover:border-brand hover:-translate-y-1">
-              <div className="mx-auto h-14 w-14 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Icon size={24} strokeWidth={2} />
+            <div key={item.title} className="group relative rounded-[16px] small:rounded-[20px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-4 small:p-6 text-center transition-all duration-300 hover:shadow-lg hover:border-brand hover:-translate-y-1">
+              <div className="mx-auto h-12 w-12 small:h-14 small:w-14 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg mb-3 small:mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Icon size={20} small:size={24} strokeWidth={2} />
               </div>
-              <div className="text-[15px] font-semibold text-grey-90 mb-1">
+              <div className="text-[14px] small:text-[15px] font-semibold text-grey-90 mb-1">
                 {item.title}
               </div>
-              <div className="text-[13px] text-grey-50 leading-[1.5]">
+              <div className="text-[12px] small:text-[13px] text-grey-50 leading-[1.5]">
                 {item.description}
               </div>
             </div>
@@ -122,37 +122,37 @@ function ShopByCategory({ categories }: { categories: any[] }) {
   const items = topLevel.length ? topLevel : fallback
 
   return sectionShell(
-    <div className="py-16 small:py-20">
-      <div className="text-center mb-12">
-        <span className="inline-block px-4 py-1.5 rounded-full bg-brand/10 text-brand text-[12px] font-semibold uppercase tracking-wider mb-4">
+    <div className="py-12 small:py-20">
+      <div className="text-center mb-8 small:mb-12">
+        <span className="inline-block px-3 small:px-4 py-1.5 rounded-full bg-brand/10 text-brand text-[11px] small:text-[12px] font-semibold uppercase tracking-wider mb-3 small:mb-4">
           Browse Collections
         </span>
-        <h2 className="text-[28px] small:text-[36px] font-bold text-grey-90">
+        <h2 className="text-[24px] small:text-[36px] font-bold text-grey-90">
           Shop By Category
         </h2>
-        <p className="mt-3 text-[14px] text-grey-50 max-w-[500px] mx-auto">
+        <p className="mt-2 small:mt-3 text-[13px] small:text-[14px] text-grey-50 max-w-[400px] small:max-w-[500px] mx-auto px-4">
           Explore our wide range of premium tech accessories organized just for you
         </p>
       </div>
       <div className="mx-auto max-w-[1200px]">
-        <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-6 gap-4 small:gap-6">
+        <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-6 gap-3 small:gap-6">
           {items.map((c) => {
             const Icon = getCategoryIcon(c.label)
             return (
               <LocalizedClientLink
                 key={c.label}
                 href={c.href}
-                className="group relative flex flex-col items-center text-center p-5 small:p-6 rounded-[20px] bg-white border border-grey-20 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-brand"
+                className="group relative flex flex-col items-center text-center p-3 small:p-6 rounded-[16px] small:rounded-[20px] bg-white border border-grey-20 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-brand"
               >
                 {/* 3D Icon Container with Brand Theme */}
-                <div className="relative h-16 w-16 small:h-20 small:w-20 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 group-hover:scale-110 transition-all duration-300">
+                <div className="relative h-12 w-12 small:h-16 small:w-16 medium:h-20 medium:w-20 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 group-hover:scale-110 transition-all duration-300">
                   {/* Inner glow effect */}
                   <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {/* Floating shadow for 3D effect */}
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-3 rounded-full bg-brand blur-md opacity-40 group-hover:opacity-60 transition-opacity" />
-                  <Icon size={28} className="relative z-10" />
+                  <div className="absolute -bottom-1.5 small:-bottom-2 left-1/2 -translate-x-1/2 w-8 small:w-12 h-2 small:h-3 rounded-full bg-brand blur-md opacity-40 group-hover:opacity-60 transition-opacity" />
+                  <Icon size={22} small:size={28} className="relative z-10" />
                 </div>
-                <div className="mt-4 text-[13px] small:text-[14px] font-semibold text-grey-90 group-hover:text-brand transition-colors">
+                <div className="mt-2 small:mt-4 text-[12px] small:text-[14px] font-semibold text-grey-90 group-hover:text-brand transition-colors">
                   {c.label}
                 </div>
                 {/* Hover arrow indicator */}
@@ -185,15 +185,15 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
   const p2Image = p2?.thumbnail || p2?.images?.[0]?.url || "/product-placeholder.svg"
 
   return sectionShell(
-    <div className="py-10">
-      <div className="grid grid-cols-1 small:grid-cols-2 gap-8">
-        <div className="relative overflow-hidden rounded-[24px] border border-grey-20 bg-grey-10 min-h-[420px]">
-          <div className="grid grid-cols-1 small:grid-cols-2 items-center gap-8 h-full p-8 small:p-10">
-            <div className="max-w-[360px]">
-            <div className="text-[22px] small:text-[26px] font-bold text-grey-90 mb-2">
+    <div className="py-6 small:py-10">
+      <div className="grid grid-cols-1 small:grid-cols-2 gap-6 small:gap-8">
+        <div className="relative overflow-hidden rounded-[16px] small:rounded-[24px] border border-grey-20 bg-grey-10 min-h-[300px] small:min-h-[420px]">
+          <div className="grid grid-cols-1 small:grid-cols-2 items-center gap-6 small:gap-8 h-full p-6 small:p-8 small:p-10">
+            <div className="max-w-[300px] small:max-w-[360px]">
+            <div className="text-[18px] small:text-[26px] font-bold text-grey-90 mb-2">
               {p1?.title}
             </div>
-            <p className="text-[13px] leading-[1.6] text-grey-50 mb-6 line-clamp-3">
+            <p className="text-[12px] small:text-[13px] leading-[1.6] text-grey-50 mb-4 small:mb-6 line-clamp-3">
               {p1?.subtitle || p1?.description || "Shop the latest picks from our store."}
             </p>
             <LocalizedClientLink
@@ -205,7 +205,7 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
             </LocalizedClientLink>
             </div>
 
-            <div className="relative h-[240px] small:h-[360px] w-full">
+            <div className="relative h-[180px] small:h-[360px] w-full">
               <Image
                 src={p1Image}
                 alt={p1?.title || "Featured product"}
@@ -217,13 +217,13 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-[24px] border border-grey-20 bg-grey-10 min-h-[420px]">
-          <div className="grid grid-cols-1 small:grid-cols-2 items-center gap-8 h-full p-8 small:p-10">
-            <div className="max-w-[360px]">
-            <div className="text-[22px] small:text-[26px] font-bold text-grey-90 mb-2">
+        <div className="relative overflow-hidden rounded-[16px] small:rounded-[24px] border border-grey-20 bg-grey-10 min-h-[300px] small:min-h-[420px]">
+          <div className="grid grid-cols-1 small:grid-cols-2 items-center gap-6 small:gap-8 h-full p-6 small:p-8 small:p-10">
+            <div className="max-w-[300px] small:max-w-[360px]">
+            <div className="text-[18px] small:text-[26px] font-bold text-grey-90 mb-2">
               {p2?.title}
             </div>
-            <p className="text-[13px] leading-[1.6] text-grey-50 mb-6 line-clamp-3">
+            <p className="text-[12px] small:text-[13px] leading-[1.6] text-grey-50 mb-4 small:mb-6 line-clamp-3">
               {p2?.subtitle || p2?.description || "Discover customer favorites and new arrivals."}
             </p>
             <LocalizedClientLink
@@ -235,7 +235,7 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
             </LocalizedClientLink>
             </div>
 
-            <div className="relative h-[240px] small:h-[360px] w-full">
+            <div className="relative h-[180px] small:h-[360px] w-full">
               <Image
                 src={p2Image}
                 alt={p2?.title || "Featured product"}
