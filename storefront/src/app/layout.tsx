@@ -14,24 +14,24 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/LetsCase LOGO.png",
-        width: 512,
-        height: 512,
+        url: "/letscase-logo.png",
+        width: 1200,
+        height: 630,
         alt: "Letscase",
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Letscase",
-    images: ["/LetsCase LOGO.png"],
+    images: ["/letscase-logo.png"],
   },
   icons: {
     icon: [
-      { url: "/icon.png", type: "image/png" },
-      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.ico", sizes: "16x16" },
     ],
-    apple: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/icon.png", type: "image/png", sizes: "180x180" }],
   },
 }
 
