@@ -76,9 +76,13 @@ export default function StoreLocation() {
                         Opening Hours
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        Monday - Friday: 9:00 AM - 7:00 PM<br />
-                        Saturday: 10:00 AM - 6:00 PM<br />
-                        Sunday: 12:00 PM - 5:00 PM
+                        Monday: 8:00 AM - 8:00 PM<br />
+                        Tuesday: 8:00 AM - 8:00 PM<br />
+                        Wednesday: 8:00 AM - 8:00 PM<br />
+                        Thursday: 8:00 AM - 8:00 PM<br />
+                        Friday: 8:00 AM - 8:00 PM<br />
+                        Saturday: 8:00 AM - 8:00 PM<br />
+                        <span className="text-red-500">Sunday: Closed</span>
                       </p>
                     </div>
                   </div>
@@ -93,8 +97,8 @@ export default function StoreLocation() {
                         Contact Us
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        Phone: +233 XX XXX XXXX<br />
-                        WhatsApp: +233 XX XXX XXXX
+                        Phone: 0540451001<br />
+                        WhatsApp: 0540451001
                       </p>
                     </div>
                   </div>

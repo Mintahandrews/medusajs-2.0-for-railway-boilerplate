@@ -61,7 +61,7 @@ function TrustBadges() {
           return (
             <div key={item.title} className="group relative rounded-[16px] small:rounded-[20px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-4 small:p-6 text-center transition-all duration-300 hover:shadow-lg hover:border-brand hover:-translate-y-1">
               <div className="mx-auto h-12 w-12 small:h-14 small:w-14 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg mb-3 small:mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Icon size={20} small:size={24} strokeWidth={2} />
+                <Icon size={20} strokeWidth={2} className="small:size-24" />
               </div>
               <div className="text-[14px] small:text-[15px] font-semibold text-grey-90 mb-1">
                 {item.title}
@@ -150,7 +150,7 @@ function ShopByCategory({ categories }: { categories: any[] }) {
                   <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                   {/* Floating shadow for 3D effect */}
                   <div className="absolute -bottom-1.5 small:-bottom-2 left-1/2 -translate-x-1/2 w-8 small:w-12 h-2 small:h-3 rounded-full bg-brand blur-md opacity-40 group-hover:opacity-60 transition-opacity" />
-                  <Icon size={22} small:size={28} className="relative z-10" />
+                  <Icon size={22} className="relative z-10 small:size-28" />
                 </div>
                 <div className="mt-2 small:mt-4 text-[12px] small:text-[14px] font-semibold text-grey-90 group-hover:text-brand transition-colors">
                   {c.label}
