@@ -13,21 +13,31 @@ export const metadata: Metadata = {
 }
 
 const fetchCart = async () => {
-  const cart = await retrieveCart()
-  if (!cart) {
-    return notFound()
-  }
+  try {
+    const cart = await retrieveCart()
+    if (!cart) {
+      return null
+    }
 
-  if (cart?.items?.length) {
-    const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id!)
-    cart.items = enrichedItems as HttpTypes.StoreCartLineItem[]
-  }
+    if (cart?.items?.length) {
+      const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id!)
+      cart.items = enrichedItems as HttpTypes.StoreCartLineItem[]
+    }
 
-  return cart
+    return cart
+  } catch (error) {
+    console.error("Error fetching cart:", error)
+    return null
+  }
 }
 
 export default async function Checkout() {
   const cart = await fetchCart()
+  
+  if (!cart) {
+    return notFound()
+  }
+
   const customer = await getCustomer()
 
   return (

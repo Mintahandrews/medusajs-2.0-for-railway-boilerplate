@@ -219,13 +219,15 @@ export async function initiatePaymentSession(
     context?: Record<string, unknown>
   }
 ) {
-  return sdk.store.payment
-    .initiatePaymentSession(cart, data, {}, await getAuthHeaders())
-    .then((resp) => {
-      revalidateTag("cart")
-      return resp
-    })
-    .catch(medusaError)
+  try {
+    const resp = await sdk.store.payment
+      .initiatePaymentSession(cart, data, {}, await getAuthHeaders())
+    revalidateTag("cart")
+    return resp
+  } catch (error: any) {
+    console.error("Payment session initialization failed:", error)
+    throw new Error(error?.message || "Failed to initialize payment session. Please try again.")
+  }
 }
 
 export async function applyPromotions(codes: string[]) {

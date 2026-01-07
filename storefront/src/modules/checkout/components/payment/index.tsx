@@ -108,6 +108,7 @@ const Payment = ({
 
   const handleSubmit = async () => {
     setIsLoading(true)
+    setError(null)
     try {
       const shouldInputCard =
         isStripeFunc(selectedPaymentMethod) && !activeSession
@@ -117,10 +118,17 @@ const Payment = ({
           ? `${window.location.origin}/${pathname.split("/")[1]}/checkout/paystack/verify`
           : undefined
 
-        await initiatePaymentSession(cart, {
-          provider_id: selectedPaymentMethod,
-          ...(callbackUrl ? { context: { callback_url: callbackUrl } } : {}),
-        })
+        try {
+          await initiatePaymentSession(cart, {
+            provider_id: selectedPaymentMethod,
+            ...(callbackUrl ? { context: { callback_url: callbackUrl } } : {}),
+          })
+        } catch (sessionErr: any) {
+          console.error("Payment session error:", sessionErr)
+          setError(sessionErr?.message || "Failed to initialize payment. Please try again.")
+          setIsLoading(false)
+          return
+        }
       }
 
       if (!shouldInputCard) {
@@ -132,7 +140,8 @@ const Payment = ({
         )
       }
     } catch (err: any) {
-      setError(err.message)
+      console.error("Payment error:", err)
+      setError(err?.message || "An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }

@@ -10,29 +10,29 @@ export default function StoreLocation() {
   const googleMapsDirectionsUrl = "https://www.google.com/maps/dir/?api=1&destination=LetsCase+Gh"
 
   return (
-    <div className="py-12 small:py-20 border-t border-grey-20">
+    <div className="py-16 small:py-20 border-t border-grey-20">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10">
-        <div className="text-center mb-8 small:mb-12">
-          <span className="inline-block px-3 small:px-4 py-1.5 rounded-full bg-brand/10 text-brand text-[11px] small:text-[12px] font-semibold uppercase tracking-wider mb-3 small:mb-4">
+        <div className="text-center mb-12">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-brand/10 text-brand text-[12px] font-semibold uppercase tracking-wider mb-4">
             Visit Us
           </span>
-          <h2 className="text-[24px] small:text-[36px] font-bold text-grey-90">
+          <h2 className="text-[28px] small:text-[36px] font-bold text-grey-90">
             Where To Find Us
           </h2>
-          <p className="mt-2 small:mt-3 text-[13px] small:text-[14px] text-grey-50 max-w-[400px] small:max-w-[500px] mx-auto px-4">
+          <p className="mt-3 text-[14px] text-grey-50 max-w-[500px] mx-auto">
             Visit our physical store in Accra for hands-on experience with our products
           </p>
         </div>
 
         <div className="mx-auto max-w-[1200px]">
-          <div className="grid grid-cols-1 medium:grid-cols-2 gap-6 small:gap-8">
+          <div className="grid grid-cols-1 medium:grid-cols-2 gap-8">
             {/* Map */}
-            <div className="relative rounded-[16px] small:rounded-[24px] overflow-hidden border border-grey-20 bg-grey-10 min-h-[300px] small:min-h-[400px]">
+            <div className="relative rounded-[24px] overflow-hidden border border-grey-20 bg-grey-10 min-h-[400px]">
               <iframe
                 src={googleMapsEmbedUrl}
                 width="100%"
                 height="100%"
-                style={{ border: 0, minHeight: "300px" }}
+                style={{ border: 0, minHeight: "400px" }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -43,7 +43,7 @@ export default function StoreLocation() {
 
             {/* Store Info */}
             <div className="flex flex-col justify-center">
-              <div className="rounded-[16px] small:rounded-[24px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-6 small:p-8 small:p-10">
+              <div className="rounded-[24px] border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-8 small:p-10">
                 <h3 className="text-[22px] font-bold text-grey-90 mb-6">
                   Letscase Ghana - Main Store
                 </h3>
@@ -76,13 +76,9 @@ export default function StoreLocation() {
                         Opening Hours
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        Monday: 8:00 AM - 8:00 PM<br />
-                        Tuesday: 8:00 AM - 8:00 PM<br />
-                        Wednesday: 8:00 AM - 8:00 PM<br />
-                        Thursday: 8:00 AM - 8:00 PM<br />
-                        Friday: 8:00 AM - 8:00 PM<br />
-                        Saturday: 8:00 AM - 8:00 PM<br />
-                        <span className="text-red-500">Sunday: Closed</span>
+                        Monday - Friday: 9:00 AM - 7:00 PM<br />
+                        Saturday: 10:00 AM - 6:00 PM<br />
+                        Sunday: 12:00 PM - 5:00 PM
                       </p>
                     </div>
                   </div>
@@ -97,8 +93,8 @@ export default function StoreLocation() {
                         Contact Us
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        Phone: 0540451001<br />
-                        WhatsApp: 0540451001
+                        Phone: +233 XX XXX XXXX<br />
+                        WhatsApp: +233 XX XXX XXXX
                       </p>
                     </div>
                   </div>
