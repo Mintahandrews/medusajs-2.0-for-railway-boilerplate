@@ -119,9 +119,18 @@ const Payment = ({
           : undefined
 
         try {
+          const context: Record<string, unknown> = {}
+          if (callbackUrl) {
+            context.callback_url = callbackUrl
+          }
+          // Paystack requires email for transaction initialization
+          if (cart?.email) {
+            context.email = cart.email
+          }
+
           await initiatePaymentSession(cart, {
             provider_id: selectedPaymentMethod,
-            ...(callbackUrl ? { context: { callback_url: callbackUrl } } : {}),
+            ...(Object.keys(context).length ? { context } : {}),
           })
         } catch (sessionErr: any) {
           console.error("Payment session error:", sessionErr)
