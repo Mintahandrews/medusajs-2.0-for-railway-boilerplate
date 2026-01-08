@@ -3,9 +3,9 @@
 import { placeOrder } from "@lib/data/cart"
 import Link from "next/link"
 import { useParams, useSearchParams, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 
-export default function PaystackVerifyPage() {
+function PaystackVerifyContent() {
   const params = useParams()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -71,5 +71,20 @@ export default function PaystackVerifyPage() {
       <h1 className="text-xl font-semibold text-green-600">Payment Successful!</h1>
       <p className="mt-2 text-ui-fg-subtle">Redirecting to your order confirmation...</p>
     </div>
+  )
+}
+
+export default function PaystackVerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="content-container py-10 flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ui-fg-base mb-4"></div>
+          <h1 className="text-xl font-semibold">Loading...</h1>
+        </div>
+      }
+    >
+      <PaystackVerifyContent />
+    </Suspense>
   )
 }
