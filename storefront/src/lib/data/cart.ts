@@ -377,6 +377,7 @@ export async function placeOrder() {
     .complete(cartId, {}, await getAuthHeaders())
     .then((cartRes) => {
       revalidateTag("cart")
+      revalidateTag("order")
       return cartRes
     })
     .catch(medusaError)
@@ -385,6 +386,7 @@ export async function placeOrder() {
     const countryCode =
       cartRes.order.shipping_address?.country_code?.toLowerCase()
     await removeCartId()
+    revalidateTag("order")
     redirect(`/${countryCode}/order/confirmed/${cartRes?.order.id}`)
   }
 

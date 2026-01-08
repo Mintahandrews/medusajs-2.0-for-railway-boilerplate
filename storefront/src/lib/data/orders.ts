@@ -32,7 +32,7 @@ export const retrieveOrder = cache(async function (id: string) {
     .catch((err) => medusaError(err))
 })
 
-export const listOrders = cache(async function (
+export const listOrders = async function (
   limit: number = 10,
   offset: number = 0
 ) {
@@ -42,5 +42,5 @@ export const listOrders = cache(async function (
       { next: { tags: ["order"] }, ...(await getAuthHeaders()) }
     )
     .then(({ orders }) => orders)
-    .catch((err) => medusaError(err))
-})
+    .catch(() => [])
+}
