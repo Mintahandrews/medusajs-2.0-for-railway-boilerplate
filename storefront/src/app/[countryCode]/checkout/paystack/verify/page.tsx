@@ -29,6 +29,11 @@ export default function PaystackVerifyPage() {
         setStatus("success")
         router.push(`/${countryCode}/order/confirmed`)
       } catch (error: any) {
+        // NEXT_REDIRECT is thrown by Next.js redirect() - this is expected behavior
+        if (error?.message?.includes("NEXT_REDIRECT") || error?.digest?.includes("NEXT_REDIRECT")) {
+          setStatus("success")
+          return
+        }
         console.error("Paystack verify - placeOrder failed:", error)
         setStatus("error")
         setErrorMessage(error?.message || "An error occurred while completing your order.")
