@@ -219,12 +219,23 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
     data,
     context,
   }: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
+    console.log("[Paystack] initiatePayment called with:", {
+      currency_code,
+      amount,
+      hasData: !!data,
+      hasContext: !!context,
+      contextEmail: (context as any)?.email,
+      dataEmail: (data as any)?.email,
+      customerEmail: (context as any)?.customer?.email,
+    })
+
     const email =
       (context as any)?.customer?.email ??
       (context as any)?.email ??
       (data as any)?.email
 
     if (!email) {
+      console.error("[Paystack] Missing email in context/data:", { context, data })
       throw new Error(
         "Paystack initiatePayment requires customer email (missing in context/data)"
       )
@@ -240,38 +251,48 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
     const metadata =
       data?.metadata && typeof data.metadata === "object" ? (data.metadata as any) : {}
 
-    const initResp = await this.request<PaystackInitializeResponse>(
-      "/transaction/initialize",
-      {
-        method: "POST",
-        idempotencyKey: (context as any)?.idempotency_key,
-        body: {
+    const requestBody = {
+      email,
+      amount: amountInSmallestUnit,
+      currency: currency_code?.toUpperCase(),
+      callback_url: callbackUrl,
+      metadata: {
+        ...metadata,
+        session_id: (data as any)?.session_id,
+      },
+    }
+
+    console.log("[Paystack] Initializing transaction with:", requestBody)
+
+    try {
+      const initResp = await this.request<PaystackInitializeResponse>(
+        "/transaction/initialize",
+        {
+          method: "POST",
+          idempotencyKey: (context as any)?.idempotency_key,
+          body: requestBody,
+        }
+      )
+      console.log("[Paystack] Transaction initialized successfully:", initResp)
+
+      const reference = initResp.data.reference
+
+      return {
+        id: reference,
+        status: PaymentSessionStatus.PENDING,
+        data: {
+          ...(data ?? {}),
+          reference,
+          authorization_url: initResp.data.authorization_url,
+          access_code: initResp.data.access_code,
           email,
+          currency: currency_code?.toLowerCase(),
           amount: amountInSmallestUnit,
-          currency: currency_code?.toUpperCase(),
-          callback_url: callbackUrl,
-          metadata: {
-            ...metadata,
-            session_id: (data as any)?.session_id,
-          },
         },
       }
-    )
-
-    const reference = initResp.data.reference
-
-    return {
-      id: reference,
-      status: PaymentSessionStatus.PENDING,
-      data: {
-        ...(data ?? {}),
-        reference,
-        authorization_url: initResp.data.authorization_url,
-        access_code: initResp.data.access_code,
-        email,
-        currency: currency_code?.toLowerCase(),
-        amount: amountInSmallestUnit,
-      },
+    } catch (error: any) {
+      console.error("[Paystack] Transaction initialization failed:", error?.message || error)
+      throw error
     }
   }
 
