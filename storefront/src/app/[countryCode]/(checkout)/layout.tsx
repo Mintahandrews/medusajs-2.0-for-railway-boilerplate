@@ -30,7 +30,7 @@ export default function CheckoutLayout({
             data-testid="store-link"
           >
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Letscase"
               width={160}
               height={40}

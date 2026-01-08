@@ -155,7 +155,7 @@ export default async function Nav() {
           <div className="flex items-center justify-center">
             <LocalizedClientLink href="/" data-testid="nav-store-link">
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="Letscase"
                 width={180}
                 height={44}
