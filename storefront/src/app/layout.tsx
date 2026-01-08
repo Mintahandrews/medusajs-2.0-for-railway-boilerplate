@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/letscase-logo.png",
+        url: "/letscase-logo.svg",
         width: 1200,
         height: 630,
         alt: "Letscase",
@@ -24,14 +24,14 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Letscase",
-    images: ["/letscase-logo.png"],
+    images: ["/letscase-logo.svg"],
   },
   icons: {
     icon: [
-      { url: "/letscase-logo.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
     ],
-    apple: [{ url: "/letscase-logo.png", type: "image/png", sizes: "180x180" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
   },
 }
 

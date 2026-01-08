@@ -12,7 +12,7 @@ export default async function Footer() {
           <div>
             <LocalizedClientLink href="/" className="inline-block">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Letscase"
                 width={160}
                 height={40}
