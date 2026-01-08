@@ -7,7 +7,7 @@ const Hero = () => {
       <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8 small:py-10">
         <div
           className="relative overflow-hidden rounded-[28px] border border-grey-20 bg-cover bg-center px-6 py-10 small:px-12 small:py-0 small:h-[560px] flex items-center"
-          style={{ backgroundImage: "url('/hero.jpg')" }}
+          style={{ backgroundImage: "url('/hero.svg')" }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/45 to-white/5" />
           <div className="relative z-10 w-full grid grid-cols-1 small:grid-cols-2 items-center gap-10">
