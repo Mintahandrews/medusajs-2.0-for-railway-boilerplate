@@ -49,40 +49,38 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 large:grid-cols-2 gap-8 large:gap-12 items-start">
-          <div className="rounded-rounded border border-ui-border-base bg-ui-bg-base p-4 small:p-6">
+        <div className="grid grid-cols-1 medium:grid-cols-2 gap-6 medium:gap-8 items-start">
+          <div className="rounded-lg overflow-hidden">
             <ImageGallery images={product?.images || []} />
           </div>
 
-          <div className="rounded-rounded border border-ui-border-base bg-ui-bg-base p-4 small:p-6">
-            <div className="flex flex-col gap-y-6">
-              <ProductInfo product={product} />
+          <div className="flex flex-col gap-y-6">
+            <ProductInfo product={product} />
 
-              <Suspense
-                fallback={
-                  <ProductActions
-                    disabled={true}
-                    product={product}
-                    region={region}
-                  />
-                }
-              >
-                <ProductActionsWrapper id={product.id} region={region} />
-              </Suspense>
+            <Suspense
+              fallback={
+                <ProductActions
+                  disabled={true}
+                  product={product}
+                  region={region}
+                />
+              }
+            >
+              <ProductActionsWrapper id={product.id} region={region} />
+            </Suspense>
 
-              <div className="grid grid-cols-1 small:grid-cols-3 gap-3 pt-2">
-                <div className="flex items-center gap-2 rounded-rounded border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
-                  <FastDelivery />
-                  <div className="text-ui-fg-subtle text-small-regular">Fast delivery</div>
-                </div>
-                <div className="flex items-center gap-2 rounded-rounded border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
-                  <Refresh />
-                  <div className="text-ui-fg-subtle text-small-regular">Easy returns</div>
-                </div>
-                <div className="flex items-center gap-2 rounded-rounded border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
-                  <ShieldCheck />
-                  <div className="text-ui-fg-subtle text-small-regular">Secure checkout</div>
-                </div>
+            <div className="grid grid-cols-3 gap-2 pt-2">
+              <div className="flex flex-col items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-3 text-center">
+                <FastDelivery />
+                <span className="text-ui-fg-subtle text-xs">Fast delivery</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-3 text-center">
+                <Refresh />
+                <span className="text-ui-fg-subtle text-xs">Easy returns</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-3 text-center">
+                <ShieldCheck />
+                <span className="text-ui-fg-subtle text-xs">Secure checkout</span>
               </div>
             </div>
           </div>
