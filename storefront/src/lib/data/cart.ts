@@ -123,12 +123,18 @@ export async function updateLineItem({
     throw new Error("Missing cart ID when updating line item")
   }
 
-  await sdk.store.cart
-    .updateLineItem(cartId, lineId, { quantity }, {}, await getAuthHeaders())
-    .then(() => {
+  try {
+    await sdk.store.cart
+      .updateLineItem(cartId, lineId, { quantity }, {}, await getAuthHeaders())
+    revalidateTag("cart")
+  } catch (error: any) {
+    const msg = error?.message || error?.response?.data?.message || ""
+    if (msg.includes("completed") || msg.includes("not found")) {
+      await removeCartId()
       revalidateTag("cart")
-    })
-    .catch(medusaError)
+    }
+    throw error
+  }
 }
 
 export async function deleteLineItem(lineId: string) {
@@ -141,13 +147,18 @@ export async function deleteLineItem(lineId: string) {
     throw new Error("Missing cart ID when deleting line item")
   }
 
-  await sdk.store.cart
-    .deleteLineItem(cartId, lineId, await getAuthHeaders())
-    .then(() => {
+  try {
+    await sdk.store.cart
+      .deleteLineItem(cartId, lineId, await getAuthHeaders())
+    revalidateTag("cart")
+  } catch (error: any) {
+    const msg = error?.message || error?.response?.data?.message || ""
+    if (msg.includes("completed") || msg.includes("not found")) {
+      await removeCartId()
       revalidateTag("cart")
-    })
-    .catch(medusaError)
-  revalidateTag("cart")
+    }
+    throw error
+  }
 }
 
 export async function enrichLineItems(
