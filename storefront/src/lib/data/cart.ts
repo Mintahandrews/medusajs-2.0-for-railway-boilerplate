@@ -20,7 +20,12 @@ export async function retrieveCart() {
   return await sdk.store.cart
     .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
     .then(({ cart }) => cart)
-    .catch(() => {
+    .catch(async (error) => {
+      // If cart is completed or not found, clear the cookie
+      const errorMsg = error?.message || ""
+      if (errorMsg.includes("already completed") || errorMsg.includes("not found")) {
+        await removeCartId()
+      }
       return null
     })
 }

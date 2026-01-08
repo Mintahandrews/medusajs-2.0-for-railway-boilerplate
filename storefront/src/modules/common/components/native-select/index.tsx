@@ -34,7 +34,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
       } else {
         setIsPlaceholder(false)
       }
-    }, [innerRef.current?.value])
+    }, [defaultValue])
 
     return (
       <div>

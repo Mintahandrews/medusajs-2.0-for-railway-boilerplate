@@ -28,7 +28,7 @@ export default function AboutUsPage() {
           <div className="rounded-[16px] border border-grey-20 bg-white p-5">
             <h2 className="text-[15px] font-semibold text-grey-90">Trusted support</h2>
             <p className="mt-2 text-[14px] leading-[1.7] text-grey-60">
-              Need help deciding? We'll recommend what fits your device.
+              Need help deciding? We&apos;ll recommend what fits your device.
             </p>
           </div>
           <div className="rounded-[16px] border border-grey-20 bg-white p-5">
