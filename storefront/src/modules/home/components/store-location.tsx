@@ -59,9 +59,9 @@ export default function StoreLocation() {
                         Store Address
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        123 Tech Street, Osu<br />
-                        Accra, Greater Accra Region<br />
-                        Ghana
+                        E123 Prince Okai St<br />
+                        Accra, Ghana<br />
+                        JQF8+C5 Accra
                       </p>
                     </div>
                   </div>
@@ -76,9 +76,8 @@ export default function StoreLocation() {
                         Opening Hours
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        Monday - Friday: 9:00 AM - 7:00 PM<br />
-                        Saturday: 10:00 AM - 6:00 PM<br />
-                        Sunday: 12:00 PM - 5:00 PM
+                        Monday - Saturday: 8:00 AM - 8:00 PM<br />
+                        Sunday: Closed
                       </p>
                     </div>
                   </div>
@@ -93,8 +92,8 @@ export default function StoreLocation() {
                         Contact Us
                       </div>
                       <p className="text-[14px] text-grey-50 leading-relaxed">
-                        Phone: +233 XX XXX XXXX<br />
-                        WhatsApp: +233 XX XXX XXXX
+                        Phone: 054 045 1001<br />
+                        WhatsApp: 054 045 1001
                       </p>
                     </div>
                   </div>

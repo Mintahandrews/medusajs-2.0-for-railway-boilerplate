@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { usePathname, useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -30,7 +31,7 @@ function navLinkClass(active: boolean) {
     : "pb-1 border-b-2 border-transparent text-grey-90 hover:text-brand"
 }
 
-export default function DesktopNav(props: {
+function DesktopNavContent(props: {
   megaCategories: MegaCategory[]
   trendingCollectionsCol1: LinkItem[]
   trendingCollectionsCol2: LinkItem[]
@@ -273,5 +274,28 @@ export default function DesktopNav(props: {
         About Us
       </LocalizedClientLink>
     </div>
+  )
+}
+
+export default function DesktopNav(props: {
+  megaCategories: MegaCategory[]
+  trendingCollectionsCol1: LinkItem[]
+  trendingCollectionsCol2: LinkItem[]
+  exploreLinks: LinkItem[]
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
+          <span className="pb-1 border-b-2 border-transparent">Home</span>
+          <span className="pb-1 border-b-2 border-transparent">Shop</span>
+          <span className="pb-1 border-b-2 border-transparent">Products</span>
+          <span className="pb-1 border-b-2 border-transparent">Deals</span>
+          <span className="pb-1 border-b-2 border-transparent">About Us</span>
+        </div>
+      }
+    >
+      <DesktopNavContent {...props} />
+    </Suspense>
   )
 }

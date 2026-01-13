@@ -15,8 +15,6 @@ import {
 import ProductCarousel from "./product-carousel"
 import TestimonialsSlider from "./testimonials-slider"
 import NewsletterSignup from "./newsletter-signup"
-import StoreLocation from "./store-location"
-import VideoShowcase from "./video-showcase"
 
 function sectionShell(children: React.ReactNode, className?: string) {
   return (
@@ -277,9 +275,6 @@ export default function LetscaseHome({
 
   return (
     <>
-      {/* Video Showcase - at the top after hero */}
-      <VideoShowcase />
-
       {bestSellers.length
         ? sectionShell(
             <>
@@ -310,9 +305,6 @@ export default function LetscaseHome({
         : null}
 
       <TestimonialsSlider />
-      
-      {/* Store Location Map */}
-      <StoreLocation />
       
       <NewsletterSignup />
       
