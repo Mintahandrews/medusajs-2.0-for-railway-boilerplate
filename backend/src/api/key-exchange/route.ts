@@ -5,8 +5,8 @@ import { Modules } from '@medusajs/framework/utils';
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     const apiKeyModuleService: IApiKeyModuleService = req.scope.resolve(Modules.API_KEY);
-    const apiKeys = await apiKeyModuleService.listApiKeys({ type: 'publishable' });
-    const defaultApiKey = apiKeys.find((apiKey) => apiKey.title === 'Webshop') || apiKeys[0];
+    const apiKeys = await apiKeyModuleService.listApiKeys();
+    const defaultApiKey = apiKeys.find((apiKey) => apiKey.title === 'Webshop');
     if (!defaultApiKey) {
       res.json({});
     } else {
