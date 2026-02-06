@@ -2,7 +2,6 @@ import Image from "next/image"
 
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
-import { getCategoryIcon } from "../../../lib/util/category-icon"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import {
   ChevronRight,
@@ -93,6 +92,34 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
   )
 }
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  iphone: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=600&h=700&fit=crop&q=80",
+  cases: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=600&h=700&fit=crop&q=80",
+  "android phones": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=700&fit=crop&q=80",
+  earphones: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=700&fit=crop&q=80",
+  headphones: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=700&fit=crop&q=80",
+  laptops: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=700&fit=crop&q=80",
+  speakers: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&h=700&fit=crop&q=80",
+  chargers: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=600&h=700&fit=crop&q=80",
+  cables: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=700&fit=crop&q=80",
+  "screen protectors": "https://images.unsplash.com/photo-1601972602237-8c79241e468b?w=600&h=700&fit=crop&q=80",
+  "laptop bags": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=700&fit=crop&q=80",
+  watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=700&fit=crop&q=80",
+  smartwatch: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&h=700&fit=crop&q=80",
+  tablets: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&h=700&fit=crop&q=80",
+  accessories: "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=600&h=700&fit=crop&q=80",
+  default: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=600&h=700&fit=crop&q=80",
+}
+
+function getCategoryImage(label: string): string {
+  const lower = label.toLowerCase()
+  for (const [key, url] of Object.entries(CATEGORY_IMAGES)) {
+    if (key === "default") continue
+    if (lower.includes(key) || key.includes(lower)) return url
+  }
+  return CATEGORY_IMAGES.default
+}
+
 function ShopByCategory({ categories }: { categories: any[] }) {
   const topLevel = (categories || [])
     .filter((c) => !c?.parent_category_id && !c?.parent_category)
@@ -106,18 +133,25 @@ function ShopByCategory({ categories }: { categories: any[] }) {
     .map((c) => ({
       label: c.name as string,
       href: `/categories/${c.handle}`,
+      image: getCategoryImage(c.name as string),
     }))
 
   const fallback = [
-    { label: "Cables", href: "/store" },
-    { label: "Headphones", href: "/store" },
-    { label: "Smartwatch", href: "/store" },
-    { label: "Screen Protector", href: "/store" },
-    { label: "Monitor", href: "/store" },
-    { label: "More", href: "/store" },
+    { label: "iPhones", href: "/store", image: CATEGORY_IMAGES.iphone },
+    { label: "Cases", href: "/store", image: CATEGORY_IMAGES.cases },
+    { label: "Earphones/buds", href: "/store", image: CATEGORY_IMAGES.earphones },
+    { label: "Laptops", href: "/store", image: CATEGORY_IMAGES.laptops },
+    { label: "Speakers", href: "/store", image: CATEGORY_IMAGES.speakers },
+    { label: "Chargers", href: "/store", image: CATEGORY_IMAGES.chargers },
+    { label: "Screen Protectors", href: "/store", image: CATEGORY_IMAGES["screen protectors"] },
+    { label: "Laptop bags", href: "/store", image: CATEGORY_IMAGES["laptop bags"] },
   ]
 
   const items = topLevel.length ? topLevel : fallback
+
+  // Split into featured (first 2 large) and rest (smaller grid)
+  const featured = items.slice(0, 2)
+  const rest = items.slice(2)
 
   return sectionShell(
     <div className="py-16 small:py-20">
@@ -132,35 +166,75 @@ function ShopByCategory({ categories }: { categories: any[] }) {
           Explore our wide range of premium tech accessories organized just for you
         </p>
       </div>
-      <div className="mx-auto max-w-[1200px]">
-        <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-6 gap-4 small:gap-6">
-          {items.map((c) => {
-            const Icon = getCategoryIcon(c.label)
-            return (
+
+      <div className="mx-auto max-w-[1200px] space-y-4 small:space-y-5">
+        {/* Top row — 2 large featured cards */}
+        <div className="grid grid-cols-1 small:grid-cols-2 gap-4 small:gap-5">
+          {featured.map((c) => (
+            <LocalizedClientLink
+              key={c.label}
+              href={c.href}
+              className="group relative overflow-hidden rounded-2xl bg-grey-90 aspect-[4/3] small:aspect-[3/2] block"
+            >
+              <Image
+                src={c.image}
+                alt={c.label}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 right-0 p-5 small:p-7">
+                <h3 className="text-white text-[20px] small:text-[24px] font-bold uppercase tracking-wide drop-shadow-lg">
+                  {c.label}
+                </h3>
+                <div className="mt-3">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-grey-90 text-[12px] font-semibold uppercase tracking-wider hover:bg-brand hover:text-white transition-colors duration-300">
+                    View All
+                    <ChevronRight size={14} />
+                  </span>
+                </div>
+              </div>
+            </LocalizedClientLink>
+          ))}
+        </div>
+
+        {/* Bottom row — smaller cards grid */}
+        {rest.length > 0 && (
+          <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-5">
+            {rest.map((c) => (
               <LocalizedClientLink
                 key={c.label}
                 href={c.href}
-                className="group relative flex flex-col items-center text-center p-5 small:p-6 rounded-[20px] bg-white border border-grey-20 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-brand"
+                className="group relative overflow-hidden rounded-2xl bg-grey-90 aspect-[3/4] block"
               >
-                {/* 3D Icon Container with Brand Theme */}
-                <div className="relative h-16 w-16 small:h-20 small:w-20 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white shadow-lg shadow-brand/30 group-hover:scale-110 transition-all duration-300">
-                  {/* Inner glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  {/* Floating shadow for 3D effect */}
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-3 rounded-full bg-brand blur-md opacity-40 group-hover:opacity-60 transition-opacity" />
-                  <Icon size={28} className="relative z-10" />
-                </div>
-                <div className="mt-4 text-[13px] small:text-[14px] font-semibold text-grey-90 group-hover:text-brand transition-colors">
-                  {c.label}
-                </div>
-                {/* Hover arrow indicator */}
-                <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ChevronRight size={16} className="text-brand" />
+                <Image
+                  src={c.image}
+                  alt={c.label}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 small:p-5">
+                  <h3 className="text-white text-[14px] small:text-[16px] font-bold uppercase tracking-wide drop-shadow-lg">
+                    {c.label}
+                  </h3>
+                  <div className="mt-2">
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/60 text-white text-[11px] font-semibold uppercase tracking-wider group-hover:bg-white group-hover:text-grey-90 transition-colors duration-300">
+                      View All
+                      <ChevronRight size={12} />
+                    </span>
+                  </div>
                 </div>
               </LocalizedClientLink>
-            )
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>,
     "bg-gradient-to-b from-grey-5 to-white"
