@@ -76,10 +76,72 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
       canvas.on("object:removed", onChange)
       canvas.on("object:modified", onChange)
 
+      // Snap-to-center alignment guides
+      const SNAP_THRESHOLD = 8
+      const cX = device.width / 2
+      const cY = device.height / 2
+      let vLine: any = null
+      let hLine: any = null
+
+      const createGuideLine = (points: number[]) => {
+        const { Line } = require("fabric")
+        return new Line(points, {
+          stroke: "rgba(59,130,246,0.6)",
+          strokeWidth: 1,
+          strokeDashArray: [4, 3],
+          selectable: false,
+          evented: false,
+          excludeFromExport: true,
+        })
+      }
+
+      const onMoving = (e: any) => {
+        const obj = e.target
+        if (!obj) return
+        const objCX = obj.left + (obj.width * obj.scaleX) / 2
+        const objCY = obj.top + (obj.height * obj.scaleY) / 2
+
+        // Vertical center guide
+        if (Math.abs(objCX - cX) < SNAP_THRESHOLD) {
+          obj.set("left", cX - (obj.width * obj.scaleX) / 2)
+          if (!vLine) {
+            vLine = createGuideLine([cX, 0, cX, device.height])
+            canvas.add(vLine)
+          }
+        } else if (vLine) {
+          canvas.remove(vLine)
+          vLine = null
+        }
+
+        // Horizontal center guide
+        if (Math.abs(objCY - cY) < SNAP_THRESHOLD) {
+          obj.set("top", cY - (obj.height * obj.scaleY) / 2)
+          if (!hLine) {
+            hLine = createGuideLine([0, cY, device.width, cY])
+            canvas.add(hLine)
+          }
+        } else if (hLine) {
+          canvas.remove(hLine)
+          hLine = null
+        }
+        canvas.renderAll()
+      }
+
+      const onMoveEnd = () => {
+        if (vLine) { canvas.remove(vLine); vLine = null }
+        if (hLine) { canvas.remove(hLine); hLine = null }
+        canvas.renderAll()
+      }
+
+      canvas.on("object:moving", onMoving)
+      canvas.on("object:modified", onMoveEnd)
+
       return () => {
         canvas.off("object:added", onChange)
         canvas.off("object:removed", onChange)
         canvas.off("object:modified", onChange)
+        canvas.off("object:moving", onMoving)
+        canvas.off("object:modified", onMoveEnd)
         canvas.dispose()
         fabricRef.current = null
       }
@@ -265,10 +327,13 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
     const R = device.borderRadius
     const uid = device.id
 
-    // Padding around canvas for the case border
-    const PAD = 12
+    // Padding around canvas for buttons + border
+    const PAD = 14
     const svgW = W + PAD * 2
     const svgH = H + PAD * 2
+
+    // Safe zone insets
+    const SZ = device.inset
 
     // Camera cutout
     const cc = device.cameraCutout
@@ -280,7 +345,7 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
           <canvas ref={canvasElRef} style={{ borderRadius: R - 2, display: "block" }} />
         </div>
 
-        {/* === CLEAN CASE CUTOUT OVERLAY === */}
+        {/* === CASE CUTOUT OVERLAY === */}
         <svg
           className="absolute inset-0 pointer-events-none"
           width={svgW}
@@ -288,39 +353,79 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
           viewBox={`0 0 ${svgW} ${svgH}`}
         >
           <defs>
-            {/* Clip to case body */}
             <clipPath id={`body-${uid}`}>
               <rect x={PAD} y={PAD} width={W} height={H} rx={R} ry={R} />
             </clipPath>
+            {/* Drop shadow */}
+            <filter id={`ds-${uid}`} x="-5%" y="-3%" width="110%" height="110%">
+              <feDropShadow dx="0" dy="3" stdDeviation="6" floodColor="#000" floodOpacity="0.12" />
+            </filter>
           </defs>
 
-          {/* Case outline — clean thin border */}
+          {/* Subtle shadow under the case */}
           <rect
-            x={PAD}
-            y={PAD}
-            width={W}
-            height={H}
-            rx={R}
-            ry={R}
-            fill="none"
-            stroke="#c0c0c0"
-            strokeWidth={2.5}
+            x={PAD + 2} y={PAD + 3} width={W - 4} height={H - 2}
+            rx={R} ry={R} fill="rgba(0,0,0,0.08)"
+            filter={`url(#ds-${uid})`}
           />
 
-          {/* Camera cutout — simple dark hole */}
+          {/* Case outline — main border */}
+          <rect
+            x={PAD} y={PAD} width={W} height={H}
+            rx={R} ry={R}
+            fill="none" stroke="#b8b8b8" strokeWidth={3}
+          />
+          {/* Inner edge highlight */}
+          <rect
+            x={PAD + 1.5} y={PAD + 1.5} width={W - 3} height={H - 3}
+            rx={R - 1} ry={R - 1}
+            fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={0.5}
+          />
+
+          {/* Safe zone guide (dashed) — shows printable area */}
+          <rect
+            x={PAD + SZ.left} y={PAD + SZ.top}
+            width={W - SZ.left - SZ.right} height={H - SZ.top - SZ.bottom}
+            rx={Math.max(R - SZ.left, 4)} ry={Math.max(R - SZ.top, 4)}
+            fill="none" stroke="rgba(59,130,246,0.25)"
+            strokeWidth={1} strokeDasharray="6 4"
+          />
+
+          {/* Button cutout notches on case edges */}
+          {device.sideButtons?.map((btn, i) => {
+            const isRight = btn.side === "right"
+            // Small rounded notch on the case edge
+            const nx = isRight ? PAD + W - 1 : PAD - 3
+            const nw = 4
+            const nr = 2
+            return (
+              <rect
+                key={`btn-${i}`}
+                x={nx} y={PAD + btn.y}
+                width={nw} height={btn.height}
+                rx={nr} ry={nr}
+                fill="#d0d0d0" stroke="#b0b0b0" strokeWidth={0.5}
+              />
+            )
+          })}
+
+          {/* Camera cutout — clean dark hole */}
           {cc && (
-            <rect
-              x={PAD + cc.x}
-              y={PAD + cc.y}
-              width={cc.width}
-              height={cc.height}
-              rx={cc.radius}
-              ry={cc.radius}
-              fill="#1a1a1e"
-              stroke="#999"
-              strokeWidth={1}
-              clipPath={`url(#body-${uid})`}
-            />
+            <g clipPath={`url(#body-${uid})`}>
+              <rect
+                x={PAD + cc.x} y={PAD + cc.y}
+                width={cc.width} height={cc.height}
+                rx={cc.radius} ry={cc.radius}
+                fill="#1a1a1e" stroke="#888" strokeWidth={1.5}
+              />
+              {/* Subtle inner shadow for depth */}
+              <rect
+                x={PAD + cc.x + 2} y={PAD + cc.y + 2}
+                width={cc.width - 4} height={cc.height - 4}
+                rx={Math.max(cc.radius - 2, 2)} ry={Math.max(cc.radius - 2, 2)}
+                fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth={1}
+              />
+            </g>
           )}
         </svg>
       </div>

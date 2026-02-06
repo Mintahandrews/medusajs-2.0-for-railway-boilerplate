@@ -16,11 +16,23 @@ import {
   ArrowUp,
   ArrowDown,
   Sparkles,
+  LayoutTemplate,
 } from "lucide-react"
 import { CASE_COLORS, GRADIENT_PRESETS, STICKER_PACKS, FONT_OPTIONS } from "../types"
 import type { DesignerCanvasHandle } from "./designer-canvas"
 
-type PanelType = "text" | "color" | "stickers" | "gradient" | null
+type PanelType = "text" | "color" | "stickers" | "gradient" | "templates" | null
+
+const DESIGN_TEMPLATES = [
+  { id: "minimal-name", label: "Name", desc: "Centered name text", colors: ["#ffffff"], text: "YOUR NAME", textColor: "#1a1a1a", fontFamily: "'Bebas Neue', sans-serif", fontSize: 42 },
+  { id: "bold-initial", label: "Initial", desc: "Large letter initial", colors: ["#1E293B"], text: "A", textColor: "#ffffff", fontFamily: "'Playfair Display', serif", fontSize: 120 },
+  { id: "gradient-quote", label: "Quote", desc: "Inspirational quote", colors: ["#667eea", "#764ba2"], text: "Dream Big", textColor: "#ffffff", fontFamily: "'Pacifico', cursive", fontSize: 36 },
+  { id: "sunset-vibes", label: "Sunset", desc: "Warm gradient", colors: ["#ff6b6b", "#feca57"], text: "", textColor: "", fontFamily: "", fontSize: 0 },
+  { id: "ocean-calm", label: "Ocean", desc: "Cool blue tones", colors: ["#89f7fe", "#66a6ff"], text: "Stay Calm", textColor: "#0f172a", fontFamily: "Inter, sans-serif", fontSize: 28 },
+  { id: "dark-elegant", label: "Dark", desc: "Sleek dark theme", colors: ["#0f0c29", "#302b63", "#24243e"], text: "", textColor: "", fontFamily: "", fontSize: 0 },
+  { id: "rose-gold", label: "Rose Gold", desc: "Elegant pink-gold", colors: ["#b76e79", "#e8c4a0"], text: "Elegant", textColor: "#ffffff", fontFamily: "'Playfair Display', serif", fontSize: 34 },
+  { id: "forest-green", label: "Forest", desc: "Nature green tones", colors: ["#134e5e", "#71b280"], text: "", textColor: "", fontFamily: "", fontSize: 0 },
+]
 
 type Props = {
   canvasRef: React.RefObject<DesignerCanvasHandle | null>
@@ -211,6 +223,12 @@ export default function DesignerToolbar({
           label="Stickers"
           active={activePanel === "stickers"}
           onClick={() => togglePanel("stickers")}
+        />
+        <ToolButton
+          icon={<LayoutTemplate size={16} />}
+          label="Templates"
+          active={activePanel === "templates"}
+          onClick={() => togglePanel("templates")}
         />
       </div>
 
@@ -413,6 +431,59 @@ export default function DesignerToolbar({
                 </button>
               )
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Templates panel */}
+      {activePanel === "templates" && (
+        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <h4 className="text-[12px] font-semibold text-grey-90 uppercase tracking-wide">
+            Quick Start Templates
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            {DESIGN_TEMPLATES.map((tmpl) => {
+              const bg = tmpl.colors.length > 1
+                ? `linear-gradient(135deg, ${tmpl.colors.join(", ")})`
+                : tmpl.colors[0]
+              return (
+                <button
+                  key={tmpl.id}
+                  type="button"
+                  onClick={() => {
+                    // Apply gradient/color background
+                    if (tmpl.colors.length > 1) {
+                      onGradientChange(tmpl.colors)
+                    } else {
+                      onBackgroundChange(tmpl.colors[0])
+                    }
+                    // Add template text if any
+                    if (tmpl.text) {
+                      canvasRef.current?.addText(tmpl.text, {
+                        fill: tmpl.textColor,
+                        fontFamily: tmpl.fontFamily,
+                        fontSize: tmpl.fontSize,
+                      })
+                    }
+                    setActivePanel(null)
+                  }}
+                  className="group relative h-20 rounded-lg border border-grey-20 overflow-hidden hover:ring-2 hover:ring-brand/30 transition"
+                >
+                  <div className="absolute inset-0" style={{ background: bg }} />
+                  {tmpl.text && (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ color: tmpl.textColor, fontFamily: tmpl.fontFamily, fontSize: Math.min(tmpl.fontSize * 0.4, 24) }}
+                    >
+                      {tmpl.text}
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-sm px-2 py-1">
+                    <span className="text-[10px] text-white font-medium">{tmpl.label}</span>
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

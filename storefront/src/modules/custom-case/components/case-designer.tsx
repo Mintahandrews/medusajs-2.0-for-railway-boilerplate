@@ -22,7 +22,7 @@ import {
   Check,
   Eye,
 } from "lucide-react"
-import { CASE_MATERIALS, type CaseMaterial, type CaseViewer3DHandle } from "./case-viewer-3d"
+import { CASE_MATERIALS, ENV_PRESETS, type CaseMaterial, type EnvironmentPreset, type CaseViewer3DHandle } from "../case-viewer-types"
 
 const CaseViewer3D = dynamic(() => import("./case-viewer-3d"), {
   ssr: false,
@@ -49,9 +49,10 @@ export default function CaseDesigner() {
 
   // Preview tab state: "flat" or "3d"
   const [previewTab, setPreviewTab] = useState<"flat" | "3d">("3d")
-  // 3D material & color
+  // 3D material, color & environment
   const [caseMaterial, setCaseMaterial] = useState<CaseMaterial>("glossy")
   const [caseColor, setCaseColor] = useState("#c0c0c0")
+  const [envPreset, setEnvPreset] = useState<EnvironmentPreset>("studio")
   // Live 3D mini-preview
   const [showLive3D, setShowLive3D] = useState(false)
   const [liveTexture, setLiveTexture] = useState<string | null>(null)
@@ -234,6 +235,7 @@ export default function CaseDesigner() {
                     textureUrl={liveTexture}
                     caseMaterial={caseMaterial}
                     caseColor={caseColor}
+                    envPreset={envPreset}
                     compact
                     style={{ height: 280 }}
                   />
@@ -368,6 +370,26 @@ export default function CaseDesigner() {
                     ))}
                   </div>
                 </div>
+                {/* Environment preset */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Scene</span>
+                  <div className="flex gap-1">
+                    {ENV_PRESETS.map((e) => (
+                      <button
+                        key={e.id}
+                        type="button"
+                        onClick={() => setEnvPreset(e.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition border ${
+                          envPreset === e.id
+                            ? "border-brand bg-brand/5 text-brand"
+                            : "border-grey-20 text-grey-50 hover:border-grey-40"
+                        }`}
+                      >
+                        {e.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 {/* 3D Screenshot */}
                 <button
                   type="button"
@@ -390,6 +412,7 @@ export default function CaseDesigner() {
                   textureUrl={preview}
                   caseMaterial={caseMaterial}
                   caseColor={caseColor}
+                  envPreset={envPreset}
                   style={{ height: 460 }}
                 />
               ) : (

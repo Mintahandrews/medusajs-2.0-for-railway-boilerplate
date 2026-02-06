@@ -18,17 +18,7 @@ import {
 } from "@react-three/drei"
 import * as THREE from "three"
 import type { DeviceTemplate } from "../types"
-
-/* ── Material preset definitions ─────────────────────── */
-
-export type CaseMaterial = "glossy" | "matte" | "clear" | "soft-touch"
-
-export const CASE_MATERIALS: { id: CaseMaterial; label: string; desc: string }[] = [
-  { id: "glossy", label: "Glossy", desc: "High-shine smooth finish" },
-  { id: "matte", label: "Matte", desc: "Smooth non-reflective surface" },
-  { id: "clear", label: "Clear", desc: "Transparent protective case" },
-  { id: "soft-touch", label: "Soft Touch", desc: "Rubberized grip feel" },
-]
+import type { CaseMaterial, EnvironmentPreset, CaseViewer3DHandle } from "../case-viewer-types"
 
 function getMaterialProps(mat: CaseMaterial, isDesignFace: boolean) {
   switch (mat) {
@@ -219,15 +209,12 @@ function ScreenshotHelper({
 
 /* ── Main exported component ─────────────────────────── */
 
-export type CaseViewer3DHandle = {
-  screenshot: () => string | null
-}
-
 type CaseViewer3DProps = {
   device: DeviceTemplate
   textureUrl: string | null
   caseMaterial?: CaseMaterial
   caseColor?: string
+  envPreset?: EnvironmentPreset
   className?: string
   style?: React.CSSProperties
   autoRotate?: boolean
@@ -241,6 +228,7 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
       textureUrl,
       caseMaterial = "glossy",
       caseColor = "#c0c0c0",
+      envPreset = "studio",
       className = "",
       style,
       autoRotate = true,
@@ -310,7 +298,7 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
             far={10}
           />
 
-          <Environment preset="studio" />
+          <Environment preset={envPreset} />
 
           <OrbitControls
             enablePan={false}
