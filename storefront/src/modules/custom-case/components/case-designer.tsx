@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useCallback } from "react"
+import { useRef, useState, useCallback, lazy, Suspense } from "react"
 import { useParams } from "next/navigation"
 import { DEVICE_TEMPLATES, type DeviceTemplate } from "../types"
 import DesignerCanvas, { type DesignerCanvasHandle } from "./designer-canvas"
@@ -15,11 +15,12 @@ import {
   ZoomOut,
   X,
   Smartphone,
-  Move3D,
-  RotateCw,
+  Box,
   Loader2,
   Check,
 } from "lucide-react"
+
+const CaseViewer3D = lazy(() => import("./case-viewer-3d"))
 
 export default function CaseDesigner() {
   const canvasRef = useRef<DesignerCanvasHandle>(null)
@@ -32,11 +33,8 @@ export default function CaseDesigner() {
   const params = useParams()
   const countryCode = (params?.countryCode as string) || "gh"
 
-  // 3D rotation state for interactive preview
-  const [rotX, setRotX] = useState(4)
-  const [rotY, setRotY] = useState(-18)
-  const isDraggingRef = useRef(false)
-  const lastPosRef = useRef({ x: 0, y: 0 })
+  // Preview tab state: "flat" or "3d"
+  const [previewTab, setPreviewTab] = useState<"flat" | "3d">("3d")
 
   const handleBackgroundChange = useCallback((color: string) => {
     setBgColor(color)
@@ -214,14 +212,58 @@ export default function CaseDesigner() {
               </p>
             </div>
 
-            {/* Side-by-side: Front + Interactive 3D */}
-            <div className="flex flex-col medium:flex-row gap-6 items-stretch justify-center">
-              {/* Front flat view — phone case mockup */}
-              <div className="flex-1 flex flex-col items-center gap-2">
-                <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Case Back</span>
-                <div className="flex-1 bg-gradient-to-br from-[#f0f1f3] to-[#dcdee2] rounded-2xl p-8 flex items-center justify-center min-h-[380px]">
-                  <div className="relative" style={{ filter: "drop-shadow(0 10px 30px rgba(0,0,0,0.2))" }}>
-                    {/* Case shell border */}
+            {/* Tab switcher: Flat / 3D */}
+            <div className="flex items-center gap-1 p-1 bg-grey-5 rounded-xl w-fit mx-auto">
+              <button
+                type="button"
+                onClick={() => setPreviewTab("3d")}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition ${
+                  previewTab === "3d"
+                    ? "bg-white text-grey-90 shadow-sm"
+                    : "text-grey-50 hover:text-grey-70"
+                }`}
+              >
+                <Box size={14} />
+                3D View
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewTab("flat")}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition ${
+                  previewTab === "flat"
+                    ? "bg-white text-grey-90 shadow-sm"
+                    : "text-grey-50 hover:text-grey-70"
+                }`}
+              >
+                <Smartphone size={14} />
+                Flat View
+              </button>
+            </div>
+
+            {/* Preview content */}
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#f0f1f3] to-[#dcdee2]">
+              {previewTab === "3d" ? (
+                /* === Three.js 3D interactive viewer === */
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center h-[460px]">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="h-8 w-8 border-2 border-grey-30 border-t-brand rounded-full animate-spin" />
+                        <span className="text-[12px] text-grey-40">Loading 3D viewer...</span>
+                      </div>
+                    </div>
+                  }
+                >
+                  <CaseViewer3D
+                    device={device}
+                    textureUrl={preview}
+                    style={{ height: 460 }}
+                  />
+                </Suspense>
+              ) : (
+                /* === Flat case back view === */
+                <div className="flex items-center justify-center p-10 min-h-[460px]">
+                  <div className="relative" style={{ filter: "drop-shadow(0 12px 35px rgba(0,0,0,0.22))" }}>
                     <div
                       className="relative overflow-hidden"
                       style={{
@@ -230,18 +272,15 @@ export default function CaseDesigner() {
                         background: "linear-gradient(160deg, rgba(255,255,255,0.1), rgba(0,0,0,0.02))",
                       }}
                     >
-                      {/* Case depth — bottom edge */}
                       <div className="absolute bottom-0 left-[6px] right-[6px] h-[6px] -mb-[3px]" style={{ background: "linear-gradient(to bottom, #b5b5b5, #8a8a8a)", borderRadius: "0 0 4px 4px" }} />
-                      {/* Case depth — right edge */}
                       <div className="absolute right-0 top-[16px] bottom-[16px] w-[5px] -mr-[3px]" style={{ background: "linear-gradient(to right, #c0c0c0, #999)", borderRadius: "0 3px 3px 0" }} />
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={preview}
                         alt="Case design — back"
                         className="block"
-                        style={{ maxHeight: 380, borderRadius: device.borderRadius * 0.36 }}
+                        style={{ maxHeight: 420, borderRadius: device.borderRadius * 0.36 }}
                       />
-                      {/* Surface highlight */}
                       <div
                         className="absolute inset-0 pointer-events-none"
                         style={{
@@ -252,138 +291,12 @@ export default function CaseDesigner() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Interactive 3D view */}
-              <div className="flex-1 flex flex-col items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">3D View</span>
-                  <span className="flex items-center gap-1 text-[10px] text-grey-40 bg-grey-5 rounded-full px-2 py-0.5">
-                    <Move3D size={10} /> Drag to rotate
-                  </span>
-                </div>
-                <div
-                  className="flex-1 bg-gradient-to-br from-[#f0f1f3] to-[#dcdee2] rounded-2xl p-8 flex items-center justify-center min-h-[380px] cursor-grab active:cursor-grabbing select-none"
-                  style={{ perspective: 1200 }}
-                  onMouseDown={(e) => { isDraggingRef.current = true; lastPosRef.current = { x: e.clientX, y: e.clientY } }}
-                  onMouseMove={(e) => {
-                    if (!isDraggingRef.current) return
-                    setRotY((p) => Math.max(-50, Math.min(50, p + (e.clientX - lastPosRef.current.x) * 0.4)))
-                    setRotX((p) => Math.max(-30, Math.min(30, p - (e.clientY - lastPosRef.current.y) * 0.4)))
-                    lastPosRef.current = { x: e.clientX, y: e.clientY }
-                  }}
-                  onMouseUp={() => { isDraggingRef.current = false }}
-                  onMouseLeave={() => { isDraggingRef.current = false }}
-                  onTouchStart={(e) => { isDraggingRef.current = true; lastPosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }}
-                  onTouchMove={(e) => {
-                    if (!isDraggingRef.current) return
-                    const t = e.touches[0]
-                    setRotY((p) => Math.max(-50, Math.min(50, p + (t.clientX - lastPosRef.current.x) * 0.4)))
-                    setRotX((p) => Math.max(-30, Math.min(30, p - (t.clientY - lastPosRef.current.y) * 0.4)))
-                    lastPosRef.current = { x: t.clientX, y: t.clientY }
-                  }}
-                  onTouchEnd={() => { isDraggingRef.current = false }}
-                >
-                  {/* 3D phone case */}
-                  <div
-                    className="relative pointer-events-none"
-                    style={{
-                      transformStyle: "preserve-3d",
-                      transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-                      transition: isDraggingRef.current ? "none" : "transform 0.2s ease",
-                    }}
-                  >
-                    {/* Case back face */}
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        background: "linear-gradient(150deg, #d0d0d0 0%, #a8a8a8 100%)",
-                        borderRadius: device.borderRadius * 0.42,
-                        transform: "translateZ(-8px)",
-                        boxShadow: "inset 0 0 15px rgba(0,0,0,0.08)",
-                        border: "1px solid rgba(0,0,0,0.1)",
-                      }}
-                    />
-                    {/* Left edge */}
-                    <div
-                      className="absolute top-[8px] bottom-[8px]"
-                      style={{
-                        left: 0, width: 8,
-                        background: "linear-gradient(to left, #c5c5c5, #a0a0a0)",
-                        transform: "rotateY(-90deg)",
-                        transformOrigin: "left center",
-                        borderRadius: "2px 0 0 2px",
-                      }}
-                    />
-                    {/* Right edge */}
-                    <div
-                      className="absolute top-[8px] bottom-[8px]"
-                      style={{
-                        right: 0, width: 8,
-                        background: "linear-gradient(to right, #c5c5c5, #a0a0a0)",
-                        transform: "rotateY(90deg)",
-                        transformOrigin: "right center",
-                        borderRadius: "0 2px 2px 0",
-                      }}
-                    />
-                    {/* Top edge */}
-                    <div
-                      className="absolute left-[8px] right-[8px]"
-                      style={{
-                        top: 0, height: 8,
-                        background: "linear-gradient(to top, #d0d0d0, #b5b5b5)",
-                        transform: "rotateX(90deg)",
-                        transformOrigin: "center top",
-                        borderRadius: "2px 2px 0 0",
-                      }}
-                    />
-                    {/* Bottom edge */}
-                    <div
-                      className="absolute left-[8px] right-[8px]"
-                      style={{
-                        bottom: 0, height: 8,
-                        background: "linear-gradient(to bottom, #bbb, #888)",
-                        transform: "rotateX(-90deg)",
-                        transformOrigin: "center bottom",
-                        borderRadius: "0 0 2px 2px",
-                      }}
-                    />
-                    {/* Front face — case with design */}
-                    <div
-                      className="relative overflow-hidden"
-                      style={{
-                        border: "3px solid #aaa",
-                        borderRadius: device.borderRadius * 0.42,
-                        boxShadow: `${-rotY * 0.6}px ${rotX * 0.6}px 35px rgba(0,0,0,0.22)`,
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={preview}
-                        alt="Case design — 3D"
-                        className="block"
-                        style={{ maxHeight: 380, borderRadius: device.borderRadius * 0.36 }}
-                      />
-                      {/* Dynamic light reflection */}
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          background: `linear-gradient(${140 + rotY * 0.8}deg, rgba(255,255,255,${0.12 + Math.abs(rotY) * 0.003}) 0%, transparent 45%, transparent 55%, rgba(0,0,0,${0.04 + Math.abs(rotY) * 0.001}) 100%)`,
-                          borderRadius: device.borderRadius * 0.36,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setRotX(4); setRotY(-18) }}
-                  className="flex items-center gap-1.5 text-[11px] text-grey-40 hover:text-grey-70 transition"
-                >
-                  <RotateCw size={11} /> Reset angle
-                </button>
-              </div>
+              )}
             </div>
+
+            <p className="text-[11px] text-grey-40 text-center">
+              {previewTab === "3d" ? "Drag to rotate \u2022 Scroll to zoom \u2022 Auto-rotates" : "Flat preview of your case back design"}
+            </p>
 
             <div className="flex gap-3 pt-2">
               <button
