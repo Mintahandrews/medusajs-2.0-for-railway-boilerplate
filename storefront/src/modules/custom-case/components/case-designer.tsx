@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useCallback } from "react"
+import { useRef, useState, useCallback, useEffect } from "react"
 import { useParams } from "next/navigation"
 import dynamic from "next/dynamic"
 import { DEVICE_TEMPLATES, type DeviceTemplate } from "../types"
@@ -61,14 +61,65 @@ export default function CaseDesigner() {
   // 3D viewer ref for screenshot
   const viewer3DRef = useRef<CaseViewer3DHandle>(null)
 
+  const syncTimerRef = useRef<number | null>(null)
+  const previewOpen = Boolean(preview)
+
+  const syncPreviews = useCallback(() => {
+    if (!showLive3D && !previewOpen) return
+
+    if (syncTimerRef.current) {
+      window.clearTimeout(syncTimerRef.current)
+    }
+
+    syncTimerRef.current = window.setTimeout(() => {
+      const nextLive = showLive3D ? canvasRef.current?.exportImage({ multiplier: 1 }) : null
+      if (showLive3D && nextLive) setLiveTexture(nextLive)
+
+      if (previewOpen) {
+        const nextPreview = canvasRef.current?.exportImage({ multiplier: performanceMode ? 1 : 2 })
+        if (nextPreview) setPreview(nextPreview)
+      }
+    }, 250)
+  }, [performanceMode, previewOpen, showLive3D])
+
+  useEffect(() => {
+    const fabricCanvas = canvasRef.current?.getCanvas()
+    if (!fabricCanvas) return
+    if (!showLive3D && !previewOpen) return
+
+    const handler = () => syncPreviews()
+    fabricCanvas.on("object:added", handler)
+    fabricCanvas.on("object:removed", handler)
+    fabricCanvas.on("object:modified", handler)
+    fabricCanvas.on("text:changed", handler)
+
+    return () => {
+      fabricCanvas.off("object:added", handler)
+      fabricCanvas.off("object:removed", handler)
+      fabricCanvas.off("object:modified", handler)
+      fabricCanvas.off("text:changed", handler)
+      if (syncTimerRef.current) {
+        window.clearTimeout(syncTimerRef.current)
+        syncTimerRef.current = null
+      }
+    }
+  }, [device.id, previewOpen, showLive3D, syncPreviews])
+
+  useEffect(() => {
+    if (!previewOpen && !showLive3D) return
+    syncPreviews()
+  }, [performanceMode, previewOpen, showLive3D, syncPreviews])
+
   const handleBackgroundChange = useCallback((color: string) => {
     setBgColor(color)
     canvasRef.current?.setBackgroundColor(color)
-  }, [])
+    syncPreviews()
+  }, [syncPreviews])
 
   const handleGradientChange = useCallback((colors: string[]) => {
     canvasRef.current?.setGradientBackground(colors)
-  }, [])
+    syncPreviews()
+  }, [syncPreviews])
 
   const handleDeviceChange = useCallback((d: DeviceTemplate) => {
     setDevice(d)
@@ -546,7 +597,7 @@ export default function CaseDesigner() {
                             cx={lens.cx}
                             cy={lens.cy}
                             r={lens.r + 2}
-                            fill={device.cameraStyle === "individual" ? "#1a1a1e" : "none"}
+                            fill="none"
                             stroke={device.cameraStyle === "individual" ? "#888" : "rgba(40,40,45,0.7)"}
                             strokeWidth={device.cameraStyle === "individual" ? 2 : 1}
                           />
@@ -554,7 +605,7 @@ export default function CaseDesigner() {
                             cx={lens.cx}
                             cy={lens.cy}
                             r={lens.r}
-                            fill={device.cameraStyle === "individual" ? "#111114" : "#0a0a0e"}
+                            fill="none"
                             stroke="rgba(100,100,110,0.5)"
                             strokeWidth={0.5}
                           />
