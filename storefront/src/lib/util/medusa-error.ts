@@ -1,22 +1,29 @@
 export default function medusaError(error: any): never {
-  if (error.response) {
-    // The request was made and the server responded with a status code
-    // that falls out of the range of 2xx
-    const u = new URL(error.config.url, error.config.baseURL)
-    console.error("Resource:", u.toString())
+  // Handle Axios-style errors (legacy)
+  if (error?.response?.data) {
+    try {
+      const u = error.config?.url
+        ? new URL(error.config.url, error.config.baseURL || "")
+        : null
+      if (u) console.error("Resource:", u.toString())
+    } catch { /* ignore URL parse errors */ }
     console.error("Response data:", error.response.data)
     console.error("Status code:", error.response.status)
-    console.error("Headers:", error.response.headers)
 
-    // Extracting the error message from the response data
-    const message = error.response.data.message || error.response.data
-
-    throw new Error(message.charAt(0).toUpperCase() + message.slice(1) + ".")
-  } else if (error.request) {
-    // The request was made but no response was received
-    throw new Error("No response received: " + error.request)
-  } else {
-    // Something happened in setting up the request that triggered an Error
-    throw new Error("Error setting up the request: " + error.message)
+    const message = error.response.data?.message || error.response.data
+    const msg = typeof message === "string" ? message : JSON.stringify(message)
+    throw new Error(msg.charAt(0).toUpperCase() + msg.slice(1) + ".")
   }
+
+  // Handle @medusajs/js-sdk fetch errors and plain Error objects
+  if (error?.message) {
+    throw new Error(error.message)
+  }
+
+  // Handle string errors
+  if (typeof error === "string") {
+    throw new Error(error)
+  }
+
+  throw new Error("An unknown error occurred.")
 }

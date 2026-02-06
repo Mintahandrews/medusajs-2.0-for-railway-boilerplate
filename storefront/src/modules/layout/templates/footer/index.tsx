@@ -1,5 +1,5 @@
 import { Text, clx } from "@medusajs/ui"
-import { ArrowUp, Facebook, Instagram, Twitter, Youtube, MessageCircle } from "lucide-react"
+import { ArrowUp, Facebook, Instagram, Twitter, Youtube } from "lucide-react"
 import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -134,17 +134,6 @@ export default async function Footer() {
                   </LocalizedClientLink>
                 </li>
               ))}
-              <li>
-                <a
-                  href="https://wa.me/233540451001"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 hover:text-brand transition"
-                >
-                  <MessageCircle size={14} />
-                  <span>WhatsApp</span>
-                </a>
-              </li>
             </ul>
           </div>
         </div>
@@ -163,13 +152,13 @@ export default async function Footer() {
               <span className="text-[12px] font-semibold text-[#003478]">MoMo</span>
             </div>
 
-            {/* Vodafone Cash — official red/white brand */}
+            {/* Telecel Cash — official blue brand */}
             <div className="flex items-center gap-2 rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-label="Vodafone Cash">
-                <circle cx="12" cy="12" r="12" fill="#E60000" />
-                <path d="M12 4c-.6 0-1.1.3-1.4.7L7.2 11c-.2.3-.2.7 0 1l3.4 6.3c.3.5.8.7 1.4.7s1.1-.2 1.4-.7l3.4-6.3c.2-.3.2-.7 0-1l-3.4-6.3C13.1 4.3 12.6 4 12 4z" fill="white" />
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-label="Telecel Cash">
+                <circle cx="12" cy="12" r="12" fill="#0033A0" />
+                <text x="12" y="15.5" textAnchor="middle" fontFamily="Arial,sans-serif" fontWeight="bold" fontSize="11" fill="white">T</text>
               </svg>
-              <span className="text-[12px] font-semibold text-[#E60000]">Vodafone Cash</span>
+              <span className="text-[12px] font-semibold text-[#0033A0]">Telecel Cash</span>
             </div>
 
             {/* Visa — official brand SVG */}

@@ -93,22 +93,38 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  iphone: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=600&h=700&fit=crop&q=80",
-  cases: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=600&h=700&fit=crop&q=80",
-  "android phones": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=700&fit=crop&q=80",
-  earphones: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=700&fit=crop&q=80",
-  headphones: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=700&fit=crop&q=80",
-  laptops: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=700&fit=crop&q=80",
-  speakers: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&h=700&fit=crop&q=80",
-  chargers: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=600&h=700&fit=crop&q=80",
-  cables: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=700&fit=crop&q=80",
-  "screen protectors": "https://images.unsplash.com/photo-1601972602237-8c79241e468b?w=600&h=700&fit=crop&q=80",
-  "laptop bags": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=700&fit=crop&q=80",
-  watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=700&fit=crop&q=80",
-  smartwatch: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&h=700&fit=crop&q=80",
-  tablets: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&h=700&fit=crop&q=80",
-  accessories: "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=600&h=700&fit=crop&q=80",
-  default: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=600&h=700&fit=crop&q=80",
+  // iPhone — iPhone 14 Pro deep purple on dark surface
+  iphone: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&h=1000&fit=crop&q=80",
+  // Cases — colorful phone cases flat lay
+  cases: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&h=1000&fit=crop&q=80",
+  // Android — Samsung Galaxy on table
+  "android phones": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&h=1000&fit=crop&q=80",
+  // Earphones — AirPods Pro on marble
+  earphones: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800&h=1000&fit=crop&q=80",
+  // Headphones — white headphones product shot
+  headphones: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=1000&fit=crop&q=80",
+  // Laptops — MacBook Pro on desk
+  laptops: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=1000&fit=crop&q=80",
+  // Speakers — portable bluetooth speaker
+  speakers: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&h=1000&fit=crop&q=80",
+  // Chargers — white charger and cable on clean background
+  chargers: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&h=1000&fit=crop&q=80",
+  // Cables — USB-C cables neatly arranged
+  cables: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=1000&fit=crop&q=80",
+  // Screen protectors — phone screen closeup
+  "screen protectors": "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&h=1000&fit=crop&q=80",
+  // Laptop bags — stylish backpack
+  "laptop bags": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=1000&fit=crop&q=80",
+  // Watches — minimal watch product shot
+  watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=1000&fit=crop&q=80",
+  // Smartwatch — Apple Watch on wrist
+  smartwatch: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&h=1000&fit=crop&q=80",
+  // Tablets — iPad on desk
+  tablets: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&h=1000&fit=crop&q=80",
+  // Accessories — tech accessories flat lay
+  accessories: "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=800&h=1000&fit=crop&q=80",
+  // Default — general tech
+  default: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&h=1000&fit=crop&q=80",
 }
 
 function getCategoryImage(label: string): string {
@@ -138,24 +154,26 @@ function ShopByCategory({ categories }: { categories: any[] }) {
 
   const fallback = [
     { label: "iPhones", href: "/store", image: CATEGORY_IMAGES.iphone },
-    { label: "Cases", href: "/store", image: CATEGORY_IMAGES.cases },
-    { label: "Earphones/buds", href: "/store", image: CATEGORY_IMAGES.earphones },
+    { label: "Android Phones", href: "/store", image: CATEGORY_IMAGES["android phones"] },
+    { label: "Earphones/Buds", href: "/store", image: CATEGORY_IMAGES.earphones },
     { label: "Laptops", href: "/store", image: CATEGORY_IMAGES.laptops },
     { label: "Speakers", href: "/store", image: CATEGORY_IMAGES.speakers },
     { label: "Chargers", href: "/store", image: CATEGORY_IMAGES.chargers },
+    { label: "Cases", href: "/store", image: CATEGORY_IMAGES.cases },
     { label: "Screen Protectors", href: "/store", image: CATEGORY_IMAGES["screen protectors"] },
-    { label: "Laptop bags", href: "/store", image: CATEGORY_IMAGES["laptop bags"] },
+    { label: "Laptop Bags", href: "/store", image: CATEGORY_IMAGES["laptop bags"] },
   ]
 
   const items = topLevel.length ? topLevel : fallback
 
-  // Split into featured (first 2 large) and rest (smaller grid)
-  const featured = items.slice(0, 2)
-  const rest = items.slice(2)
+  // Split: first 2 = hero row, next 4 = mid row, rest = bottom row
+  const heroItems = items.slice(0, 2)
+  const midItems = items.slice(2, 6)
+  const bottomItems = items.slice(6)
 
   return sectionShell(
     <div className="py-16 small:py-20">
-      <div className="text-center mb-12">
+      <div className="text-center mb-10 small:mb-14">
         <span className="inline-block px-4 py-1.5 rounded-full bg-brand/10 text-brand text-[12px] font-semibold uppercase tracking-wider mb-4">
           Browse Collections
         </span>
@@ -167,31 +185,30 @@ function ShopByCategory({ categories }: { categories: any[] }) {
         </p>
       </div>
 
-      <div className="mx-auto max-w-[1200px] space-y-4 small:space-y-5">
-        {/* Top row — 2 large featured cards */}
-        <div className="grid grid-cols-1 small:grid-cols-2 gap-4 small:gap-5">
-          {featured.map((c) => (
+      <div className="mx-auto max-w-[1200px] space-y-3 small:space-y-4">
+        {/* Hero row — 2 large featured cards */}
+        <div className="grid grid-cols-1 small:grid-cols-2 gap-3 small:gap-4">
+          {heroItems.map((c) => (
             <LocalizedClientLink
               key={c.label}
               href={c.href}
-              className="group relative overflow-hidden rounded-2xl bg-grey-90 aspect-[4/3] small:aspect-[3/2] block"
+              className="group relative overflow-hidden rounded-2xl small:rounded-3xl block"
+              style={{ aspectRatio: "16 / 10" }}
             >
               <Image
                 src={c.image}
                 alt={c.label}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-5 small:p-7">
-                <h3 className="text-white text-[20px] small:text-[24px] font-bold uppercase tracking-wide drop-shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/5 group-hover:from-black/80 transition-all duration-500" />
+              <div className="absolute bottom-0 left-0 right-0 p-5 small:p-8">
+                <h3 className="text-white text-[22px] small:text-[28px] font-extrabold uppercase tracking-wide drop-shadow-lg">
                   {c.label}
                 </h3>
                 <div className="mt-3">
-                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-grey-90 text-[12px] font-semibold uppercase tracking-wider hover:bg-brand hover:text-white transition-colors duration-300">
+                  <span className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-white text-grey-90 text-[12px] font-bold uppercase tracking-wider shadow-lg group-hover:bg-brand group-hover:text-white transition-all duration-300 group-hover:shadow-brand/30">
                     View All
                     <ChevronRight size={14} />
                   </span>
@@ -201,31 +218,70 @@ function ShopByCategory({ categories }: { categories: any[] }) {
           ))}
         </div>
 
-        {/* Bottom row — smaller cards grid */}
-        {rest.length > 0 && (
-          <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-4 small:gap-5">
-            {rest.map((c) => (
+        {/* Mid row — 4 equal cards */}
+        {midItems.length > 0 && (
+          <div className="grid grid-cols-2 small:grid-cols-4 gap-3 small:gap-4">
+            {midItems.map((c) => (
               <LocalizedClientLink
                 key={c.label}
                 href={c.href}
-                className="group relative overflow-hidden rounded-2xl bg-grey-90 aspect-[3/4] block"
+                className="group relative overflow-hidden rounded-2xl block"
+                style={{ aspectRatio: "3 / 4" }}
               >
                 <Image
                   src={c.image}
                   alt={c.label}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-                {/* Content */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-500" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 small:p-5">
-                  <h3 className="text-white text-[14px] small:text-[16px] font-bold uppercase tracking-wide drop-shadow-lg">
+                  <h3 className="text-white text-[15px] small:text-[17px] font-bold uppercase tracking-wide drop-shadow-lg">
                     {c.label}
                   </h3>
-                  <div className="mt-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/60 text-white text-[11px] font-semibold uppercase tracking-wider group-hover:bg-white group-hover:text-grey-90 transition-colors duration-300">
+                  <div className="mt-2.5">
+                    <span className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white text-[11px] font-semibold uppercase tracking-wider group-hover:bg-white group-hover:text-grey-90 group-hover:border-white transition-all duration-300">
+                      View All
+                      <ChevronRight size={12} />
+                    </span>
+                  </div>
+                </div>
+              </LocalizedClientLink>
+            ))}
+          </div>
+        )}
+
+        {/* Bottom row — remaining cards */}
+        {bottomItems.length > 0 && (
+          <div className={`grid gap-3 small:gap-4 ${
+            bottomItems.length === 1
+              ? "grid-cols-1"
+              : bottomItems.length === 2
+              ? "grid-cols-2"
+              : "grid-cols-2 small:grid-cols-3"
+          }`}>
+            {bottomItems.map((c) => (
+              <LocalizedClientLink
+                key={c.label}
+                href={c.href}
+                className="group relative overflow-hidden rounded-2xl block"
+                style={{ aspectRatio: "4 / 3" }}
+              >
+                <Image
+                  src={c.image}
+                  alt={c.label}
+                  fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-500" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 small:p-5">
+                  <h3 className="text-white text-[15px] small:text-[17px] font-bold uppercase tracking-wide drop-shadow-lg">
+                    {c.label}
+                  </h3>
+                  <div className="mt-2.5">
+                    <span className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white text-[11px] font-semibold uppercase tracking-wider group-hover:bg-white group-hover:text-grey-90 group-hover:border-white transition-all duration-300">
                       View All
                       <ChevronRight size={12} />
                     </span>

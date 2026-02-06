@@ -12,9 +12,14 @@ import { revalidateTag } from "next/cache"
 export async function findCustomCaseProduct() {
   try {
     const { products } = await sdk.store.product.list(
-      { q: "custom case", limit: 5 },
+      { q: "custom case", limit: 10 },
       { next: { tags: ["products"] } }
     )
+
+    if (!products?.length) {
+      console.warn("[custom-case] No products returned for 'custom case' search")
+      return null
+    }
 
     // Find product whose title matches custom case
     const match = products.find((p) => {
@@ -22,14 +27,23 @@ export async function findCustomCaseProduct() {
       return t.includes("custom") && t.includes("case")
     })
 
-    if (!match || !match.variants?.length) return null
+    if (!match) {
+      console.warn("[custom-case] No product title matched 'custom case'. Found:", products.map((p) => p.title))
+      return null
+    }
+
+    if (!match.variants?.length) {
+      console.warn("[custom-case] Product found but has no variants:", match.id, match.title)
+      return null
+    }
 
     return {
       productId: match.id,
       variantId: match.variants[0].id,
       title: match.title,
     }
-  } catch {
+  } catch (err) {
+    console.error("[custom-case] Error searching for custom case product:", err)
     return null
   }
 }
@@ -61,7 +75,16 @@ export async function addCustomCaseToCart({
   }
 
   // 2. Get or create cart
-  const cart = await getOrSetCart(countryCode)
+  let cart
+  try {
+    cart = await getOrSetCart(countryCode)
+  } catch (cartErr: any) {
+    console.error("[custom-case] Cart error:", cartErr)
+    return {
+      success: false,
+      error: cartErr?.message || "Could not create or retrieve cart. Is the Medusa backend running?",
+    }
+  }
   if (!cart) {
     return { success: false, error: "Could not create or retrieve cart." }
   }
