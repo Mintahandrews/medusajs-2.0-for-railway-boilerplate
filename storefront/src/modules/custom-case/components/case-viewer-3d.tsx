@@ -9,7 +9,7 @@ import {
   useImperativeHandle,
   useCallback,
 } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Canvas, useThree } from "@react-three/fiber"
 import {
   OrbitControls,
   Environment,
@@ -171,7 +171,7 @@ function CaseLip({
   )
 }
 
-/* ── Camera cutout ───────────────────────────────────── */
+/* ── Camera cutout (simple dark hole) ────────────────── */
 
 function CameraCutout({ device }: { device: DeviceTemplate }) {
   const { w, h, d } = useMemo(() => toWorld(device), [device])
@@ -180,75 +180,15 @@ function CameraCutout({ device }: { device: DeviceTemplate }) {
 
   const ccW = cc.width * 0.025
   const ccH = cc.height * 0.025
+  const ccR = Math.min(cc.radius * 0.025, Math.min(ccW, ccH) * 0.5)
   const ccCenterX = (cc.x + cc.width / 2) * 0.025 - w / 2
   const ccCenterY = -(cc.y + cc.height / 2) * 0.025 + h / 2
 
   return (
-    <group position={[ccCenterX, ccCenterY, d / 2 + 0.001]}>
-      <mesh>
-        <planeGeometry args={[ccW + 0.1, ccH + 0.1]} />
-        <meshPhysicalMaterial
-          color="#1a1a20"
-          roughness={0.12}
-          metalness={0.3}
-          clearcoat={0.9}
-          clearcoatRoughness={0.08}
-        />
-      </mesh>
-
-      {device.cameraLenses?.map((lens, i) => {
-        const lx = lens.cx * 0.025 - w / 2 - ccCenterX
-        const ly = -(lens.cy * 0.025 - h / 2) - ccCenterY
-        const lr = lens.r * 0.025
-        return (
-          <group key={i} position={[lx, ly, 0.01]}>
-            <mesh>
-              <ringGeometry args={[lr, lr + 0.06, 32]} />
-              <meshStandardMaterial color="#888" roughness={0.15} metalness={0.85} />
-            </mesh>
-            <mesh>
-              <circleGeometry args={[lr, 32]} />
-              <meshPhysicalMaterial
-                color="#080814"
-                roughness={0.03}
-                metalness={0.5}
-                clearcoat={1.0}
-                clearcoatRoughness={0.02}
-              />
-            </mesh>
-            <mesh position={[0, 0, 0.005]}>
-              <ringGeometry args={[lr * 0.3, lr * 0.55, 32]} />
-              <meshStandardMaterial color="#15152a" roughness={0.3} metalness={0.2} transparent opacity={0.7} />
-            </mesh>
-            <mesh position={[-lr * 0.2, lr * 0.2, 0.008]}>
-              <circleGeometry args={[lr * 0.18, 16]} />
-              <meshBasicMaterial color="#fff" transparent opacity={0.18} />
-            </mesh>
-          </group>
-        )
-      })}
-
-      {device.brand === "Apple" && (
-        <>
-          <mesh position={[
-            (cc.x + 16) * 0.025 - w / 2 - ccCenterX,
-            -((cc.y + cc.height - 16) * 0.025 - h / 2) - ccCenterY,
-            0.01,
-          ]}>
-            <circleGeometry args={[0.12, 16]} />
-            <meshStandardMaterial color="#ffe8cc" roughness={0.4} metalness={0.1} emissive="#ffe0a0" emissiveIntensity={0.1} />
-          </mesh>
-          <mesh position={[
-            (cc.x + cc.width - 16) * 0.025 - w / 2 - ccCenterX,
-            -((cc.y + cc.height - 16) * 0.025 - h / 2) - ccCenterY,
-            0.01,
-          ]}>
-            <circleGeometry args={[0.08, 16]} />
-            <meshStandardMaterial color="#111118" roughness={0.5} metalness={0.2} />
-          </mesh>
-        </>
-      )}
-    </group>
+    <mesh position={[ccCenterX, ccCenterY, d / 2 + 0.001]}>
+      <planeGeometry args={[ccW, ccH]} />
+      <meshStandardMaterial color="#1a1a1e" roughness={0.5} metalness={0.1} />
+    </mesh>
   )
 }
 
