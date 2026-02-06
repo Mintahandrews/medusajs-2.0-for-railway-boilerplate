@@ -91,6 +91,10 @@ function CaseBody({
     return tex
   }, [textureUrl])
 
+  useEffect(() => {
+    return () => { texture?.dispose() }
+  }, [texture])
+
   const materials = useMemo(() => {
     const sideProps = getMaterialProps(caseMaterial, false)
     const backProps = getMaterialProps(caseMaterial, true)
@@ -113,8 +117,12 @@ function CaseBody({
       ...(caseMaterial === "clear" ? { transparent: true, opacity: 0.3 } : {}),
     } as THREE.MeshPhysicalMaterialParameters)
 
-    return [caseSide, caseSide, caseSide, caseSide, caseBack, caseInner]
+    return { list: [caseSide, caseSide, caseSide, caseSide, caseBack, caseInner], unique: [caseSide, caseBack, caseInner] }
   }, [texture, caseMaterial, caseColor])
+
+  useEffect(() => {
+    return () => { materials.unique.forEach((m) => m.dispose()) }
+  }, [materials])
 
   return (
     <RoundedBox
@@ -122,7 +130,7 @@ function CaseBody({
       args={[w, h, d]}
       radius={r}
       smoothness={8}
-      material={materials}
+      material={materials.list}
       castShadow
       receiveShadow
     />
@@ -166,7 +174,7 @@ function CaseLip({
 function CameraCutout({ device }: { device: DeviceTemplate }) {
   const { w, h, d } = useMemo(() => toWorld(device), [device])
   const cc = device.cameraCutout
-  if (!cc) return null
+  if (!cc || device.cameraStyle === "individual") return null
 
   const ccW = cc.width * 0.025
   const ccH = cc.height * 0.025

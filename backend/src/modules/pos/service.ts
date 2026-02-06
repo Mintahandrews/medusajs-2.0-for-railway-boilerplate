@@ -20,6 +20,7 @@ type PersistedData = {
   productMappings: [string, PosProductMapping][]
   orderSyncs: [string, PosOrderSync][]
   inventorySyncs: [string, PosInventorySync][]
+  documentCounter?: number
 }
 
 /**
@@ -55,7 +56,8 @@ export default class PosModuleService {
         if (data.productMappings) this.productMappings = new Map(data.productMappings)
         if (data.orderSyncs) this.orderSyncs = new Map(data.orderSyncs)
         if (data.inventorySyncs) this.inventorySyncs = new Map(data.inventorySyncs)
-        console.log(`[POS] Loaded ${this.productMappings.size} products, ${this.orderSyncs.size} orders, ${this.inventorySyncs.size} inventory records from disk`)
+        if (data.documentCounter != null) this.documentCounter = data.documentCounter
+        console.log(`[POS] Loaded ${this.productMappings.size} products, ${this.orderSyncs.size} orders, ${this.inventorySyncs.size} inventory records, counter=${this.documentCounter} from disk`)
       }
     } catch (err) {
       console.error("[POS] Failed to load persisted data:", err)
@@ -72,6 +74,7 @@ export default class PosModuleService {
         productMappings: Array.from(this.productMappings.entries()),
         orderSyncs: Array.from(this.orderSyncs.entries()),
         inventorySyncs: Array.from(this.inventorySyncs.entries()),
+        documentCounter: this.documentCounter,
       }
       fs.writeFileSync(this.dataFilePath, JSON.stringify(data, null, 2), "utf-8")
     } catch (err) {
@@ -124,7 +127,16 @@ export default class PosModuleService {
     data: Partial<
       Pick<
         PosProductMapping,
-        "pos_product_id" | "pos_sku" | "sync_status" | "error_message"
+        | "pos_product_id"
+        | "pos_sku"
+        | "pos_barcode"
+        | "pos_name"
+        | "tax_rate"
+        | "tax_inclusive"
+        | "cost_price"
+        | "markup"
+        | "sync_status"
+        | "error_message"
       >
     >
   ): Promise<PosProductMapping | null> {

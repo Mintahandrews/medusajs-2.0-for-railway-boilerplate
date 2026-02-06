@@ -26,7 +26,10 @@ export function validatePosRequest(
 
   // External agent requests must provide the API key header
   const apiKey = req.headers["x-pos-api-key"] as string | undefined
-  if (apiKey && !posService.validateApiKey(apiKey)) {
+  if (!apiKey) {
+    return { status: 401, message: "POS API key required" }
+  }
+  if (!posService.validateApiKey(apiKey)) {
     return { status: 401, message: "Invalid POS API key" }
   }
 

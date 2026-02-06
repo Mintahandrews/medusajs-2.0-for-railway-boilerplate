@@ -37,9 +37,12 @@ export default async function orderPosSyncHandler({
       pos_product_id: null,
     }))
 
+    const summary = (order as any).summary || {}
     await posService.createOrderSync({
       medusa_order_id: order.id,
-      total_amount: (order as any).summary?.current_order_total ?? 0,
+      total_amount: summary.current_order_total ?? 0,
+      tax_total: summary.tax_total ?? 0,
+      discount_total: summary.discount_total ?? 0,
       currency_code: order.currency_code,
       sync_direction: "medusa_to_pos",
       pos_document_type: "sale",
