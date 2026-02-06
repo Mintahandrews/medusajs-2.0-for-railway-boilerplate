@@ -16,6 +16,7 @@ import { getCategoryIcon } from "@lib/util/category-icon"
 const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "Home", href: "/", testId: "home-link" },
   { name: "Deals", href: "/deals", testId: "deals-link" },
+  { name: "Custom Case", href: "/custom-case", testId: "custom-case-link" },
   { name: "About Us", href: "/about-us", testId: "about-us-link" },
   { name: "Account", href: "/account", testId: "account-link" },
   { name: "Wishlist", href: "/account/wishlist", testId: "wishlist-link" },
