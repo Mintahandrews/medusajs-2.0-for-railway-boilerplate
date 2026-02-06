@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { POS_MODULE } from "../../../../modules/pos"
 import PosModuleService from "../../../../modules/pos/service"
+import { validatePosRequest } from "../../../../modules/pos/middleware"
 import type { SyncStatus, CreateProductMappingInput } from "../../../../modules/pos/types"
 
 /**
@@ -12,6 +13,8 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
+  const authError = validatePosRequest(req, posService)
+  if (authError) { res.status(authError.status).json({ message: authError.message }); return }
   const sync_status = req.query.sync_status as SyncStatus | undefined
   const mappings = await posService.listProductMappings(
     sync_status ? { sync_status } : undefined
@@ -28,6 +31,8 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
+  const authError = validatePosRequest(req, posService)
+  if (authError) { res.status(authError.status).json({ message: authError.message }); return }
   const body = req.body as CreateProductMappingInput
 
   if (!body.medusa_product_id || !body.medusa_variant_id) {

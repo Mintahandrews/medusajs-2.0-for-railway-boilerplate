@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { POS_MODULE } from "../../../../modules/pos"
 import PosModuleService from "../../../../modules/pos/service"
+import { validatePosRequest } from "../../../../modules/pos/middleware"
 import type { SyncStatus, CreateInventorySyncInput } from "../../../../modules/pos/types"
 
 /**
@@ -12,6 +13,8 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
+  const authError = validatePosRequest(req, posService)
+  if (authError) { res.status(authError.status).json({ message: authError.message }); return }
   const sync_status = req.query.sync_status as SyncStatus | undefined
   const syncs = await posService.listInventorySyncs(
     sync_status ? { sync_status } : undefined
@@ -29,6 +32,8 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
+  const authError = validatePosRequest(req, posService)
+  if (authError) { res.status(authError.status).json({ message: authError.message }); return }
   const body = req.body as CreateInventorySyncInput
 
   if (!body.medusa_variant_id || !body.pos_product_id) {

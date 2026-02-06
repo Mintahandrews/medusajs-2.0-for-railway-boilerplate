@@ -1,4 +1,6 @@
 import { ulid } from "ulid"
+import * as fs from "fs"
+import * as path from "path"
 import type {
   PosProductMapping,
   PosOrderSync,
@@ -11,11 +13,18 @@ import type {
   SyncStatus,
 } from "./types"
 
+/** Shape of the persisted JSON file */
+type PersistedData = {
+  productMappings: [string, PosProductMapping][]
+  orderSyncs: [string, PosOrderSync][]
+  inventorySyncs: [string, PosInventorySync][]
+}
+
 /**
  * POS Module Service
  *
  * Manages sync state between Medusa and Aronium POS.
- * Uses in-memory storage with JSON file persistence.
+ * Uses in-memory Maps backed by JSON file persistence.
  * A dedicated sync agent (running alongside Aronium) calls
  * the admin API routes to push/pull data.
  */
@@ -24,9 +33,46 @@ export default class PosModuleService {
   private productMappings: Map<string, PosProductMapping> = new Map()
   private orderSyncs: Map<string, PosOrderSync> = new Map()
   private inventorySyncs: Map<string, PosInventorySync> = new Map()
+  private dataFilePath: string
 
   constructor(_: any, options: PosModuleOptions) {
     this.options_ = options || {}
+    this.dataFilePath = path.resolve(process.cwd(), "data", "pos-sync.json")
+    this.loadFromDisk()
+  }
+
+  // ─── Persistence ────────────────────────────────────────
+
+  private loadFromDisk(): void {
+    try {
+      if (fs.existsSync(this.dataFilePath)) {
+        const raw = fs.readFileSync(this.dataFilePath, "utf-8")
+        const data: PersistedData = JSON.parse(raw)
+        if (data.productMappings) this.productMappings = new Map(data.productMappings)
+        if (data.orderSyncs) this.orderSyncs = new Map(data.orderSyncs)
+        if (data.inventorySyncs) this.inventorySyncs = new Map(data.inventorySyncs)
+        console.log(`[POS] Loaded ${this.productMappings.size} products, ${this.orderSyncs.size} orders, ${this.inventorySyncs.size} inventory records from disk`)
+      }
+    } catch (err) {
+      console.error("[POS] Failed to load persisted data:", err)
+    }
+  }
+
+  private saveToDisk(): void {
+    try {
+      const dir = path.dirname(this.dataFilePath)
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+      }
+      const data: PersistedData = {
+        productMappings: Array.from(this.productMappings.entries()),
+        orderSyncs: Array.from(this.orderSyncs.entries()),
+        inventorySyncs: Array.from(this.inventorySyncs.entries()),
+      }
+      fs.writeFileSync(this.dataFilePath, JSON.stringify(data, null, 2), "utf-8")
+    } catch (err) {
+      console.error("[POS] Failed to persist data:", err)
+    }
   }
 
   // ─── Auth ──────────────────────────────────────────────────
@@ -59,6 +105,7 @@ export default class PosModuleService {
       updated_at: now,
     }
     this.productMappings.set(mapping.id, mapping)
+    this.saveToDisk()
     return mapping
   }
 
@@ -82,6 +129,7 @@ export default class PosModuleService {
         : {}),
     }
     this.productMappings.set(id, updated)
+    this.saveToDisk()
     return updated
   }
 
@@ -108,7 +156,9 @@ export default class PosModuleService {
   }
 
   async deleteProductMapping(id: string): Promise<boolean> {
-    return this.productMappings.delete(id)
+    const deleted = this.productMappings.delete(id)
+    if (deleted) this.saveToDisk()
+    return deleted
   }
 
   // ─── Order Syncs ───────────────────────────────────────────
@@ -128,6 +178,7 @@ export default class PosModuleService {
       updated_at: now,
     }
     this.orderSyncs.set(sync.id, sync)
+    this.saveToDisk()
     return sync
   }
 
@@ -145,6 +196,7 @@ export default class PosModuleService {
       updated_at: new Date().toISOString(),
     }
     this.orderSyncs.set(id, updated)
+    this.saveToDisk()
     return updated
   }
 
@@ -189,6 +241,7 @@ export default class PosModuleService {
       updated_at: now,
     }
     this.inventorySyncs.set(sync.id, sync)
+    this.saveToDisk()
     return sync
   }
 
@@ -209,6 +262,7 @@ export default class PosModuleService {
         : {}),
     }
     this.inventorySyncs.set(id, updated)
+    this.saveToDisk()
     return updated
   }
 

@@ -27,8 +27,6 @@ import {
   ARONIUM_POS_ENABLED,
   ARONIUM_POS_API_KEY,
 } from 'lib/constants';
-import { POS_MODULE } from './src/modules/pos';
-
 loadEnv(process.env.NODE_ENV, process.cwd());
 
 const medusaConfig = {
@@ -147,7 +145,7 @@ const medusaConfig = {
       },
     }] : []),
     ...(ARONIUM_POS_ENABLED ? [{
-      key: POS_MODULE,
+      key: "posModuleService",
       resolve: './src/modules/pos',
       options: {
         enabled: ARONIUM_POS_ENABLED,

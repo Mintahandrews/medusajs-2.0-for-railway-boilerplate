@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { POS_MODULE } from "../../../modules/pos"
 import PosModuleService from "../../../modules/pos/service"
+import { validatePosRequest } from "../../../modules/pos/middleware"
 
 /**
  * GET /admin/pos
@@ -12,8 +13,9 @@ export async function GET(
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
 
-  if (!posService.isEnabled()) {
-    res.status(503).json({ message: "POS module is not enabled" })
+  const authError = validatePosRequest(req, posService)
+  if (authError) {
+    res.status(authError.status).json({ message: authError.message })
     return
   }
 

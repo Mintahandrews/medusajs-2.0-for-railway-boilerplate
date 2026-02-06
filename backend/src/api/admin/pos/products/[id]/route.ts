@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import { POS_MODULE } from "../../../../../modules/pos"
 import PosModuleService from "../../../../../modules/pos/service"
+import { validatePosRequest } from "../../../../../modules/pos/middleware"
 
 /**
  * PATCH /admin/pos/products/:id
@@ -11,6 +12,8 @@ export async function PATCH(
   res: MedusaResponse
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
+  const authError = validatePosRequest(req, posService)
+  if (authError) { res.status(authError.status).json({ message: authError.message }); return }
   const { id } = req.params
   const body = req.body as Record<string, any>
 
@@ -38,6 +41,8 @@ export async function DELETE(
   res: MedusaResponse
 ): Promise<void> {
   const posService: PosModuleService = req.scope.resolve(POS_MODULE)
+  const authError = validatePosRequest(req, posService)
+  if (authError) { res.status(authError.status).json({ message: authError.message }); return }
   const { id } = req.params
   const deleted = await posService.deleteProductMapping(id)
 
