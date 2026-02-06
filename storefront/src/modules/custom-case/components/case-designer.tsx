@@ -131,7 +131,7 @@ export default function CaseDesigner() {
       <div className="grid grid-cols-1 large:grid-cols-[280px_1fr_280px] gap-8">
         {/* Left sidebar — Device selector */}
         <div className="order-2 large:order-1">
-          <div className="sticky top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto">
+          <div className="large:sticky large:top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-6 large:max-h-[calc(100vh-120px)] large:overflow-y-auto">
             <DeviceSelector selected={device} onSelect={handleDeviceChange} />
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function CaseDesigner() {
         {/* Center — Canvas */}
         <div className="order-1 large:order-2 flex flex-col items-center">
           {/* Zoom controls */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
             <button
               type="button"
               onClick={handleZoomOut}
@@ -162,16 +162,16 @@ export default function CaseDesigner() {
             <button
               type="button"
               onClick={handleZoomReset}
-              className="h-8 w-8 rounded-lg border border-grey-20 flex items-center justify-center text-grey-50 hover:text-grey-90 hover:border-grey-40 transition"
+              className="h-8 w-8 rounded-lg border border-grey-20 flex items-center justify-center text-grey-50 hover:text-grey-90 hover:bg-grey-10 transition"
               aria-label="Reset zoom"
             >
               <RotateCcw size={12} />
             </button>
-            <div className="w-px h-5 bg-grey-20 mx-1" />
-            <span className="text-[11px] text-grey-40 font-medium px-2 py-1 rounded bg-grey-5">
+            <div className="hidden small:block w-px h-5 bg-grey-20 mx-1" />
+            <span className="hidden small:inline-flex text-[11px] text-grey-40 font-medium px-2 py-1 rounded bg-grey-5">
               {device.brand} {device.name}
             </span>
-            <div className="w-px h-5 bg-grey-20 mx-1" />
+            <div className="hidden small:block w-px h-5 bg-grey-20 mx-1" />
             <button
               type="button"
               onClick={() => {
@@ -251,7 +251,7 @@ export default function CaseDesigner() {
 
         {/* Right sidebar — Toolbar */}
         <div className="order-3">
-          <div className="sticky top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-5 max-h-[calc(100vh-120px)] overflow-y-auto">
+          <div className="large:sticky large:top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-5 large:max-h-[calc(100vh-120px)] large:overflow-y-auto">
             <DesignerToolbar
               canvasRef={canvasRef}
               backgroundColor={bgColor}
@@ -276,11 +276,11 @@ export default function CaseDesigner() {
       {/* Preview modal — interactive 3D */}
       {preview && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto"
           onClick={() => setPreview(null)}
         >
           <div
-            className="bg-white rounded-2xl p-6 max-w-3xl w-full space-y-5 relative"
+            className="bg-white rounded-2xl p-4 small:p-6 max-w-3xl w-full space-y-5 relative max-h-[calc(100vh-2rem)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -302,11 +302,11 @@ export default function CaseDesigner() {
             </div>
 
             {/* Tab switcher: Flat / 3D */}
-            <div className="flex items-center gap-1 p-1 bg-grey-5 rounded-xl w-fit mx-auto">
+            <div className="flex items-center gap-1 p-1 bg-grey-5 rounded-xl w-fit max-w-full mx-auto">
               <button
                 type="button"
                 onClick={() => setPreviewTab("3d")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition ${
+                className={`flex items-center gap-1.5 px-3 small:px-4 py-2 rounded-lg text-[12px] small:text-[13px] font-medium transition ${
                   previewTab === "3d"
                     ? "bg-white text-grey-90 shadow-sm"
                     : "text-grey-50 hover:text-grey-70"
@@ -318,7 +318,7 @@ export default function CaseDesigner() {
               <button
                 type="button"
                 onClick={() => setPreviewTab("flat")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium transition ${
+                className={`flex items-center gap-1.5 px-3 small:px-4 py-2 rounded-lg text-[12px] small:text-[13px] font-medium transition ${
                   previewTab === "flat"
                     ? "bg-white text-grey-90 shadow-sm"
                     : "text-grey-50 hover:text-grey-70"
@@ -331,11 +331,11 @@ export default function CaseDesigner() {
 
             {/* Material & color picker (visible in 3D tab) */}
             {previewTab === "3d" && (
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-col small:flex-row small:flex-wrap items-start small:items-center gap-4">
                 {/* Material picker */}
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Finish</span>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap gap-1">
                     {CASE_MATERIALS.map((m) => (
                       <button
                         key={m.id}
@@ -356,7 +356,7 @@ export default function CaseDesigner() {
                 {/* Case edge color */}
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Edge</span>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap gap-1">
                     {["#c0c0c0", "#1a1a1a", "#f5e6d3", "#e8d5e0", "#d4e5f7", "#d5e8d4"].map((c) => (
                       <button
                         key={c}
@@ -373,7 +373,7 @@ export default function CaseDesigner() {
                 {/* Environment preset */}
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Scene</span>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap gap-1">
                     {ENV_PRESETS.map((e) => (
                       <button
                         key={e.id}
@@ -394,7 +394,7 @@ export default function CaseDesigner() {
                 <button
                   type="button"
                   onClick={handleDownload3D}
-                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-grey-20 text-[12px] font-medium text-grey-50 hover:border-grey-40 hover:text-grey-70 transition"
+                  className="w-full small:w-auto small:ml-auto flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-grey-20 text-[12px] font-medium text-grey-50 hover:border-grey-40 hover:text-grey-70 transition"
                 >
                   <Camera size={12} />
                   Save 3D Mockup
@@ -413,37 +413,106 @@ export default function CaseDesigner() {
                   caseMaterial={caseMaterial}
                   caseColor={caseColor}
                   envPreset={envPreset}
-                  style={{ height: 460 }}
+                  style={{ height: "min(460px, 60vh)" }}
                 />
               ) : (
                 /* === Flat case back view === */
-                <div className="flex items-center justify-center p-10 min-h-[460px]">
-                  <div className="relative" style={{ filter: "drop-shadow(0 12px 35px rgba(0,0,0,0.22))" }}>
-                    <div
-                      className="relative overflow-hidden"
-                      style={{
-                        border: "3px solid #b0b0b0",
-                        borderRadius: device.borderRadius * 0.42,
-                        background: "linear-gradient(160deg, rgba(255,255,255,0.1), rgba(0,0,0,0.02))",
-                      }}
+                <div className="flex items-center justify-center p-6 small:p-10 min-h-[60vh] small:min-h-[460px]">
+                  <div className="w-full max-w-[420px]" style={{ filter: "drop-shadow(0 12px 35px rgba(0,0,0,0.22))" }}>
+                    <svg
+                      className="w-full h-auto"
+                      viewBox={`0 0 ${device.width} ${device.height}`}
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <div className="absolute bottom-0 left-[6px] right-[6px] h-[6px] -mb-[3px]" style={{ background: "linear-gradient(to bottom, #b5b5b5, #8a8a8a)", borderRadius: "0 0 4px 4px" }} />
-                      <div className="absolute right-0 top-[16px] bottom-[16px] w-[5px] -mr-[3px]" style={{ background: "linear-gradient(to right, #c0c0c0, #999)", borderRadius: "0 3px 3px 0" }} />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={preview}
-                        alt="Case design — back"
-                        className="block"
-                        style={{ maxHeight: 420, borderRadius: device.borderRadius * 0.36 }}
+                      <defs>
+                        <clipPath id={`preview-body-${device.id}`}>
+                          <rect
+                            x={0}
+                            y={0}
+                            width={device.width}
+                            height={device.height}
+                            rx={device.borderRadius}
+                            ry={device.borderRadius}
+                          />
+                        </clipPath>
+                      </defs>
+
+                      <g clipPath={`url(#preview-body-${device.id})`}>
+                        <image
+                          href={preview}
+                          x={0}
+                          y={0}
+                          width={device.width}
+                          height={device.height}
+                          preserveAspectRatio="xMidYMid slice"
+                        />
+                      </g>
+
+                      {device.cameraCutout && device.cameraStyle !== "individual" && (
+                        <rect
+                          x={device.cameraCutout.x}
+                          y={device.cameraCutout.y}
+                          width={device.cameraCutout.width}
+                          height={device.cameraCutout.height}
+                          rx={device.cameraCutout.radius}
+                          ry={device.cameraCutout.radius}
+                          fill="none"
+                          stroke="#888"
+                          strokeWidth={2}
+                        />
+                      )}
+
+                      {device.cameraLenses?.map((lens, i) => (
+                        <g key={`preview-lens-${i}`}>
+                          <circle
+                            cx={lens.cx}
+                            cy={lens.cy}
+                            r={lens.r + 2}
+                            fill={device.cameraStyle === "individual" ? "#1a1a1e" : "none"}
+                            stroke={device.cameraStyle === "individual" ? "#888" : "rgba(40,40,45,0.7)"}
+                            strokeWidth={device.cameraStyle === "individual" ? 2 : 1}
+                          />
+                          <circle
+                            cx={lens.cx}
+                            cy={lens.cy}
+                            r={lens.r}
+                            fill={device.cameraStyle === "individual" ? "#111114" : "#0a0a0e"}
+                            stroke="rgba(100,100,110,0.5)"
+                            strokeWidth={0.5}
+                          />
+                          <circle
+                            cx={lens.cx - lens.r * 0.25}
+                            cy={lens.cy - lens.r * 0.25}
+                            r={lens.r * 0.18}
+                            fill="rgba(255,255,255,0.08)"
+                          />
+                        </g>
+                      ))}
+
+                      <rect
+                        x={0}
+                        y={0}
+                        width={device.width}
+                        height={device.height}
+                        rx={device.borderRadius}
+                        ry={device.borderRadius}
+                        fill="none"
+                        stroke="#b8b8b8"
+                        strokeWidth={6}
                       />
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          background: "linear-gradient(140deg, rgba(255,255,255,0.12) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.03) 100%)",
-                          borderRadius: device.borderRadius * 0.36,
-                        }}
+
+                      <rect
+                        x={3}
+                        y={3}
+                        width={device.width - 6}
+                        height={device.height - 6}
+                        rx={Math.max(device.borderRadius - 2, 0)}
+                        ry={Math.max(device.borderRadius - 2, 0)}
+                        fill="none"
+                        stroke="rgba(255,255,255,0.28)"
+                        strokeWidth={1}
                       />
-                    </div>
+                    </svg>
                   </div>
                 </div>
               )}
@@ -453,7 +522,7 @@ export default function CaseDesigner() {
               {previewTab === "3d" ? "Drag to rotate \u2022 Scroll to zoom \u2022 Auto-rotates" : "Flat preview of your case back design"}
             </p>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col small:flex-row gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleDownload}

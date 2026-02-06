@@ -416,7 +416,7 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
                 x={PAD + cc.x} y={PAD + cc.y}
                 width={cc.width} height={cc.height}
                 rx={cc.radius} ry={cc.radius}
-                fill="#1a1a1e" stroke="#888" strokeWidth={1.5}
+                fill="none" stroke="#888" strokeWidth={1.5}
               />
               <rect
                 x={PAD + cc.x + 2} y={PAD + cc.y + 2}
@@ -432,13 +432,13 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
             <g key={`lens-${i}`} clipPath={`url(#body-${uid})`}>
               <circle
                 cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r + 2}
-                fill={device.cameraStyle === "individual" ? "#1a1a1e" : "none"}
+                fill="none"
                 stroke={device.cameraStyle === "individual" ? "#888" : "rgba(40,40,45,0.7)"}
                 strokeWidth={device.cameraStyle === "individual" ? 1.5 : 1}
               />
               <circle
                 cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r}
-                fill={device.cameraStyle === "individual" ? "#111114" : "#0a0a0e"}
+                fill="none"
                 stroke="rgba(100,100,110,0.5)" strokeWidth={0.5}
               />
               <circle
