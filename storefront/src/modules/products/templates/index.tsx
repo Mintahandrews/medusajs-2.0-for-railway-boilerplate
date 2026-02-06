@@ -4,6 +4,9 @@ import ImageGallery from "@modules/products/components/image-gallery"
 import ProductActions from "@modules/products/components/product-actions"
 import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
+import RecentlyViewedTracker from "@modules/products/components/recently-viewed-tracker"
+import RecentlyViewedSection from "@modules/products/components/recently-viewed-section"
+import ProductReviews from "@modules/products/components/product-reviews"
 import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
@@ -31,6 +34,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <RecentlyViewedTracker
+        productId={product.id!}
+        handle={product.handle!}
+        title={product.title}
+        thumbnail={product.thumbnail || product.images?.[0]?.url || null}
+      />
       <div
         className="content-container py-6 small:py-10"
         data-testid="product-container"
@@ -91,6 +100,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         <div className="rounded-rounded border border-ui-border-base bg-ui-bg-base p-4 small:p-6">
           <ProductTabs product={product} />
         </div>
+      </div>
+
+      <div className="content-container my-10 small:my-16">
+        <ProductReviews productId={product.id!} />
+      </div>
+
+      <div className="content-container">
+        <RecentlyViewedSection excludeProductId={product.id!} />
       </div>
 
       <div

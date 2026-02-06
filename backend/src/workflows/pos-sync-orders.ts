@@ -2,8 +2,10 @@ import {
   createStep,
   createWorkflow,
   StepResponse,
+  WorkflowResponse,
 } from "@medusajs/framework/workflows-sdk"
 import { POS_MODULE } from "../modules/pos"
+import PosModuleService from "../modules/pos/service"
 
 type SyncInput = {
   order_sync_id: string
@@ -17,7 +19,7 @@ type SyncInput = {
 const markOrderSynced = createStep(
   "mark-order-synced",
   async (input: SyncInput, { container }) => {
-    const posService = container.resolve(POS_MODULE)
+    const posService = container.resolve(POS_MODULE) as PosModuleService
     const previous = await posService.updateOrderSync(input.order_sync_id, {
       pos_order_id: input.pos_order_id,
       sync_status: "synced",
@@ -26,7 +28,7 @@ const markOrderSynced = createStep(
   },
   async (input, { container }) => {
     if (!input) return
-    const posService = container.resolve(POS_MODULE)
+    const posService = container.resolve(POS_MODULE) as PosModuleService
     await posService.updateOrderSync(input.order_sync_id, {
       pos_order_id: null,
       sync_status: "pending",
@@ -42,7 +44,7 @@ const posSyncOrderWorkflow = createWorkflow(
   "pos-sync-order",
   function (input: SyncInput) {
     const result = markOrderSynced(input)
-    return result
+    return new WorkflowResponse(result)
   }
 )
 
