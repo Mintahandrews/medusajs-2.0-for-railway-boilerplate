@@ -41,12 +41,20 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  transpilePackages: [
+    "@react-three/fiber",
+    "@react-three/drei",
+    "three",
+  ],
   webpack: (config) => {
+    const path = require("path")
     config.resolve = config.resolve || {}
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      react: require.resolve("react"),
-      "react-dom": require.resolve("react-dom"),
+      // Point to package directories (not resolved files) so subpath
+      // imports like react-dom/client and react/jsx-runtime still work.
+      react: path.dirname(require.resolve("react/package.json")),
+      "react-dom": path.dirname(require.resolve("react-dom/package.json")),
     }
 
     return config
