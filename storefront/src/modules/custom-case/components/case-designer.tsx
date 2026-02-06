@@ -1,10 +1,12 @@
 "use client"
 
 import { useRef, useState, useCallback } from "react"
+import { useParams } from "next/navigation"
 import { DEVICE_TEMPLATES, type DeviceTemplate } from "../types"
 import DesignerCanvas, { type DesignerCanvasHandle } from "./designer-canvas"
 import DesignerToolbar from "./designer-toolbar"
 import DeviceSelector from "./device-selector"
+import { addCustomCaseToCart } from "@lib/data/custom-case"
 import {
   ShoppingCart,
   Download,
@@ -15,6 +17,8 @@ import {
   Smartphone,
   Move3D,
   RotateCw,
+  Loader2,
+  Check,
 } from "lucide-react"
 
 export default function CaseDesigner() {
@@ -23,6 +27,10 @@ export default function CaseDesigner() {
   const [bgColor, setBgColor] = useState("#FFFFFF")
   const [preview, setPreview] = useState<string | null>(null)
   const [zoom, setZoom] = useState(1)
+  const [cartStatus, setCartStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [cartError, setCartError] = useState<string | null>(null)
+  const params = useParams()
+  const countryCode = (params?.countryCode as string) || "gh"
 
   // 3D rotation state for interactive preview
   const [rotX, setRotX] = useState(4)
@@ -314,18 +322,55 @@ export default function CaseDesigner() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  // TODO: integrate with Medusa cart
-                  alert(
-                    "Custom case added! In a future update this will integrate with your cart."
-                  )
-                  setPreview(null)
+                disabled={cartStatus === "loading" || cartStatus === "success"}
+                onClick={async () => {
+                  if (!preview) return
+                  setCartStatus("loading")
+                  setCartError(null)
+                  try {
+                    const canvasJSON = canvasRef.current?.exportJSON()
+                    const result = await addCustomCaseToCart({
+                      countryCode,
+                      designImage: preview,
+                      deviceName: `${device.brand} ${device.name}`,
+                      canvasJSON,
+                    })
+                    if (result.success) {
+                      setCartStatus("success")
+                      setTimeout(() => {
+                        setPreview(null)
+                        setCartStatus("idle")
+                      }, 1500)
+                    } else {
+                      setCartStatus("error")
+                      setCartError(result.error || "Failed to add to cart")
+                    }
+                  } catch {
+                    setCartStatus("error")
+                    setCartError("Something went wrong. Please try again.")
+                  }
                 }}
-                className="flex-1 h-11 rounded-xl bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition flex items-center justify-center gap-2"
+                className={`flex-1 h-11 rounded-xl text-[14px] font-semibold transition flex items-center justify-center gap-2 ${
+                  cartStatus === "success"
+                    ? "bg-green-600 text-white"
+                    : cartStatus === "error"
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-brand text-white hover:bg-brand-dark"
+                } disabled:opacity-70`}
               >
-                <ShoppingCart size={16} />
-                Add to Cart
+                {cartStatus === "loading" ? (
+                  <><Loader2 size={16} className="animate-spin" /> Adding...</>
+                ) : cartStatus === "success" ? (
+                  <><Check size={16} /> Added!</>
+                ) : (
+                  <><ShoppingCart size={16} /> Add to Cart</>
+                )}
               </button>
+              {cartError && (
+                <p className="text-[12px] text-red-500 mt-1 text-center col-span-full">
+                  {cartError}
+                </p>
+              )}
             </div>
           </div>
         </div>
