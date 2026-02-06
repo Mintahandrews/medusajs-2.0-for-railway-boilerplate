@@ -266,14 +266,15 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
     const D = device.caseDepth || 8
     const uid = device.id
 
-    // Screen area
-    const si = device.screenInset || { top: 16, right: 12, bottom: 16, left: 12 }
-    const sr = device.screenRadius || R - 8
-
-    // Total SVG with extra space for 3D depth edges + side buttons
-    const PAD = D + 6
+    // Case edge thickness for the visual frame
+    const EDGE = 4
+    // Total SVG with space for 3D edges + side buttons
+    const PAD = D + 8
     const svgW = W + PAD * 2
     const svgH = H + PAD * 2
+
+    // Camera cutout shorthand
+    const cc = device.cameraCutout
 
     return (
       <div ref={containerRef} className="relative inline-block">
@@ -282,128 +283,118 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
           <canvas ref={canvasElRef} style={{ borderRadius: R - 2, display: "block" }} />
         </div>
 
-        {/* Realistic 3D phone case overlay */}
+        {/* === REALISTIC PHONE CASE OVERLAY === */}
         <svg
           className="absolute inset-0 pointer-events-none"
           width={svgW}
           height={svgH}
           viewBox={`0 0 ${svgW} ${svgH}`}
-          style={{ filter: "drop-shadow(0 12px 40px rgba(0,0,0,0.22)) drop-shadow(0 2px 8px rgba(0,0,0,0.12))" }}
         >
           <defs>
-            {/* Case edge (3D depth) gradient — left side */}
-            <linearGradient id={`edge-l-${uid}`} x1="1" y1="0" x2="0" y2="0">
-              <stop offset="0%" stopColor="#d0d0d0" />
-              <stop offset="100%" stopColor="#a0a0a0" />
-            </linearGradient>
-            {/* Case edge — bottom */}
-            <linearGradient id={`edge-b-${uid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c8c8c8" />
-              <stop offset="100%" stopColor="#909090" />
-            </linearGradient>
-            {/* Case edge — right */}
-            <linearGradient id={`edge-r-${uid}`} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#d8d8d8" />
-              <stop offset="100%" stopColor="#b0b0b0" />
-            </linearGradient>
-
-            {/* 3D highlight on case surface */}
-            <linearGradient id={`hl-${uid}`} x1="0" y1="0" x2="0.4" y2="1">
-              <stop offset="0%" stopColor="white" stopOpacity="0.18" />
-              <stop offset="30%" stopColor="white" stopOpacity="0.05" />
-              <stop offset="70%" stopColor="black" stopOpacity="0" />
-              <stop offset="100%" stopColor="black" stopOpacity="0.08" />
-            </linearGradient>
-
-            {/* Camera module glass gradient */}
-            <linearGradient id={`cam-glass-${uid}`} x1="0" y1="0" x2="0.3" y2="1">
-              <stop offset="0%" stopColor="#2a2a2a" />
-              <stop offset="50%" stopColor="#1a1a1a" />
-              <stop offset="100%" stopColor="#0d0d0d" />
-            </linearGradient>
-
-            {/* Lens gradient */}
-            <radialGradient id={`lens-${uid}`} cx="35%" cy="35%">
-              <stop offset="0%" stopColor="#4a4a5a" />
-              <stop offset="35%" stopColor="#222230" />
-              <stop offset="70%" stopColor="#111118" />
-              <stop offset="100%" stopColor="#050508" />
-            </radialGradient>
-
-            {/* Lens reflection */}
-            <radialGradient id={`lens-ref-${uid}`} cx="28%" cy="28%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.55" />
-              <stop offset="60%" stopColor="white" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
-            </radialGradient>
-
-            {/* Clip path for case shape */}
-            <clipPath id={`case-clip-${uid}`}>
+            {/* Case body clip */}
+            <clipPath id={`body-${uid}`}>
               <rect x={PAD} y={PAD} width={W} height={H} rx={R} ry={R} />
             </clipPath>
 
-            {/* Screen hole clip (to show phone screen black area) */}
-            <mask id={`screen-mask-${uid}`}>
-              <rect width={svgW} height={svgH} fill="white" />
-              <rect
-                x={PAD + si.left}
-                y={PAD + si.top}
-                width={W - si.left - si.right}
-                height={H - si.top - si.bottom}
-                rx={sr}
-                ry={sr}
-                fill="black"
-              />
+            {/* Mask: everything OUTSIDE the case shape is covered */}
+            <mask id={`outer-mask-${uid}`}>
+              <rect width={svgW} height={svgH} fill="black" />
+              <rect x={PAD} y={PAD} width={W} height={H} rx={R} ry={R} fill="white" />
             </mask>
+
+            {/* Case edge gradients for 3D depth */}
+            <linearGradient id={`edgeT-${uid}`} x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor="#d0d0d0" />
+              <stop offset="100%" stopColor="#b0b0b0" />
+            </linearGradient>
+            <linearGradient id={`edgeB-${uid}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#bbb" />
+              <stop offset="100%" stopColor="#888" />
+            </linearGradient>
+            <linearGradient id={`edgeL-${uid}`} x1="1" y1="0" x2="0" y2="0">
+              <stop offset="0%" stopColor="#ccc" />
+              <stop offset="100%" stopColor="#999" />
+            </linearGradient>
+            <linearGradient id={`edgeR-${uid}`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#d5d5d5" />
+              <stop offset="100%" stopColor="#aaa" />
+            </linearGradient>
+
+            {/* Surface highlight for 3D feel */}
+            <linearGradient id={`surf-${uid}`} x1="0" y1="0" x2="0.3" y2="1">
+              <stop offset="0%" stopColor="white" stopOpacity="0.15" />
+              <stop offset="25%" stopColor="white" stopOpacity="0.03" />
+              <stop offset="75%" stopColor="black" stopOpacity="0" />
+              <stop offset="100%" stopColor="black" stopOpacity="0.06" />
+            </linearGradient>
+
+            {/* Camera module interior */}
+            <linearGradient id={`cam-int-${uid}`} x1="0.2" y1="0" x2="0.8" y2="1">
+              <stop offset="0%" stopColor="#1e1e24" />
+              <stop offset="100%" stopColor="#0a0a10" />
+            </linearGradient>
+
+            {/* Lens gradients */}
+            <radialGradient id={`lens-${uid}`} cx="38%" cy="38%">
+              <stop offset="0%" stopColor="#5a5a6a" />
+              <stop offset="30%" stopColor="#2a2a38" />
+              <stop offset="60%" stopColor="#15151e" />
+              <stop offset="100%" stopColor="#08080c" />
+            </radialGradient>
+            <radialGradient id={`lref-${uid}`} cx="30%" cy="30%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.6" />
+              <stop offset="50%" stopColor="white" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </radialGradient>
+
+            {/* Drop shadow filter */}
+            <filter id={`shadow-${uid}`} x="-10%" y="-5%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="6" stdDeviation="12" floodColor="#000" floodOpacity="0.2" />
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000" floodOpacity="0.1" />
+            </filter>
           </defs>
 
-          {/* === 3D DEPTH EDGES (case thickness) === */}
-          {/* Bottom edge */}
+          {/* === CASE SHADOW (underneath) === */}
           <rect
-            x={PAD + 2}
-            y={PAD + H}
-            width={W - 4}
-            height={D}
-            rx={3}
-            fill={`url(#edge-b-${uid})`}
+            x={PAD + 4}
+            y={PAD + 6}
+            width={W - 8}
+            height={H - 4}
+            rx={R}
+            ry={R}
+            fill="rgba(0,0,0,0.15)"
+            filter={`url(#shadow-${uid})`}
+          />
+
+          {/* === 3D DEPTH EDGES (case thickness visible from slight top-down view) === */}
+          {/* Bottom edge — most visible */}
+          <path
+            d={`M${PAD + R},${PAD + H} L${PAD + R},${PAD + H + D} Q${PAD + R},${PAD + H + D + 2} ${PAD + R + 4},${PAD + H + D + 2} L${PAD + W - R - 4},${PAD + H + D + 2} Q${PAD + W - R},${PAD + H + D + 2} ${PAD + W - R},${PAD + H + D} L${PAD + W - R},${PAD + H}`}
+            fill={`url(#edgeB-${uid})`}
+            stroke="rgba(0,0,0,0.08)"
+            strokeWidth={0.5}
           />
           {/* Right edge */}
           <rect
             x={PAD + W}
-            y={PAD + R}
-            width={D}
-            height={H - R * 2}
-            fill={`url(#edge-r-${uid})`}
+            y={PAD + R + 4}
+            width={D - 2}
+            height={H - R * 2 - 8}
+            rx={2}
+            fill={`url(#edgeR-${uid})`}
           />
           {/* Left edge */}
           <rect
-            x={PAD - D}
-            y={PAD + R}
-            width={D}
-            height={H - R * 2}
-            fill={`url(#edge-l-${uid})`}
-          />
-          {/* Bottom-right corner */}
-          <ellipse
-            cx={PAD + W - 2}
-            cy={PAD + H}
-            rx={D * 0.7}
-            ry={D * 0.7}
-            fill="#aaa"
-            opacity={0.4}
-          />
-          {/* Bottom-left corner */}
-          <ellipse
-            cx={PAD + 2}
-            cy={PAD + H}
-            rx={D * 0.7}
-            ry={D * 0.7}
-            fill="#b0b0b0"
-            opacity={0.4}
+            x={PAD - D + 2}
+            y={PAD + R + 4}
+            width={D - 2}
+            height={H - R * 2 - 8}
+            rx={2}
+            fill={`url(#edgeL-${uid})`}
           />
 
-          {/* === CASE BODY === */}
-          {/* Case outer shell */}
+          {/* === CASE BODY BORDER (main outline) === */}
+          {/* Outer border — case shell edge */}
           <rect
             x={PAD}
             y={PAD}
@@ -412,35 +403,35 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
             rx={R}
             ry={R}
             fill="none"
-            stroke="#b8b8b8"
-            strokeWidth={3}
+            stroke="#a8a8a8"
+            strokeWidth={EDGE}
           />
-          {/* Case inner edge highlight (top-left light) */}
+          {/* Inner highlight line (light source top-left) */}
           <rect
-            x={PAD + 1.5}
-            y={PAD + 1.5}
-            width={W - 3}
-            height={H - 3}
+            x={PAD + EDGE * 0.5}
+            y={PAD + EDGE * 0.5}
+            width={W - EDGE}
+            height={H - EDGE}
             rx={R - 1}
             ry={R - 1}
             fill="none"
-            stroke="rgba(255,255,255,0.3)"
+            stroke="rgba(255,255,255,0.35)"
+            strokeWidth={0.8}
+          />
+          {/* Outer shadow line (bottom-right) */}
+          <rect
+            x={PAD - 0.5}
+            y={PAD - 0.5}
+            width={W + 1}
+            height={H + 1}
+            rx={R + 0.5}
+            ry={R + 0.5}
+            fill="none"
+            stroke="rgba(0,0,0,0.15)"
             strokeWidth={1}
           />
-          {/* Case inner edge shadow (bottom-right shadow) */}
-          <rect
-            x={PAD + 1}
-            y={PAD + 1}
-            width={W - 2}
-            height={H - 2}
-            rx={R}
-            ry={R}
-            fill="none"
-            stroke="rgba(0,0,0,0.08)"
-            strokeWidth={2}
-          />
 
-          {/* 3D light/shadow overlay */}
+          {/* === SURFACE HIGHLIGHT/SHADOW OVERLAY === */}
           <rect
             x={PAD}
             y={PAD}
@@ -448,132 +439,167 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
             height={H}
             rx={R}
             ry={R}
-            fill={`url(#hl-${uid})`}
-            clipPath={`url(#case-clip-${uid})`}
-          />
-
-          {/* === CASE EDGE BEZEL (thin lip around the screen) === */}
-          <rect
-            x={PAD}
-            y={PAD}
-            width={W}
-            height={H}
-            rx={R}
-            ry={R}
-            fill="rgba(200,200,200,0.15)"
-            mask={`url(#screen-mask-${uid})`}
-            clipPath={`url(#case-clip-${uid})`}
+            fill={`url(#surf-${uid})`}
+            clipPath={`url(#body-${uid})`}
           />
 
           {/* === SIDE BUTTONS === */}
           {device.sideButtons?.map((btn, i) => {
             const isRight = btn.side === "right"
-            const bx = isRight ? PAD + W : PAD - D - 1
-            const bw = D + 2
+            const bx = isRight ? PAD + W - 1 : PAD - D + 1
+            const bw = D
             return (
               <g key={`btn-${i}`}>
-                {/* Button body */}
                 <rect
                   x={bx}
                   y={PAD + btn.y}
                   width={bw}
                   height={btn.height}
-                  rx={2.5}
-                  fill={isRight ? "#a8a8a8" : "#b0b0b0"}
-                  stroke="#888"
+                  rx={2}
+                  fill={isRight ? "#b0b0b0" : "#b8b8b8"}
+                  stroke={isRight ? "#999" : "#a0a0a0"}
                   strokeWidth={0.5}
                 />
-                {/* Button highlight */}
+                {/* Top highlight */}
                 <rect
                   x={bx + 1}
-                  y={PAD + btn.y + 1}
+                  y={PAD + btn.y + 0.5}
                   width={bw - 2}
-                  height={btn.height * 0.35}
-                  rx={1.5}
-                  fill="rgba(255,255,255,0.2)"
+                  height={2}
+                  rx={1}
+                  fill="rgba(255,255,255,0.25)"
                 />
               </g>
             )
           })}
 
-          {/* === CAMERA MODULE === */}
-          {device.cameraCutout && (
-            <g clipPath={`url(#case-clip-${uid})`}>
-              {/* Camera island raised background */}
+          {/* === CAMERA MODULE (cutout hole in case) === */}
+          {cc && (
+            <g clipPath={`url(#body-${uid})`}>
+              {/* Camera cutout raised ring (case material lip around the hole) */}
               <rect
-                x={PAD + device.cameraCutout.x - 3}
-                y={PAD + device.cameraCutout.y - 3}
-                width={device.cameraCutout.width + 6}
-                height={device.cameraCutout.height + 6}
-                rx={device.cameraCutout.radius + 3}
-                ry={device.cameraCutout.radius + 3}
+                x={PAD + cc.x - 5}
+                y={PAD + cc.y - 5}
+                width={cc.width + 10}
+                height={cc.height + 10}
+                rx={cc.radius + 5}
+                ry={cc.radius + 5}
                 fill="none"
-                stroke="rgba(0,0,0,0.12)"
-                strokeWidth={1}
+                stroke="rgba(0,0,0,0.06)"
+                strokeWidth={3}
               />
-              {/* Camera glass surface */}
               <rect
-                x={PAD + device.cameraCutout.x}
-                y={PAD + device.cameraCutout.y}
-                width={device.cameraCutout.width}
-                height={device.cameraCutout.height}
-                rx={device.cameraCutout.radius}
-                ry={device.cameraCutout.radius}
-                fill={`url(#cam-glass-${uid})`}
-                stroke="rgba(60,60,60,0.6)"
+                x={PAD + cc.x - 3}
+                y={PAD + cc.y - 3}
+                width={cc.width + 6}
+                height={cc.height + 6}
+                rx={cc.radius + 3}
+                ry={cc.radius + 3}
+                fill="none"
+                stroke="rgba(180,180,180,0.5)"
                 strokeWidth={1.5}
               />
-              {/* Glass sheen */}
+
+              {/* Camera cutout interior — dark phone back visible through the hole */}
               <rect
-                x={PAD + device.cameraCutout.x + 3}
-                y={PAD + device.cameraCutout.y + 3}
-                width={device.cameraCutout.width - 6}
-                height={device.cameraCutout.height * 0.3}
-                rx={device.cameraCutout.radius - 2}
-                fill="rgba(255,255,255,0.07)"
+                x={PAD + cc.x}
+                y={PAD + cc.y}
+                width={cc.width}
+                height={cc.height}
+                rx={cc.radius}
+                ry={cc.radius}
+                fill={`url(#cam-int-${uid})`}
+                stroke="rgba(40,40,50,0.7)"
+                strokeWidth={1.5}
+              />
+              {/* Inner shadow ring for depth effect */}
+              <rect
+                x={PAD + cc.x + 1.5}
+                y={PAD + cc.y + 1.5}
+                width={cc.width - 3}
+                height={cc.height - 3}
+                rx={cc.radius - 1}
+                ry={cc.radius - 1}
+                fill="none"
+                stroke="rgba(0,0,0,0.2)"
+                strokeWidth={2}
+              />
+              {/* Glass sheen across camera module */}
+              <rect
+                x={PAD + cc.x + 4}
+                y={PAD + cc.y + 3}
+                width={cc.width - 8}
+                height={cc.height * 0.25}
+                rx={cc.radius - 3}
+                fill="rgba(255,255,255,0.06)"
               />
             </g>
           )}
 
-          {/* === CAMERA LENSES === */}
+          {/* === CAMERA LENSES (inside the cutout) === */}
           {device.cameraLenses?.map((lens, i) => (
-            <g key={`lens-${i}`} clipPath={`url(#case-clip-${uid})`}>
-              {/* Shadow ring */}
-              <circle cx={PAD + lens.cx} cy={PAD + lens.cy + 1} r={lens.r + 3} fill="rgba(0,0,0,0.2)" />
-              {/* Chrome outer ring */}
-              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r + 3} fill="none" stroke="#666" strokeWidth={1.5} />
-              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r + 1.5} fill="none" stroke="#888" strokeWidth={0.5} />
+            <g key={`lens-${i}`} clipPath={`url(#body-${uid})`}>
+              {/* Lens shadow */}
+              <circle cx={PAD + lens.cx} cy={PAD + lens.cy + 1} r={lens.r + 4} fill="rgba(0,0,0,0.25)" />
+              {/* Chrome bezel ring */}
+              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r + 4} fill="none" stroke="#555" strokeWidth={2} />
+              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r + 2} fill="none" stroke="#777" strokeWidth={0.8} />
               {/* Lens body */}
               <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r} fill={`url(#lens-${uid})`} />
-              {/* Inner ring (iris) */}
-              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r * 0.6} fill="rgba(8,8,20,0.92)" stroke="rgba(50,50,70,0.4)" strokeWidth={0.5} />
-              {/* Lens reflection highlight */}
-              <circle cx={PAD + lens.cx - lens.r * 0.18} cy={PAD + lens.cy - lens.r * 0.18} r={lens.r * 0.38} fill={`url(#lens-ref-${uid})`} />
-              {/* Center dot */}
-              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={1.2} fill="rgba(20,20,40,0.7)" />
+              {/* Inner ring (aperture) */}
+              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r * 0.55} fill="rgba(6,6,18,0.9)" stroke="rgba(40,40,60,0.5)" strokeWidth={0.5} />
+              {/* Reflection highlight */}
+              <circle cx={PAD + lens.cx - lens.r * 0.2} cy={PAD + lens.cy - lens.r * 0.2} r={lens.r * 0.35} fill={`url(#lref-${uid})`} />
+              {/* Center element */}
+              <circle cx={PAD + lens.cx} cy={PAD + lens.cy} r={1.5} fill="rgba(15,15,30,0.6)" />
             </g>
           ))}
 
-          {/* Flash/sensor dots near camera (for Apple devices) */}
-          {device.brand === "Apple" && device.cameraCutout && (
-            <g clipPath={`url(#case-clip-${uid})`}>
+          {/* === FLASH & SENSORS (Apple devices) === */}
+          {device.brand === "Apple" && cc && (
+            <g clipPath={`url(#body-${uid})`}>
+              {/* Flash LED */}
               <circle
-                cx={PAD + device.cameraCutout.x + device.cameraCutout.width - 14}
-                cy={PAD + device.cameraCutout.y + device.cameraCutout.height - 14}
-                r={5}
-                fill="#1a1a22"
-                stroke="#444"
-                strokeWidth={0.5}
-              />
-              <circle
-                cx={PAD + device.cameraCutout.x + 14}
-                cy={PAD + device.cameraCutout.y + device.cameraCutout.height - 14}
-                r={4}
+                cx={PAD + cc.x + 16}
+                cy={PAD + cc.y + cc.height - 16}
+                r={5.5}
                 fill="#ffeedd"
-                opacity={0.3}
-                stroke="#666"
+                opacity={0.35}
+              />
+              <circle
+                cx={PAD + cc.x + 16}
+                cy={PAD + cc.y + cc.height - 16}
+                r={5.5}
+                fill="none"
+                stroke="#998866"
                 strokeWidth={0.5}
               />
+              {/* LiDAR / Microphone */}
+              <circle
+                cx={PAD + cc.x + cc.width - 16}
+                cy={PAD + cc.y + cc.height - 16}
+                r={4}
+                fill="#111118"
+                stroke="#333"
+                strokeWidth={0.5}
+              />
+            </g>
+          )}
+
+          {/* === SAMSUNG individual lens surrounds === */}
+          {device.brand === "Samsung" && cc && (
+            <g clipPath={`url(#body-${uid})`}>
+              {device.cameraLenses?.map((lens, i) => (
+                <circle
+                  key={`sr-${i}`}
+                  cx={PAD + lens.cx}
+                  cy={PAD + lens.cy}
+                  r={lens.r + 6}
+                  fill="none"
+                  stroke="rgba(60,60,70,0.3)"
+                  strokeWidth={1}
+                />
+              ))}
             </g>
           )}
         </svg>
