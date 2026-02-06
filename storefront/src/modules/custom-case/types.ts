@@ -52,12 +52,237 @@ export type StickerItem = {
   label: string
 }
 
+/* ── CASE TYPES (Casetify-style) ────────────────────────────────────────── */
+
+export type CaseType = {
+  id: string
+  name: string
+  description: string
+  price: number
+  badge?: string
+  features: string[]
+}
+
+export const CASE_TYPES: CaseType[] = [
+  {
+    id: "bounce",
+    name: "Bounce Case",
+    description: "Maximum protection with EcoShock™ technology",
+    price: 52,
+    badge: "BEST SELLER",
+    features: ["6.6ft drop protection", "EcoShock™ corners", "MagSafe compatible", "Antimicrobial"],
+  },
+  {
+    id: "ultra-bounce",
+    name: "Ultra Bounce Case",
+    description: "Our strongest protection ever",
+    price: 72,
+    badge: "NEW",
+    features: ["9.8ft drop protection", "Reinforced bumper", "MagSafe compatible", "Camera ring guard"],
+  },
+  {
+    id: "impact",
+    name: "Impact Case",
+    description: "Slim profile with serious protection",
+    price: 45,
+    features: ["4ft drop protection", "Slim design", "MagSafe compatible", "Raised bezels"],
+  },
+  {
+    id: "clear",
+    name: "Impact Clear Case",
+    description: "Show off your phone color with crystal clarity",
+    price: 45,
+    features: ["4ft drop protection", "Crystal clear back", "Non-yellowing", "Slim profile"],
+  },
+  {
+    id: "compact",
+    name: "Compact Case",
+    description: "Ultra-thin everyday protection",
+    price: 35,
+    features: ["2ft drop protection", "Ultra-slim 0.65mm", "Lightweight", "Scratch resistant"],
+  },
+]
+
+/* ── GRID SYSTEM ────────────────────────────────────────────────────────── */
+
+export type GridSlot = {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export type GridLayout = {
+  id: string
+  name: string
+  photoCount: number
+  slots: GridSlot[]
+}
+
+export type PhotoItem = {
+  id: string
+  url: string
+  slotId: string | null
+  zoom: number
+  panX: number
+  panY: number
+  rotation: number
+}
+
 export type DesignState = {
   device: DeviceTemplate
   backgroundColor: string
+  layout: GridLayout
+  photos: PhotoItem[]
+  caseType: CaseType
+  gridGap: number
   canvasJSON: string | null
   previewDataUrl: string | null
 }
+
+export const GRID_LAYOUTS: GridLayout[] = [
+  {
+    id: "full",
+    name: "Full",
+    photoCount: 1,
+    slots: [{ id: "s1", x: 0, y: 0, width: 100, height: 100 }],
+  },
+  {
+    id: "split-v",
+    name: "2 Vertical",
+    photoCount: 2,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 50, height: 100 },
+      { id: "s2", x: 50, y: 0, width: 50, height: 100 },
+    ],
+  },
+  {
+    id: "split-h",
+    name: "2 Horizontal",
+    photoCount: 2,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 100, height: 50 },
+      { id: "s2", x: 0, y: 50, width: 100, height: 50 },
+    ],
+  },
+  {
+    id: "tri-v",
+    name: "3 Vertical",
+    photoCount: 3,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 33.33, height: 100 },
+      { id: "s2", x: 33.33, y: 0, width: 33.34, height: 100 },
+      { id: "s3", x: 66.67, y: 0, width: 33.33, height: 100 },
+    ],
+  },
+  {
+    id: "tri-h",
+    name: "3 Horizontal",
+    photoCount: 3,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 100, height: 33.33 },
+      { id: "s2", x: 0, y: 33.33, width: 100, height: 33.34 },
+      { id: "s3", x: 0, y: 66.67, width: 100, height: 33.33 },
+    ],
+  },
+  {
+    id: "feature-top",
+    name: "Feature Top",
+    photoCount: 3,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 100, height: 60 },
+      { id: "s2", x: 0, y: 60, width: 50, height: 40 },
+      { id: "s3", x: 50, y: 60, width: 50, height: 40 },
+    ],
+  },
+  {
+    id: "feature-bottom",
+    name: "Feature Bottom",
+    photoCount: 3,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 50, height: 40 },
+      { id: "s2", x: 50, y: 0, width: 50, height: 40 },
+      { id: "s3", x: 0, y: 40, width: 100, height: 60 },
+    ],
+  },
+  {
+    id: "grid-2x2",
+    name: "Grid 4",
+    photoCount: 4,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 50, height: 50 },
+      { id: "s2", x: 50, y: 0, width: 50, height: 50 },
+      { id: "s3", x: 0, y: 50, width: 50, height: 50 },
+      { id: "s4", x: 50, y: 50, width: 50, height: 50 },
+    ],
+  },
+  {
+    id: "collage-4",
+    name: "Collage 4",
+    photoCount: 4,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 100, height: 55 },
+      { id: "s2", x: 0, y: 55, width: 33.33, height: 45 },
+      { id: "s3", x: 33.33, y: 55, width: 33.34, height: 45 },
+      { id: "s4", x: 66.67, y: 55, width: 33.33, height: 45 },
+    ],
+  },
+  {
+    id: "mosaic-4",
+    name: "Mosaic",
+    photoCount: 4,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 60, height: 60 },
+      { id: "s2", x: 60, y: 0, width: 40, height: 30 },
+      { id: "s3", x: 60, y: 30, width: 40, height: 30 },
+      { id: "s4", x: 0, y: 60, width: 100, height: 40 },
+    ],
+  },
+  {
+    id: "grid-6",
+    name: "Grid 6",
+    photoCount: 6,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 33.33, height: 50 },
+      { id: "s2", x: 33.33, y: 0, width: 33.34, height: 50 },
+      { id: "s3", x: 66.67, y: 0, width: 33.33, height: 50 },
+      { id: "s4", x: 0, y: 50, width: 33.33, height: 50 },
+      { id: "s5", x: 33.33, y: 50, width: 33.34, height: 50 },
+      { id: "s6", x: 66.67, y: 50, width: 33.33, height: 50 },
+    ],
+  },
+  {
+    id: "grid-2x4",
+    name: "Grid 8",
+    photoCount: 8,
+    slots: [
+      { id: "s1", x: 0, y: 0, width: 50, height: 25 },
+      { id: "s2", x: 50, y: 0, width: 50, height: 25 },
+      { id: "s3", x: 0, y: 25, width: 50, height: 25 },
+      { id: "s4", x: 50, y: 25, width: 50, height: 25 },
+      { id: "s5", x: 0, y: 50, width: 50, height: 25 },
+      { id: "s6", x: 50, y: 50, width: 50, height: 25 },
+      { id: "s7", x: 0, y: 75, width: 50, height: 25 },
+      { id: "s8", x: 50, y: 75, width: 50, height: 25 },
+    ],
+  },
+]
+
+export const BG_COLORS = [
+  "#FFFFFF", "#F5F5F5", "#000000", "#1A1A2E",
+  "#E8D5C4", "#F7E7CE", "#FADADD", "#E6E6FA",
+  "#D4F1F4", "#D5F5E3", "#FCF3CF", "#FADBD8",
+  "#F08080", "#FF6B6B", "#FFA07A", "#FFD700",
+  "#98FB98", "#87CEEB", "#DDA0DD", "#FF69B4",
+]
+
+export const GRID_GAP_OPTIONS = [
+  { id: "none", label: "None", value: 0 },
+  { id: "thin", label: "Thin", value: 2 },
+  { id: "medium", label: "Medium", value: 4 },
+  { id: "thick", label: "Thick", value: 8 },
+]
 
 export const FONT_OPTIONS = [
   { id: "inter", name: "Inter", family: "Inter, sans-serif" },
