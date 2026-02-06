@@ -10,14 +10,23 @@ import {
   RotateCcw,
   Bold,
   Italic,
+  Undo2,
+  Redo2,
+  Smile,
+  ArrowUp,
+  ArrowDown,
+  Sparkles,
 } from "lucide-react"
-import { CASE_COLORS } from "../types"
+import { CASE_COLORS, GRADIENT_PRESETS, STICKER_PACKS, FONT_OPTIONS } from "../types"
 import type { DesignerCanvasHandle } from "./designer-canvas"
+
+type PanelType = "text" | "color" | "stickers" | "gradient" | null
 
 type Props = {
   canvasRef: React.RefObject<DesignerCanvasHandle | null>
   backgroundColor: string
   onBackgroundChange: (color: string) => void
+  onGradientChange: (colors: string[]) => void
   onExport: () => void
 }
 
@@ -25,21 +34,27 @@ export default function DesignerToolbar({
   canvasRef,
   backgroundColor,
   onBackgroundChange,
+  onGradientChange,
   onExport,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [activePanel, setActivePanel] = useState<"text" | "color" | null>(null)
+  const [activePanel, setActivePanel] = useState<PanelType>(null)
   const [textInput, setTextInput] = useState("")
   const [textColor, setTextColor] = useState("#000000")
+  const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0])
+  const [stickerCategory, setStickerCategory] = useState(STICKER_PACKS[0].category)
 
-  const togglePanel = (panel: "text" | "color") => {
+  const togglePanel = (panel: PanelType) => {
     setActivePanel((prev) => (prev === panel ? null : panel))
   }
 
   const handleAddText = () => {
     const trimmed = textInput.trim()
     if (!trimmed) return
-    canvasRef.current?.addText(trimmed, { fill: textColor })
+    canvasRef.current?.addText(trimmed, {
+      fill: textColor,
+      fontFamily: selectedFont.family,
+    })
     setTextInput("")
   }
 
@@ -94,9 +109,79 @@ export default function DesignerToolbar({
     }
   }
 
+  const handleFontChange = (fontId: string) => {
+    const font = FONT_OPTIONS.find((f) => f.id === fontId)
+    if (!font) return
+    setSelectedFont(font)
+    const canvas = canvasRef.current?.getCanvas()
+    if (!canvas) return
+    const obj = canvas.getActiveObject()
+    if (obj && "fontFamily" in obj) {
+      ;(obj as any).set("fontFamily", font.family)
+      canvas.renderAll()
+    }
+  }
+
+  const handleBringForward = () => {
+    const canvas = canvasRef.current?.getCanvas()
+    if (!canvas) return
+    const obj = canvas.getActiveObject()
+    if (obj) {
+      canvas.bringObjectForward(obj)
+      canvas.renderAll()
+    }
+  }
+
+  const handleSendBackward = () => {
+    const canvas = canvasRef.current?.getCanvas()
+    if (!canvas) return
+    const obj = canvas.getActiveObject()
+    if (obj) {
+      canvas.sendObjectBackwards(obj)
+      canvas.renderAll()
+    }
+  }
+
   return (
     <div className="space-y-4">
-      {/* Action buttons */}
+      {/* Undo / Redo */}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => canvasRef.current?.undo()}
+          className="h-8 w-8 rounded-lg border border-grey-20 flex items-center justify-center text-grey-50 hover:text-grey-90 hover:border-grey-40 transition"
+          title="Undo"
+        >
+          <Undo2 size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={() => canvasRef.current?.redo()}
+          className="h-8 w-8 rounded-lg border border-grey-20 flex items-center justify-center text-grey-50 hover:text-grey-90 hover:border-grey-40 transition"
+          title="Redo"
+        >
+          <Redo2 size={14} />
+        </button>
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={handleBringForward}
+          className="h-8 w-8 rounded-lg border border-grey-20 flex items-center justify-center text-grey-50 hover:text-grey-90 hover:border-grey-40 transition"
+          title="Bring forward"
+        >
+          <ArrowUp size={14} />
+        </button>
+        <button
+          type="button"
+          onClick={handleSendBackward}
+          className="h-8 w-8 rounded-lg border border-grey-20 flex items-center justify-center text-grey-50 hover:text-grey-90 hover:border-grey-40 transition"
+          title="Send backward"
+        >
+          <ArrowDown size={14} />
+        </button>
+      </div>
+
+      {/* Tool buttons */}
       <div className="flex flex-wrap gap-2">
         <ToolButton
           icon={<Type size={16} />}
@@ -116,14 +201,30 @@ export default function DesignerToolbar({
           onClick={() => togglePanel("color")}
         />
         <ToolButton
-          icon={<Trash2 size={16} />}
+          icon={<Sparkles size={16} />}
+          label="Gradient"
+          active={activePanel === "gradient"}
+          onClick={() => togglePanel("gradient")}
+        />
+        <ToolButton
+          icon={<Smile size={16} />}
+          label="Stickers"
+          active={activePanel === "stickers"}
+          onClick={() => togglePanel("stickers")}
+        />
+      </div>
+
+      {/* Danger actions */}
+      <div className="flex gap-2">
+        <ToolButton
+          icon={<Trash2 size={14} />}
           label="Delete"
           onClick={handleDeleteSelected}
           variant="danger"
         />
         <ToolButton
-          icon={<RotateCcw size={16} />}
-          label="Clear"
+          icon={<RotateCcw size={14} />}
+          label="Clear All"
           onClick={handleClearAll}
           variant="danger"
         />
@@ -140,7 +241,7 @@ export default function DesignerToolbar({
 
       {/* Text panel */}
       {activePanel === "text" && (
-        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
           <h4 className="text-[12px] font-semibold text-grey-90 uppercase tracking-wide">
             Add Text
           </h4>
@@ -161,6 +262,29 @@ export default function DesignerToolbar({
               Add
             </button>
           </div>
+
+          {/* Font selector */}
+          <div>
+            <label className="text-[11px] text-grey-50 uppercase tracking-wide mb-1.5 block">Font</label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {FONT_OPTIONS.map((font) => (
+                <button
+                  key={font.id}
+                  type="button"
+                  onClick={() => handleFontChange(font.id)}
+                  className={`h-8 rounded-lg border px-2 text-[12px] truncate transition ${
+                    selectedFont.id === font.id
+                      ? "border-brand bg-brand/5 text-brand font-semibold"
+                      : "border-grey-20 text-grey-60 hover:border-grey-40"
+                  }`}
+                  style={{ fontFamily: font.family }}
+                >
+                  {font.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
             <label className="text-[12px] text-grey-50">Color:</label>
             <input
@@ -191,9 +315,9 @@ export default function DesignerToolbar({
 
       {/* Color panel */}
       {activePanel === "color" && (
-        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3">
+        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
           <h4 className="text-[12px] font-semibold text-grey-90 uppercase tracking-wide">
-            Case Background
+            Solid Color
           </h4>
           <div className="flex flex-wrap gap-2">
             {CASE_COLORS.map((color) => (
@@ -223,6 +347,76 @@ export default function DesignerToolbar({
         </div>
       )}
 
+      {/* Gradient panel */}
+      {activePanel === "gradient" && (
+        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <h4 className="text-[12px] font-semibold text-grey-90 uppercase tracking-wide">
+            Gradient Background
+          </h4>
+          <div className="grid grid-cols-4 gap-2">
+            {GRADIENT_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => onGradientChange(preset.colors)}
+                className="group flex flex-col items-center gap-1"
+                title={preset.name}
+              >
+                <div
+                  className="h-10 w-full rounded-lg border border-grey-20 group-hover:ring-2 group-hover:ring-brand/30 transition"
+                  style={{ background: preset.css }}
+                />
+                <span className="text-[10px] text-grey-50 truncate w-full text-center">
+                  {preset.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Stickers panel */}
+      {activePanel === "stickers" && (
+        <div className="rounded-xl border border-grey-20 bg-white p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <h4 className="text-[12px] font-semibold text-grey-90 uppercase tracking-wide">
+            Stickers
+          </h4>
+          {/* Category tabs */}
+          <div className="flex gap-1 overflow-x-auto pb-1">
+            {STICKER_PACKS.map((pack) => (
+              <button
+                key={pack.category}
+                type="button"
+                onClick={() => setStickerCategory(pack.category)}
+                className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition ${
+                  stickerCategory === pack.category
+                    ? "bg-brand text-white"
+                    : "bg-grey-10 text-grey-50 hover:text-grey-90"
+                }`}
+              >
+                {pack.category}
+              </button>
+            ))}
+          </div>
+          {/* Sticker grid */}
+          <div className="grid grid-cols-6 gap-1">
+            {STICKER_PACKS.find((p) => p.category === stickerCategory)?.stickers.map(
+              (sticker) => (
+                <button
+                  key={sticker.id}
+                  type="button"
+                  onClick={() => canvasRef.current?.addSticker(sticker.emoji)}
+                  className="h-10 w-10 rounded-lg border border-grey-10 hover:border-grey-30 hover:bg-grey-5 flex items-center justify-center text-[22px] transition hover:scale-110"
+                  title={sticker.label}
+                >
+                  {sticker.emoji}
+                </button>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Export */}
       <button
         type="button"
@@ -230,7 +424,7 @@ export default function DesignerToolbar({
         className="w-full flex items-center justify-center gap-2 h-11 rounded-xl bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition"
       >
         <Download size={16} />
-        Save &amp; Add to Cart
+        Save &amp; Preview
       </button>
     </div>
   )
