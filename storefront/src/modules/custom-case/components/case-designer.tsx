@@ -216,21 +216,62 @@ export default function CaseDesigner() {
 
             {/* Side-by-side: Front + Interactive 3D */}
             <div className="flex flex-col medium:flex-row gap-6 items-stretch justify-center">
-              {/* Front flat view */}
+              {/* Front flat view — rendered as phone case mockup */}
               <div className="flex-1 flex flex-col items-center gap-2">
                 <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Front View</span>
-                <div className="flex-1 bg-gradient-to-br from-grey-5 to-grey-10 rounded-2xl p-6 flex items-center justify-center min-h-[300px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preview}
-                    alt="Case design — front"
-                    className="object-contain"
+                <div className="flex-1 bg-gradient-to-br from-[#e8eaed] to-[#d5d8dc] rounded-2xl p-6 flex items-center justify-center min-h-[340px]">
+                  {/* Phone case mockup wrapper */}
+                  <div
+                    className="relative"
                     style={{
-                      maxHeight: 340,
-                      borderRadius: device.borderRadius * 0.6,
-                      boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
+                      padding: 6,
+                      borderRadius: device.borderRadius * 0.45,
+                      background: "linear-gradient(145deg, #e0e0e0, #c8c8c8)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.4)",
                     }}
-                  />
+                  >
+                    {/* Case depth edge (bottom) */}
+                    <div
+                      className="absolute left-[3px] right-[3px] rounded-b-lg"
+                      style={{
+                        bottom: -5,
+                        height: 5,
+                        background: "linear-gradient(to bottom, #bbb, #999)",
+                        borderBottomLeftRadius: 6,
+                        borderBottomRightRadius: 6,
+                      }}
+                    />
+                    {/* Case depth edge (right) */}
+                    <div
+                      className="absolute top-[20px] bottom-[20px]"
+                      style={{
+                        right: -4,
+                        width: 4,
+                        background: "linear-gradient(to right, #ccc, #aaa)",
+                        borderTopRightRadius: 3,
+                        borderBottomRightRadius: 3,
+                      }}
+                    />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={preview}
+                      alt="Case design — front"
+                      className="object-contain block"
+                      style={{
+                        maxHeight: 360,
+                        borderRadius: device.borderRadius * 0.38,
+                      }}
+                    />
+                    {/* Subtle glass highlight overlay */}
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        borderRadius: device.borderRadius * 0.38,
+                        margin: 6,
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.04) 100%)",
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -246,8 +287,8 @@ export default function CaseDesigner() {
                   </span>
                 </div>
                 <div
-                  className="flex-1 bg-gradient-to-br from-grey-5 to-grey-10 rounded-2xl p-6 flex items-center justify-center min-h-[300px] cursor-grab active:cursor-grabbing select-none"
-                  style={{ perspective: 900 }}
+                  className="flex-1 bg-gradient-to-br from-[#e8eaed] to-[#d5d8dc] rounded-2xl p-6 flex items-center justify-center min-h-[340px] cursor-grab active:cursor-grabbing select-none"
+                  style={{ perspective: 1000 }}
                   onMouseDown={(e) => {
                     isDraggingRef.current = true
                     lastPosRef.current = { x: e.clientX, y: e.clientY }
@@ -256,8 +297,8 @@ export default function CaseDesigner() {
                     if (!isDraggingRef.current) return
                     const dx = e.clientX - lastPosRef.current.x
                     const dy = e.clientY - lastPosRef.current.y
-                    setRotY((prev) => Math.max(-60, Math.min(60, prev + dx * 0.4)))
-                    setRotX((prev) => Math.max(-40, Math.min(40, prev - dy * 0.4)))
+                    setRotY((prev) => Math.max(-55, Math.min(55, prev + dx * 0.4)))
+                    setRotX((prev) => Math.max(-35, Math.min(35, prev - dy * 0.4)))
                     lastPosRef.current = { x: e.clientX, y: e.clientY }
                   }}
                   onMouseUp={() => { isDraggingRef.current = false }}
@@ -272,25 +313,84 @@ export default function CaseDesigner() {
                     const t = e.touches[0]
                     const dx = t.clientX - lastPosRef.current.x
                     const dy = t.clientY - lastPosRef.current.y
-                    setRotY((prev) => Math.max(-60, Math.min(60, prev + dx * 0.4)))
-                    setRotX((prev) => Math.max(-40, Math.min(40, prev - dy * 0.4)))
+                    setRotY((prev) => Math.max(-55, Math.min(55, prev + dx * 0.4)))
+                    setRotX((prev) => Math.max(-35, Math.min(35, prev - dy * 0.4)))
                     lastPosRef.current = { x: t.clientX, y: t.clientY }
                   }}
                   onTouchEnd={() => { isDraggingRef.current = false }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preview}
-                    alt="Case design — 3D interactive"
-                    className="object-contain pointer-events-none"
+                  {/* 3D phone case container */}
+                  <div
+                    className="relative pointer-events-none"
                     style={{
-                      maxHeight: 340,
-                      borderRadius: device.borderRadius * 0.6,
+                      transformStyle: "preserve-3d",
                       transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-                      boxShadow: `${-rotY * 0.6}px ${rotX * 0.6}px 40px rgba(0,0,0,0.25)`,
-                      transition: isDraggingRef.current ? "none" : "transform 0.15s ease, box-shadow 0.15s ease",
+                      transition: isDraggingRef.current ? "none" : "transform 0.15s ease",
                     }}
-                  />
+                  >
+                    {/* Case back face (visible when rotated) */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: "linear-gradient(145deg, #d8d8d8, #b0b0b0)",
+                        borderRadius: device.borderRadius * 0.45,
+                        transform: "translateZ(-6px)",
+                        boxShadow: "inset 0 0 12px rgba(0,0,0,0.1)",
+                      }}
+                    />
+                    {/* Case side edges */}
+                    <div
+                      className="absolute top-0 bottom-0"
+                      style={{
+                        left: -5,
+                        width: 5,
+                        background: "linear-gradient(to left, #ccc, #aaa)",
+                        borderRadius: "3px 0 0 3px",
+                        transform: "rotateY(-90deg)",
+                        transformOrigin: "right center",
+                      }}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0"
+                      style={{
+                        right: -5,
+                        width: 5,
+                        background: "linear-gradient(to right, #ccc, #aaa)",
+                        borderRadius: "0 3px 3px 0",
+                        transform: "rotateY(90deg)",
+                        transformOrigin: "left center",
+                      }}
+                    />
+                    {/* Main case front face with design */}
+                    <div
+                      style={{
+                        padding: 6,
+                        borderRadius: device.borderRadius * 0.45,
+                        background: "linear-gradient(145deg, #e0e0e0, #c8c8c8)",
+                        boxShadow: `${-rotY * 0.8}px ${rotX * 0.8}px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1)`,
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={preview}
+                        alt="Case design — 3D"
+                        className="object-contain block"
+                        style={{
+                          maxHeight: 360,
+                          borderRadius: device.borderRadius * 0.38,
+                        }}
+                      />
+                      {/* Glass reflection overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          borderRadius: device.borderRadius * 0.38,
+                          margin: 6,
+                          background: `linear-gradient(${135 + rotY}deg, rgba(255,255,255,${0.15 + Math.abs(rotY) * 0.002}) 0%, transparent 50%, rgba(0,0,0,${0.05 + Math.abs(rotY) * 0.001}) 100%)`,
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
                 {/* Reset rotation button */}
                 <button
