@@ -1,6 +1,14 @@
 "use client"
 
-import { useRef, useMemo, useEffect, useState } from "react"
+import {
+  useRef,
+  useMemo,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+} from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import {
   OrbitControls,
@@ -11,33 +19,80 @@ import {
 import * as THREE from "three"
 import type { DeviceTemplate } from "../types"
 
+/* ── Material preset definitions ─────────────────────── */
+
+export type CaseMaterial = "glossy" | "matte" | "clear" | "soft-touch"
+
+export const CASE_MATERIALS: { id: CaseMaterial; label: string; desc: string }[] = [
+  { id: "glossy", label: "Glossy", desc: "High-shine smooth finish" },
+  { id: "matte", label: "Matte", desc: "Smooth non-reflective surface" },
+  { id: "clear", label: "Clear", desc: "Transparent protective case" },
+  { id: "soft-touch", label: "Soft Touch", desc: "Rubberized grip feel" },
+]
+
+function getMaterialProps(mat: CaseMaterial, isDesignFace: boolean) {
+  switch (mat) {
+    case "glossy":
+      return {
+        roughness: isDesignFace ? 0.15 : 0.2,
+        metalness: 0.02,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.05,
+        ...(isDesignFace ? {} : { envMapIntensity: 1.2 }),
+      }
+    case "matte":
+      return {
+        roughness: isDesignFace ? 0.55 : 0.7,
+        metalness: 0.0,
+        clearcoat: 0.0,
+        clearcoatRoughness: 0.8,
+      }
+    case "clear":
+      return {
+        roughness: isDesignFace ? 0.1 : 0.08,
+        metalness: 0.0,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.03,
+        transparent: true,
+        opacity: isDesignFace ? 0.92 : 0.4,
+        transmission: isDesignFace ? 0 : 0.5,
+      }
+    case "soft-touch":
+      return {
+        roughness: isDesignFace ? 0.45 : 0.85,
+        metalness: 0.0,
+        clearcoat: 0.15,
+        clearcoatRoughness: 0.6,
+      }
+  }
+}
+
 /* ── helpers ─────────────────────────────────────────── */
 
-/** Convert device px dimensions to 3D world units (1 unit ≈ 1 cm) */
 function toWorld(device: DeviceTemplate) {
-  // Scale factor: device.width px → real mm → world cm
-  // e.g. iPhone 16 Pro Max: 310px maps to 77.6mm = 7.76cm
-  const pxPerMm = device.width / (device.width * 0.25) // approximate
-  const wCm = device.width * 0.025 // rough scale px → cm
+  const wCm = device.width * 0.025
   const hCm = device.height * 0.025
   const dCm = (device.caseDepth || 8) * 0.025
   const rCm = device.borderRadius * 0.025
   return { w: wCm, h: hCm, d: Math.max(dCm, 0.12), r: Math.min(rCm, Math.min(wCm, hCm) * 0.4) }
 }
 
-/* ── CaseBody: the main 3D phone case mesh ───────────── */
+/* ── CaseBody ────────────────────────────────────────── */
 
 function CaseBody({
   device,
   textureUrl,
+  caseMaterial,
+  caseColor,
 }: {
   device: DeviceTemplate
   textureUrl: string | null
+  caseMaterial: CaseMaterial
+  caseColor: string
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const { w, h, d, r } = useMemo(() => toWorld(device), [device])
 
-  // Load design texture
   const texture = useMemo(() => {
     if (!textureUrl) return null
     const tex = new THREE.TextureLoader().load(textureUrl)
@@ -46,42 +101,30 @@ function CaseBody({
     return tex
   }, [textureUrl])
 
-  // Create materials for each face of the rounded box
-  // Order: +X, -X, +Y, -Y, +Z (front/back of case), -Z
   const materials = useMemo(() => {
+    const sideProps = getMaterialProps(caseMaterial, false)
+    const backProps = getMaterialProps(caseMaterial, true)
+
     const caseSide = new THREE.MeshPhysicalMaterial({
-      color: "#c0c0c0",
-      roughness: 0.35,
-      metalness: 0.05,
-      clearcoat: 0.3,
-      clearcoatRoughness: 0.4,
-    })
+      color: caseColor,
+      ...sideProps,
+    } as THREE.MeshPhysicalMaterialParameters)
 
     const caseBack = new THREE.MeshPhysicalMaterial({
-      color: "#ffffff",
-      roughness: 0.3,
-      metalness: 0.0,
-      clearcoat: 0.5,
-      clearcoatRoughness: 0.2,
+      color: caseMaterial === "clear" ? "#ffffff" : "#ffffff",
       map: texture,
-    })
+      ...backProps,
+    } as THREE.MeshPhysicalMaterialParameters)
 
     const caseInner = new THREE.MeshPhysicalMaterial({
-      color: "#e8e8e8",
-      roughness: 0.6,
+      color: caseMaterial === "clear" ? "#f0f0f0" : "#e0e0e0",
+      roughness: 0.7,
       metalness: 0.0,
-    })
+      ...(caseMaterial === "clear" ? { transparent: true, opacity: 0.3 } : {}),
+    } as THREE.MeshPhysicalMaterialParameters)
 
-    // [+X right, -X left, +Y top, -Y bottom, +Z back(design), -Z front(inner)]
     return [caseSide, caseSide, caseSide, caseSide, caseBack, caseInner]
-  }, [texture])
-
-  // Subtle idle rotation
-  useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.15
-    }
-  })
+  }, [texture, caseMaterial, caseColor])
 
   return (
     <RoundedBox
@@ -92,113 +135,118 @@ function CaseBody({
       material={materials}
       castShadow
       receiveShadow
-    >
-    </RoundedBox>
+    />
   )
 }
 
-/* ── Camera cutout (dark cylinder on the back) ───────── */
+/* ── Case lip/edge (raised border around the phone) ─── */
 
-function CameraCutout({
+function CaseLip({
   device,
+  caseColor,
+  caseMaterial,
 }: {
   device: DeviceTemplate
+  caseColor: string
+  caseMaterial: CaseMaterial
 }) {
+  const { w, h, d, r } = useMemo(() => toWorld(device), [device])
+  const lipH = 0.06
+  const props = getMaterialProps(caseMaterial, false)
+
+  return (
+    <group position={[0, 0, -d / 2 - lipH / 2]}>
+      <RoundedBox
+        args={[w + 0.06, h + 0.06, lipH]}
+        radius={Math.min(r + 0.02, (w + 0.06) * 0.4)}
+        smoothness={6}
+        castShadow
+      >
+        <meshPhysicalMaterial
+          color={caseColor}
+          {...(props as any)}
+        />
+      </RoundedBox>
+    </group>
+  )
+}
+
+/* ── Camera cutout ───────────────────────────────────── */
+
+function CameraCutout({ device }: { device: DeviceTemplate }) {
   const { w, h, d } = useMemo(() => toWorld(device), [device])
   const cc = device.cameraCutout
   if (!cc) return null
 
-  // Convert camera cutout px positions to world coords
-  // Camera position is relative to top-left of device in px
   const ccW = cc.width * 0.025
   const ccH = cc.height * 0.025
-  const ccR = cc.radius * 0.025
-  // Center of cutout in device coords → offset from center
   const ccCenterX = (cc.x + cc.width / 2) * 0.025 - w / 2
   const ccCenterY = -(cc.y + cc.height / 2) * 0.025 + h / 2
 
   return (
     <group position={[ccCenterX, ccCenterY, d / 2 + 0.001]}>
-      {/* Camera island background */}
       <mesh>
         <planeGeometry args={[ccW + 0.1, ccH + 0.1]} />
         <meshPhysicalMaterial
           color="#1a1a20"
-          roughness={0.15}
+          roughness={0.12}
           metalness={0.3}
-          clearcoat={0.8}
-          clearcoatRoughness={0.1}
+          clearcoat={0.9}
+          clearcoatRoughness={0.08}
         />
       </mesh>
 
-      {/* Individual camera lenses */}
       {device.cameraLenses?.map((lens, i) => {
         const lx = lens.cx * 0.025 - w / 2 - ccCenterX
         const ly = -(lens.cy * 0.025 - h / 2) - ccCenterY
         const lr = lens.r * 0.025
         return (
           <group key={i} position={[lx, ly, 0.01]}>
-            {/* Chrome ring */}
             <mesh>
               <ringGeometry args={[lr, lr + 0.06, 32]} />
-              <meshStandardMaterial
-                color="#888888"
-                roughness={0.2}
-                metalness={0.8}
-              />
+              <meshStandardMaterial color="#888" roughness={0.15} metalness={0.85} />
             </mesh>
-            {/* Lens glass */}
             <mesh>
               <circleGeometry args={[lr, 32]} />
               <meshPhysicalMaterial
-                color="#0a0a14"
-                roughness={0.05}
-                metalness={0.4}
+                color="#080814"
+                roughness={0.03}
+                metalness={0.5}
                 clearcoat={1.0}
-                clearcoatRoughness={0.05}
-                reflectivity={1}
+                clearcoatRoughness={0.02}
               />
             </mesh>
-            {/* Lens inner ring */}
             <mesh position={[0, 0, 0.005]}>
               <ringGeometry args={[lr * 0.3, lr * 0.55, 32]} />
-              <meshStandardMaterial
-                color="#15152a"
-                roughness={0.3}
-                metalness={0.2}
-                transparent
-                opacity={0.7}
-              />
+              <meshStandardMaterial color="#15152a" roughness={0.3} metalness={0.2} transparent opacity={0.7} />
             </mesh>
-            {/* Reflection highlight */}
             <mesh position={[-lr * 0.2, lr * 0.2, 0.008]}>
-              <circleGeometry args={[lr * 0.2, 16]} />
-              <meshBasicMaterial
-                color="#ffffff"
-                transparent
-                opacity={0.15}
-              />
+              <circleGeometry args={[lr * 0.18, 16]} />
+              <meshBasicMaterial color="#fff" transparent opacity={0.18} />
             </mesh>
           </group>
         )
       })}
 
-      {/* Flash (Apple devices) */}
       {device.brand === "Apple" && (
-        <mesh position={[
-          (cc.x + 16) * 0.025 - w / 2 - ccCenterX,
-          -((cc.y + cc.height - 16) * 0.025 - h / 2) - ccCenterY,
-          0.01,
-        ]}>
-          <circleGeometry args={[0.12, 16]} />
-          <meshStandardMaterial
-            color="#ffe8cc"
-            roughness={0.4}
-            metalness={0.1}
-            emissive="#ffe0a0"
-            emissiveIntensity={0.1}
-          />
-        </mesh>
+        <>
+          <mesh position={[
+            (cc.x + 16) * 0.025 - w / 2 - ccCenterX,
+            -((cc.y + cc.height - 16) * 0.025 - h / 2) - ccCenterY,
+            0.01,
+          ]}>
+            <circleGeometry args={[0.12, 16]} />
+            <meshStandardMaterial color="#ffe8cc" roughness={0.4} metalness={0.1} emissive="#ffe0a0" emissiveIntensity={0.1} />
+          </mesh>
+          <mesh position={[
+            (cc.x + cc.width - 16) * 0.025 - w / 2 - ccCenterX,
+            -((cc.y + cc.height - 16) * 0.025 - h / 2) - ccCenterY,
+            0.01,
+          ]}>
+            <circleGeometry args={[0.08, 16]} />
+            <meshStandardMaterial color="#111118" roughness={0.5} metalness={0.2} />
+          </mesh>
+        </>
       )}
     </group>
   )
@@ -215,93 +263,129 @@ function SceneSetup() {
   return null
 }
 
+/* ── Screenshot helper ───────────────────────────────── */
+
+function ScreenshotHelper({
+  onGlReady,
+}: {
+  onGlReady: (gl: THREE.WebGLRenderer) => void
+}) {
+  const { gl } = useThree()
+  useEffect(() => {
+    onGlReady(gl)
+  }, [gl, onGlReady])
+  return null
+}
+
 /* ── Main exported component ─────────────────────────── */
+
+export type CaseViewer3DHandle = {
+  screenshot: () => string | null
+}
 
 type CaseViewer3DProps = {
   device: DeviceTemplate
   textureUrl: string | null
+  caseMaterial?: CaseMaterial
+  caseColor?: string
   className?: string
   style?: React.CSSProperties
   autoRotate?: boolean
+  compact?: boolean
 }
 
-export default function CaseViewer3D({
-  device,
-  textureUrl,
-  className = "",
-  style,
-  autoRotate = true,
-}: CaseViewer3DProps) {
-  const [ready, setReady] = useState(false)
+const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
+  function CaseViewer3D(
+    {
+      device,
+      textureUrl,
+      caseMaterial = "glossy",
+      caseColor = "#c0c0c0",
+      className = "",
+      style,
+      autoRotate = true,
+      compact = false,
+    },
+    ref
+  ) {
+    const [ready, setReady] = useState(false)
+    const glRef = useRef<THREE.WebGLRenderer | null>(null)
 
-  return (
-    <div className={`relative ${className}`} style={{ minHeight: 400, ...style }}>
-      {/* Loading indicator */}
-      {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 border-2 border-grey-30 border-t-brand rounded-full animate-spin" />
-            <span className="text-[12px] text-grey-40">Loading 3D model...</span>
+    const handleGlReady = useCallback((gl: THREE.WebGLRenderer) => {
+      glRef.current = gl
+    }, [])
+
+    useImperativeHandle(ref, () => ({
+      screenshot: () => {
+        if (!glRef.current) return null
+        return glRef.current.domElement.toDataURL("image/png")
+      },
+    }))
+
+    const minH = compact ? 260 : 400
+    const camZ = compact ? 16 : 14
+
+    return (
+      <div className={`relative ${className}`} style={{ minHeight: minH, ...style }}>
+        {!ready && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="h-8 w-8 border-2 border-grey-30 border-t-brand rounded-full animate-spin" />
+              <span className="text-[12px] text-grey-40">Loading 3D...</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
-        onCreated={() => setReady(true)}
-        style={{ opacity: ready ? 1 : 0, transition: "opacity 0.3s ease" }}
-      >
-        <SceneSetup />
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
+          camera={{ position: [0, 0, camZ], fov: 35 }}
+          onCreated={() => setReady(true)}
+          style={{ opacity: ready ? 1 : 0, transition: "opacity 0.3s ease" }}
+        >
+          <ScreenshotHelper onGlReady={handleGlReady} />
 
-        {/* Lighting */}
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[5, 8, 5]}
-          intensity={1.2}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <directionalLight position={[-3, 4, -3]} intensity={0.4} />
-        <spotLight
-          position={[0, 10, 0]}
-          intensity={0.6}
-          angle={0.5}
-          penumbra={0.5}
-        />
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[5, 8, 5]} intensity={1.0} castShadow />
+          <directionalLight position={[-4, 3, -4]} intensity={0.3} />
+          <spotLight position={[0, 12, 4]} intensity={0.5} angle={0.4} penumbra={0.6} />
 
-        {/* Phone case model */}
-        <group>
-          <CaseBody device={device} textureUrl={textureUrl} />
-          <CameraCutout device={device} />
-        </group>
+          <group rotation={[0.05, 0, 0]}>
+            <CaseBody
+              device={device}
+              textureUrl={textureUrl}
+              caseMaterial={caseMaterial}
+              caseColor={caseColor}
+            />
+            <CaseLip device={device} caseColor={caseColor} caseMaterial={caseMaterial} />
+            <CameraCutout device={device} />
+          </group>
 
-        {/* Ground shadow */}
-        <ContactShadows
-          position={[0, -toWorld(device).h / 2 - 0.5, 0]}
-          opacity={0.35}
-          scale={20}
-          blur={2}
-          far={10}
-        />
+          <ContactShadows
+            position={[0, -toWorld(device).h / 2 - 0.5, 0]}
+            opacity={0.3}
+            scale={20}
+            blur={2.5}
+            far={10}
+          />
 
-        {/* Environment for reflections */}
-        <Environment preset="studio" />
+          <Environment preset="studio" />
 
-        {/* Orbit controls */}
-        <OrbitControls
-          enablePan={false}
-          enableZoom={true}
-          minDistance={8}
-          maxDistance={22}
-          autoRotate={autoRotate}
-          autoRotateSpeed={1.5}
-          minPolarAngle={Math.PI * 0.2}
-          maxPolarAngle={Math.PI * 0.8}
-        />
-      </Canvas>
-    </div>
-  )
-}
+          <OrbitControls
+            enablePan={false}
+            enableZoom={!compact}
+            minDistance={8}
+            maxDistance={22}
+            autoRotate={autoRotate}
+            autoRotateSpeed={1.2}
+            minPolarAngle={Math.PI * 0.25}
+            maxPolarAngle={Math.PI * 0.75}
+          />
+        </Canvas>
+      </div>
+    )
+  }
+)
+
+export default CaseViewer3D

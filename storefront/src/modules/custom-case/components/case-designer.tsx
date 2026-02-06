@@ -1,7 +1,8 @@
 "use client"
 
-import { useRef, useState, useCallback, lazy, Suspense } from "react"
+import { useRef, useState, useCallback } from "react"
 import { useParams } from "next/navigation"
+import dynamic from "next/dynamic"
 import { DEVICE_TEMPLATES, type DeviceTemplate } from "../types"
 import DesignerCanvas, { type DesignerCanvasHandle } from "./designer-canvas"
 import DesignerToolbar from "./designer-toolbar"
@@ -16,11 +17,24 @@ import {
   X,
   Smartphone,
   Box,
+  Camera,
   Loader2,
   Check,
+  Eye,
 } from "lucide-react"
+import { CASE_MATERIALS, type CaseMaterial, type CaseViewer3DHandle } from "./case-viewer-3d"
 
-const CaseViewer3D = lazy(() => import("./case-viewer-3d"))
+const CaseViewer3D = dynamic(() => import("./case-viewer-3d"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-[460px]">
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-8 w-8 border-2 border-grey-30 border-t-brand rounded-full animate-spin" />
+        <span className="text-[12px] text-grey-40">Loading 3D viewer...</span>
+      </div>
+    </div>
+  ),
+})
 
 export default function CaseDesigner() {
   const canvasRef = useRef<DesignerCanvasHandle>(null)
@@ -35,6 +49,14 @@ export default function CaseDesigner() {
 
   // Preview tab state: "flat" or "3d"
   const [previewTab, setPreviewTab] = useState<"flat" | "3d">("3d")
+  // 3D material & color
+  const [caseMaterial, setCaseMaterial] = useState<CaseMaterial>("glossy")
+  const [caseColor, setCaseColor] = useState("#c0c0c0")
+  // Live 3D mini-preview
+  const [showLive3D, setShowLive3D] = useState(false)
+  const [liveTexture, setLiveTexture] = useState<string | null>(null)
+  // 3D viewer ref for screenshot
+  const viewer3DRef = useRef<CaseViewer3DHandle>(null)
 
   const handleBackgroundChange = useCallback((color: string) => {
     setBgColor(color)
@@ -69,6 +91,21 @@ export default function CaseDesigner() {
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.1, 1.5))
   const handleZoomOut = () => setZoom((z) => Math.max(z - 0.1, 0.5))
   const handleZoomReset = () => setZoom(1)
+
+  const refreshLivePreview = useCallback(() => {
+    if (!showLive3D) return
+    const url = canvasRef.current?.exportImage()
+    if (url) setLiveTexture(url)
+  }, [showLive3D])
+
+  const handleDownload3D = useCallback(() => {
+    const url = viewer3DRef.current?.screenshot()
+    if (!url) return
+    const link = document.createElement("a")
+    link.download = `letscase-${device.id}-3d-mockup.png`
+    link.href = url
+    link.click()
+  }, [device.id])
 
   return (
     <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8">
@@ -133,26 +170,76 @@ export default function CaseDesigner() {
             <span className="text-[11px] text-grey-40 font-medium px-2 py-1 rounded bg-grey-5">
               {device.brand} {device.name}
             </span>
+            <div className="w-px h-5 bg-grey-20 mx-1" />
+            <button
+              type="button"
+              onClick={() => {
+                setShowLive3D((v) => {
+                  if (!v) {
+                    const url = canvasRef.current?.exportImage()
+                    if (url) setLiveTexture(url)
+                  }
+                  return !v
+                })
+              }}
+              className={`flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-medium transition ${
+                showLive3D
+                  ? "border-brand bg-brand/5 text-brand"
+                  : "border-grey-20 text-grey-50 hover:text-grey-90 hover:border-grey-40"
+              }`}
+            >
+              <Eye size={12} />
+              3D Preview
+            </button>
           </div>
 
-          {/* Canvas wrapper with zoom */}
-          <div
-            className="rounded-2xl border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-6 small:p-10 overflow-auto flex items-center justify-center"
-            style={{ maxHeight: "80vh" }}
-          >
+          {/* Canvas + optional live 3D preview side by side */}
+          <div className={`flex gap-4 items-start ${showLive3D ? "flex-col xlarge:flex-row" : ""}`}>
+            {/* Canvas wrapper with zoom */}
             <div
-              style={{
-                transform: `scale(${zoom})`,
-                transformOrigin: "center center",
-                transition: "transform 0.2s ease",
-              }}
+              className="rounded-2xl border border-grey-20 bg-gradient-to-br from-grey-5 to-white p-6 small:p-10 overflow-auto flex items-center justify-center"
+              style={{ maxHeight: "80vh" }}
             >
-              <DesignerCanvas
-                ref={canvasRef}
-                device={device}
-                backgroundColor={bgColor}
-              />
+              <div
+                style={{
+                  transform: `scale(${zoom})`,
+                  transformOrigin: "center center",
+                  transition: "transform 0.2s ease",
+                }}
+              >
+                <DesignerCanvas
+                  ref={canvasRef}
+                  device={device}
+                  backgroundColor={bgColor}
+                />
+              </div>
             </div>
+
+            {/* Live 3D mini-preview */}
+            {showLive3D && (
+              <div className="w-full xlarge:w-[300px] flex-shrink-0">
+                <div className="rounded-2xl border border-grey-20 bg-gradient-to-br from-grey-5 to-white overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-grey-10">
+                    <span className="text-[11px] font-semibold text-grey-50 uppercase tracking-wider">Live 3D</span>
+                    <button
+                      type="button"
+                      onClick={refreshLivePreview}
+                      className="flex items-center gap-1 text-[10px] text-brand font-medium hover:underline"
+                    >
+                      <RotateCcw size={10} /> Refresh
+                    </button>
+                  </div>
+                  <CaseViewer3D
+                    device={device}
+                    textureUrl={liveTexture}
+                    caseMaterial={caseMaterial}
+                    caseColor={caseColor}
+                    compact
+                    style={{ height: 280 }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <p className="mt-3 text-[12px] text-grey-40 text-center">
@@ -240,26 +327,71 @@ export default function CaseDesigner() {
               </button>
             </div>
 
+            {/* Material & color picker (visible in 3D tab) */}
+            {previewTab === "3d" && (
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Material picker */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Finish</span>
+                  <div className="flex gap-1">
+                    {CASE_MATERIALS.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setCaseMaterial(m.id)}
+                        title={m.desc}
+                        className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition border ${
+                          caseMaterial === m.id
+                            ? "border-brand bg-brand/5 text-brand"
+                            : "border-grey-20 text-grey-50 hover:border-grey-40 hover:text-grey-70"
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Case edge color */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-grey-40 uppercase tracking-wider">Edge</span>
+                  <div className="flex gap-1">
+                    {["#c0c0c0", "#1a1a1a", "#f5e6d3", "#e8d5e0", "#d4e5f7", "#d5e8d4"].map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setCaseColor(c)}
+                        className={`h-7 w-7 rounded-full border-2 transition ${
+                          caseColor === c ? "border-brand scale-110" : "border-grey-20 hover:border-grey-40"
+                        }`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {/* 3D Screenshot */}
+                <button
+                  type="button"
+                  onClick={handleDownload3D}
+                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-grey-20 text-[12px] font-medium text-grey-50 hover:border-grey-40 hover:text-grey-70 transition"
+                >
+                  <Camera size={12} />
+                  Save 3D Mockup
+                </button>
+              </div>
+            )}
+
             {/* Preview content */}
             <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#f0f1f3] to-[#dcdee2]">
               {previewTab === "3d" ? (
                 /* === Three.js 3D interactive viewer === */
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center h-[460px]">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="h-8 w-8 border-2 border-grey-30 border-t-brand rounded-full animate-spin" />
-                        <span className="text-[12px] text-grey-40">Loading 3D viewer...</span>
-                      </div>
-                    </div>
-                  }
-                >
-                  <CaseViewer3D
-                    device={device}
-                    textureUrl={preview}
-                    style={{ height: 460 }}
-                  />
-                </Suspense>
+                <CaseViewer3D
+                  ref={viewer3DRef}
+                  device={device}
+                  textureUrl={preview}
+                  caseMaterial={caseMaterial}
+                  caseColor={caseColor}
+                  style={{ height: 460 }}
+                />
               ) : (
                 /* === Flat case back view === */
                 <div className="flex items-center justify-center p-10 min-h-[460px]">
