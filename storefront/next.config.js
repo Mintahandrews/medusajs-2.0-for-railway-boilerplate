@@ -56,7 +56,6 @@ const nextConfig = {
       react: path.dirname(require.resolve("react/package.json")),
       "react-dom": path.dirname(require.resolve("react-dom/package.json")),
     }
-
     return config
   },
   images: {
