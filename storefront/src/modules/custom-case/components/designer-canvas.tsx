@@ -6,7 +6,7 @@ import type { DeviceTemplate } from "../types"
 
 export type DesignerCanvasHandle = {
   getCanvas: () => Canvas | null
-  exportImage: () => string | null
+  exportImage: (options?: { multiplier?: number }) => string | null
   exportJSON: () => string | null
   loadJSON: (json: string) => void
   setBackgroundColor: (color: string) => void
@@ -164,10 +164,10 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
       canvas.renderAll()
     }, [device.width, device.height])
 
-    const exportImage = useCallback((): string | null => {
+    const exportImage = useCallback((options?: { multiplier?: number }): string | null => {
       const canvas = fabricRef.current
       if (!canvas) return null
-      return canvas.toDataURL({ format: "png", quality: 1, multiplier: 2 })
+      return canvas.toDataURL({ format: "png", quality: 1, multiplier: options?.multiplier ?? 2 })
     }, [])
 
     const exportJSON = useCallback((): string | null => {

@@ -56,6 +56,8 @@ export default function CaseDesigner() {
   // Live 3D mini-preview
   const [showLive3D, setShowLive3D] = useState(false)
   const [liveTexture, setLiveTexture] = useState<string | null>(null)
+  const [performanceMode, setPerformanceMode] = useState(false)
+  const [showGuides, setShowGuides] = useState(false)
   // 3D viewer ref for screenshot
   const viewer3DRef = useRef<CaseViewer3DHandle>(null)
 
@@ -95,7 +97,7 @@ export default function CaseDesigner() {
 
   const refreshLivePreview = useCallback(() => {
     if (!showLive3D) return
-    const url = canvasRef.current?.exportImage()
+    const url = canvasRef.current?.exportImage({ multiplier: 1 })
     if (url) setLiveTexture(url)
   }, [showLive3D])
 
@@ -131,8 +133,20 @@ export default function CaseDesigner() {
       <div className="grid grid-cols-1 large:grid-cols-[280px_1fr_280px] gap-8">
         {/* Left sidebar — Device selector */}
         <div className="order-2 large:order-1">
-          <div className="large:sticky large:top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-6 large:max-h-[calc(100vh-120px)] large:overflow-y-auto">
-            <DeviceSelector selected={device} onSelect={handleDeviceChange} />
+          <div className="large:hidden">
+            <details className="rounded-2xl border border-grey-20 bg-white">
+              <summary className="cursor-pointer select-none px-5 py-4 text-[13px] font-semibold text-grey-90">
+                Choose device
+              </summary>
+              <div className="px-5 pb-5 pt-1 space-y-6">
+                <DeviceSelector selected={device} onSelect={handleDeviceChange} />
+              </div>
+            </details>
+          </div>
+          <div className="hidden large:block">
+            <div className="large:sticky large:top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-6 large:max-h-[calc(100vh-120px)] large:overflow-y-auto">
+              <DeviceSelector selected={device} onSelect={handleDeviceChange} />
+            </div>
           </div>
         </div>
 
@@ -177,7 +191,7 @@ export default function CaseDesigner() {
               onClick={() => {
                 setShowLive3D((v) => {
                   if (!v) {
-                    const url = canvasRef.current?.exportImage()
+                    const url = canvasRef.current?.exportImage({ multiplier: 1 })
                     if (url) setLiveTexture(url)
                   }
                   return !v
@@ -191,6 +205,28 @@ export default function CaseDesigner() {
             >
               <Eye size={12} />
               3D Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowGuides((v) => !v)}
+              className={`flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-medium transition ${
+                showGuides
+                  ? "border-brand bg-brand/5 text-brand"
+                  : "border-grey-20 text-grey-50 hover:text-grey-90 hover:border-grey-40"
+              }`}
+            >
+              Guides
+            </button>
+            <button
+              type="button"
+              onClick={() => setPerformanceMode((v) => !v)}
+              className={`flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-medium transition ${
+                performanceMode
+                  ? "border-brand bg-brand/5 text-brand"
+                  : "border-grey-20 text-grey-50 hover:text-grey-90 hover:border-grey-40"
+              }`}
+            >
+              Performance
             </button>
           </div>
 
@@ -237,6 +273,8 @@ export default function CaseDesigner() {
                     caseColor={caseColor}
                     envPreset={envPreset}
                     compact
+                    performanceMode={performanceMode}
+                    showGuides={showGuides}
                     style={{ height: 280 }}
                   />
                 </div>
@@ -251,24 +289,48 @@ export default function CaseDesigner() {
 
         {/* Right sidebar — Toolbar */}
         <div className="order-3">
-          <div className="large:sticky large:top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-5 large:max-h-[calc(100vh-120px)] large:overflow-y-auto">
-            <DesignerToolbar
-              canvasRef={canvasRef}
-              backgroundColor={bgColor}
-              onBackgroundChange={handleBackgroundChange}
-              onGradientChange={handleGradientChange}
-              onExport={handleExport}
-            />
-
-            {/* Download button */}
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-grey-20 text-grey-60 text-[13px] font-medium hover:border-grey-40 hover:text-grey-90 transition"
-            >
-              <Download size={14} />
-              Download PNG
-            </button>
+          <div className="large:hidden">
+            <details className="rounded-2xl border border-grey-20 bg-white">
+              <summary className="cursor-pointer select-none px-5 py-4 text-[13px] font-semibold text-grey-90">
+                Tools
+              </summary>
+              <div className="px-5 pb-5 pt-1 space-y-5">
+                <DesignerToolbar
+                  canvasRef={canvasRef}
+                  backgroundColor={bgColor}
+                  onBackgroundChange={handleBackgroundChange}
+                  onGradientChange={handleGradientChange}
+                  onExport={handleExport}
+                />
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-grey-20 text-grey-60 text-[13px] font-medium hover:border-grey-40 hover:text-grey-90 transition"
+                >
+                  <Download size={14} />
+                  Download PNG
+                </button>
+              </div>
+            </details>
+          </div>
+          <div className="hidden large:block">
+            <div className="large:sticky large:top-[90px] rounded-2xl border border-grey-20 bg-white p-5 space-y-5 large:max-h-[calc(100vh-120px)] large:overflow-y-auto">
+              <DesignerToolbar
+                canvasRef={canvasRef}
+                backgroundColor={bgColor}
+                onBackgroundChange={handleBackgroundChange}
+                onGradientChange={handleGradientChange}
+                onExport={handleExport}
+              />
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="w-full flex items-center justify-center gap-2 h-10 rounded-xl border border-grey-20 text-grey-60 text-[13px] font-medium hover:border-grey-40 hover:text-grey-90 transition"
+              >
+                <Download size={14} />
+                Download PNG
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -413,6 +475,8 @@ export default function CaseDesigner() {
                   caseMaterial={caseMaterial}
                   caseColor={caseColor}
                   envPreset={envPreset}
+                  performanceMode={performanceMode}
+                  showGuides={showGuides}
                   style={{ height: "min(460px, 60vh)" }}
                 />
               ) : (
@@ -447,6 +511,20 @@ export default function CaseDesigner() {
                           preserveAspectRatio="xMidYMid slice"
                         />
                       </g>
+
+                      <rect
+                        x={device.inset.left}
+                        y={device.inset.top}
+                        width={device.width - device.inset.left - device.inset.right}
+                        height={device.height - device.inset.top - device.inset.bottom}
+                        rx={Math.max(device.borderRadius - Math.max(device.inset.left, device.inset.top), 4)}
+                        ry={Math.max(device.borderRadius - Math.max(device.inset.left, device.inset.top), 4)}
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        strokeDasharray="10 7"
+                        opacity={showGuides ? 0.6 : 0}
+                      />
 
                       {device.cameraCutout && device.cameraStyle !== "individual" && (
                         <rect
@@ -542,14 +620,32 @@ export default function CaseDesigner() {
                 type="button"
                 disabled={cartStatus === "loading" || cartStatus === "success"}
                 onClick={async () => {
-                  if (!preview) return
+                  if (!preview) {
+                    setCartStatus("error")
+                    setCartError("Please generate a preview first.")
+                    return
+                  }
                   setCartStatus("loading")
                   setCartError(null)
                   try {
                     const canvasJSON = canvasRef.current?.exportJSON()
+                    if (!canvasJSON) {
+                      setCartStatus("error")
+                      setCartError("Couldn't read your design. Please try again.")
+                      return
+                    }
+
+                    const designImageForCart =
+                      canvasRef.current?.exportImage({ multiplier: 1 }) || preview
+                    if (!designImageForCart) {
+                      setCartStatus("error")
+                      setCartError("Couldn't export your design. Please try again.")
+                      return
+                    }
+
                     const result = await addCustomCaseToCart({
                       countryCode,
-                      designImage: preview,
+                      designImage: designImageForCart,
                       deviceName: `${device.brand} ${device.name}`,
                       canvasJSON,
                     })

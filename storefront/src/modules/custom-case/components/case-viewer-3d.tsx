@@ -12,6 +12,7 @@ import {
 import { Canvas, useThree } from "@react-three/fiber"
 import {
   OrbitControls,
+  Edges,
   Environment,
   ContactShadows,
   RoundedBox,
@@ -153,6 +154,24 @@ function CaseBody({
   )
 }
 
+function PrintableGuide({ device }: { device: DeviceTemplate }) {
+  const { w, h, d } = useMemo(() => toWorld(device), [device])
+  const inset = device.inset
+  const s = 0.01
+  const printW = (device.width - inset.left - inset.right) * s
+  const printH = (device.height - inset.top - inset.bottom) * s
+  const cx = (inset.left + (device.width - inset.left - inset.right) / 2) * s - w / 2
+  const cy = -(inset.top + (device.height - inset.top - inset.bottom) / 2) * s + h / 2
+
+  return (
+    <mesh position={[cx, cy, d / 2 + 0.002]}>
+      <planeGeometry args={[printW, printH]} />
+      <meshBasicMaterial transparent opacity={0} />
+      <Edges color="#3b82f6" />
+    </mesh>
+  )
+}
+
 /* ── Case lip/edge (raised border around the phone) ─── */
 
 function CaseLip({
@@ -271,6 +290,8 @@ type CaseViewer3DProps = {
   style?: React.CSSProperties
   autoRotate?: boolean
   compact?: boolean
+  performanceMode?: boolean
+  showGuides?: boolean
 }
 
 const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
@@ -285,6 +306,8 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
       style,
       autoRotate = true,
       compact = false,
+      performanceMode = false,
+      showGuides = false,
     },
     ref
   ) {
@@ -321,9 +344,9 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
         )}
 
         <Canvas
-          shadows
-          dpr={[1, 2]}
-          gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
+          shadows={!performanceMode}
+          dpr={performanceMode ? 1 : [1, 2]}
+          gl={{ antialias: !performanceMode, alpha: true, preserveDrawingBuffer: true }}
           camera={{ position: [0, 0, camZ], fov: 35 }}
           onCreated={({ gl }) => {
             gl.outputColorSpace = THREE.SRGBColorSpace
@@ -351,15 +374,18 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
             />
             <CaseLip device={device} caseColor={caseColor} caseMaterial={caseMaterial} />
             <CameraCutout device={device} />
+            {showGuides && <PrintableGuide device={device} />}
           </group>
 
-          <ContactShadows
-            position={[0, -toWorld(device).h / 2 - 0.5, 0]}
-            opacity={0.3}
-            scale={20}
-            blur={2.5}
-            far={10}
-          />
+          {!performanceMode && (
+            <ContactShadows
+              position={[0, -toWorld(device).h / 2 - 0.5, 0]}
+              opacity={0.3}
+              scale={20}
+              blur={2.5}
+              far={10}
+            />
+          )}
 
           <Environment preset={envPreset} />
 
