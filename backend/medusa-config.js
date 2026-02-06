@@ -23,8 +23,11 @@ import {
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
   MEILISEARCH_HOST,
-  MEILISEARCH_ADMIN_KEY
+  MEILISEARCH_ADMIN_KEY,
+  ARONIUM_POS_ENABLED,
+  ARONIUM_POS_API_KEY,
 } from 'lib/constants';
+import { POS_MODULE } from './src/modules/pos';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
 
@@ -142,7 +145,15 @@ const medusaConfig = {
           }] : []),
         ],
       },
-    }] : [])
+    }] : []),
+    ...(ARONIUM_POS_ENABLED ? [{
+      key: POS_MODULE,
+      resolve: './src/modules/pos',
+      options: {
+        enabled: ARONIUM_POS_ENABLED,
+        apiKey: ARONIUM_POS_API_KEY,
+      },
+    }] : []),
   ],
   plugins: [
   ...(MEILISEARCH_HOST && MEILISEARCH_ADMIN_KEY ? [{
