@@ -46,15 +46,17 @@ const nextConfig = {
     "@react-three/drei",
     "three",
   ],
-  webpack: (config) => {
-    const path = require("path")
-    config.resolve = config.resolve || {}
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      // Point to package directories (not resolved files) so subpath
-      // imports like react-dom/client and react/jsx-runtime still work.
-      react: path.dirname(require.resolve("react/package.json")),
-      "react-dom": path.dirname(require.resolve("react-dom/package.json")),
+  webpack: (config, { isServer }) => {
+    // Only alias for client builds — the server SSG build uses
+    // react-server exports and aliasing breaks useContext resolution.
+    if (!isServer) {
+      const path = require("path")
+      config.resolve = config.resolve || {}
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        react: path.dirname(require.resolve("react/package.json")),
+        "react-dom": path.dirname(require.resolve("react-dom/package.json")),
+      }
     }
     return config
   },
