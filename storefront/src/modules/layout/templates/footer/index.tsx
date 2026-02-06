@@ -151,42 +151,55 @@ export default async function Footer() {
 
         {/* Payment Methods */}
         <div className="border-t border-grey-20 py-6">
-          <div className="flex flex-wrap items-center justify-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <span className="text-[12px] text-grey-40 uppercase tracking-wider font-medium">We accept</span>
-            {/* MTN MoMo */}
-            <div className="flex items-center gap-1.5 rounded-md border border-grey-20 bg-grey-5 px-3 py-1.5">
-              <div className="h-5 w-5 rounded-full bg-[#FFC300] flex items-center justify-center">
-                <span className="text-[8px] font-bold text-grey-90">MTN</span>
-              </div>
-              <span className="text-[11px] font-medium text-grey-60">MoMo</span>
+
+            {/* MTN MoMo — official yellow/blue brand */}
+            <div className="flex items-center gap-2 rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
+              <svg viewBox="0 0 40 20" className="h-5 w-auto" aria-label="MTN MoMo">
+                <rect width="40" height="20" rx="3" fill="#FFCB05" />
+                <text x="20" y="13.5" textAnchor="middle" fontFamily="Arial,sans-serif" fontWeight="bold" fontSize="10" fill="#003478">MTN</text>
+              </svg>
+              <span className="text-[12px] font-semibold text-[#003478]">MoMo</span>
             </div>
-            {/* Vodafone Cash */}
-            <div className="flex items-center gap-1.5 rounded-md border border-grey-20 bg-grey-5 px-3 py-1.5">
-              <div className="h-5 w-5 rounded-full bg-[#E60000] flex items-center justify-center">
-                <span className="text-[7px] font-bold text-white">V</span>
-              </div>
-              <span className="text-[11px] font-medium text-grey-60">Vodafone Cash</span>
+
+            {/* Vodafone Cash — official red/white brand */}
+            <div className="flex items-center gap-2 rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-label="Vodafone Cash">
+                <circle cx="12" cy="12" r="12" fill="#E60000" />
+                <path d="M12 4c-.6 0-1.1.3-1.4.7L7.2 11c-.2.3-.2.7 0 1l3.4 6.3c.3.5.8.7 1.4.7s1.1-.2 1.4-.7l3.4-6.3c.2-.3.2-.7 0-1l-3.4-6.3C13.1 4.3 12.6 4 12 4z" fill="white" />
+              </svg>
+              <span className="text-[12px] font-semibold text-[#E60000]">Vodafone Cash</span>
             </div>
-            {/* Visa */}
-            <div className="flex items-center rounded-md border border-grey-20 bg-grey-5 px-3 py-1.5">
-              <svg viewBox="0 0 48 16" className="h-4 w-auto" aria-label="Visa">
-                <path d="M19.5 1.3l-3.2 13.4h-2.6l3.2-13.4h2.6zm13.1 8.7l1.4-3.7.8 3.7h-2.2zm2.9 4.7h2.4l-2.1-13.4h-2.2c-.5 0-.9.3-1.1.7l-3.8 12.7h2.7l.5-1.4h3.3l.3 1.4zm-6.5-4.4c0-3.5-4.9-3.7-4.9-5.3 0-.5.5-1 1.5-1.1.5-.1 1.9-.1 3.5.6l.6-2.9A9.5 9.5 0 0 0 26.3.8c-2.5 0-4.3 1.3-4.3 3.3 0 1.4 1.3 2.2 2.3 2.7 1 .5 1.4.8 1.4 1.3 0 .7-.8 1-1.6 1-1.3 0-2.1-.4-2.7-.6l-.5 2.9c.6.3 1.8.5 3 .5 2.7 0 4.4-1.3 4.4-3.3zM15 1.3l-4.2 13.4H8.1L5.9 4.5c-.1-.5-.3-.7-.7-.9C4.3 3.2 3 2.8 1.8 2.5l.1-.2H6c.6 0 1.1.4 1.2 1.1l1 5.5 2.6-6.6H15z" fill="#1A1F71" />
+
+            {/* Visa — official brand SVG */}
+            <div className="flex items-center rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
+              <svg viewBox="0 0 780 500" className="h-5 w-auto" aria-label="Visa">
+                <rect width="780" height="500" rx="40" fill="#fff" />
+                <path d="M293.2 348.7l33.4-195.8h53.4l-33.4 195.8h-53.4zM523.6 158.8c-10.6-4-27.2-8.3-47.9-8.3-52.8 0-90 26.6-90.3 64.6-.3 28.1 26.5 43.8 46.8 53.2 20.8 9.6 27.8 15.7 27.7 24.3-.1 13.1-16.6 19.1-32 19.1-21.3 0-32.7-3-50.2-10.2l-6.9-3.1-7.5 43.8c12.5 5.5 35.5 10.2 59.4 10.5 56.2 0 92.7-26.3 93.1-66.8.2-22.3-14-39.2-44.8-53.2-18.6-9.1-30.1-15.1-30-24.3 0-8.1 9.7-16.8 30.6-16.8 17.4-.3 30.1 3.5 39.9 7.5l4.8 2.3 7.3-42.6zM661.6 152.9h-41.3c-12.8 0-22.4 3.5-28 16.3l-79.4 179.5h56.2s9.2-24.1 11.3-29.4h68.6c1.6 6.9 6.5 29.4 6.5 29.4h49.7l-43.6-195.8zm-65.9 126.3c4.4-11.3 21.5-54.7 21.5-54.7-.3.5 4.4-11.4 7.1-18.8l3.6 17s10.3 47.2 12.5 57.1h-44.7v-.6zM232.8 152.9l-52.3 133.5-5.6-27.2c-9.7-31.2-39.8-65-73.5-81.9l47.9 171.3h56.6l84.2-195.7h-57.3z" fill="#1A1F71" />
+                <path d="M124.7 152.9H38.4l-.6 3.7c67.2 16.2 111.7 55.5 130.1 102.6l-18.8-90.2c-3.2-12.4-12.6-15.7-24.4-16.1z" fill="#F9A533" />
               </svg>
             </div>
-            {/* Mastercard */}
-            <div className="flex items-center rounded-md border border-grey-20 bg-grey-5 px-3 py-1.5">
-              <svg viewBox="0 0 48 30" className="h-5 w-auto" aria-label="Mastercard">
-                <circle cx="18" cy="15" r="12" fill="#EB001B" />
-                <circle cx="30" cy="15" r="12" fill="#F79E1B" />
-                <path d="M24 5.6a12 12 0 0 0-4.4 9.4 12 12 0 0 0 4.4 9.4 12 12 0 0 0 4.4-9.4A12 12 0 0 0 24 5.6z" fill="#FF5F00" />
+
+            {/* Mastercard — official overlapping circles */}
+            <div className="flex items-center rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
+              <svg viewBox="0 0 152.407 108" className="h-5 w-auto" aria-label="Mastercard">
+                <rect width="152.407" height="108" rx="8" fill="#fff" />
+                <circle cx="60.412" cy="54" r="38" fill="#EB001B" />
+                <circle cx="91.995" cy="54" r="38" fill="#F79E1B" />
+                <path d="M76.204 24.793a37.94 37.94 0 0 0-14.192 29.207 37.94 37.94 0 0 0 14.192 29.207A37.94 37.94 0 0 0 90.396 54a37.94 37.94 0 0 0-14.192-29.207z" fill="#FF5F00" />
               </svg>
             </div>
-            {/* Paystack */}
-            <div className="flex items-center gap-1.5 rounded-md border border-grey-20 bg-grey-5 px-3 py-1.5">
-              <div className="h-4 w-4 rounded bg-[#00C3F7] flex items-center justify-center">
-                <span className="text-[7px] font-bold text-white">P</span>
-              </div>
-              <span className="text-[11px] font-medium text-grey-60">Paystack</span>
+
+            {/* Paystack — official teal brand */}
+            <div className="flex items-center gap-2 rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-label="Paystack">
+                <rect width="24" height="24" rx="4" fill="#00C3F7" />
+                <rect x="5" y="5" width="14" height="3" rx="1" fill="white" />
+                <rect x="5" y="10.5" width="14" height="3" rx="1" fill="white" />
+                <rect x="5" y="16" width="8" height="3" rx="1" fill="white" />
+              </svg>
+              <span className="text-[12px] font-semibold text-[#011B33]">Paystack</span>
             </div>
           </div>
         </div>
