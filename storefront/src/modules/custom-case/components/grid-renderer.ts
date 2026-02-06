@@ -95,10 +95,10 @@ export async function renderGridToCanvas(
         drawY = sy + (sh - drawH) / 2
       }
 
-      // Zoom & Pan
+      // Zoom & Pan (panX/panY are -50..50, scaled to 0.5% of slot dimension per unit)
       const zoom = photo.zoom || 1
-      const panX = (photo.panX || 0) * (w / 360)
-      const panY = (photo.panY || 0) * (h / 360)
+      const panX = (photo.panX || 0) * 0.005 * sw
+      const panY = (photo.panY || 0) * 0.005 * sh
 
       const cx = drawX + drawW / 2
       const cy = drawY + drawH / 2

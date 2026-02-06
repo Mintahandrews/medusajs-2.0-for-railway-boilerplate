@@ -245,6 +245,54 @@ function useCaseGeometry(device: DeviceTemplate) {
 
 /* ── CaseBody ────────────────────────────────────────── */
 
+/**
+ * Split ExtrudeGeometry into 3 material groups based on face normals:
+ *   Group 0 = Sides (normals mostly in XY plane)
+ *   Group 1 = Back face / Design (normal Z > 0.5)
+ *   Group 2 = Front face / Inner (normal Z < -0.5)
+ */
+function splitGeometryGroups(geo: THREE.ExtrudeGeometry) {
+  geo.computeVertexNormals()
+  const index = geo.index
+  if (!index) return // non-indexed, skip
+
+  const normals = geo.attributes.normal
+  const faceCount = index.count / 3
+
+  // Classify each triangle
+  const sides: number[] = []
+  const backs: number[] = []
+  const fronts: number[] = []
+
+  for (let f = 0; f < faceCount; f++) {
+    const i0 = index.getX(f * 3)
+    const i1 = index.getX(f * 3 + 1)
+    const i2 = index.getX(f * 3 + 2)
+    const avgNz = (normals.getZ(i0) + normals.getZ(i1) + normals.getZ(i2)) / 3
+
+    if (avgNz > 0.4) {
+      backs.push(i0, i1, i2)
+    } else if (avgNz < -0.4) {
+      fronts.push(i0, i1, i2)
+    } else {
+      sides.push(i0, i1, i2)
+    }
+  }
+
+  // Rebuild index buffer: sides first, then backs, then fronts
+  const newIndices = new Uint32Array(sides.length + backs.length + fronts.length)
+  newIndices.set(sides, 0)
+  newIndices.set(backs, sides.length)
+  newIndices.set(fronts, sides.length + backs.length)
+  geo.setIndex(new THREE.BufferAttribute(newIndices, 1))
+
+  // Set groups
+  geo.clearGroups()
+  geo.addGroup(0, sides.length, 0) // sides
+  geo.addGroup(sides.length, backs.length, 1) // back (design)
+  geo.addGroup(sides.length + backs.length, fronts.length, 2) // front (inner)
+}
+
 function CaseBody({
   device,
   textureUrl,
@@ -256,9 +304,21 @@ function CaseBody({
   caseMaterial: CaseMaterial
   caseColor: string
 }) {
-  const geometry = useCaseGeometry(device)
+  const baseGeometry = useCaseGeometry(device)
   const meshRef = useRef<THREE.Mesh>(null)
 
+  // Split geometry into 3 material groups
+  const geometry = useMemo(() => {
+    const geo = baseGeometry.clone()
+    splitGeometryGroups(geo)
+    return geo
+  }, [baseGeometry])
+
+  useEffect(() => {
+    return () => { geometry.dispose() }
+  }, [geometry])
+
+  // Load texture with proper live-update support
   const texture = useMemo(() => {
     if (!textureUrl) return null
     const tex = new THREE.TextureLoader().load(textureUrl)
@@ -277,6 +337,7 @@ function CaseBody({
     return () => { texture?.dispose() }
   }, [texture])
 
+  // 3 materials: [sides, back/design, front/inner]
   const materials = useMemo(() => {
     const sideProps = getMaterialProps(caseMaterial, false)
     const backProps = getMaterialProps(caseMaterial, true)
@@ -287,39 +348,21 @@ function CaseBody({
     } as THREE.MeshPhysicalMaterialParameters)
 
     const caseBack = new THREE.MeshPhysicalMaterial({
-      color: caseMaterial === "clear" ? "#ffffff" : "#ffffff",
+      color: "#ffffff",
       map: texture,
       ...backProps,
-      // Ensure transparent PNGs work if using clear case
-      transparent: caseMaterial === "clear", 
-      alphaTest: 0.1, // Helps with cutout edges if texture has alpha
+      transparent: caseMaterial === "clear",
+      alphaTest: 0.1,
     } as THREE.MeshPhysicalMaterialParameters)
 
     const caseInner = new THREE.MeshPhysicalMaterial({
-      color: caseMaterial === "clear" ? "#f0f0f0" : "#e0e0e0",
-      roughness: 0.7,
+      color: caseMaterial === "clear" ? "#1a1a1a" : "#111111",
+      roughness: 0.8,
       metalness: 0.0,
-      ...(caseMaterial === "clear" ? { transparent: true, opacity: 0.3 } : {}),
+      ...(caseMaterial === "clear" ? { transparent: true, opacity: 0.4 } : {}),
     } as THREE.MeshPhysicalMaterialParameters)
 
-    // Side, Back (Design), Inner (Screen)
-    // Since we can't easily split Top/Bottom caps in standard ExtrudeGeometry without re-tessellating,
-    // we'll use a simplified approach:
-    // Index 0: Sides
-    // Index 1: Caps (Both Back and Inner will share this for now).
-    // To fix this properly requires manually splitting the geometry groups, which is verbose.
-    // For this level of detail, mapping the texture to the back is key.
-    // If we map UVs correctly, the texture will show on Back.
-    // On Inner (Front), the texture will also show (mirrored) if we share material.
-    // To prevent this, we can stick to a solid color inner if possible.
-    
-    // For "World Standard", let's try to do it right:
-    // If we can't separate, we'll use `caseBack` for both caps. 
-    // The UV remapping ensures the texture looks correct on the back.
-    // On the front (screen side), the UVs will result in the texture showing too.
-    // This is often acceptable for a phone case viewer (screen covers inner).
-    
-    return [caseSide, caseBack] 
+    return [caseSide, caseBack, caseInner]
   }, [texture, caseMaterial, caseColor])
 
   useEffect(() => {
@@ -435,11 +478,17 @@ function CameraBump({ device, caseColor, caseMaterial }: { device: DeviceTemplat
   if (!geo) return null
 
   // Material for the bump - slightly darker/matte or same as case
-  const bumpMat = new THREE.MeshStandardMaterial({
-    color: caseColor,
-    roughness: 0.4,
-    metalness: 0.1,
-  })
+  const bumpMat = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: caseColor,
+      roughness: 0.4,
+      metalness: 0.1,
+    })
+  }, [caseColor])
+
+  useEffect(() => {
+    return () => { bumpMat.dispose() }
+  }, [bumpMat])
 
   // Render Module Style
   if (geo.type === "module" && device.cameraCutout) {
@@ -480,6 +529,27 @@ function CameraBump({ device, caseColor, caseMaterial }: { device: DeviceTemplat
   }
 
   return null
+}
+
+/* ── Phone Screen (visible from front) ─────────────── */
+
+function PhoneScreen({ device }: { device: DeviceTemplate }) {
+  const { w, h, d } = useMemo(() => toWorld(device), [device])
+  const screenInset = 0.15 // slight inset from edges
+  return (
+    <mesh position={[0, 0, -d / 2 - 0.001]} rotation={[0, 0, 0]}>
+      <planeGeometry args={[w - screenInset, h - screenInset]} />
+      <meshPhysicalMaterial
+        color="#050505"
+        roughness={0.05}
+        metalness={0.1}
+        clearcoat={1.0}
+        clearcoatRoughness={0.02}
+        envMapIntensity={1.5}
+        reflectivity={1.0}
+      />
+    </mesh>
+  )
 }
 
 function PrintableGuide({ device }: { device: DeviceTemplate }) {
@@ -674,6 +744,7 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
             />
             <CaseLip device={device} caseColor={caseColor} caseMaterial={caseMaterial} />
             <CameraBump device={device} caseColor={caseColor} caseMaterial={caseMaterial} />
+            <PhoneScreen device={device} />
             {showGuides && <PrintableGuide device={device} />}
           </group>
 
@@ -687,7 +758,7 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
             />
           )}
 
-          <Environment preset="city" blur={0.6} />
+          <Environment preset={envPreset} blur={0.6} />
 
           <OrbitControls
             enablePan={false}

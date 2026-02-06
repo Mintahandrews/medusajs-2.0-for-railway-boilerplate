@@ -93,8 +93,9 @@ export default function CaseDesigner() {
   const syncTimerRef = useRef<number | null>(null)
   const previewOpen = Boolean(preview)
 
-  // --- SYNC LIVE 3D ---
-  const syncPreviews = useCallback(async () => {
+  // --- SYNC LIVE 3D & PREVIEW ---
+  // Regenerate texture whenever design state changes AND 3D or preview is visible
+  useEffect(() => {
     if (!showLive3D && !previewOpen) return
     if (syncTimerRef.current) window.clearTimeout(syncTimerRef.current)
     syncTimerRef.current = window.setTimeout(async () => {
@@ -105,10 +106,11 @@ export default function CaseDesigner() {
       } catch (err) {
         console.error("Failed to render preview:", err)
       }
-    }, 250)
+    }, 150)
+    return () => {
+      if (syncTimerRef.current) window.clearTimeout(syncTimerRef.current)
+    }
   }, [device, layout, photos, backgroundColor, gridGap, performanceMode, previewOpen, showLive3D])
-
-  useEffect(() => { syncPreviews() }, [syncPreviews])
 
   // --- HANDLERS ---
   const handleDeviceChange = useCallback((d: DeviceTemplate) => {
@@ -224,11 +226,21 @@ export default function CaseDesigner() {
         setCartError("Couldn't export design.")
         return
       }
+      // Save design state so it can be re-loaded later
+      const designState = JSON.stringify({
+        deviceId: device.id,
+        layoutId: layout.id,
+        backgroundColor,
+        gridGap,
+        caseTypeId: caseType.id,
+        caseColor,
+        photos: photos.map((p) => ({ slotId: p.slotId, zoom: p.zoom, panX: p.panX, panY: p.panY, rotation: p.rotation })),
+      })
       const result = await addCustomCaseToCart({
         countryCode,
         designImage,
-        deviceName: `${device.brand} ${device.name}`,
-        canvasJSON: null,
+        deviceName: `${device.brand} ${device.name} - ${caseType.name}`,
+        canvasJSON: designState,
       })
       if (result.success) {
         setCartStatus("success")
@@ -241,7 +253,7 @@ export default function CaseDesigner() {
       setCartStatus("error")
       setCartError("Something went wrong.")
     }
-  }, [countryCode, device, layout, photos, backgroundColor, gridGap])
+  }, [countryCode, device, layout, photos, backgroundColor, gridGap, caseType, caseColor])
 
   const assignedCount = photos.filter((p) => p.slotId).length
   const totalSlots = layout.slots.length
@@ -600,14 +612,35 @@ export default function CaseDesigner() {
               <span className="text-[22px] font-black text-gray-900">${caseType.price}</span>
               <button
                 type="button"
-                onClick={handleGeneratePreview}
-                className="flex-1 sm:flex-none h-12 px-6 rounded-2xl bg-green-600 text-white text-[14px] font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-600/25 flex items-center justify-center gap-2"
+                disabled={cartStatus === "loading" || cartStatus === "success"}
+                onClick={handleAddToCart}
+                className={`flex-1 sm:flex-none h-12 px-6 rounded-2xl text-white text-[14px] font-bold transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  cartStatus === "success"
+                    ? "bg-green-600 shadow-green-600/25"
+                    : cartStatus === "loading"
+                    ? "bg-green-600/80 shadow-green-600/20"
+                    : cartStatus === "error"
+                    ? "bg-red-500 hover:bg-red-600 shadow-red-500/25"
+                    : "bg-green-600 hover:bg-green-700 shadow-green-600/25"
+                } disabled:opacity-70`}
               >
-                <ShoppingCart size={16} />
-                Add to Bag
+                {cartStatus === "loading" ? (
+                  <><Loader2 size={16} className="animate-spin" /> Adding...</>
+                ) : cartStatus === "success" ? (
+                  <><Check size={16} /> Added!</>
+                ) : cartStatus === "error" ? (
+                  <><ShoppingCart size={16} /> Retry</>
+                ) : (
+                  <><ShoppingCart size={16} /> Add to Bag</>
+                )}
               </button>
             </div>
           </div>
+          {cartError && (
+            <div className="pb-2 px-4 sm:px-0">
+              <p className="text-[11px] text-red-500 text-center sm:text-right">{cartError}</p>
+            </div>
+          )}
         </div>
       </div>
 

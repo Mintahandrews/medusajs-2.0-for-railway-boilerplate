@@ -105,7 +105,8 @@ export default function GridCanvas({
                         alt="Custom"
                         className="w-full h-full object-cover pointer-events-none"
                         style={{
-                          transform: `scale(${photo.zoom || 1}) translate(${photo.panX || 0}px, ${photo.panY || 0}px) rotate(${photo.rotation || 0}deg)`,
+                          transform: `scale(${photo.zoom || 1}) translate(${(photo.panX || 0) * 0.5}%, ${(photo.panY || 0) * 0.5}%) rotate(${photo.rotation || 0}deg)`,
+                          transformOrigin: "center center",
                         }}
                         draggable={false}
                       />
