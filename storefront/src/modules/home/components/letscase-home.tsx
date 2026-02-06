@@ -27,13 +27,13 @@ function sectionShell(children: React.ReactNode, className?: string) {
 function TrustBadges() {
   const items = [
     {
-      title: "Superior Quality",
-      description: "All products are 100% authentic",
+      title: "100% Authentic",
+      description: "Every product is genuine and verified",
       icon: Shield,
     },
     {
-      title: "Fast & Free Shipping",
-      description: "Free delivery on orders over GH₵200",
+      title: "Delivery Across Ghana",
+      description: "Free shipping on orders over GH₵200",
       icon: Truck,
     },
     {
@@ -42,8 +42,8 @@ function TrustBadges() {
       icon: RotateCcw,
     },
     {
-      title: "24/7 Support",
-      description: "Dedicated support team available anytime",
+      title: "WhatsApp Support",
+      description: "Chat with us anytime on WhatsApp",
       icon: Headphones,
     },
   ]
