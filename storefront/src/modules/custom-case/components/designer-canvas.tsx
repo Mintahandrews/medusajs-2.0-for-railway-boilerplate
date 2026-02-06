@@ -409,8 +409,8 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
             )
           })}
 
-          {/* Camera cutout — clean dark hole */}
-          {cc && (
+          {/* Camera cutout — style-aware rendering */}
+          {cc && device.cameraStyle !== "individual" && (
             <g clipPath={`url(#body-${uid})`}>
               <rect
                 x={PAD + cc.x} y={PAD + cc.y}
@@ -418,7 +418,6 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
                 rx={cc.radius} ry={cc.radius}
                 fill="#1a1a1e" stroke="#888" strokeWidth={1.5}
               />
-              {/* Subtle inner shadow for depth */}
               <rect
                 x={PAD + cc.x + 2} y={PAD + cc.y + 2}
                 width={cc.width - 4} height={cc.height - 4}
@@ -426,6 +425,38 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
                 fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth={1}
               />
             </g>
+          )}
+
+          {/* Individual camera lens circles (Samsung-style or inside module) */}
+          {device.cameraLenses?.map((lens, i) => (
+            <g key={`lens-${i}`} clipPath={`url(#body-${uid})`}>
+              <circle
+                cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r + 2}
+                fill={device.cameraStyle === "individual" ? "#1a1a1e" : "none"}
+                stroke={device.cameraStyle === "individual" ? "#888" : "rgba(40,40,45,0.7)"}
+                strokeWidth={device.cameraStyle === "individual" ? 1.5 : 1}
+              />
+              <circle
+                cx={PAD + lens.cx} cy={PAD + lens.cy} r={lens.r}
+                fill={device.cameraStyle === "individual" ? "#111114" : "#0a0a0e"}
+                stroke="rgba(100,100,110,0.5)" strokeWidth={0.5}
+              />
+              <circle
+                cx={PAD + lens.cx - lens.r * 0.25} cy={PAD + lens.cy - lens.r * 0.25}
+                r={lens.r * 0.18}
+                fill="rgba(255,255,255,0.08)"
+              />
+            </g>
+          ))}
+
+          {/* USB-C / Lightning port cutout at bottom */}
+          {device.portCutout && (
+            <rect
+              x={PAD + device.portCutout.x} y={PAD + device.portCutout.y}
+              width={device.portCutout.width} height={device.portCutout.height}
+              rx={device.portCutout.radius} ry={device.portCutout.radius}
+              fill="#c0c0c0" stroke="#a0a0a0" strokeWidth={0.5}
+            />
           )}
         </svg>
       </div>

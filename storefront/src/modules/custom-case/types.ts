@@ -12,6 +12,8 @@ export type DeviceTemplate = {
   width: number
   /** Canvas height in px */
   height: number
+  /** Physical device size in mm (for reference / verification) */
+  physicalSize?: { height: number; width: number; depth: number }
   /** Printable area inset from edges (case edge thickness) */
   inset: { top: number; right: number; bottom: number; left: number }
   /** Border radius for the case outline */
@@ -20,12 +22,16 @@ export type DeviceTemplate = {
   screenInset?: { top: number; right: number; bottom: number; left: number }
   /** Screen border radius */
   screenRadius?: number
+  /** Camera rendering style: "module" = square/pill island, "individual" = separate lens cutouts, "bar" = horizontal visor */
+  cameraStyle?: "module" | "individual" | "bar"
   /** Camera module bounding box */
   cameraCutout?: { x: number; y: number; width: number; height: number; radius: number }
   /** Individual camera lenses for realistic rendering */
   cameraLenses?: CameraLens[]
   /** Side button positions */
   sideButtons?: { side: "left" | "right"; y: number; height: number }[]
+  /** USB-C / Lightning port cutout at the bottom edge */
+  portCutout?: { x: number; y: number; width: number; height: number; radius: number }
   /** Case depth in px for 3D rendering */
   caseDepth?: number
 }
@@ -146,55 +152,102 @@ export const STICKER_PACKS: { category: string; stickers: StickerItem[] }[] = [
   },
 ]
 
-// Real phone dimensions (mm): iPhone 16 Pro Max = 163 x 77.6, iPhone 16 Pro = 149.6 x 71.5
-// Scaled to canvas units keeping accurate aspect ratios
+/*
+ * ── DEVICE TEMPLATES ───────────────────────────────────────────────────
+ *
+ * All canvas dimensions derived from official specs at **4 px per mm**.
+ * Camera cutouts are positioned for the BACK of the phone (case design view).
+ * Case edge adds ~2 mm (8 px) inset on each side.
+ *
+ * Sources:
+ *   Apple — support.apple.com/en-us/111829, /121030, /121031, /121032
+ *   Samsung — gsmarena.com, samsung.com/specs
+ *   Google — store.google.com/product/pixel_*_specs
+ */
 export const DEVICE_TEMPLATES: DeviceTemplate[] = [
-  // Apple — 16 series
+  // ── Apple · iPhone 16 series ───────────────────────────────────────
+
   {
     id: "iphone-16-pro-max",
     name: "iPhone 16 Pro Max",
     brand: "Apple",
-    width: 310,   // 77.6mm scaled
-    height: 652,  // 163mm scaled (ratio 2.1:1)
-    inset: { top: 14, right: 10, bottom: 14, left: 10 },
+    width: 310,
+    height: 652,
+    physicalSize: { height: 163.0, width: 77.6, depth: 8.25 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
     borderRadius: 44,
-    screenInset: { top: 18, right: 14, bottom: 18, left: 14 },
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
     screenRadius: 36,
     caseDepth: 10,
-    cameraCutout: { x: 185, y: 28, width: 100, height: 100, radius: 22 },
+    cameraStyle: "module",
+    cameraCutout: { x: 18, y: 26, width: 148, height: 148, radius: 28 },
     cameraLenses: [
-      { cx: 213, cy: 56, r: 16 },
-      { cx: 257, cy: 56, r: 16 },
-      { cx: 235, cy: 100, r: 16 },
+      { cx: 56, cy: 64, r: 16 },   // Main 48 MP
+      { cx: 128, cy: 64, r: 16 },  // Ultra Wide
+      { cx: 92, cy: 136, r: 16 },  // 5× Telephoto
     ],
     sideButtons: [
-      { side: "right", y: 160, height: 50 },
-      { side: "left", y: 140, height: 28 },
-      { side: "left", y: 195, height: 56 },
+      { side: "right", y: 258, height: 80 },  // Side button
+      { side: "right", y: 390, height: 32 },  // Camera Control
+      { side: "left", y: 230, height: 24 },   // Action button
+      { side: "left", y: 270, height: 40 },   // Volume Up
+      { side: "left", y: 320, height: 40 },   // Volume Down
     ],
+    portCutout: { x: 137, y: 648, width: 36, height: 4, radius: 2 },
   },
   {
     id: "iphone-16-pro",
     name: "iPhone 16 Pro",
     brand: "Apple",
-    width: 286,   // 71.5mm
-    height: 598,  // 149.6mm
-    inset: { top: 13, right: 9, bottom: 13, left: 9 },
+    width: 286,
+    height: 598,
+    physicalSize: { height: 149.6, width: 71.5, depth: 8.25 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
     borderRadius: 42,
-    screenInset: { top: 17, right: 13, bottom: 17, left: 13 },
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
     screenRadius: 34,
     caseDepth: 10,
-    cameraCutout: { x: 168, y: 26, width: 95, height: 95, radius: 20 },
+    cameraStyle: "module",
+    cameraCutout: { x: 16, y: 24, width: 140, height: 140, radius: 26 },
     cameraLenses: [
-      { cx: 194, cy: 52, r: 15 },
-      { cx: 236, cy: 52, r: 15 },
-      { cx: 215, cy: 94, r: 15 },
+      { cx: 52, cy: 60, r: 15 },
+      { cx: 120, cy: 60, r: 15 },
+      { cx: 86, cy: 128, r: 15 },
     ],
     sideButtons: [
-      { side: "right", y: 148, height: 46 },
-      { side: "left", y: 130, height: 26 },
-      { side: "left", y: 180, height: 52 },
+      { side: "right", y: 236, height: 74 },
+      { side: "right", y: 358, height: 30 },
+      { side: "left", y: 210, height: 22 },
+      { side: "left", y: 246, height: 36 },
+      { side: "left", y: 292, height: 36 },
     ],
+    portCutout: { x: 125, y: 594, width: 36, height: 4, radius: 2 },
+  },
+  {
+    id: "iphone-16-plus",
+    name: "iPhone 16 Plus",
+    brand: "Apple",
+    width: 311,
+    height: 644,
+    physicalSize: { height: 160.9, width: 77.8, depth: 7.80 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 44,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 36,
+    caseDepth: 9,
+    cameraStyle: "module",
+    cameraCutout: { x: 20, y: 28, width: 70, height: 140, radius: 35 },
+    cameraLenses: [
+      { cx: 55, cy: 68, r: 15 },
+      { cx: 55, cy: 128, r: 15 },
+    ],
+    sideButtons: [
+      { side: "right", y: 250, height: 78 },
+      { side: "right", y: 380, height: 30 },
+      { side: "left", y: 252, height: 38 },
+      { side: "left", y: 300, height: 38 },
+    ],
+    portCutout: { x: 138, y: 640, width: 36, height: 4, radius: 2 },
   },
   {
     id: "iphone-16",
@@ -202,155 +255,338 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     brand: "Apple",
     width: 286,
     height: 590,
-    inset: { top: 13, right: 9, bottom: 13, left: 9 },
+    physicalSize: { height: 147.6, width: 71.6, depth: 7.80 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
     borderRadius: 42,
-    screenInset: { top: 17, right: 13, bottom: 17, left: 13 },
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
     screenRadius: 34,
     caseDepth: 9,
-    cameraCutout: { x: 180, y: 30, width: 82, height: 82, radius: 18 },
+    cameraStyle: "module",
+    cameraCutout: { x: 18, y: 26, width: 66, height: 132, radius: 33 },
     cameraLenses: [
-      { cx: 204, cy: 52, r: 14 },
-      { cx: 240, cy: 52, r: 14 },
+      { cx: 51, cy: 62, r: 14 },
+      { cx: 51, cy: 120, r: 14 },
     ],
     sideButtons: [
-      { side: "right", y: 148, height: 46 },
-      { side: "left", y: 130, height: 26 },
-      { side: "left", y: 180, height: 52 },
+      { side: "right", y: 230, height: 72 },
+      { side: "right", y: 352, height: 28 },
+      { side: "left", y: 232, height: 36 },
+      { side: "left", y: 278, height: 36 },
     ],
+    portCutout: { x: 125, y: 586, width: 36, height: 4, radius: 2 },
   },
-  // Apple — 15 series
+
+  // ── Apple · iPhone 15 series ───────────────────────────────────────
+
   {
     id: "iphone-15-pro-max",
     name: "iPhone 15 Pro Max",
     brand: "Apple",
-    width: 310,
+    width: 307,
     height: 640,
-    inset: { top: 14, right: 10, bottom: 14, left: 10 },
+    physicalSize: { height: 159.9, width: 76.7, depth: 8.25 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
     borderRadius: 44,
-    screenInset: { top: 18, right: 14, bottom: 18, left: 14 },
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
     screenRadius: 36,
     caseDepth: 10,
-    cameraCutout: { x: 185, y: 28, width: 100, height: 100, radius: 22 },
+    cameraStyle: "module",
+    cameraCutout: { x: 18, y: 26, width: 146, height: 146, radius: 28 },
     cameraLenses: [
-      { cx: 213, cy: 56, r: 16 },
-      { cx: 257, cy: 56, r: 16 },
-      { cx: 235, cy: 100, r: 16 },
+      { cx: 56, cy: 64, r: 15 },
+      { cx: 128, cy: 64, r: 15 },
+      { cx: 92, cy: 134, r: 15 },
     ],
     sideButtons: [
-      { side: "right", y: 155, height: 50 },
-      { side: "left", y: 138, height: 28 },
-      { side: "left", y: 190, height: 56 },
+      { side: "right", y: 252, height: 78 },
+      { side: "left", y: 224, height: 22 },
+      { side: "left", y: 260, height: 38 },
+      { side: "left", y: 308, height: 38 },
     ],
+    portCutout: { x: 136, y: 636, width: 36, height: 4, radius: 2 },
+  },
+  {
+    id: "iphone-15-pro",
+    name: "iPhone 15 Pro",
+    brand: "Apple",
+    width: 282,
+    height: 586,
+    physicalSize: { height: 146.6, width: 70.6, depth: 8.25 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 42,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 34,
+    caseDepth: 10,
+    cameraStyle: "module",
+    cameraCutout: { x: 16, y: 24, width: 136, height: 136, radius: 26 },
+    cameraLenses: [
+      { cx: 50, cy: 58, r: 14 },
+      { cx: 118, cy: 58, r: 14 },
+      { cx: 84, cy: 124, r: 14 },
+    ],
+    sideButtons: [
+      { side: "right", y: 230, height: 72 },
+      { side: "left", y: 206, height: 20 },
+      { side: "left", y: 240, height: 34 },
+      { side: "left", y: 284, height: 34 },
+    ],
+    portCutout: { x: 123, y: 582, width: 36, height: 4, radius: 2 },
   },
   {
     id: "iphone-15",
     name: "iPhone 15",
     brand: "Apple",
     width: 286,
-    height: 580,
-    inset: { top: 13, right: 9, bottom: 13, left: 9 },
+    height: 590,
+    physicalSize: { height: 147.6, width: 71.6, depth: 7.80 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
     borderRadius: 42,
-    screenInset: { top: 17, right: 13, bottom: 17, left: 13 },
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
     screenRadius: 34,
     caseDepth: 9,
-    cameraCutout: { x: 175, y: 30, width: 82, height: 82, radius: 18 },
+    cameraStyle: "module",
+    cameraCutout: { x: 18, y: 28, width: 88, height: 88, radius: 20 },
     cameraLenses: [
-      { cx: 199, cy: 52, r: 14 },
-      { cx: 235, cy: 52, r: 14 },
+      { cx: 44, cy: 54, r: 14 },
+      { cx: 80, cy: 90, r: 14 },
     ],
     sideButtons: [
-      { side: "right", y: 148, height: 46 },
-      { side: "left", y: 130, height: 26 },
-      { side: "left", y: 180, height: 52 },
+      { side: "right", y: 230, height: 72 },
+      { side: "left", y: 228, height: 10 },
+      { side: "left", y: 252, height: 36 },
+      { side: "left", y: 298, height: 36 },
     ],
+    portCutout: { x: 125, y: 586, width: 36, height: 4, radius: 2 },
   },
-  // Samsung
+
+  // ── Samsung · Galaxy S series ──────────────────────────────────────
+
+  {
+    id: "samsung-s25-ultra",
+    name: "Galaxy S25 Ultra",
+    brand: "Samsung",
+    width: 310,
+    height: 651,
+    physicalSize: { height: 162.8, width: 77.6, depth: 8.20 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 32,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 24,
+    caseDepth: 10,
+    cameraStyle: "individual",
+    cameraCutout: { x: 16, y: 28, width: 52, height: 210, radius: 10 },
+    cameraLenses: [
+      { cx: 42, cy: 60, r: 16 },   // 200 MP Main
+      { cx: 42, cy: 108, r: 15 },  // Ultra Wide
+      { cx: 42, cy: 154, r: 12 },  // 5× Tele
+      { cx: 42, cy: 194, r: 10 },  // 3× Tele
+    ],
+    sideButtons: [
+      { side: "right", y: 260, height: 48 },
+      { side: "right", y: 320, height: 72 },
+    ],
+    portCutout: { x: 137, y: 647, width: 36, height: 4, radius: 2 },
+  },
   {
     id: "samsung-s24-ultra",
     name: "Galaxy S24 Ultra",
     brand: "Samsung",
-    width: 316,  // 79mm
-    height: 648, // 162.3mm
-    inset: { top: 14, right: 10, bottom: 14, left: 10 },
+    width: 316,
+    height: 649,
+    physicalSize: { height: 162.3, width: 79.0, depth: 8.60 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
     borderRadius: 28,
-    screenInset: { top: 16, right: 12, bottom: 16, left: 12 },
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
     screenRadius: 20,
     caseDepth: 10,
-    cameraCutout: { x: 210, y: 32, width: 80, height: 130, radius: 14 },
+    cameraStyle: "individual",
+    cameraCutout: { x: 16, y: 30, width: 52, height: 200, radius: 10 },
     cameraLenses: [
-      { cx: 250, cy: 58, r: 15 },
-      { cx: 250, cy: 96, r: 15 },
-      { cx: 250, cy: 134, r: 11 },
+      { cx: 42, cy: 62, r: 15 },
+      { cx: 42, cy: 106, r: 15 },
+      { cx: 42, cy: 150, r: 12 },
+      { cx: 42, cy: 190, r: 10 },
     ],
     sideButtons: [
-      { side: "right", y: 165, height: 50 },
-      { side: "right", y: 235, height: 64 },
+      { side: "right", y: 258, height: 48 },
+      { side: "right", y: 318, height: 72 },
     ],
+    portCutout: { x: 140, y: 645, width: 36, height: 4, radius: 2 },
+  },
+  {
+    id: "samsung-s24-plus",
+    name: "Galaxy S24+",
+    brand: "Samsung",
+    width: 304,
+    height: 634,
+    physicalSize: { height: 158.5, width: 75.9, depth: 7.70 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 28,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 20,
+    caseDepth: 9,
+    cameraStyle: "individual",
+    cameraCutout: { x: 14, y: 28, width: 48, height: 180, radius: 10 },
+    cameraLenses: [
+      { cx: 38, cy: 58, r: 14 },
+      { cx: 38, cy: 100, r: 14 },
+      { cx: 38, cy: 140, r: 11 },
+    ],
+    sideButtons: [
+      { side: "right", y: 248, height: 46 },
+      { side: "right", y: 306, height: 68 },
+    ],
+    portCutout: { x: 134, y: 630, width: 36, height: 4, radius: 2 },
   },
   {
     id: "samsung-s24",
     name: "Galaxy S24",
     brand: "Samsung",
-    width: 284,  // 70.6mm
-    height: 590, // 147mm
-    inset: { top: 12, right: 9, bottom: 12, left: 9 },
-    borderRadius: 30,
-    screenInset: { top: 15, right: 11, bottom: 15, left: 11 },
-    screenRadius: 22,
+    width: 282,
+    height: 588,
+    physicalSize: { height: 147.0, width: 70.6, depth: 7.60 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 28,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 20,
     caseDepth: 9,
-    cameraCutout: { x: 190, y: 30, width: 72, height: 120, radius: 12 },
+    cameraStyle: "individual",
+    cameraCutout: { x: 14, y: 28, width: 46, height: 170, radius: 10 },
     cameraLenses: [
-      { cx: 226, cy: 54, r: 14 },
-      { cx: 226, cy: 90, r: 14 },
-      { cx: 226, cy: 124, r: 10 },
+      { cx: 37, cy: 56, r: 13 },
+      { cx: 37, cy: 96, r: 13 },
+      { cx: 37, cy: 134, r: 10 },
     ],
     sideButtons: [
-      { side: "right", y: 150, height: 46 },
-      { side: "right", y: 216, height: 60 },
+      { side: "right", y: 230, height: 44 },
+      { side: "right", y: 286, height: 64 },
     ],
+    portCutout: { x: 123, y: 584, width: 36, height: 4, radius: 2 },
   },
-  // Google
+
+  // ── Google · Pixel series ──────────────────────────────────────────
+
+  {
+    id: "pixel-9-pro-xl",
+    name: "Pixel 9 Pro XL",
+    brand: "Google",
+    width: 306,
+    height: 651,
+    physicalSize: { height: 162.8, width: 76.6, depth: 8.50 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 40,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 32,
+    caseDepth: 10,
+    cameraStyle: "bar",
+    cameraCutout: { x: 36, y: 24, width: 234, height: 56, radius: 28 },
+    cameraLenses: [
+      { cx: 88, cy: 52, r: 14 },
+      { cx: 148, cy: 52, r: 14 },
+      { cx: 208, cy: 52, r: 11 },
+    ],
+    sideButtons: [
+      { side: "right", y: 260, height: 48 },
+      { side: "right", y: 322, height: 64 },
+    ],
+    portCutout: { x: 135, y: 647, width: 36, height: 4, radius: 2 },
+  },
   {
     id: "pixel-9-pro",
     name: "Pixel 9 Pro",
     brand: "Google",
-    width: 296,  // 73mm
-    height: 612, // 152.8mm
-    inset: { top: 13, right: 9, bottom: 13, left: 9 },
-    borderRadius: 38,
-    screenInset: { top: 16, right: 12, bottom: 16, left: 12 },
-    screenRadius: 30,
+    width: 288,
+    height: 611,
+    physicalSize: { height: 152.8, width: 71.9, depth: 8.50 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 40,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 32,
     caseDepth: 10,
-    cameraCutout: { x: 68, y: 26, width: 160, height: 48, radius: 24 },
+    cameraStyle: "bar",
+    cameraCutout: { x: 32, y: 22, width: 224, height: 52, radius: 26 },
     cameraLenses: [
-      { cx: 110, cy: 50, r: 14 },
-      { cx: 148, cy: 50, r: 14 },
-      { cx: 186, cy: 50, r: 11 },
+      { cx: 82, cy: 48, r: 13 },
+      { cx: 140, cy: 48, r: 13 },
+      { cx: 198, cy: 48, r: 10 },
     ],
     sideButtons: [
-      { side: "right", y: 155, height: 46 },
-      { side: "right", y: 220, height: 60 },
+      { side: "right", y: 244, height: 44 },
+      { side: "right", y: 300, height: 60 },
     ],
+    portCutout: { x: 126, y: 607, width: 36, height: 4, radius: 2 },
+  },
+  {
+    id: "pixel-9",
+    name: "Pixel 9",
+    brand: "Google",
+    width: 288,
+    height: 610,
+    physicalSize: { height: 152.4, width: 72.0, depth: 8.50 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 40,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 32,
+    caseDepth: 9,
+    cameraStyle: "bar",
+    cameraCutout: { x: 40, y: 22, width: 208, height: 52, radius: 26 },
+    cameraLenses: [
+      { cx: 96, cy: 48, r: 13 },
+      { cx: 192, cy: 48, r: 13 },
+    ],
+    sideButtons: [
+      { side: "right", y: 242, height: 44 },
+      { side: "right", y: 298, height: 60 },
+    ],
+    portCutout: { x: 126, y: 606, width: 36, height: 4, radius: 2 },
+  },
+  {
+    id: "pixel-8-pro",
+    name: "Pixel 8 Pro",
+    brand: "Google",
+    width: 306,
+    height: 650,
+    physicalSize: { height: 162.6, width: 76.5, depth: 8.80 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 40,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 32,
+    caseDepth: 10,
+    cameraStyle: "bar",
+    cameraCutout: { x: 34, y: 22, width: 238, height: 54, radius: 27 },
+    cameraLenses: [
+      { cx: 86, cy: 49, r: 14 },
+      { cx: 148, cy: 49, r: 14 },
+      { cx: 210, cy: 49, r: 11 },
+    ],
+    sideButtons: [
+      { side: "right", y: 258, height: 46 },
+      { side: "right", y: 316, height: 62 },
+    ],
+    portCutout: { x: 135, y: 646, width: 36, height: 4, radius: 2 },
   },
   {
     id: "pixel-8",
     name: "Pixel 8",
     brand: "Google",
-    width: 288,
-    height: 596,
-    inset: { top: 12, right: 9, bottom: 12, left: 9 },
-    borderRadius: 36,
-    screenInset: { top: 15, right: 11, bottom: 15, left: 11 },
-    screenRadius: 28,
+    width: 283,
+    height: 602,
+    physicalSize: { height: 150.5, width: 70.8, depth: 8.90 },
+    inset: { top: 8, right: 8, bottom: 8, left: 8 },
+    borderRadius: 40,
+    screenInset: { top: 12, right: 12, bottom: 12, left: 12 },
+    screenRadius: 32,
     caseDepth: 9,
-    cameraCutout: { x: 66, y: 24, width: 156, height: 44, radius: 22 },
+    cameraStyle: "bar",
+    cameraCutout: { x: 34, y: 22, width: 215, height: 50, radius: 25 },
     cameraLenses: [
-      { cx: 108, cy: 46, r: 13 },
-      { cx: 178, cy: 46, r: 13 },
+      { cx: 86, cy: 47, r: 13 },
+      { cx: 193, cy: 47, r: 13 },
     ],
     sideButtons: [
-      { side: "right", y: 150, height: 46 },
-      { side: "right", y: 216, height: 60 },
+      { side: "right", y: 240, height: 44 },
+      { side: "right", y: 296, height: 58 },
     ],
+    portCutout: { x: 124, y: 598, width: 36, height: 4, radius: 2 },
   },
 ]
