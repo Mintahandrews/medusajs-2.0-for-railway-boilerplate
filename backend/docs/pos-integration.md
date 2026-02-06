@@ -87,6 +87,82 @@ All routes are under `/admin/pos` and require either:
 2. Agent posts to `POST /admin/pos/inventory` with quantities
 3. Medusa inventory can be updated via the inventory module
 
+## Aronium POS Reference
+
+Based on [Aronium Getting Started](https://help.aronium.com/hc/en-us/categories/201073245-Getting-Started).
+
+### Products
+- **Barcode search** — Products can be found by barcode, code, or name
+- **Tax rate** — Per-product tax rate (e.g. 15%); inherits from default tax rate
+- **Tax-inclusive pricing** — Prices displayed/printed with tax included
+- **Cost price & markup** — Aronium calculates sell price from cost + markup %
+- **Negative inventory prevention** — Optional warning/block when stock goes below 0
+
+### Orders & Payments
+- **Payment types** — Cash, card, mobile money, voucher, credit, other
+- **Discount types** — Percentage or fixed, per-item or per-order
+- **Discount apply rule** — Before tax or after tax (affects totals)
+- **Order number reset** — Can reset on day close (Advanced settings)
+- **Separate row per item** — Each unit on its own line vs merged quantities
+
+### Module Options
+```typescript
+{
+  apiKey: "your-shared-secret",
+  enabled: true,
+  defaultTaxRate: 15,           // Aronium: Settings > Products > Default tax rate
+  taxInclusive: true,           // Aronium: Display and print items with tax included
+  discountApplyRule: "after_tax", // Aronium: Discount apply rule
+  resetOrderNumberOnDayClose: false,
+  documentConfig: {
+    format: "%YEAR%-%TYPE%-%COUNTER%",
+    typeOverrides: {
+      sale: "INV-%COUNTER%",
+      refund: "R-%COUNTER%"
+    }
+  }
+}
+```
+
+## Aronium Document Numbering
+
+Based on [Aronium Documents Settings](https://help.aronium.com/hc/en-us/articles/13306315342354-Documents-settings).
+
+### Default Format
+```
+%YEAR%-%TYPE%-%COUNTER%
+```
+Example: first sale in 2025 → `25-200-000001`
+
+### Placeholders
+| Placeholder  | Description                          |
+|-------------|--------------------------------------|
+| `%YEAR%`    | Two-digit year (e.g. `25`)           |
+| `%TYPE%`    | Document type code (see below)       |
+| `%COUNTER%` | Auto-incrementing 6-digit counter    |
+
+### Document Type Codes
+| Type       | Code  |
+|-----------|-------|
+| Sale       | `200` |
+| Refund     | `201` |
+| Purchase   | `300` |
+| Transfer   | `400` |
+| Custom     | `500` |
+
+### Custom Formats
+You can override per document type via `PosModuleOptions.documentConfig`:
+```json
+{
+  "format": "%YEAR%-%TYPE%-%COUNTER%",
+  "typeOverrides": {
+    "sale": "INV-%COUNTER%",
+    "refund": "R-%COUNTER%"
+  }
+}
+```
+Result: sales → `INV-000001`, refunds → `R-000001`, others → default.
+
 ## Data Persistence
 
 Sync state is stored in-memory using `Map` collections and persisted to

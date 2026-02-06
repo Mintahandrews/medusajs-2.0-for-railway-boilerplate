@@ -33,9 +33,15 @@ type OrderSync = {
   id: string
   medusa_order_id: string
   pos_order_id: string | null
+  pos_document_number: string | null
+  pos_document_type: string
   sync_status: string
   total_amount: number
+  tax_total: number
+  discount_total: number
   currency_code: string
+  payment_type: string
+  line_items: { medusa_item_id: string; title: string; quantity: number; unit_price: number; tax_amount: number; discount_amount: number }[]
   error_message: string | null
   updated_at: string
 }
@@ -263,7 +269,9 @@ const PosPage = () => {
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>Order ID</Table.HeaderCell>
+                  <Table.HeaderCell>Doc Number</Table.HeaderCell>
                   <Table.HeaderCell>Amount</Table.HeaderCell>
+                  <Table.HeaderCell>Items</Table.HeaderCell>
                   <Table.HeaderCell>POS Order</Table.HeaderCell>
                   <Table.HeaderCell>Status</Table.HeaderCell>
                   <Table.HeaderCell>Updated</Table.HeaderCell>
@@ -275,8 +283,14 @@ const PosPage = () => {
                     <Table.Cell className="font-mono text-xs">
                       {o.medusa_order_id.slice(0, 16)}...
                     </Table.Cell>
+                    <Table.Cell className="font-mono text-xs">
+                      {o.pos_document_number || "—"}
+                    </Table.Cell>
                     <Table.Cell>
                       {(o.total_amount / 100).toFixed(2)} {o.currency_code.toUpperCase()}
+                    </Table.Cell>
+                    <Table.Cell className="text-xs">
+                      {o.line_items?.length ?? 0}
                     </Table.Cell>
                     <Table.Cell className="font-mono text-xs">
                       {o.pos_order_id || "—"}

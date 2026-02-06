@@ -26,11 +26,24 @@ export default async function orderPosSyncHandler({
     const existing = await posService.getOrderSyncByOrderId(order.id)
     if (existing) return
 
+    const lineItems = ((order as any).items || []).map((item: any) => ({
+      medusa_item_id: item.id,
+      title: item.title || item.variant_title || "Unknown",
+      quantity: item.quantity,
+      unit_price: item.unit_price ?? 0,
+      tax_amount: item.tax_total ? Math.round(item.tax_total / item.quantity) : 0,
+      discount_amount: item.discount_total ?? 0,
+      discount_type: item.discount_total ? "fixed" as const : null,
+      pos_product_id: null,
+    }))
+
     await posService.createOrderSync({
       medusa_order_id: order.id,
       total_amount: (order as any).summary?.current_order_total ?? 0,
       currency_code: order.currency_code,
       sync_direction: "medusa_to_pos",
+      pos_document_type: "sale",
+      line_items: lineItems,
     })
 
     console.log(`[POS] Order ${order.id} queued for POS sync`)

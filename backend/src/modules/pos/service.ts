@@ -11,7 +11,9 @@ import type {
   CreateInventorySyncInput,
   PosSyncStats,
   SyncStatus,
+  AroniumDocumentType,
 } from "./types"
+import { ARONIUM_DOC_TYPE_CODES } from "./types"
 
 /** Shape of the persisted JSON file */
 type PersistedData = {
@@ -34,6 +36,8 @@ export default class PosModuleService {
   private orderSyncs: Map<string, PosOrderSync> = new Map()
   private inventorySyncs: Map<string, PosInventorySync> = new Map()
   private dataFilePath: string
+
+  private documentCounter: number = 0
 
   constructor(_: any, options: PosModuleOptions) {
     this.options_ = options || {}
@@ -98,6 +102,12 @@ export default class PosModuleService {
       medusa_variant_id: input.medusa_variant_id,
       pos_product_id: input.pos_product_id || null,
       pos_sku: input.pos_sku || null,
+      pos_barcode: input.pos_barcode || null,
+      pos_name: input.pos_name || null,
+      tax_rate: input.tax_rate ?? this.options_.defaultTaxRate ?? null,
+      tax_inclusive: input.tax_inclusive ?? this.options_.taxInclusive ?? false,
+      cost_price: input.cost_price ?? null,
+      markup: input.markup ?? null,
       sync_status: "pending",
       last_synced_at: null,
       error_message: null,
@@ -163,16 +173,44 @@ export default class PosModuleService {
 
   // ─── Order Syncs ───────────────────────────────────────────
 
+  /**
+   * Generate an Aronium-style document number.
+   * Default format: %YEAR%-%TYPE%-%COUNTER%
+   * Supports per-type overrides (e.g. sale → "INV-%COUNTER%").
+   */
+  generateDocumentNumber(docType: AroniumDocumentType): string {
+    this.documentCounter++
+    const year = new Date().getFullYear().toString().slice(-2)
+    const typeCode = ARONIUM_DOC_TYPE_CODES[docType] || "200"
+    const counter = this.documentCounter.toString().padStart(6, "0")
+
+    const config = this.options_.documentConfig
+    const format =
+      config?.typeOverrides?.[docType] ?? config?.format ?? "%YEAR%-%TYPE%-%COUNTER%"
+
+    return format
+      .replace("%YEAR%", year)
+      .replace("%TYPE%", typeCode)
+      .replace("%COUNTER%", counter)
+  }
+
   async createOrderSync(input: CreateOrderSyncInput): Promise<PosOrderSync> {
     const now = new Date().toISOString()
+    const docType = input.pos_document_type || "sale"
     const sync: PosOrderSync = {
       id: ulid(),
       medusa_order_id: input.medusa_order_id,
       pos_order_id: null,
+      pos_document_number: this.generateDocumentNumber(docType),
+      pos_document_type: docType,
       sync_status: "pending",
       sync_direction: input.sync_direction || "medusa_to_pos",
       total_amount: input.total_amount,
+      tax_total: input.tax_total ?? 0,
+      discount_total: input.discount_total ?? 0,
       currency_code: input.currency_code,
+      payment_type: input.payment_type ?? "other",
+      line_items: input.line_items || [],
       error_message: null,
       created_at: now,
       updated_at: now,
