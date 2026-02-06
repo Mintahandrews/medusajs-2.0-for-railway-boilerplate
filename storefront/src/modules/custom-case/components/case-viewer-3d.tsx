@@ -70,12 +70,16 @@ function getMaterialProps(mat: CaseMaterial, isDesignFace: boolean) {
 /* ── helpers ─────────────────────────────────────────── */
 
 function toWorld(device: DeviceTemplate) {
-  const s = 0.01
-  const w = device.width * s
-  const h = device.height * s
-  const d = (device.caseDepth || 8) * s
-  const r = device.borderRadius * s
-  return { w, h, d: Math.max(d, 0.06), r: Math.min(r, Math.min(w, h) * 0.4) }
+  const PX_SCALE = 0.01 // canvas px → world  (4 px/mm × 0.01 = 0.04 per mm)
+  const MM_SCALE = 0.04  // mm → world (same effective scale)
+  const w = device.width * PX_SCALE
+  const h = device.height * PX_SCALE
+  // Use physical depth + ~2 mm case shell for realistic thickness
+  const physDepthMm = device.physicalSize?.depth ?? 8
+  const caseShellMm = 2
+  const d = (physDepthMm + caseShellMm) * MM_SCALE
+  const r = device.borderRadius * PX_SCALE
+  return { w, h, d, r: Math.min(r, Math.min(w, h) * 0.4) }
 }
 
 /* ── CaseBody ────────────────────────────────────────── */
@@ -184,15 +188,17 @@ function CaseLip({
   caseMaterial: CaseMaterial
 }) {
   const { w, h, d, r } = useMemo(() => toWorld(device), [device])
-  const lipH = 0.06
+  const lipH = Math.max(0.06, d * 0.15) // proportional lip height (~1.5 mm)
+  const edge = 0.08 // lip extends beyond case body
   const props = getMaterialProps(caseMaterial, false)
   const shellOpacity = caseMaterial === "matte" ? 0.06 : caseMaterial === "clear" ? 0.08 : 0.1
 
   return (
     <group position={[0, 0, -d / 2 - lipH / 2]}>
+      {/* Subtle highlight shell */}
       <RoundedBox
-        args={[w + 0.07, h + 0.07, lipH + 0.01]}
-        radius={Math.min(r + 0.03, (w + 0.07) * 0.4)}
+        args={[w + edge + 0.01, h + edge + 0.01, lipH + 0.01]}
+        radius={Math.min(r + 0.03, (w + edge + 0.01) * 0.4)}
         smoothness={8}
       >
         <meshPhysicalMaterial
@@ -207,9 +213,10 @@ function CaseLip({
           color="#ffffff"
         />
       </RoundedBox>
+      {/* Solid lip */}
       <RoundedBox
-        args={[w + 0.06, h + 0.06, lipH]}
-        radius={Math.min(r + 0.02, (w + 0.06) * 0.4)}
+        args={[w + edge, h + edge, lipH]}
+        radius={Math.min(r + 0.02, (w + edge) * 0.4)}
         smoothness={6}
         castShadow
       >
@@ -222,7 +229,7 @@ function CaseLip({
   )
 }
 
-/* ── Camera cutout (simple dark hole) ────────────────── */
+/* ── Camera cutout (see-through with subtle outline) ──── */
 
 function CameraCutout({ device }: { device: DeviceTemplate }) {
   const { w, h, d } = useMemo(() => toWorld(device), [device])
@@ -234,34 +241,17 @@ function CameraCutout({ device }: { device: DeviceTemplate }) {
   const ccH = cc.height * s
   const ccCenterX = (cc.x + cc.width / 2) * s - w / 2
   const ccCenterY = -(cc.y + cc.height / 2) * s + h / 2
+  const minDim = Math.min(ccW, ccH)
 
   return (
     <group position={[ccCenterX, ccCenterY, d / 2 + 0.001]}>
+      {/* Subtle outline ring — fully see-through center */}
       <mesh>
-        <planeGeometry args={[ccW, ccH]} />
-        <meshStandardMaterial transparent opacity={0} />
-      </mesh>
-      <mesh>
-        <ringGeometry args={[Math.max(0.001, Math.min(ccW, ccH) * 0.42), Math.max(0.002, Math.min(ccW, ccH) * 0.5), 64]} />
-        <meshBasicMaterial color="#8c8c96" transparent opacity={0.45} />
-      </mesh>
-      <mesh>
-        <planeGeometry args={[ccW, ccH]} />
-        <meshBasicMaterial color="#8c8c96" transparent opacity={0.18} />
+        <ringGeometry args={[minDim * 0.46, minDim * 0.5, 64]} />
+        <meshBasicMaterial color="#a0a0a8" transparent opacity={0.3} depthWrite={false} />
       </mesh>
     </group>
   )
-}
-
-/* ── Scene setup ─────────────────────────────────────── */
-
-function SceneSetup() {
-  const { camera } = useThree()
-  useEffect(() => {
-    camera.position.set(0, 0, 14)
-    camera.lookAt(0, 0, 0)
-  }, [camera])
-  return null
 }
 
 /* ── Screenshot helper ───────────────────────────────── */
@@ -326,11 +316,11 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
     }))
 
     const minH = compact ? 260 : 400
-    const { w, h } = toWorld(device)
-    const base = Math.max(w, h)
-    const camZ = Math.min(28, Math.max(10, base * (compact ? 1.25 : 1.1)))
-    const minDist = Math.max(6, camZ * 0.55)
-    const maxDist = Math.max(minDist + 6, camZ * 1.6)
+    const { w, h, d } = toWorld(device)
+    const diag = Math.sqrt(w * w + h * h + d * d)
+    const camZ = Math.min(30, Math.max(10, diag * (compact ? 1.15 : 1.05)))
+    const minDist = Math.max(6, camZ * 0.5)
+    const maxDist = Math.max(minDist + 8, camZ * 1.8)
 
     return (
       <div className={`relative ${className}`} style={{ minHeight: minH, ...style }}>
@@ -379,7 +369,7 @@ const CaseViewer3D = forwardRef<CaseViewer3DHandle, CaseViewer3DProps>(
 
           {!performanceMode && (
             <ContactShadows
-              position={[0, -toWorld(device).h / 2 - 0.5, 0]}
+              position={[0, -h / 2 - 0.5, 0]}
               opacity={0.3}
               scale={20}
               blur={2.5}

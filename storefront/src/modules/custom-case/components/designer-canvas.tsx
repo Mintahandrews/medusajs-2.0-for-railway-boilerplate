@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react"
-import { Canvas, Rect, FabricImage, Gradient } from "fabric"
+import { Canvas, Rect, FabricImage, Gradient, Line } from "fabric"
 import type { DeviceTemplate } from "../types"
 
 export type DesignerCanvasHandle = {
@@ -83,8 +83,7 @@ const DesignerCanvas = forwardRef<DesignerCanvasHandle, Props>(
       let vLine: any = null
       let hLine: any = null
 
-      const createGuideLine = (points: number[]) => {
-        const { Line } = require("fabric")
+      const createGuideLine = (points: [number, number, number, number]) => {
         return new Line(points, {
           stroke: "rgba(59,130,246,0.6)",
           strokeWidth: 1,

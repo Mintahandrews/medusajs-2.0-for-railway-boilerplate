@@ -180,11 +180,11 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 36,
     caseDepth: 10,
     cameraStyle: "module",
-    cameraCutout: { x: 18, y: 26, width: 148, height: 148, radius: 28 },
+    cameraCutout: { x: 16, y: 24, width: 144, height: 144, radius: 28 },
     cameraLenses: [
-      { cx: 56, cy: 64, r: 16 },   // Main 48 MP
-      { cx: 128, cy: 64, r: 16 },  // Ultra Wide
-      { cx: 92, cy: 136, r: 16 },  // 5× Telephoto
+      { cx: 52, cy: 60, r: 16 },   // Main 48 MP (upper-left)
+      { cx: 124, cy: 60, r: 16 },  // Ultra Wide (upper-right)
+      { cx: 88, cy: 132, r: 16 },  // 5× Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 258, height: 80 },  // Side button
@@ -208,11 +208,11 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 34,
     caseDepth: 10,
     cameraStyle: "module",
-    cameraCutout: { x: 16, y: 24, width: 140, height: 140, radius: 26 },
+    cameraCutout: { x: 14, y: 22, width: 136, height: 136, radius: 26 },
     cameraLenses: [
-      { cx: 52, cy: 60, r: 15 },
-      { cx: 120, cy: 60, r: 15 },
-      { cx: 86, cy: 128, r: 15 },
+      { cx: 48, cy: 56, r: 15 },   // Main (upper-left)
+      { cx: 116, cy: 56, r: 15 },  // Ultra Wide (upper-right)
+      { cx: 82, cy: 124, r: 15 },  // Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 236, height: 74 },
@@ -236,10 +236,10 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 36,
     caseDepth: 9,
     cameraStyle: "module",
-    cameraCutout: { x: 20, y: 28, width: 70, height: 140, radius: 35 },
+    cameraCutout: { x: 20, y: 26, width: 56, height: 132, radius: 28 },
     cameraLenses: [
-      { cx: 55, cy: 68, r: 15 },
-      { cx: 55, cy: 128, r: 15 },
+      { cx: 48, cy: 62, r: 15 },   // Main 48 MP (top)
+      { cx: 48, cy: 122, r: 15 },  // Ultra Wide (bottom)
     ],
     sideButtons: [
       { side: "right", y: 250, height: 78 },
@@ -262,10 +262,10 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 34,
     caseDepth: 9,
     cameraStyle: "module",
-    cameraCutout: { x: 18, y: 26, width: 66, height: 132, radius: 33 },
+    cameraCutout: { x: 18, y: 24, width: 52, height: 124, radius: 26 },
     cameraLenses: [
-      { cx: 51, cy: 62, r: 14 },
-      { cx: 51, cy: 120, r: 14 },
+      { cx: 44, cy: 58, r: 14 },   // Main 48 MP (top)
+      { cx: 44, cy: 114, r: 14 },  // Ultra Wide (bottom)
     ],
     sideButtons: [
       { side: "right", y: 230, height: 72 },
@@ -291,11 +291,11 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 36,
     caseDepth: 10,
     cameraStyle: "module",
-    cameraCutout: { x: 18, y: 26, width: 146, height: 146, radius: 28 },
+    cameraCutout: { x: 16, y: 24, width: 140, height: 140, radius: 28 },
     cameraLenses: [
-      { cx: 56, cy: 64, r: 15 },
-      { cx: 128, cy: 64, r: 15 },
-      { cx: 92, cy: 134, r: 15 },
+      { cx: 52, cy: 60, r: 15 },   // Main (upper-left)
+      { cx: 120, cy: 60, r: 15 },  // Ultra Wide (upper-right)
+      { cx: 86, cy: 128, r: 15 },  // Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 252, height: 78 },
@@ -318,11 +318,11 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 34,
     caseDepth: 10,
     cameraStyle: "module",
-    cameraCutout: { x: 16, y: 24, width: 136, height: 136, radius: 26 },
+    cameraCutout: { x: 14, y: 22, width: 132, height: 132, radius: 26 },
     cameraLenses: [
-      { cx: 50, cy: 58, r: 14 },
-      { cx: 118, cy: 58, r: 14 },
-      { cx: 84, cy: 124, r: 14 },
+      { cx: 46, cy: 54, r: 14 },   // Main (upper-left)
+      { cx: 112, cy: 54, r: 14 },  // Ultra Wide (upper-right)
+      { cx: 80, cy: 120, r: 14 },  // Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 230, height: 72 },
@@ -345,10 +345,10 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     screenRadius: 34,
     caseDepth: 9,
     cameraStyle: "module",
-    cameraCutout: { x: 18, y: 28, width: 88, height: 88, radius: 20 },
+    cameraCutout: { x: 16, y: 26, width: 86, height: 86, radius: 20 },
     cameraLenses: [
-      { cx: 44, cy: 54, r: 14 },
-      { cx: 80, cy: 90, r: 14 },
+      { cx: 42, cy: 52, r: 14 },   // Main (upper-left, diagonal)
+      { cx: 76, cy: 86, r: 14 },   // Ultra Wide (lower-right, diagonal)
     ],
     sideButtons: [
       { side: "right", y: 230, height: 72 },
