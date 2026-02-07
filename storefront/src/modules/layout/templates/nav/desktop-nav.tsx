@@ -7,7 +7,7 @@ import { Suspense } from "react"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { getCategoryIcon } from "@lib/util/category-icon"
-import { ChevronRight, Paintbrush } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 
 type LinkItem = { name: string; href: string }
 
@@ -49,7 +49,6 @@ function DesktopNavContent(props: {
   const isShop = normalized.startsWith("/categories")
   const isProducts =
     (!onSale && normalized === "/store") || normalized.startsWith("/collections")
-  const isCustomCase = normalized === "/custom-case"
 
   return (
     <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
@@ -271,13 +270,6 @@ function DesktopNavContent(props: {
       <LocalizedClientLink href="/deals" className={navLinkClass(isDeals)}>
         Deals
       </LocalizedClientLink>
-      <LocalizedClientLink
-        href="/custom-case"
-        className={`inline-flex items-center gap-1.5 ${navLinkClass(isCustomCase)}`}
-      >
-        <Paintbrush size={14} />
-        Custom Case
-      </LocalizedClientLink>
       <LocalizedClientLink href="/about-us" className={navLinkClass(isAbout)}>
         About Us
       </LocalizedClientLink>
@@ -299,7 +291,6 @@ export default function DesktopNav(props: {
           <span className="pb-1 border-b-2 border-transparent">Shop</span>
           <span className="pb-1 border-b-2 border-transparent">Products</span>
           <span className="pb-1 border-b-2 border-transparent">Deals</span>
-          <span className="pb-1 border-b-2 border-transparent">Custom Case</span>
           <span className="pb-1 border-b-2 border-transparent">About Us</span>
         </div>
       }

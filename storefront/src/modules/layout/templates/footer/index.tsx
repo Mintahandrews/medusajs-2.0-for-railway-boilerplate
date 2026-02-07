@@ -70,7 +70,6 @@ export default async function Footer() {
             <ul className="space-y-2 text-[14px] text-grey-50">
               {[
                 { label: "Shop All", href: "/store" },
-                { label: "Custom Case", href: "/custom-case" },
                 { label: "Best Sellers", href: "/best-sellers" },
                 { label: "New Arrivals", href: "/new-arrivals" },
                 { label: "Wishlist", href: "/account/wishlist" },

@@ -9,8 +9,7 @@ export default function WhatsAppWidget() {
   const pathname = usePathname()
 
   const isCheckout = pathname?.includes("/checkout")
-  const isCustomCase = pathname?.includes("/custom-case")
-  if (isCheckout || isCustomCase) return null
+  if (isCheckout) return null
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 

@@ -1,5 +1,5 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { ArrowRight, Paintbrush, Smartphone, Headphones, BatteryCharging, Shield } from "lucide-react"
+import { ArrowRight, Smartphone, Headphones, BatteryCharging, Shield } from "lucide-react"
 
 const QUICK_CATEGORIES = [
   { label: "Phone Cases", icon: Smartphone, href: "/categories/phone-cases" },
@@ -44,13 +44,6 @@ const Hero = () => {
                   <ArrowRight size={16} />
                 </LocalizedClientLink>
 
-                <LocalizedClientLink
-                  href="/custom-case"
-                  className="inline-flex items-center gap-2 px-7 h-[48px] rounded-full bg-white border border-grey-20 text-grey-90 text-[15px] font-semibold transition duration-300 hover:border-brand hover:text-brand hover:scale-[1.02]"
-                >
-                  <Paintbrush size={16} />
-                  <span>Design Your Case</span>
-                </LocalizedClientLink>
               </div>
 
               {/* Quick category pills */}
