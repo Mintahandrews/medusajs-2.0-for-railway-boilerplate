@@ -152,13 +152,13 @@ export default async function Footer() {
               <span className="text-[12px] font-semibold text-[#003478]">MoMo</span>
             </div>
 
-            {/* Telecel Cash — official blue brand */}
+            {/* Telecel Cash — official red brand */}
             <div className="flex items-center gap-2 rounded-lg border border-grey-20 bg-white px-3.5 py-2 shadow-sm">
               <svg viewBox="0 0 24 24" className="h-5 w-5" aria-label="Telecel Cash">
-                <circle cx="12" cy="12" r="12" fill="#0033A0" />
+                <circle cx="12" cy="12" r="12" fill="#E30613" />
                 <text x="12" y="15.5" textAnchor="middle" fontFamily="Arial,sans-serif" fontWeight="bold" fontSize="11" fill="white">T</text>
               </svg>
-              <span className="text-[12px] font-semibold text-[#0033A0]">Telecel Cash</span>
+              <span className="text-[12px] font-semibold text-[#E30613]">Telecel Cash</span>
             </div>
 
             {/* Visa — official brand SVG */}

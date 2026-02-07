@@ -613,65 +613,105 @@ const FabricCaseEditor = forwardRef<FabricCaseEditorHandle, FabricCaseEditorProp
                 <stop offset="50%" stopColor={adjustBrightness(caseColor, -10)} />
                 <stop offset="100%" stopColor={bumperDark} />
               </linearGradient>
-              <linearGradient id={`fce-cam-${device.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(30,30,30,0.95)" />
-                <stop offset="100%" stopColor="rgba(50,50,50,0.92)" />
-              </linearGradient>
-              <radialGradient id={`fce-lens-${device.id}`} cx="35%" cy="35%">
-                <stop offset="0%" stopColor="rgba(90,90,120,0.5)" />
-                <stop offset="35%" stopColor="rgba(20,20,30,0.95)" />
-                <stop offset="100%" stopColor="rgba(5,5,15,0.98)" />
-              </radialGradient>
+              {/* Camera is see-through — no solid fill gradients needed */}
               <linearGradient id={`fce-finish-${device.id}`} x1="0.3" y1="0" x2="0.7" y2="1">
                 <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
                 <stop offset="30%" stopColor="rgba(255,255,255,0)" />
                 <stop offset="70%" stopColor="rgba(255,255,255,0)" />
                 <stop offset="100%" stopColor="rgba(255,255,255,0.08)" />
               </linearGradient>
-              {/* Mask: case body with design area cut out (so canvas shows through) */}
+              {/* Mask: case body with design area AND camera cutout punched through */}
               <mask id={`fce-frame-mask-${device.id}`}>
                 <rect x={-BUMPER - 8} y={-BUMPER - 4} width={OW + 20} height={OH + 12} fill="white" />
+                {/* Punch out the design area */}
                 <rect x={BUMPER} y={BUMPER} width={W} height={H} rx={R} ry={R} fill="black" />
+                {/* Punch out the camera cutout — see-through hole */}
+                {device.cameraCutout && device.cameraStyle !== "individual" && (
+                  <rect
+                    x={device.cameraCutout.x + BUMPER}
+                    y={device.cameraCutout.y + BUMPER}
+                    width={device.cameraCutout.width}
+                    height={device.cameraCutout.height}
+                    rx={device.cameraCutout.radius}
+                    ry={device.cameraCutout.radius}
+                    fill="black"
+                  />
+                )}
+                {/* Punch out individual lens holes for individual-style cameras */}
+                {device.cameraStyle === "individual" && device.cameraLenses?.map((lens, i) => (
+                  <circle key={i} cx={lens.cx + BUMPER} cy={lens.cy + BUMPER} r={lens.r + 5} fill="black" />
+                ))}
               </mask>
             </defs>
 
-            {/* Case body with cutout for design area */}
+            {/* Case body with cutout for design area + camera */}
             <g mask={`url(#fce-frame-mask-${device.id})`}>
               <rect x={0} y={0} width={OW} height={OH} rx={OR} ry={OR} fill={`url(#fce-body-${device.id})`} stroke={bumperEdge} strokeWidth={1} />
             </g>
 
-            {/* Inner edge */}
+            {/* Inner edge around design area */}
             <rect x={BUMPER - 0.5} y={BUMPER - 0.5} width={W + 1} height={H + 1} rx={R + 0.5} ry={R + 0.5} fill="none" stroke="rgba(0,0,0,0.12)" strokeWidth={0.5} />
 
-            {/* Camera module */}
+            {/* Camera raised bumper ring (module style) — ring only, center is see-through */}
             {device.cameraCutout && device.cameraStyle !== "individual" && (
               <g transform={`translate(${BUMPER}, ${BUMPER})`}>
-                <rect x={device.cameraCutout.x - 3} y={device.cameraCutout.y - 3} width={device.cameraCutout.width + 6} height={device.cameraCutout.height + 6} rx={device.cameraCutout.radius + 3} ry={device.cameraCutout.radius + 3} fill={bumperDark} stroke="rgba(80,80,80,0.3)" strokeWidth={0.5} />
-                <rect x={device.cameraCutout.x} y={device.cameraCutout.y} width={device.cameraCutout.width} height={device.cameraCutout.height} rx={device.cameraCutout.radius} ry={device.cameraCutout.radius} fill={`url(#fce-cam-${device.id})`} stroke="rgba(60,60,60,0.5)" strokeWidth={1} />
+                {/* Outer raised lip */}
+                <rect
+                  x={device.cameraCutout.x - 4}
+                  y={device.cameraCutout.y - 4}
+                  width={device.cameraCutout.width + 8}
+                  height={device.cameraCutout.height + 8}
+                  rx={device.cameraCutout.radius + 4}
+                  ry={device.cameraCutout.radius + 4}
+                  fill="none"
+                  stroke={bumperDark}
+                  strokeWidth={3}
+                />
+                {/* Inner ring edge */}
+                <rect
+                  x={device.cameraCutout.x - 0.5}
+                  y={device.cameraCutout.y - 0.5}
+                  width={device.cameraCutout.width + 1}
+                  height={device.cameraCutout.height + 1}
+                  rx={device.cameraCutout.radius + 0.5}
+                  ry={device.cameraCutout.radius + 0.5}
+                  fill="none"
+                  stroke="rgba(0,0,0,0.15)"
+                  strokeWidth={0.5}
+                />
               </g>
             )}
 
-            {/* Camera lenses */}
-            <g transform={`translate(${BUMPER}, ${BUMPER})`}>
-              {device.cameraLenses?.map((lens, i) => {
-                const isIndividual = device.cameraStyle === "individual"
-                return (
+            {/* Individual camera lens rings (individual style) — ring only, center is see-through */}
+            {device.cameraStyle === "individual" && (
+              <g transform={`translate(${BUMPER}, ${BUMPER})`}>
+                {device.cameraLenses?.map((lens, i) => (
                   <g key={i}>
-                    {isIndividual && (
-                      <>
-                        <circle cx={lens.cx} cy={lens.cy} r={lens.r + 6} fill={bumperDark} />
-                        <circle cx={lens.cx} cy={lens.cy} r={lens.r + 4} fill="rgba(40,40,40,0.9)" stroke="rgba(60,60,60,0.3)" strokeWidth={0.5} />
-                      </>
-                    )}
-                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 2.5} fill="rgba(35,35,35,0.95)" />
-                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 1.5} fill="rgba(55,55,55,0.4)" stroke="rgba(80,80,80,0.25)" strokeWidth={0.4} />
-                    <circle cx={lens.cx} cy={lens.cy} r={lens.r} fill={`url(#fce-lens-${device.id})`} />
-                    <circle cx={lens.cx - lens.r * 0.22} cy={lens.cy - lens.r * 0.22} r={lens.r * 0.22} fill="rgba(255,255,255,0.18)" />
-                    <circle cx={lens.cx} cy={lens.cy} r={lens.r * 0.55} fill="none" stroke="rgba(80,80,80,0.15)" strokeWidth={0.3} />
+                    {/* Outer raised ring */}
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 7} fill="none" stroke={bumperDark} strokeWidth={3} />
+                    {/* Inner edge */}
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 4.5} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth={0.5} />
                   </g>
-                )
-              })}
-            </g>
+                ))}
+              </g>
+            )}
+
+            {/* Bar-style camera ring (same as module but for bar cameras) */}
+            {device.cameraStyle === "bar" && device.cameraCutout && (
+              <g transform={`translate(${BUMPER}, ${BUMPER})`}>
+                <rect
+                  x={device.cameraCutout.x - 4}
+                  y={device.cameraCutout.y - 4}
+                  width={device.cameraCutout.width + 8}
+                  height={device.cameraCutout.height + 8}
+                  rx={device.cameraCutout.radius + 4}
+                  ry={device.cameraCutout.radius + 4}
+                  fill="none"
+                  stroke={bumperDark}
+                  strokeWidth={3}
+                />
+              </g>
+            )}
 
             {/* Side buttons */}
             {device.sideButtons?.map((btn, i) => {
