@@ -643,11 +643,11 @@ const FabricCaseEditor = forwardRef<FabricCaseEditorHandle, FabricCaseEditorProp
                 <stop offset="50%" stopColor={caseColor} />
                 <stop offset="100%" stopColor={bumperDark} />
               </linearGradient>
-              {/* Camera module inner — slightly lighter than frame */}
+              {/* Camera module inner — silver/gray like real phone back */}
               <linearGradient id={`fce-cam-inner-${device.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#e8e8e8" />
-                <stop offset="50%" stopColor="#d8d8d8" />
-                <stop offset="100%" stopColor="#c8c8c8" />
+                <stop offset="0%" stopColor="#d4d4d8" />
+                <stop offset="50%" stopColor="#c0c0c4" />
+                <stop offset="100%" stopColor="#a8a8ac" />
               </linearGradient>
               {/* Camera lens glass */}
               <radialGradient id={`fce-lens-${device.id}`} cx="42%" cy="38%">
@@ -780,29 +780,37 @@ const FabricCaseEditor = forwardRef<FabricCaseEditorHandle, FabricCaseEditorProp
                 )
               })}
 
-              {/* Flash / LED — amber circle */}
+              {/* Flash / LED + LiDAR sensor — positioned relative to lens layout */}
               {device.cameraLenses && device.cameraLenses.length >= 2 && device.cameraCutout && device.cameraStyle !== "individual" && (() => {
                 const cc = device.cameraCutout!
-                const flashCx = cc.x + cc.width - 18
-                const flashCy = cc.y + 18
-                return (
-                  <g>
-                    <circle cx={flashCx} cy={flashCy} r={6} fill="#d4b04a" stroke="#b89840" strokeWidth={0.5} />
-                    <circle cx={flashCx} cy={flashCy} r={4} fill="#e8cc70" opacity={0.6} />
-                    <circle cx={flashCx - 1.5} cy={flashCy - 1.5} r={1.8} fill="rgba(255,248,220,0.7)" />
-                  </g>
-                )
-              })()}
+                const lenses = device.cameraLenses!
+                const topLenses = lenses.filter(l => l.cy < cc.y + cc.height * 0.5)
+                const bottomLenses = lenses.filter(l => l.cy >= cc.y + cc.height * 0.5)
 
-              {/* LiDAR / sensor — small dark dot */}
-              {device.cameraLenses && device.cameraLenses.length >= 3 && device.cameraCutout && device.cameraStyle !== "individual" && (() => {
-                const cc = device.cameraCutout!
-                const sCx = cc.x + 16
-                const sCy = cc.y + cc.height - 16
+                // Flash: top-right area, between top-right lens and top edge
+                const rightLens = topLenses.length >= 2 ? topLenses[topLenses.length - 1] : lenses[0]
+                const flashCx = rightLens.cx + (cc.x + cc.width - rightLens.cx) / 2
+                const flashCy = cc.y + cc.height * 0.15
+                // Sensor: bottom-left area
+                const leftLens = bottomLenses.length > 0 ? bottomLenses[0] : lenses[0]
+                const sensorCx = cc.x + cc.width * 0.15
+                const sensorCy = leftLens.cy + (cc.y + cc.height - leftLens.cy) / 2
+                const flashR = Math.min(6, cc.width * 0.04)
+                const sensorR = Math.min(4, cc.width * 0.03)
+
                 return (
                   <g>
-                    <circle cx={sCx} cy={sCy} r={4} fill="#1a1a1a" stroke="#333" strokeWidth={0.4} />
-                    <circle cx={sCx - 0.5} cy={sCy - 0.5} r={1} fill="rgba(255,255,255,0.08)" />
+                    {/* Flash LED */}
+                    <circle cx={flashCx} cy={flashCy} r={flashR} fill="#d4b04a" stroke="#b89840" strokeWidth={0.5} />
+                    <circle cx={flashCx} cy={flashCy} r={flashR * 0.65} fill="#e8cc70" opacity={0.6} />
+                    <circle cx={flashCx - flashR * 0.2} cy={flashCy - flashR * 0.2} r={flashR * 0.28} fill="rgba(255,248,220,0.7)" />
+                    {/* LiDAR / microphone sensor */}
+                    {lenses.length >= 3 && (
+                      <>
+                        <circle cx={sensorCx} cy={sensorCy} r={sensorR} fill="#1a1a1a" stroke="#333" strokeWidth={0.4} />
+                        <circle cx={sensorCx - 0.5} cy={sensorCy - 0.5} r={sensorR * 0.3} fill="rgba(255,255,255,0.08)" />
+                      </>
+                    )}
                   </g>
                 )
               })()}

@@ -407,9 +407,9 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 16, y: 24, width: 144, height: 144, radius: 28 },
     cameraLenses: [
-      { cx: 52, cy: 60, r: 16 },   // Main 48 MP (upper-left)
-      { cx: 124, cy: 60, r: 16 },  // Ultra Wide (upper-right)
-      { cx: 88, cy: 132, r: 16 },  // 5× Telephoto (lower-center)
+      { cx: 52, cy: 60, r: 22 },   // Main 48 MP (upper-left)
+      { cx: 124, cy: 60, r: 22 },  // Ultra Wide (upper-right)
+      { cx: 88, cy: 132, r: 22 },  // 5× Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 258, height: 80 },  // Side button
@@ -435,9 +435,9 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 14, y: 22, width: 136, height: 136, radius: 26 },
     cameraLenses: [
-      { cx: 48, cy: 56, r: 15 },   // Main (upper-left)
-      { cx: 116, cy: 56, r: 15 },  // Ultra Wide (upper-right)
-      { cx: 82, cy: 124, r: 15 },  // Telephoto (lower-center)
+      { cx: 48, cy: 56, r: 20 },   // Main (upper-left)
+      { cx: 116, cy: 56, r: 20 },  // Ultra Wide (upper-right)
+      { cx: 82, cy: 124, r: 20 },  // Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 236, height: 74 },
@@ -463,8 +463,8 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 20, y: 26, width: 56, height: 132, radius: 28 },
     cameraLenses: [
-      { cx: 48, cy: 62, r: 15 },   // Main 48 MP (top)
-      { cx: 48, cy: 122, r: 15 },  // Ultra Wide (bottom)
+      { cx: 48, cy: 62, r: 18 },   // Main 48 MP (top)
+      { cx: 48, cy: 122, r: 18 },  // Ultra Wide (bottom)
     ],
     sideButtons: [
       { side: "right", y: 250, height: 78 },
@@ -489,8 +489,8 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 18, y: 24, width: 52, height: 124, radius: 26 },
     cameraLenses: [
-      { cx: 44, cy: 58, r: 14 },   // Main 48 MP (top)
-      { cx: 44, cy: 114, r: 14 },  // Ultra Wide (bottom)
+      { cx: 44, cy: 58, r: 17 },   // Main 48 MP (top)
+      { cx: 44, cy: 114, r: 17 },  // Ultra Wide (bottom)
     ],
     sideButtons: [
       { side: "right", y: 230, height: 72 },
@@ -518,9 +518,9 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 16, y: 24, width: 140, height: 140, radius: 28 },
     cameraLenses: [
-      { cx: 52, cy: 60, r: 15 },   // Main (upper-left)
-      { cx: 120, cy: 60, r: 15 },  // Ultra Wide (upper-right)
-      { cx: 86, cy: 128, r: 15 },  // Telephoto (lower-center)
+      { cx: 52, cy: 60, r: 21 },   // Main (upper-left)
+      { cx: 120, cy: 60, r: 21 },  // Ultra Wide (upper-right)
+      { cx: 86, cy: 128, r: 21 },  // Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 252, height: 78 },
@@ -545,9 +545,9 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 14, y: 22, width: 132, height: 132, radius: 26 },
     cameraLenses: [
-      { cx: 46, cy: 54, r: 14 },   // Main (upper-left)
-      { cx: 112, cy: 54, r: 14 },  // Ultra Wide (upper-right)
-      { cx: 80, cy: 120, r: 14 },  // Telephoto (lower-center)
+      { cx: 46, cy: 54, r: 19 },   // Main (upper-left)
+      { cx: 112, cy: 54, r: 19 },  // Ultra Wide (upper-right)
+      { cx: 80, cy: 120, r: 19 },  // Telephoto (lower-center)
     ],
     sideButtons: [
       { side: "right", y: 230, height: 72 },
@@ -572,8 +572,8 @@ export const DEVICE_TEMPLATES: DeviceTemplate[] = [
     cameraStyle: "module",
     cameraCutout: { x: 16, y: 26, width: 86, height: 86, radius: 20 },
     cameraLenses: [
-      { cx: 42, cy: 52, r: 14 },   // Main (upper-left, diagonal)
-      { cx: 76, cy: 86, r: 14 },   // Ultra Wide (lower-right, diagonal)
+      { cx: 42, cy: 52, r: 16 },   // Main (upper-left, diagonal)
+      { cx: 76, cy: 86, r: 16 },   // Ultra Wide (lower-right, diagonal)
     ],
     sideButtons: [
       { side: "right", y: 230, height: 72 },
