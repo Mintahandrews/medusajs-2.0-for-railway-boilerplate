@@ -41,25 +41,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  transpilePackages: [
-    "@react-three/fiber",
-    "@react-three/drei",
-    "three",
-  ],
-  webpack: (config, { isServer }) => {
-    // Only alias for client builds — the server SSG build uses
-    // react-server exports and aliasing breaks useContext resolution.
-    if (!isServer) {
-      const path = require("path")
-      config.resolve = config.resolve || {}
-      config.resolve.alias = {
-        ...(config.resolve.alias || {}),
-        react: path.dirname(require.resolve("react/package.json")),
-        "react-dom": path.dirname(require.resolve("react-dom/package.json")),
-      }
-    }
-    return config
-  },
   images: {
     unoptimized: true,
     remotePatterns: [
