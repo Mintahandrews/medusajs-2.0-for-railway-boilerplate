@@ -114,10 +114,15 @@ const FabricCaseEditor = forwardRef<FabricCaseEditorHandle, FabricCaseEditorProp
     const OR = R + BUMPER * 0.6
 
     // ── Scale to fit container ──
+    // SVG viewBox includes extra padding for shadow: 10+BUMPER left, 6+BUMPER top, 24 total width extra, 40 total height extra
+    const SVG_PAD_L = BUMPER + 10
+    const SVG_PAD_T = BUMPER + 6
+    const SVG_VB_W = OW + 24
+    const SVG_VB_H = OH + 40
     const MAX_DISPLAY_W = 380
-    const scale = MAX_DISPLAY_W / OW
-    const displayW = OW * scale
-    const displayH = OH * scale
+    const scale = MAX_DISPLAY_W / SVG_VB_W
+    const displayW = SVG_VB_W * scale
+    const displayH = SVG_VB_H * scale
     const canvasDisplayW = W * scale
     const canvasDisplayH = H * scale
 
@@ -593,158 +598,211 @@ const FabricCaseEditor = forwardRef<FabricCaseEditorHandle, FabricCaseEditorProp
             height: displayH,
           }}
         >
-          {/* ── Phone Case SVG Frame (overlay) ── */}
+          {/* ── Phone Case SVG Frame (overlay) — realistic mockup style ── */}
           <svg
-            viewBox={`-${BUMPER + 8} -${BUMPER + 4} ${OW + 20} ${OH + 12}`}
+            viewBox={`-${BUMPER + 10} -${BUMPER + 6} ${OW + 24} ${OH + 40}`}
             className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-              zIndex: 20,
-              filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.2)) drop-shadow(0 6px 12px rgba(0,0,0,0.12))",
-            }}
+            style={{ zIndex: 20 }}
           >
             <defs>
+              {/* Case body gradient — subtle 3D shading */}
               <linearGradient id={`fce-body-${device.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={bumperLight} />
+                <stop offset="0%" stopColor={adjustBrightness(caseColor, 40)} />
+                <stop offset="15%" stopColor={bumperLight} />
                 <stop offset="50%" stopColor={caseColor} />
-                <stop offset="100%" stopColor={bumperDark} />
+                <stop offset="85%" stopColor={bumperDark} />
+                <stop offset="100%" stopColor={adjustBrightness(caseColor, -45)} />
               </linearGradient>
+              {/* Left edge highlight (3D depth) */}
+              <linearGradient id={`fce-left-${device.id}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={adjustBrightness(caseColor, 50)} stopOpacity="0.6" />
+                <stop offset="100%" stopColor={caseColor} stopOpacity="0" />
+              </linearGradient>
+              {/* Right edge shadow (3D depth) */}
+              <linearGradient id={`fce-right-${device.id}`} x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stopColor={adjustBrightness(caseColor, -60)} stopOpacity="0.4" />
+                <stop offset="100%" stopColor={caseColor} stopOpacity="0" />
+              </linearGradient>
+              {/* Button gradient */}
               <linearGradient id={`fce-btn-${device.id}`} x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor={bumperDark} />
-                <stop offset="50%" stopColor={adjustBrightness(caseColor, -10)} />
-                <stop offset="100%" stopColor={bumperDark} />
+                <stop offset="0%" stopColor={adjustBrightness(caseColor, -20)} />
+                <stop offset="50%" stopColor={caseColor} />
+                <stop offset="100%" stopColor={adjustBrightness(caseColor, -20)} />
               </linearGradient>
-              {/* Camera is see-through — no solid fill gradients needed */}
-              <linearGradient id={`fce-finish-${device.id}`} x1="0.3" y1="0" x2="0.7" y2="1">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
-                <stop offset="30%" stopColor="rgba(255,255,255,0)" />
-                <stop offset="70%" stopColor="rgba(255,255,255,0)" />
-                <stop offset="100%" stopColor="rgba(255,255,255,0.08)" />
+              {/* Camera module white background */}
+              <linearGradient id={`fce-cam-bg-${device.id}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f8f8f8" />
+                <stop offset="50%" stopColor="#f0f0f0" />
+                <stop offset="100%" stopColor="#e8e8e8" />
               </linearGradient>
-              {/* Mask: case body with design area AND camera cutout punched through */}
+              {/* Camera lens glass gradient */}
+              <radialGradient id={`fce-lens-${device.id}`} cx="40%" cy="38%">
+                <stop offset="0%" stopColor="#4a5568" stopOpacity="0.6" />
+                <stop offset="25%" stopColor="#1a202c" stopOpacity="0.9" />
+                <stop offset="60%" stopColor="#0a0e14" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#000810" />
+              </radialGradient>
+              {/* Lens blue reflection */}
+              <radialGradient id={`fce-lens-reflect-${device.id}`} cx="35%" cy="32%">
+                <stop offset="0%" stopColor="#6ba3d6" stopOpacity="0.5" />
+                <stop offset="40%" stopColor="#2d5a8e" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+              </radialGradient>
+              {/* Glossy finish overlay */}
+              <linearGradient id={`fce-finish-${device.id}`} x1="0.2" y1="0" x2="0.8" y2="1">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
+                <stop offset="25%" stopColor="rgba(255,255,255,0.04)" />
+                <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+                <stop offset="75%" stopColor="rgba(255,255,255,0)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0.06)" />
+              </linearGradient>
+              {/* Drop shadow filter */}
+              <filter id={`fce-shadow-${device.id}`} x="-8%" y="-4%" width="116%" height="116%">
+                <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(0,0,0,0.18)" />
+                <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="rgba(0,0,0,0.10)" />
+              </filter>
+              {/* Inner shadow for camera module */}
+              <filter id={`fce-cam-shadow-${device.id}`} x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="rgba(0,0,0,0.15)" />
+              </filter>
+              {/* Mask: case body with design area cut out */}
               <mask id={`fce-frame-mask-${device.id}`}>
-                <rect x={-BUMPER - 8} y={-BUMPER - 4} width={OW + 20} height={OH + 12} fill="white" />
-                {/* Punch out the design area */}
+                <rect x={-BUMPER - 10} y={-BUMPER - 6} width={OW + 24} height={OH + 40} fill="white" />
                 <rect x={BUMPER} y={BUMPER} width={W} height={H} rx={R} ry={R} fill="black" />
-                {/* Punch out the camera cutout — see-through hole */}
-                {device.cameraCutout && device.cameraStyle !== "individual" && (
-                  <rect
-                    x={device.cameraCutout.x + BUMPER}
-                    y={device.cameraCutout.y + BUMPER}
-                    width={device.cameraCutout.width}
-                    height={device.cameraCutout.height}
-                    rx={device.cameraCutout.radius}
-                    ry={device.cameraCutout.radius}
-                    fill="black"
-                  />
-                )}
-                {/* Punch out individual lens holes for individual-style cameras */}
-                {device.cameraStyle === "individual" && device.cameraLenses?.map((lens, i) => (
-                  <circle key={i} cx={lens.cx + BUMPER} cy={lens.cy + BUMPER} r={lens.r + 5} fill="black" />
-                ))}
               </mask>
             </defs>
 
-            {/* Case body with cutout for design area + camera */}
-            <g mask={`url(#fce-frame-mask-${device.id})`}>
-              <rect x={0} y={0} width={OW} height={OH} rx={OR} ry={OR} fill={`url(#fce-body-${device.id})`} stroke={bumperEdge} strokeWidth={1} />
+            {/* ── Case body with design area cutout ── */}
+            <g filter={`url(#fce-shadow-${device.id})`}>
+              <g mask={`url(#fce-frame-mask-${device.id})`}>
+                {/* Main case fill */}
+                <rect x={0} y={0} width={OW} height={OH} rx={OR} ry={OR} fill={`url(#fce-body-${device.id})`} />
+                {/* Left edge highlight for 3D depth */}
+                <rect x={0} y={0} width={OW * 0.15} height={OH} rx={OR} ry={OR} fill={`url(#fce-left-${device.id})`} />
+                {/* Right edge shadow for 3D depth */}
+                <rect x={OW * 0.85} y={0} width={OW * 0.15} height={OH} rx={OR} ry={OR} fill={`url(#fce-right-${device.id})`} />
+              </g>
             </g>
 
             {/* Inner edge around design area */}
-            <rect x={BUMPER - 0.5} y={BUMPER - 0.5} width={W + 1} height={H + 1} rx={R + 0.5} ry={R + 0.5} fill="none" stroke="rgba(0,0,0,0.12)" strokeWidth={0.5} />
+            <rect x={BUMPER - 0.3} y={BUMPER - 0.3} width={W + 0.6} height={H + 0.6} rx={R + 0.3} ry={R + 0.3} fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth={0.6} />
 
-            {/* Camera raised bumper ring (module style) — ring only, center is see-through */}
-            {device.cameraCutout && device.cameraStyle !== "individual" && (
+            {/* ── Camera module — white background with realistic glass lenses ── */}
+            {device.cameraCutout && (
               <g transform={`translate(${BUMPER}, ${BUMPER})`}>
-                {/* Outer raised lip */}
+                {/* Raised bumper ring around camera */}
                 <rect
-                  x={device.cameraCutout.x - 4}
-                  y={device.cameraCutout.y - 4}
-                  width={device.cameraCutout.width + 8}
-                  height={device.cameraCutout.height + 8}
-                  rx={device.cameraCutout.radius + 4}
-                  ry={device.cameraCutout.radius + 4}
-                  fill="none"
-                  stroke={bumperDark}
-                  strokeWidth={3}
+                  x={device.cameraCutout.x - 5}
+                  y={device.cameraCutout.y - 5}
+                  width={device.cameraCutout.width + 10}
+                  height={device.cameraCutout.height + 10}
+                  rx={device.cameraCutout.radius + 5}
+                  ry={device.cameraCutout.radius + 5}
+                  fill={bumperDark}
+                  stroke={bumperEdge}
+                  strokeWidth={0.5}
                 />
-                {/* Inner ring edge */}
+                {/* White/cream camera module background */}
                 <rect
-                  x={device.cameraCutout.x - 0.5}
-                  y={device.cameraCutout.y - 0.5}
-                  width={device.cameraCutout.width + 1}
-                  height={device.cameraCutout.height + 1}
-                  rx={device.cameraCutout.radius + 0.5}
-                  ry={device.cameraCutout.radius + 0.5}
-                  fill="none"
-                  stroke="rgba(0,0,0,0.15)"
+                  x={device.cameraCutout.x}
+                  y={device.cameraCutout.y}
+                  width={device.cameraCutout.width}
+                  height={device.cameraCutout.height}
+                  rx={device.cameraCutout.radius}
+                  ry={device.cameraCutout.radius}
+                  fill={`url(#fce-cam-bg-${device.id})`}
+                  filter={`url(#fce-cam-shadow-${device.id})`}
+                  stroke="rgba(0,0,0,0.06)"
                   strokeWidth={0.5}
                 />
               </g>
             )}
 
-            {/* Individual camera lens rings (individual style) — ring only, center is see-through */}
-            {device.cameraStyle === "individual" && (
-              <g transform={`translate(${BUMPER}, ${BUMPER})`}>
-                {device.cameraLenses?.map((lens, i) => (
+            {/* ── Realistic camera lenses ── */}
+            <g transform={`translate(${BUMPER}, ${BUMPER})`}>
+              {device.cameraLenses?.map((lens, i) => {
+                const isIndividual = device.cameraStyle === "individual"
+                return (
                   <g key={i}>
-                    {/* Outer raised ring */}
-                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 7} fill="none" stroke={bumperDark} strokeWidth={3} />
-                    {/* Inner edge */}
-                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 4.5} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth={0.5} />
+                    {/* Individual camera: own raised ring per lens */}
+                    {isIndividual && (
+                      <>
+                        <circle cx={lens.cx} cy={lens.cy} r={lens.r + 7} fill={bumperDark} stroke={bumperEdge} strokeWidth={0.5} />
+                        <circle cx={lens.cx} cy={lens.cy} r={lens.r + 4} fill="#f0f0f0" stroke="rgba(0,0,0,0.06)" strokeWidth={0.5} />
+                      </>
+                    )}
+                    {/* Metallic outer ring */}
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 2} fill="none" stroke="#888" strokeWidth={1.5} />
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r + 1} fill="none" stroke="#aaa" strokeWidth={0.5} />
+                    {/* Dark glass lens */}
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r} fill={`url(#fce-lens-${device.id})`} />
+                    {/* Blue-tinted reflection */}
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r} fill={`url(#fce-lens-reflect-${device.id})`} />
+                    {/* Small specular highlight */}
+                    <circle cx={lens.cx - lens.r * 0.28} cy={lens.cy - lens.r * 0.28} r={lens.r * 0.18} fill="rgba(255,255,255,0.35)" />
+                    {/* Inner ring detail */}
+                    <circle cx={lens.cx} cy={lens.cy} r={lens.r * 0.55} fill="none" stroke="rgba(100,120,160,0.12)" strokeWidth={0.4} />
                   </g>
-                ))}
-              </g>
-            )}
+                )
+              })}
 
-            {/* Bar-style camera ring (same as module but for bar cameras) */}
-            {device.cameraStyle === "bar" && device.cameraCutout && (
-              <g transform={`translate(${BUMPER}, ${BUMPER})`}>
-                <rect
-                  x={device.cameraCutout.x - 4}
-                  y={device.cameraCutout.y - 4}
-                  width={device.cameraCutout.width + 8}
-                  height={device.cameraCutout.height + 8}
-                  rx={device.cameraCutout.radius + 4}
-                  ry={device.cameraCutout.radius + 4}
-                  fill="none"
-                  stroke={bumperDark}
-                  strokeWidth={3}
-                />
-              </g>
-            )}
+              {/* Flash / LED — small amber circle (only for module & bar styles with 3+ lenses) */}
+              {device.cameraLenses && device.cameraLenses.length >= 2 && device.cameraCutout && device.cameraStyle !== "individual" && (() => {
+                const cc = device.cameraCutout
+                const flashCx = cc.x + cc.width - 16
+                const flashCy = cc.y + 16
+                return (
+                  <g>
+                    <circle cx={flashCx} cy={flashCy} r={5} fill="#c8a84e" stroke="#b89840" strokeWidth={0.5} />
+                    <circle cx={flashCx - 1} cy={flashCy - 1} r={2} fill="rgba(255,240,180,0.6)" />
+                  </g>
+                )
+              })()}
 
-            {/* Side buttons */}
+              {/* Microphone / sensor — tiny dark dot */}
+              {device.cameraLenses && device.cameraLenses.length >= 2 && device.cameraCutout && device.cameraStyle !== "individual" && (() => {
+                const cc = device.cameraCutout
+                const sensorCx = cc.x + 14
+                const sensorCy = cc.y + cc.height - 14
+                return <circle cx={sensorCx} cy={sensorCy} r={3} fill="#222" stroke="#333" strokeWidth={0.3} />
+              })()}
+            </g>
+
+            {/* ── Side buttons — subtle raised look ── */}
             {device.sideButtons?.map((btn, i) => {
-              const BTN_W = 4
-              const BTN_OFFSET = OW + 1
-              const bx = btn.side === "right" ? BTN_OFFSET : -BTN_W - 1
+              const BTN_W = 3.5
+              const bx = btn.side === "right" ? OW + 0.5 : -BTN_W - 0.5
               return (
-                <rect key={i} x={bx} y={btn.y + BUMPER} width={BTN_W} height={btn.height} rx={2} ry={2} fill={`url(#fce-btn-${device.id})`} stroke={bumperEdge} strokeWidth={0.5} />
+                <g key={i}>
+                  <rect x={bx} y={btn.y + BUMPER} width={BTN_W} height={btn.height} rx={1.5} ry={1.5} fill={`url(#fce-btn-${device.id})`} stroke={bumperEdge} strokeWidth={0.4} />
+                  {/* Top highlight on button */}
+                  <rect x={bx + 0.5} y={btn.y + BUMPER + 0.5} width={BTN_W - 1} height={btn.height * 0.4} rx={1} ry={1} fill="rgba(255,255,255,0.12)" />
+                </g>
               )
             })}
 
-            {/* Port cutout */}
+            {/* ── Port cutout ── */}
             {device.portCutout ? (
-              <rect x={device.portCutout.x + BUMPER} y={OH - 2} width={device.portCutout.width} height={4} rx={device.portCutout.radius || 2} ry={device.portCutout.radius || 2} fill="rgba(30,30,30,0.7)" />
+              <rect x={device.portCutout.x + BUMPER} y={OH + 0.5} width={device.portCutout.width} height={3} rx={device.portCutout.radius || 1.5} ry={device.portCutout.radius || 1.5} fill="rgba(30,30,30,0.5)" />
             ) : (
-              <rect x={OW / 2 - 12} y={OH - 2} width={24} height={4} rx={2} ry={2} fill="rgba(30,30,30,0.5)" />
+              <rect x={OW / 2 - 12} y={OH + 0.5} width={24} height={3} rx={1.5} ry={1.5} fill="rgba(30,30,30,0.4)" />
             )}
 
-            {/* Material finish */}
+            {/* ── Glossy finish overlay ── */}
             {caseMaterial === "glossy" && (
               <rect x={0} y={0} width={OW} height={OH} rx={OR} ry={OR} fill={`url(#fce-finish-${device.id})`} pointerEvents="none" />
             )}
 
-            {/* Outer highlight */}
-            <rect x={0} y={0} width={OW} height={OH} rx={OR} ry={OR} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth={0.3} pointerEvents="none" />
+            {/* ── Outer case edge highlight ── */}
+            <rect x={0.3} y={0.3} width={OW - 0.6} height={OH - 0.6} rx={OR} ry={OR} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth={0.4} pointerEvents="none" />
           </svg>
 
           {/* ── Fabric.js Canvas (interactive, sits under the SVG frame) ── */}
           <div
             className="absolute"
             style={{
-              left: (BUMPER / OW) * displayW + (8 / OW) * displayW,
-              top: (BUMPER / OH) * displayH + (4 / OH) * displayH,
+              left: ((SVG_PAD_L + BUMPER) / SVG_VB_W) * displayW,
+              top: ((SVG_PAD_T + BUMPER) / SVG_VB_H) * displayH,
               width: canvasDisplayW,
               height: canvasDisplayH,
               zIndex: 10,
