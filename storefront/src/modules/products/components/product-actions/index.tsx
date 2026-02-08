@@ -16,6 +16,7 @@ import ProductPrice from "../product-price"
 import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
+import { isCustomizableCase } from "@lib/device-assets"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -177,7 +178,7 @@ export default function ProductActions({
             ? "Out of stock"
             : "Add to cart"}
         </Button>
-        {product.handle && (
+        {product.handle && isCustomizableCase(product) && (
           <LocalizedClientLink
             href={`/customizer/${product.handle}`}
             className="flex items-center justify-center w-full h-10 rounded-lg border-2 border-violet-600 text-violet-600 text-sm font-semibold hover:bg-violet-50 transition-colors"

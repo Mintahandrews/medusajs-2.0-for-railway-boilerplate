@@ -228,64 +228,6 @@ export default function FabricCanvas() {
             }}
           />
 
-          {/* CSS camera island overlay (iPhone 15 Pro style) */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              top: 28 * displayScale,
-              left: 28 * displayScale,
-              width: 130 * displayScale,
-              height: 130 * displayScale,
-              borderRadius: 28 * displayScale,
-              background: "rgba(0,0,0,0.85)",
-              boxShadow: `
-                inset 0 0 0 ${3 * displayScale}px rgba(60,60,60,0.6),
-                0 0 ${6 * displayScale}px rgba(0,0,0,0.3)
-              `,
-            }}
-          >
-            {/* Main lens */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                top: "18%",
-                left: "18%",
-                width: "34%",
-                height: "34%",
-                background: "radial-gradient(circle, #1a1a3a 40%, #0d0d1a 70%, #333 100%)",
-                boxShadow: `
-                  inset 0 0 ${4 * displayScale}px rgba(100,100,255,0.15),
-                  0 0 0 ${2 * displayScale}px rgba(80,80,80,0.5)
-                `,
-              }}
-            />
-            {/* Secondary lens */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                top: "50%",
-                left: "50%",
-                width: "30%",
-                height: "30%",
-                background: "radial-gradient(circle, #1a1a3a 40%, #0d0d1a 70%, #333 100%)",
-                boxShadow: `
-                  inset 0 0 ${3 * displayScale}px rgba(100,100,255,0.1),
-                  0 0 0 ${2 * displayScale}px rgba(80,80,80,0.5)
-                `,
-              }}
-            />
-            {/* Flash */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                top: "22%",
-                right: "18%",
-                width: "14%",
-                height: "14%",
-                background: "radial-gradient(circle, #ffeebb 20%, #997744 100%)",
-              }}
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -150,3 +150,68 @@ export function getDefaultDevice(): DeviceConfig {
 export function getAllDeviceHandles(): string[] {
   return Object.keys(DEVICE_CONFIGS)
 }
+
+/**
+ * Keywords that identify each device model.
+ * Order matters — more specific patterns should come first.
+ */
+const DEVICE_KEYWORDS: { keywords: string[]; handle: string }[] = [
+  { keywords: ["iphone-16-pro", "iphone 16 pro", "i-phone-16-pro", "i-phone-16pro"], handle: "iphone-16-pro" },
+  { keywords: ["iphone-15-pro", "iphone 15 pro", "i-phone-15-pro", "i-phone-15pro"], handle: "iphone-15-pro" },
+  { keywords: ["iphone-14", "iphone 14", "i-phone-14", "iphone14"], handle: "iphone-14" },
+  { keywords: ["samsung-s24", "samsung s24", "galaxy-s24", "galaxy s24"], handle: "samsung-s24" },
+  { keywords: ["pixel-9", "pixel 9", "pixel9"], handle: "pixel-9" },
+]
+
+/**
+ * Fuzzy-match a product handle, title, or description to a device config.
+ * Returns the matching DeviceConfig or null if no match.
+ */
+export function detectDeviceFromProduct(
+  productHandle?: string | null,
+  productTitle?: string | null,
+  productDescription?: string | null
+): DeviceConfig | null {
+  const haystack = [productHandle, productTitle, productDescription]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+
+  for (const entry of DEVICE_KEYWORDS) {
+    for (const kw of entry.keywords) {
+      if (haystack.includes(kw)) {
+        return DEVICE_CONFIGS[entry.handle] ?? null
+      }
+    }
+  }
+  return null
+}
+
+/**
+ * Check whether a product is a customizable phone case.
+ * Looks for "case" in the handle, title, tags, or collection names.
+ */
+export function isCustomizableCase(product: {
+  handle?: string | null
+  title?: string | null
+  description?: string | null
+  tags?: Array<{ value?: string }> | null
+  collection?: { handle?: string; title?: string } | null
+  type?: { value?: string } | null
+}): boolean {
+  const text = [
+    product.handle,
+    product.title,
+    product.description,
+    product.collection?.handle,
+    product.collection?.title,
+    product.type?.value,
+    ...(product.tags?.map((t) => t.value) ?? []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+
+  // Must contain "case" somewhere in the product data
+  return text.includes("case")
+}
