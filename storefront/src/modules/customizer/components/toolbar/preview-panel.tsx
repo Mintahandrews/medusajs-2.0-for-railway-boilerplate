@@ -23,6 +23,7 @@ const AI_SCENES = [
   { label: "Desk", description: "A custom phone case on a clean minimal desk with a laptop and coffee cup, top-down product photography" },
   { label: "Nature", description: "A custom phone case resting on a smooth stone in a forest with soft natural light, product photography" },
   { label: "Studio", description: "A custom phone case on white studio background with dramatic lighting and subtle shadow, product photography" },
+  { label: "Transparent", description: "__transparent__" },
 ]
 
 /* ---- Angle & BG for local mode ---- */
@@ -68,6 +69,14 @@ export default function PreviewPanel() {
       if (!preview) throw new Error("Could not export design")
 
       const scene = AI_SCENES[sceneIdx]
+
+      // Transparent mode — just show the exported design directly (no AI call)
+      if (scene.description === "__transparent__") {
+        setAiImageUrl(preview)
+        setGenerating(false)
+        return
+      }
+
       const result = await generateAiPreview(preview, scene.description)
       setAiImageUrl(`data:image/png;base64,${result.data}`)
     } catch (err: any) {

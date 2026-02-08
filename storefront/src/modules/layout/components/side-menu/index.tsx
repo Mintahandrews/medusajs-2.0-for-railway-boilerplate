@@ -13,6 +13,43 @@ import { listCategories } from "@lib/data/categories"
 import { getCollectionsList } from "@lib/data/collections"
 import { getCategoryIcon } from "@lib/util/category-icon"
 
+/** Lock body scroll while the sidebar is open (works on iOS Safari too) */
+function ScrollLock({ active }: { active: boolean }) {
+  useEffect(() => {
+    if (!active) return
+    const scrollY = window.scrollY
+    const html = document.documentElement
+    const body = document.body
+
+    // Save previous values
+    const prevHtmlOverflow = html.style.overflow
+    const prevBodyOverflow = body.style.overflow
+    const prevBodyPosition = body.style.position
+    const prevBodyTop = body.style.top
+    const prevBodyLeft = body.style.left
+    const prevBodyRight = body.style.right
+
+    // Lock: position:fixed preserves scroll pos, overflow:hidden on both html & body
+    html.style.overflow = "hidden"
+    body.style.overflow = "hidden"
+    body.style.position = "fixed"
+    body.style.top = `-${scrollY}px`
+    body.style.left = "0"
+    body.style.right = "0"
+
+    return () => {
+      html.style.overflow = prevHtmlOverflow
+      body.style.overflow = prevBodyOverflow
+      body.style.position = prevBodyPosition
+      body.style.top = prevBodyTop
+      body.style.left = prevBodyLeft
+      body.style.right = prevBodyRight
+      window.scrollTo(0, scrollY)
+    }
+  }, [active])
+  return null
+}
+
 const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "Home", href: "/", testId: "home-link" },
   { name: "Design Your Case", href: "/customizer", testId: "customizer-link" },
@@ -117,6 +154,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
         <Popover className="h-full flex">
           {({ open, close }) => (
             <>
+              <ScrollLock active={open} />
               <div className="relative flex h-full">
                 <Popover.Button
                   data-testid="nav-menu-button"

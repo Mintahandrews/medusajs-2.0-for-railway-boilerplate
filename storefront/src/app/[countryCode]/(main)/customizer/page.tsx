@@ -57,103 +57,108 @@ function PhoneIcon({ handle }: { handle: string }) {
   )
 
   /* ---- iPhone 16 / 16 Plus — vertical pill ---- */
+  /* Real: pill ~14mm W × 28mm H on 71.6mm-wide body → 19.6% × 19.0% */
   if (/^iphone-16(-plus)?$/.test(handle)) {
-    const px = 9, py = 6, pw = 11, ph = 28, pr = 5.5
+    const px = 6, py = 3, pw = 11, ph = 17, pr = 5.5
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={px} y={py} width={pw} height={ph} rx={pr}
           className="fill-gray-300 group-hover:fill-emerald-200" />
-        <circle cx={px + pw / 2} cy={py + 8} r="4"
+        <circle cx={px + pw / 2} cy={py + ph * 0.32} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        <circle cx={px + pw / 2} cy={py + 20} r="4"
+        <circle cx={px + pw / 2} cy={py + ph * 0.68} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />
       </svg>
     )
   }
 
   /* ---- iPhone Pro / Pro Max — square module, triangle 3 lenses ---- */
+  /* Real: module ~37mm square on 71.5mm-wide body → 51.7% of width */
   if (/iphone-\d+-pro/.test(handle)) {
-    const mx = 5, my = 5, ms = 26, mr = 7
+    const mx = 3, my = 2, ms = 29, mr = 8
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
           className="fill-gray-300 group-hover:fill-emerald-200" />
         {/* Triangle: top-left, top-right, bottom-center */}
-        <circle cx={mx + 8} cy={my + 8} r="4"
+        <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        <circle cx={mx + 18} cy={my + 8} r="4"
+        <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        <circle cx={mx + 13} cy={my + 18} r="4"
+        <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
         {/* Flash */}
-        <circle cx={mx + 19} cy={my + 18} r="1.5"
+        <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
         {/* LiDAR */}
-        <circle cx={mx + 7} cy={my + 18} r="1.2"
+        <circle cx={mx + ms * 0.28} cy={my + ms * 0.70} r="1.2"
           className="fill-gray-400 group-hover:fill-emerald-400" />
       </svg>
     )
   }
 
   /* ---- iPhone 11–15 standard / mini / Plus — square module, diagonal 2 lenses ---- */
+  /* Real: module ~28mm square on 71.5mm-wide body → 39.2% of width */
   if (/^iphone-/.test(handle)) {
-    const mx = 5, my = 5, ms = 22, mr = 6
+    const mx = 3, my = 2, ms = 22, mr = 6
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
           className="fill-gray-300 group-hover:fill-emerald-200" />
         {/* Diagonal: top-left, bottom-right */}
-        <circle cx={mx + 7} cy={my + 7} r="4"
+        <circle cx={mx + ms * 0.33} cy={my + ms * 0.33} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        <circle cx={mx + 15} cy={my + 15} r="4"
+        <circle cx={mx + ms * 0.67} cy={my + ms * 0.67} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />
         {/* Flash */}
-        <circle cx={mx + 16} cy={my + 7} r="1.5"
+        <circle cx={mx + ms * 0.67} cy={my + ms * 0.33} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )
   }
 
   /* ---- Samsung Ultra — 4 individual raised circles ---- */
+  /* Real: lens ~13mm on 79mm-wide body, cx at 15.2%, gap 8.6% of height */
   if (/samsung.*ultra/.test(handle)) {
-    const cx = 13, startY = 9, gap = 14
+    const lx = 9, startY = 8, gap = 8
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         {[0, 1, 2, 3].map(i => (
           <g key={i}>
-            <circle cx={cx} cy={startY + i * gap} r="5.5"
-              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1.2" />
-            <circle cx={cx} cy={startY + i * gap} r="3"
+            <circle cx={lx} cy={startY + i * gap} r="4.5"
+              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
+            <circle cx={lx} cy={startY + i * gap} r="2.5"
               className="fill-gray-500 group-hover:fill-emerald-600" />
           </g>
         ))}
         {/* Flash */}
-        <circle cx={cx} cy={startY + 4 * gap} r="2"
+        <circle cx={lx} cy={startY + 3 * gap + 6} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )
   }
 
   /* ---- Samsung S23/S24/S25 standard — 3 individual raised circles ---- */
+  /* Real: lens ~13mm on 70.6mm-wide body, cx at 17%, gap 9.5% of height */
   if (/samsung/.test(handle)) {
-    const cx = 13, startY = 10, gap = 16
+    const lx = 10, startY = 9, gap = 9
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         {[0, 1, 2].map(i => (
           <g key={i}>
-            <circle cx={cx} cy={startY + i * gap} r="6"
-              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1.2" />
-            <circle cx={cx} cy={startY + i * gap} r="3.5"
+            <circle cx={lx} cy={startY + i * gap} r="5"
+              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
+            <circle cx={lx} cy={startY + i * gap} r="3"
               className="fill-gray-500 group-hover:fill-emerald-600" />
           </g>
         ))}
         {/* Flash */}
-        <circle cx={cx} cy={startY + 3 * gap} r="2"
+        <circle cx={lx} cy={startY + 2 * gap + 7} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )

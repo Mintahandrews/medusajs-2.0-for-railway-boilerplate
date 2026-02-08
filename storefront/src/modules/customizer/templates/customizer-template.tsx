@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useCallback } from "react"
-import { ChevronUp, ChevronDown } from "lucide-react"
+import { ChevronUp, ChevronDown, Upload, Type, Palette, Shield, Smartphone, ShoppingCart } from "lucide-react"
 import { CustomizerProvider } from "../context"
 import FabricCanvas from "../components/fabric-canvas"
 import Toolbar from "../components/toolbar"
@@ -34,7 +34,7 @@ export default function CustomizerTemplate({ deviceConfig, productHandle, produc
         {/* ---- Canvas area ---- */}
         <main
           className={`relative flex-1 flex flex-col items-center justify-center p-2 lg:p-8 min-h-0 transition-all duration-300 ${
-            mobileExpanded ? "h-[35dvh] lg:h-auto" : "h-[calc(100dvh-64px-56px)] lg:h-auto"
+            mobileExpanded ? "h-[40dvh] lg:h-auto" : "flex-1 lg:h-auto"
           }`}
         >
           {/* Device label */}
@@ -57,7 +57,7 @@ export default function CustomizerTemplate({ deviceConfig, productHandle, produc
         {/* ---- Mobile bottom sheet toolbar ---- */}
         <div
           className={`lg:hidden flex flex-col bg-white border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out ${
-            mobileExpanded ? "h-[65dvh]" : "h-14"
+            mobileExpanded ? "h-[60dvh]" : "h-auto"
           }`}
         >
           {/* Drag handle / toggle */}
@@ -100,16 +100,26 @@ export default function CustomizerTemplate({ deviceConfig, productHandle, produc
  * Quick-access toolbar icons shown in the collapsed mobile bottom bar.
  * Tapping any icon expands the full toolbar and switches to that tool.
  */
+const QUICK_TOOLS = [
+  { label: "Upload", icon: Upload },
+  { label: "Text", icon: Type },
+  { label: "Color", icon: Palette },
+  { label: "Case", icon: Shield },
+  { label: "Preview", icon: Smartphone },
+  { label: "Cart", icon: ShoppingCart },
+]
+
 function MobileQuickBar({ onExpand }: { onExpand: () => void }) {
   return (
-    <div className="flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom,0px)]">
-      {["Uploads", "Text", "Color", "Case", "Preview", "Cart"].map((label) => (
+    <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
+      {QUICK_TOOLS.map(({ label, icon: Icon }) => (
         <button
           key={label}
           onClick={onExpand}
-          className="flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] text-gray-500 active:text-black min-w-[44px] min-h-[44px] justify-center"
+          className="flex flex-col items-center gap-0.5 py-1.5 px-1 text-gray-500 active:text-black min-w-[48px] min-h-[44px] justify-center"
         >
-          <span className="font-medium">{label}</span>
+          <Icon size={18} strokeWidth={1.8} />
+          <span className="text-[9px] font-medium leading-none">{label}</span>
         </button>
       ))}
     </div>

@@ -82,15 +82,16 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
 
   /* ------------------------------------------------------------------ */
   /*  iPhone 16 / 16 Plus — vertical pill, 2 lenses stacked             */
-  /*  Pill ~17% of width, ~13% of height, positioned upper-left         */
+  /*  Pill ~18% of width, ~10% of height, positioned upper-left         */
   /* ------------------------------------------------------------------ */
+  /* Real: pill ~14mm W × 28mm H on 71.6mm body → 19.6% × 19.0% */
   if (family === "iphone-16-vertical") {
-    const pillW = Math.round(cw * 0.17)
-    const pillH = Math.round(ch * 0.13)
-    const pillX = Math.round(cw * 0.10)
-    const pillY = Math.round(ch * 0.025)
+    const pillW = Math.round(cw * 0.196)
+    const pillH = Math.round(ch * 0.190)
+    const pillX = Math.round(cw * 0.112)
+    const pillY = Math.round(ch * 0.034)
     const pillR = Math.round(pillW / 2)
-    const ld = Math.round(pillW * 0.70)
+    const ld = Math.round(pillW * 0.78)
     const flashD = Math.round(pillW * 0.18)
     return (
       <div
@@ -105,21 +106,22 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
       >
         <Lens cx={pillW * 0.50} cy={pillH * 0.32} d={ld} s={s} />
         <Lens cx={pillW * 0.50} cy={pillH * 0.68} d={ld} s={s} />
-        <Lens cx={pillW * 0.50} cy={pillH * 0.03} d={flashD} s={s} type="flash" />
+        <Lens cx={pillW * 0.82} cy={pillH * 0.12} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
   /* ------------------------------------------------------------------ */
   /*  iPhone 11–15 standard / mini / Plus — diagonal dual in square     */
-  /*  Module ~38% of width, positioned ~5% from top-left                */
+  /*  Module ~40% of width, positioned ~4% from top-left                */
   /* ------------------------------------------------------------------ */
+  /* Real: module ~28mm square on 71.5mm body → 39.2% of width */
   if (family === "iphone-diagonal") {
-    const mod = Math.round(cw * 0.38)
-    const modX = Math.round(cw * 0.05)
-    const modY = Math.round(ch * 0.025)
+    const mod = Math.round(cw * 0.392)
+    const modX = Math.round(cw * 0.049)
+    const modY = Math.round(ch * 0.024)
     const modR = Math.round(mod * 0.28)
-    const ld = Math.round(mod * 0.34)
+    const ld = Math.round(mod * 0.38)
     const flashD = Math.round(mod * 0.10)
     return (
       <div
@@ -133,27 +135,28 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
         }}
       >
         {/* Diagonal: top-left and bottom-right */}
-        <Lens cx={mod * 0.36} cy={mod * 0.36} d={ld} s={s} />
-        <Lens cx={mod * 0.64} cy={mod * 0.64} d={ld} s={s} />
+        <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
+        <Lens cx={mod * 0.67} cy={mod * 0.67} d={ld} s={s} />
         {/* Flash: top-right area */}
-        <Lens cx={mod * 0.64} cy={mod * 0.36} d={flashD} s={s} type="flash" />
+        <Lens cx={mod * 0.67} cy={mod * 0.33} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
   /* ------------------------------------------------------------------ */
   /*  All iPhone Pro / Pro Max — square module, triangle triple lens     */
-  /*  Module ~50% of width (~36mm on 71mm phone), ~5% from top-left     */
+  /*  Module ~53% of width (~38mm on 71mm phone), ~3% from top-left     */
   /*  Triangle: 2 lenses top row, 1 bottom-center + flash + LiDAR      */
   /* ------------------------------------------------------------------ */
+  /* Real: module ~37mm square on 71.5mm body → 51.7% of width */
   if (family === "iphone-triple") {
-    const mod = Math.round(cw * 0.50)
-    const modX = Math.round(cw * 0.05)
-    const modY = Math.round(ch * 0.02)
-    const modR = Math.round(mod * 0.25)
-    const ld = Math.round(mod * 0.28)
+    const mod = Math.round(cw * 0.517)
+    const modX = Math.round(cw * 0.049)
+    const modY = Math.round(ch * 0.023)
+    const modR = Math.round(mod * 0.27)
+    const ld = Math.round(mod * 0.35)
     const flashD = Math.round(mod * 0.09)
-    const sensorD = Math.round(mod * 0.07)
+    const sensorD = Math.round(mod * 0.06)
     return (
       <div
         className="absolute pointer-events-none z-10"
@@ -166,14 +169,14 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
         }}
       >
         {/* Top row: wide (left) + ultrawide (right) */}
-        <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
-        <Lens cx={mod * 0.67} cy={mod * 0.33} d={ld} s={s} />
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
         {/* Bottom center: telephoto */}
-        <Lens cx={mod * 0.50} cy={mod * 0.67} d={ld} s={s} />
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
         {/* Flash: between top-right and bottom-center */}
-        <Lens cx={mod * 0.67} cy={mod * 0.67} d={flashD} s={s} type="flash" />
+        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
         {/* LiDAR sensor: between top-left and bottom-center */}
-        <Lens cx={mod * 0.33} cy={mod * 0.67} d={sensorD} s={s} type="sensor" />
+        <Lens cx={mod * 0.28} cy={mod * 0.70} d={sensorD} s={s} type="sensor" />
       </div>
     )
   }
@@ -181,20 +184,21 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
   /* ------------------------------------------------------------------ */
   /*  Samsung Galaxy S23/S24/S25 — 3 individual raised circles          */
   /*  No surrounding frame. Vertical stack in upper-left.               */
-  /*  Each lens ~14% of width, spaced ~8% of height apart               */
+  /*  Each lens ~13% of width, spaced ~5.5% of height apart             */
   /* ------------------------------------------------------------------ */
+  /* Real: lens ~13mm on 70.6mm body, cx at 17%, gap 9.5% of height */
   if (family === "samsung-triple") {
-    const ld = Math.round(cw * 0.14)
-    const cx = Math.round(cw * 0.16)
-    const startY = Math.round(ch * 0.05)
-    const gap = Math.round(ch * 0.08)
-    const flashD = Math.round(cw * 0.05)
+    const ld = Math.round(cw * 0.184)
+    const cx = Math.round(cw * 0.170)
+    const startY = Math.round(ch * 0.095)
+    const gap = Math.round(ch * 0.095)
+    const flashD = Math.round(cw * 0.04)
     return (
       <div className="absolute pointer-events-none z-10 inset-0">
         <Lens cx={cx} cy={startY} d={ld} s={s} />
         <Lens cx={cx} cy={startY + gap} d={ld} s={s} />
         <Lens cx={cx} cy={startY + gap * 2} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap * 2.8} d={flashD} s={s} type="flash" />
+        <Lens cx={cx} cy={startY + gap * 2 + gap * 0.65} d={flashD} s={s} type="flash" />
       </div>
     )
   }
@@ -203,19 +207,20 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
   /*  Samsung Galaxy S Ultra — 4 individual circles (+ periscope)       */
   /*  Same vertical stack layout but with 4th periscope lens             */
   /* ------------------------------------------------------------------ */
+  /* Real: lens ~13mm on 79mm body, cx at 15.2%, gap 8.6% of height */
   if (family === "samsung-quad") {
-    const ld = Math.round(cw * 0.13)
-    const cx = Math.round(cw * 0.16)
-    const startY = Math.round(ch * 0.04)
-    const gap = Math.round(ch * 0.065)
-    const flashD = Math.round(cw * 0.05)
+    const ld = Math.round(cw * 0.165)
+    const cx = Math.round(cw * 0.152)
+    const startY = Math.round(ch * 0.086)
+    const gap = Math.round(ch * 0.086)
+    const flashD = Math.round(cw * 0.04)
     return (
       <div className="absolute pointer-events-none z-10 inset-0">
         <Lens cx={cx} cy={startY} d={ld} s={s} />
         <Lens cx={cx} cy={startY + gap} d={ld} s={s} />
         <Lens cx={cx} cy={startY + gap * 2} d={ld} s={s} />
         <Lens cx={cx} cy={startY + gap * 3} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap * 3.7} d={flashD} s={s} type="flash" />
+        <Lens cx={cx} cy={startY + gap * 3 + gap * 0.65} d={flashD} s={s} type="flash" />
       </div>
     )
   }
@@ -377,6 +382,20 @@ export default function FabricCanvas() {
       canvasRef.current = fabricCanvas
       fabricCanvas.renderAll()
 
+      // Apply initial CSS scaling so Fabric maps pointer coords correctly
+      if (containerRef.current) {
+        const cW = containerRef.current.clientWidth
+        const cH = containerRef.current.clientHeight
+        const sW = cW / canvasWidth
+        const sH = cH / canvasHeight
+        const initScale = Math.min(1, sW, sH)
+        setDisplayScale(initScale)
+        fabricCanvas.setDimensions(
+          { width: canvasWidth * initScale, height: canvasHeight * initScale },
+          { cssOnly: true }
+        )
+      }
+
       // push initial blank state
       pushHistory()
       dispatch({ type: "SET_CANVAS_READY", ready: true })
@@ -403,13 +422,23 @@ export default function FabricCanvas() {
       const scaleW = containerW / deviceConfig.canvasWidth
       const scaleH = containerH / deviceConfig.canvasHeight
       // fit inside container on both axes, cap at 1×
-      setDisplayScale(Math.min(1, scaleW, scaleH))
+      const newScale = Math.min(1, scaleW, scaleH)
+      setDisplayScale(newScale)
+
+      // Tell Fabric about the CSS size so pointer coordinates map correctly
+      const canvas = canvasRef.current
+      if (canvas) {
+        canvas.setDimensions(
+          { width: deviceConfig.canvasWidth * newScale, height: deviceConfig.canvasHeight * newScale },
+          { cssOnly: true }
+        )
+      }
     }
 
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight])
+  }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight, canvasRef])
 
   const r = deviceConfig.cornerRadius
   const w = deviceConfig.canvasWidth * displayScale
@@ -448,12 +477,6 @@ export default function FabricCanvas() {
         >
           <canvas
             ref={canvasElRef}
-            style={{
-              transformOrigin: "top left",
-              transform: `scale(${displayScale})`,
-              width: deviceConfig.canvasWidth,
-              height: deviceConfig.canvasHeight,
-            }}
           />
 
           {/* Device-specific camera module overlay */}

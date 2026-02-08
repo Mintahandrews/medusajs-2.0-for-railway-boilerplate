@@ -1,4 +1,9 @@
-const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+const _raw = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+// Ensure HTTPS in production to avoid Mixed Content errors
+const BACKEND_URL =
+  typeof window !== "undefined" && window.location.protocol === "https:" && _raw.startsWith("http://")
+    ? _raw.replace("http://", "https://")
+    : _raw
 
 export interface AiPreviewResult {
   /** Base64-encoded result image */
