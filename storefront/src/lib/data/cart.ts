@@ -107,6 +107,55 @@ export async function addToCart({
     .catch(medusaError)
 }
 
+/**
+ * Ensure a cart exists for the given country and return its ID.
+ * Used by the customizer to authenticate design file uploads.
+ */
+export async function ensureCart(countryCode: string): Promise<string> {
+  const cart = await getOrSetCart(countryCode)
+  if (!cart) {
+    throw new Error("Error retrieving or creating cart")
+  }
+  return cart.id
+}
+
+export async function addCustomizedToCart({
+  variantId,
+  quantity,
+  countryCode,
+  metadata,
+}: {
+  variantId: string
+  quantity: number
+  countryCode: string
+  metadata: Record<string, unknown>
+}) {
+  if (!variantId) {
+    throw new Error("Missing variant ID when adding to cart")
+  }
+
+  const cart = await getOrSetCart(countryCode)
+  if (!cart) {
+    throw new Error("Error retrieving or creating cart")
+  }
+
+  await sdk.store.cart
+    .createLineItem(
+      cart.id,
+      {
+        variant_id: variantId,
+        quantity,
+        metadata,
+      },
+      {},
+      await getAuthHeaders()
+    )
+    .then(() => {
+      revalidateTag("cart")
+    })
+    .catch(medusaError)
+}
+
 export async function updateLineItem({
   lineId,
   quantity,

@@ -1,0 +1,301 @@
+﻿Architectural Blueprint for a Custom Product Personalization Engine on Medusa
+1. Executive Summary
+1.1 Project Overview and Strategic Objectives
+The digital commerce landscape for electronics accessories has shifted fundamentally from static catalog browsing to interactive, user-driven co-creation. Platforms such as Casetify have established a market standard where the consumer is not merely a buyer but a designer, utilizing sophisticated web-based tools to personalize products on demand. This report outlines the technical architecture, implementation strategy, and operational considerations for deploying a "Canva-like" design tool integrated into a Medusa-based e-commerce ecosystem. The proposed system enables users to select specific device models (e.g., iPhone 15 Pro, Samsung S24), manipulate visual elements within a constrained "container" mirroring the physical device, and visualize a photorealistic preview ("case slap") prior to purchase.
+The core technical challenge lies in bridging the gap between a flexible, browser-based vector design environment and the rigid data requirements of an e-commerce order fulfillment system. Unlike standard product variations, user-generated content (UGC) introduces complexity regarding file storage, high-resolution rendering, and metadata persistence. By leveraging the headless architecture of Medusa v2, the interactive capabilities of Fabric.js, and advanced image processing APIs, this solution delivers a scalable, high-fidelity personalization engine without the overhead of full 3D rendering.
+1.2 Architectural Thesis
+The recommended architecture adopts a decoupled "Design-to-Commerce" pipeline. The frontend utilizes Fabric.js to manage the vector editing state, ensuring pixel-perfect manipulation of images and text within complex SVG-based clipping masks that represent device form factors. The backend, built on Medusa v2, bypasses traditional rigid product schemas by utilizing the metadata capability of Line Items to store references to generated assets (print files, preview images, and editor state JSON).
+For the "image AI" or rendering component, a hybrid approach is proposed. While Generative AI (Stable Diffusion via ControlNet) offers unmatched stylistic adaptation, its latency is often prohibitive for real-time interaction. Therefore, the primary rendering engine will utilize Displacement Mapping via Cloudinary or a custom compositing service to warp 2D designs onto 3D-like phone surfaces instantly, reserving Generative AI for premium "lifestyle" visualization features. This tiered approach balances performance, cost, and visual fidelity, ensuring the system remains responsive on the consumer side while providing the necessary high-resolution assets for the fulfillment team.
+1.3 Key Deliverables
+1. Open-Source Design Studio: A React-based WYSIWYG editor integrating Fabric.js for complex object manipulation (rotation, scaling, layering).
+2. Device-Specific Containerization: A robust masking system using SVG paths to enforce design boundaries for hundreds of distinct phone models.
+3. Photorealistic Preview Engine: A pipeline to generate the "case slap" effect using alpha compositing and displacement maps.
+4. Medusa Commerce Integration: A seamless flow of custom data from the design canvas to the Cart, Order, and Admin Dashboard.
+5. Fulfillment Automation: Automated generation of 300 DPI print-ready assets linked directly to the Medusa Admin Order details.
+2. Market Analysis and User Experience Design
+2.1 Deconstructing the "Casetify" Experience
+To replicate the success of platforms like Casetify, one must understand the interaction model beyond the visual interface. The user journey is not linear; it is cyclical and exploratory. Users select a device, upload an image, realize it doesn't fit, switch devices, re-adjust the image, add text, and finally preview.
+The technical implication of this behavior is that the application must maintain a persistent "Editor State" separate from the final "Print File." If a user designs a case for an iPhone 14 but switches to an iPhone 15, the system must attempt to re-map the assets to the new container rather than clearing the canvas. This requires a robust state management strategy (e.g., Redux or Zustand) synchronized with the Canvas library's internal object model.
+2.2 The "Container" Concept: Technical Definition
+The user query specifies a "custom edit space/container based on the devices." In visual terms, this is the phone shape. In technical terms, this is a Clipping Mask.
+Unlike a simple rectangular crop, phone cases have complex geometries: rounded corners of varying radii, camera bumps (which differ in size and position per model), and button cutouts. The "Container" is not a single asset but a composite of three distinct layers:
+1. The Mask (Logic Layer): An SVG Path strictly defining the printable area. This acts as the clipping boundary for user content.
+2. The Overlay (Visual Layer): A transparent PNG containing the shadows, highlights, and camera bezel. This sits above the user content to provide depth (the "slap" effect).
+3. The Bleed (Production Layer): An invisible boundary extending 3-5mm beyond the mask, ensuring that the printed design wraps around the physical edges of the case without white gaps.
+2.3 Mobile vs. Desktop Interaction Models
+The "Canva-like" requirement implies a complex toolbar with options for text font, color, layer arrangement, and image filters. Transposing this to a mobile storefront requires careful architectural consideration.
+On desktop, a "sidebar + canvas" layout is standard. On mobile, this must collapse into a "bottom sheet + gesture" interface. The Canvas library must support touch events (pinch-to-zoom, two-finger rotate) natively. Fabric.js provides robust touch support, but the implementation must prevent the canvas touch events from hijacking the page scroll. A "modal" or "fullscreen" editing mode is recommended for mobile users to separate the design interaction from the commerce browsing experience.
+3. Frontend Architecture: The Design Engine
+The frontend is the most critical component of this system, serving as the interface where conversion occurs. It must be performant, responsive, and capable of handling high-resolution image manipulation in the browser.
+3.1 Technology Selection: The Canvas Library Comparison
+The requirement for an "open source Canva style tool" narrows the technology choice to DOM-based manipulation or Canvas-based manipulation. Given the need for pixel-perfect image export and complex masking, Canvas-based libraries are the only viable option. The two primary contenders in the React ecosystem are Fabric.js and Konva.js.
+3.1.1 Fabric.js: The Object-Oriented Choice
+Fabric.js acts as a wrapper around the HTML5 Canvas API, providing an interactive object model. It is the industry standard for web-to-print editors due to its sophisticated handling of vector objects and serialization capabilities.
+* Object Model: Fabric.js treats every element (image, text, shape) as an instance of a class with properties (left, top, scale, angle). This makes implementing "undo/redo" and "layer management" straightforward, as the state of every object is accessible and modifiable.
+* Clipping Path Implementation: Crucially for this project, Fabric.js (v2.4+) supports clipPath on any object or group. This allows developers to load an SVG path of a phone case and assign it as the clipPath of a Group containing all user content. This ensures that no matter how the user moves their image, it is visible only within the phone's boundaries.
+* Serialization: Fabric.js has a native toJSON() and loadFromJSON() method. This is essential for saving the user's design as a "Draft" in the Medusa backend, allowing them to return later and continue editing exactly where they left off.
+3.1.2 Konva.js: The Performance Choice
+Konva.js is a 2D drawing library that focuses on high-performance rendering, often used for games or apps with thousands of moving parts.
+* React Integration: Konva has excellent React bindings (react-konva) which allow for a declarative style of coding (e.g., <Layer><Rect /></Layer>). This fits naturally into a Next.js workflow.
+* Masking Limitations: Konva uses a clipFunc property which relies on standard Canvas 2D context drawing commands. While powerful, implementing complex SVG path clipping (like a specific phone model) is more verbose and computationally expensive for hit detection (determining if a mouse click is "inside" the shape) compared to Fabric's object-based clipping.
+Verdict: For a product customizer where the primary interaction is manipulating a few high-fidelity images within a static complex shape, Fabric.js is the superior choice due to its robust clipPath support and built-in serialization features tailored for design tools.
+3.2 The "Container" Logic Implementation
+Implementing the device-specific container requires a precise coordination of assets.
+3.2.1 The Asset Pipeline
+The system requires a repository of assets for every supported device. These assets should be stored in the Medusa File Service (S3) and referenced via the Product Variant's metadata.
+Asset Type
+	Format
+	Purpose
+	Usage
+	Mask
+	SVG
+	Defines the printable area.
+	Used as clipPath in Fabric.js.
+	Overlay
+	PNG (Alpha)
+	Provides shadows, highlights, camera bump.
+	Placed at z-index: 999 on canvas, evented: false.
+	Displacement
+	JPG (Grayscale)
+	Defines surface curvature for 3D effect.
+	Used by Cloudinary/ImageMagick for rendering.
+	Print Template
+	PDF
+	Contains bleed lines and registration marks.
+	Used by Admin for fulfillment.
+	3.2.2 Initializing the Canvas
+When the user selects "iPhone 15 Pro", the React component initializes the Fabric canvas.
+1. Canvas Creation: A fabric.Canvas is instantiated.
+2. Mask Loading: The SVG mask is fetched. fabric.loadSVGFromURL parses the path data. This path is not added to the canvas directly; instead, it is assigned to the clipPath property of a fabric.Group called userDesignGroup.
+3. Overlay Loading: The PNG overlay is fetched and added to the canvas. Crucially, its property evented is set to false. This allows mouse events to "pass through" the overlay, enabling the user to drag the underlying images while seeing the shadows on top.
+4. Interaction: When the user adds an image, it is programmatically added to the userDesignGroup. This ensures the image is instantly clipped by the mask.
+3.3 State Management and "Undo/Redo"
+To provide a professional UX, the application cannot rely solely on the Canvas state. A synchronization layer is needed between React state and Fabric state.
+* Zustand Store: A global store (using libraries like Zustand or Redux) tracks the "History Stack."
+* Snapshotting: Every time a object:modified event fires in Fabric.js, the application serializes the current state (canvas.toJSON()) and pushes it to the history stack.
+* Restoration: When "Undo" is clicked, the previous JSON state is loaded (canvas.loadFromJSON()). This restores not just the images, but their exact rotation, scale, and filter settings.
+4. Backend Architecture: Medusa v2 Integration
+The backend serves as the persistent memory and commerce engine. Medusa v2's modular architecture allows for the injection of custom logic without forking the core platform.
+4.1 Data Modeling Strategy
+A common mistake in e-commerce customization is attempting to create a new Product Variant for every unique user design. This leads to database bloat (millions of variants) and inventory mismanagement.
+4.1.1 The Metadata Approach
+The correct approach is to use a generic "Base Variant" (e.g., "iPhone 15 Pro Case - Clear") and attach the specific customization data to the Line Item in the Cart.
+Medusa entities (Cart, LineItem, Order) support a metadata column (JSONB type in PostgreSQL). This field allows for flexible, schema-less data storage.
+Target Data Structure for Line Item Metadata:
+{
+ "is_customized": true,
+ "customization_id": "cst_01...",
+ "device_model": "iPhone 15 Pro",
+ "assets": {
+   "print_file": "https://s3.bucket/uploads/design-123-print.png",
+   "preview_file": "https://s3.bucket/uploads/design-123-preview.png",
+   "editor_state": "https://s3.bucket/uploads/design-123-state.json"
+ },
+ "specs": {
+   "dpi": 300,
+   "width_mm": 75,
+   "height_mm": 147
+ }
+}
+
+4.2 The File Module (Medusa v2)
+User-generated designs must be uploaded securely. Medusa v2 introduces the File Module, which abstracts storage providers (S3, MinIO, Local).
+4.2.1 Secure Upload Workflow
+Directly uploading from the client to the storage bucket is risky. A "Presigned URL" workflow is recommended.
+1. Request: The React frontend requests an upload slot from the Medusa backend via a custom route: POST /store/custom-uploads.
+2. Authentication: The backend validates the request (e.g., ensures the user has a valid session).
+3. Generation: The backend uses the File Module Service to generate a presigned URL (write-access) for the storage provider.
+4. Upload: The frontend uploads the Blob directly to the storage provider using this URL. This bypasses the Medusa server's bandwidth limits while maintaining security.
+5. Confirmation: The storage provider returns the public URL/key, which the frontend then attaches to the Cart Line Item.
+4.3 Custom API Routes
+To facilitate the specific needs of the design tool, several custom API routes are required in the Medusa backend.
+* GET /store/device-configs/:model_id: Retrieves the SVG mask URL, overlay URL, and physical dimensions for a specific phone model. This prevents hardcoding asset URLs in the frontend code.
+* POST /store/designs/save: (Optional) Allows logged-in users to save a design to their "Saved Designs" collection without adding it to the cart. This requires a custom entity UserDesign linking Customer and the design JSON.
+5. The Rendering Engine: "The Case Slap"
+The user requirement for an "image AI that renders the design... into a case slap" implies a need for high-fidelity visualization. The simple canvas overlay (Tier 1) often looks "flat" because it lacks light wrapping and surface curvature.
+5.1 Tier 1: Client-Side Compositing (MVP)
+This is the baseline implementation.
+* Mechanism: The browser utilizes a secondary, hidden <canvas> element.
+   1. Draw the user's design.
+   2. Draw the "Lighting/Shadow" PNG on top using globalCompositeOperation = 'multiply' or 'screen' depending on the desired effect (shadows darken, highlights lighten).
+* Pros: Instant (ms latency), zero cost, runs offline.
+* Cons: Cannot simulate the curvature of the image around the edges of the phone. The image appears as a flat sticker.
+5.2 Tier 2: Displacement Mapping (Recommended)
+To achieve the Casetify-level "slap," the image must be distorted to match the phone's 3D geometry.
+* Technology: Cloudinary Transformation API or Imgix.
+* Concept: A "Displacement Map" is a grayscale image where pixel intensity represents geometric shift.
+* Implementation:
+   1. Frontend uploads the flat design to Cloudinary.
+   2. Frontend constructs a URL requesting the displace effect, referencing the specific displacement map for that phone model.
+   3. Example URL structure: .../image/upload/l_my_design,e_displace:iphone15_map/iphone15_base.png.
+* Result: The texture of the design bends around the camera bump and edges, creating a convincing 3D illusion without 3D rendering.
+5.3 Tier 3: Generative AI (Future-Proofing)
+If the "image AI" requirement implies generating context (e.g., "Show this case on a coffee table next to a latte"), then Stable Diffusion is the necessary tool.
+* ControlNet: Standard Image-to-Image AI loses the specific geometry of the product. ControlNet allows the injection of a "Canny Edge" map (the outline of the phone case) to constrain the diffusion process.
+* Workflow:
+   1. Input: The flat preview from the canvas.
+   2. Conditioning: ControlNet Canny Preprocessor creates an edge map.
+   3. Prompt: "A high-end product photograph of an iPhone case with a floral pattern, sitting on a wooden desk, cinematic lighting, 8k."
+   4. Processing: Sent to an external GPU worker (e.g., Replicate, Fal.ai).
+   5. Output: A completely hallucinated but geometrically accurate lifestyle photo.
+* Trade-off: This process takes 5-10 seconds and costs ~$0.01 per generation. It is not suitable for the real-time design loop but is excellent for the "Final Preview" before checkout.
+6. Fulfillment and Admin Operations
+The success of the system depends on the fulfillment team receiving actionable files. A "preview" image is insufficient for printing; they need a high-resolution, dimensionally accurate print file.
+6.1 Admin Dashboard Customization
+Medusa’s Admin is extensible via Widgets. The default "Order Details" page shows product thumbnails, which will just be the generic "Phone Case" image. This is a failure point for fulfillment.
+6.1.1 The "Production Files" Widget
+We must build a custom widget injected into the order.details.after zone.
+* Logic: The widget scans the order items. If metadata.print_file exists, it renders a specialized view.
+* Features:
+   * Thumbnail: Displays the preview_file (the case slap) so the packer knows what the final product should look like.
+   * Action: A "Download Production Asset" button linking to the print_file.
+   * Details: Displays the device_model and finish clearly, as these might be buried in variant options.
+6.2 Print File Generation Specifications
+The frontend must export the "Print File" with specific characteristics:
+1. Resolution: 300 DPI (Dots Per Inch). Screens are 72 DPI. If the physical case is 3 inches wide, the digital file must be 900 pixels wide. The Fabric.js toDataURL method accepts a multiplier argument to scale up the export without quality loss.
+2. Color Profile: Browsers operate in sRGB. Printers operate in CMYK. While browser-side CMYK conversion is difficult, the "Print File" should be exported as a high-quality PNG. The backend (or the print provider's RIP software) will handle the color conversion.
+3. Bleed: The export must include the "bleed area" (the extra 3-5mm beyond the mask) which was hidden from the user during editing but is present in the underlying canvas state. The fulfillment team cuts this off, ensuring edge-to-edge printing.
+7. Infrastructure, Security, and Performance
+7.1 Infrastructure Scalability
+* Storefront: Deployed on Vercel or Railway. Since the editor is client-side, the server load is minimal.
+* Backend: Medusa Node.js server deployed on Railway.
+* Database: PostgreSQL.
+* Storage: S3 is critical. As the store scales, storage costs for thousands of high-res PNGs will grow. Lifecycle policies should be implemented to move old "draft" designs to Glacier storage or delete them after X days if no purchase was made.
+7.2 Security Considerations
+* Malicious Uploads: Users can upload images. The system must validate mime types (allow only image/jpeg, image/png, image/svg+) and strictly enforce file size limits (e.g., 10MB) to prevent DoS attacks on the storage bucket.
+* Input Sanitization: The metadata field in Medusa is flexible but dangerous. Ensure that any text strings entered by the user in the design tool are sanitized before being stored/rendered to prevent Stored XSS attacks in the Admin Dashboard.
+7.3 Performance Optimization
+* Asset Caching: The SVG masks and Overlay PNGs are static assets. They should be served via a CDN with long Cache-Control headers.
+* Lazy Loading: The Fabric.js library is large. It should be dynamically imported (next/dynamic) only when the user enters the "Customize" route, keeping the initial page load bundle size small for the rest of the store.
+8. Implementation Roadmap
+Phase 1: The Prototype (Weeks 1-3)
+* Goal: A working React component where a user can drag an image onto a phone shape.
+* Tasks:
+   * Initialize Next.js + Fabric.js.
+   * Create SVG masks for 2 popular devices (e.g., iPhone 14, 15).
+   * Implement clipPath logic.
+   * Implement basic "Download Image" functionality.
+Phase 2: The Commerce Integration (Weeks 4-6)
+* Goal: Connecting the prototype to Medusa.
+* Tasks:
+   * Deploy Medusa v2.
+   * Configure File Module (S3).
+   * Implement "Upload to S3" workflow.
+   * Update Cart Metadata logic.
+   * Create the "Production Files" Admin Widget.
+Phase 3: The Polish & AI (Weeks 7-9)
+* Goal: Improving realism and UX.
+* Tasks:
+   * Integrate Cloudinary for displacement map previews.
+   * Implement "Undo/Redo" state management.
+   * Optimize mobile touch interactions.
+   * (Optional) Pilot Stable Diffusion generation for marketing assets.
+9. Conclusion
+The proposed architecture successfully bridges the flexibility of a "Canva-like" creative tool with the robust transactional capabilities of Medusa v2. By decoupling the visual editor (Fabric.js) from the commerce logic (Medusa), the system avoids the limitations of rigid "product option" plugins. It treats the design process as a stateful application that outputs manufacturing assets, utilizing the Cart Line Item as the carrier of this complex data.
+This "Design-First, Commerce-Second" approach allows the platform to scale from simple image uploads to complex, multi-layered artistic compositions without requiring a re-architecture of the backend. The use of standard open-source libraries ensures that the platform remains maintainable and extensible, free from the vendor lock-in associated with proprietary "Product Customizer" SaaS apps. The result is a competitive, high-fidelity user experience that rivals market leaders like Casetify.
+Detailed Technical Analysis
+Chapter 1: The Design Engine - Fabric.js Deep Dive
+To understand why Fabric.js is the cornerstone of this architecture, we must analyze the specific requirements of a "Canva-like" tool. Users expect object autonomy—the ability to select an image added five minutes ago, rotate it 13 degrees, send it behind some text, and apply a sepia filter.
+1.1 The Object Model and Event Handling
+Standard HTML5 Canvas is a "fire and forget" raster environment. Once a pixel is drawn, the canvas forgets what drew it. Implementing "selection" or "drag and drop" on raw canvas requires rewriting a physics engine from scratch.
+Fabric.js solves this by maintaining a second, hidden object model in JavaScript memory.
+* The Scene Graph: Fabric maintains an array of objects (fabric.Object). When the user clicks the canvas, Fabric calculates which object's bounding box intersects with the mouse coordinates.
+* Retained Mode: Because the objects are retained in memory, we can modify properties non-destructively.
+   * Scenario: A user uploads a high-res photo. In a raw canvas, scaling this down destroys the pixel data. In Fabric, we simply change the scaleX and scaleY properties. The original high-res image data remains in memory. This is vital for the "Print File" generation, where we need to render the design at 300 DPI, distinct from the 72 DPI screen view.
+1.2 The Power of clipPath
+The user's request for a "custom edit space/container based on the devices" is the most challenging frontend requirement.
+* Legacy Approach (clipTo): Older versions of Fabric and other libraries used a function-based clipping approach. This was slow and raster-based. It meant you couldn't easily interact with objects "inside" the clip area.
+* Modern Approach (clipPath): Introduced in Fabric.js v2.4, this property allows a vector shape to define the visibility of another object.
+   * Implementation: We load the Phone Case SVG. We define it as the clipPath of the entire Canvas (or a Group).
+   * Absolute Positioning: By setting clipPath.absolutePositioned = true, the clipping shape remains static relative to the canvas viewport, even if the user pans or zooms their design layer. This creates the effect of a "window" (the phone shape) through which the user views their design.
+1.3 Serialization and Persistence
+The "Canva" experience implies that designs are not just images, but editable documents.
+* JSON Schema: Fabric.js exports a standardized JSON schema.
+{
+ "version": "5.3.0",
+ "objects":
+}
+
+* Database Storage: This JSON string is what should be stored in the editor_state metadata field in Medusa. It is lightweight (text) compared to storing multiple bitmap revisions. It allows the system to reconstruct the canvas perfectly at any time in the future.
+Chapter 2: Medusa v2 Backend Configuration
+Medusa v2 is a significant evolution, moving towards a module-centric architecture. This aligns perfectly with our need for custom file handling and data linkage.
+2.1 The File Module Service
+In v1, file services were plugins. In v2, they are Modules. This provides a standardized API for file operations across the system.
+   * Provider Selection: For a production app on Railway (which has ephemeral file systems), a persistent object storage provider is mandatory. MinIO is a great self-hosted S3-compatible option if privacy is paramount, but AWS S3 or Cloudflare R2 offer better edge performance for serving assets to global users.
+   * Presigned URLs: The security model is paramount. The frontend should never hold the AWS Secret Key.
+   * Workflow:
+   1. Frontend sends: { filename: "design.png", mimeType: "image/png" }.
+   2. Backend (File Module) calls: getUploadStream or getPresignedUrl.
+   3. Backend returns: { uploadUrl: "https://s3.amazonaws.com/bucket/key?signature=..." }.
+   4. Frontend performs a PUT request to uploadUrl.
+   * Benefit: This offloads the heavy binary upload traffic from the Medusa Node.js server to the Amazon infrastructure, ensuring the store remains responsive even during heavy traffic.
+2.2 Extending the Order Data Model
+While Medusa's metadata is powerful, sometimes structured SQL relations are needed for querying. For example, if we want to "Find all orders that used the iPhone 15 template," querying inside a JSONB column can be slow.
+   * Medusa Links: Medusa v2 introduces "Links" to associate data models from different modules without tight coupling.
+   * Custom Module: We can define a DesignModule with a Design entity.
+   * Design table: id, s3_url, device_model, created_at.
+   * The Link: We define a link between OrderModule.LineItem and DesignModule.Design.
+   * Advantage: This keeps the core commerce tables clean. It allows us to build independent logic for "Design Management" (e.g., a user gallery) without polluting the Order service logic.
+Chapter 3: The Rendering Pipeline - From Vector to Pixel
+The transition from the "Edit Mode" (Vector) to "Preview Mode" (Raster) is where the illusion of the product is created.
+3.1 The Compositing Stack
+A "Case Slap" is visually composed of layers. Let's define the stack from bottom to top:
+   1. Background Color: The physical color of the phone case material (e.g., Clear, Black, Pink).
+   2. User Design: The pixel data generated by Fabric.js.
+   3. Lighting/Reflection Map: A semi-transparent PNG. It contains white pixels (highlights) where the light hits the curved edges and black pixels (shadows) in the crevices.
+   * Blend Mode: Hard Light or Overlay is often used here. Multiply is used for shadows.
+   4. Hardware Occlusion: A fully opaque layer for parts of the phone that cover the case (e.g., the camera lenses, the Apple logo if it's a cutout case).
+3.2 Automated Mockup Generation vs. AI
+The user asked for "image ai". It is vital to distinguish between Algorithmic Image Processing and Generative AI.
+   * Algorithmic (Cloudinary/Imgix/Canvas): Deterministic. Fast. Accurate. If you put a straight line on a curved surface map, it curves the line. This is the correct technology for the "Cart Preview" and "Order Confirmation" email. It reliably shows the user what they will get.
+   * Generative (Stable Diffusion): Probabilistic. Slow. Creative. If you ask it to render the case, it might hallucinate a slightly different camera array or invent a lighting reflection that obscures the text.
+   * Recommendation: Use Algorithmic processing for the core commerce loop. Use Generative AI only for a specific "See it in Real Life" button that generates a marketing-style image for social media sharing. This manages cost and expectations.
+Chapter 4: Fulfillment Workflow
+The digital design is useless if it cannot be manufactured. The fulfillment workflow is the bridge between the server and the printer.
+4.1 The Print File Specification
+Sublimation printers (commonly used for phone cases) require specific file parameters.
+   * DPI (Resolution): 300 DPI is the standard.
+   * Bleed Area: The design must extend 3-5mm beyond the edge of the case face. This allows the plastic to wrap around the sides of the phone.
+   * Fabric.js Implementation: The SVG Mask used in the editor shows the "Safe Zone." However, the canvas itself should be sized to include the bleed. When exporting for the user preview, we clip to the mask. When exporting for the printer, we disable the clip path and export the full canvas.
+   * Mirroring: Sublimation transfers are printed in reverse.
+   * Note: It is generally safer to send the non-mirrored file to the printer and let their RIP software handle the mirroring. Doing it in the browser confuses users if they see a mirrored preview.
+4.2 Admin Widget Logic
+The Fulfillment Manager needs a streamlined dashboard.
+   * Status Indicators: The widget should show if the high-res file has been successfully generated and stored.
+   * Batch Downloading: For high-volume stores, clicking "Download" on every order is tedious. A custom Admin Route can be built to "Download all pending print files for iPhone 15" as a ZIP file.
+   * Code Structure:
+// Concept for Batch Download Route
+router.get("/admin/batch-download", async (req, res) => {
+ const orders = await orderService.list({ status: "pending", fulfillment_status: "not_fulfilled" });
+ const files = orders.flatMap(o => o.items.map(i => i.metadata.print_file));
+ const zip = await zipService.create(files);
+ res.download(zip);
+});
+
+Chapter 5: Infrastructure and Cost Analysis
+5.1 Hosting Costs
+      * Railway (Backend): ~$10-20/month for the Medusa Node.js server and Redis instance (needed for caching sessions and queueing AI jobs).
+      * Vercel (Frontend): Free/Pro ($20/month). Next.js hosting.
+      * S3 (Storage): The biggest variable. High-res PNGs are large (5-10MB).
+      * Scenario: 1,000 orders/month = ~10GB of new data/month.
+      * Cost: S3 Standard is ~$0.023/GB. Negligible at start, but requires lifecycle policies (e.g., delete "abandoned cart" uploads after 30 days).
+5.2 Third-Party API Costs
+      * Cloudinary: Generous free tier, but "transformations" (the displacement map effect) count against quotas. Creating a custom "slap" consumes 1 transformation unit.
+      * Generative AI (Replicate): Running Stable Diffusion XL costs ~$0.005 - $0.02 per second. A high-quality render takes 5 seconds.
+      * Cost per user: If a user generates 10 AI previews before buying, that's $0.10 - $0.20 cost per session. This must be factored into the product margin.
+Chapter 6: Implementation Roadmap
+Phase 1: The "MVP" (Weeks 1-4)
+      * Frontend: Fabric.js editor with one phone model. Basic upload, rotate, scale.
+      * Backend: Medusa v2 setup. File Module configured for S3.
+      * Integration: Add to Cart works. Order shows the image URL in metadata.
+Phase 2: The "Casetify Lite" (Weeks 5-8)
+      * Frontend: Multiple device support. SVG Masks for top 10 phones. Overlay system (Tier 1 rendering).
+      * Backend: Custom Admin Widget for fulfillment.
+Phase 3: The "Pro" (Weeks 9-12)
+      * Frontend: Advanced text tools (curved text, fonts).
+      * Rendering: Cloudinary Displacement Maps (Tier 2).
+      * Performance: Redis caching for assets.
+Conclusion
+This architecture allows "Let's Case" to deploy a feature-rich, scalable customization engine. By leveraging Open Source technologies (Medusa, Fabric.js), the platform retains full ownership of its data and user experience, avoiding the fees and limitations of third-party apps, while delivering a "big brand" experience to the end user.
+Works cited
+1. React Canva Clone - React | IMG.LY Docs, https://img.ly/docs/cesdk/react/prebuilt-solutions/canva-clone-19de75/ 2. Fabric.js vs. Konva.js: Navigating the Canvas Crossroads for Your Next Project - Oreate AI, http://oreateai.com/blog/fabricjs-vs-konvajs-navigating-the-canvas-crossroads-for-your-next-project/61a38ec5c6577a0999231f68eef1cf8f 3. Add Custom Data to Cart and Order Line Items - Medusa.js, https://medusajs.com/blog/add-custom-data-cart-order-line-items/ 4. Medusa Store API Reference - Medusa Documentation - Medusa.js, https://docs.medusajs.com/api/store#carts_postcartsalllineitemsitemid 5. Dynamically Generate Visual Image Effects and Enhancements - Cloudinary, https://cloudinary.com/documentation/effects_and_artistic_enhancements 6. Deploy a controlled Image Generation API (ControlNet) - Lightning AI, https://lightning.ai/lightning-ai/studios/deploy-a-controlled-image-generation-api-controlnet 7. Amanuel-1/kanvas: Kanvas is a customizable canvas editor ... - GitHub, https://github.com/Amanuel-1/kanvas 8. Clipping and masking - Fabric.js, https://fabricjs.com/demos/clipping/ 9. Clipping the objects with absolute clipPaths | Docs and Guides - Fabric.js, https://fabricjs.com/docs/old-docs/clippath-part4/ 10. React: Comparison of JS Canvas Libraries (Konvajs vs Fabricjs) - DEV Community, https://dev.to/lico/react-comparison-of-js-canvas-libraries-konvajs-vs-fabricjs-1dan 11. Clipping Functions Tutorial | Konva - JavaScript Canvas 2d Library, https://konvajs.org/docs/clipping/Clipping_Function.html 12. [AskJS] What is the best canvas library to make an app like figma or integromat? - Reddit, https://www.reddit.com/r/javascript/comments/pdib99/askjs_what_is_the_best_canvas_library_to_make_an/ 13. How to Create Phone Case Mockups in Photoshop - YouTube, https://www.youtube.com/watch?v=FCQ9sUKxzxA 14. How to Create a File Module Provider - Medusa Documentation, https://docs.medusajs.com/resources/references/file-provider-module 15. How to Use File Module - Medusa Documentation, https://docs.medusajs.com/resources/references/file-service 16. Personalized Products Recipe - Medusa Documentation, https://docs.medusajs.com/resources/recipes/personalized-products 17. Add Personalized Product Options - Medusa.js, https://medusajs.com/blog/add-personalized-product-options/ 18. Image Transformations for Developers | Documentation - Cloudinary, https://cloudinary.com/documentation/image_transformations 19. Price differences on Fal and Replicate : r/StableDiffusion - Reddit, https://www.reddit.com/r/StableDiffusion/comments/1meiccn/price_differences_on_fal_and_replicate/ 20. Implement Personalized Products in Medusa, https://docs.medusajs.com/resources/recipes/personalized-products/example 21. 4.2. Admin Widgets - Medusa Documentation, https://docs.medusajs.com/learn/fundamentals/admin/widgets 22. ClipPath introdcution | Docs and Guides - Fabric.js, https://fabricjs.com/docs/old-docs/clippath-part1/ 23. Building a multivendor marketplace with Medusa.js 2.0: a Dev guide (Part 1) - Medium, https://medium.com/@igorkhomenko/building-a-multivendor-marketplace-with-medusa-js-2-0-a-dev-guide-f55aec971126 24. Links between Order Module and Other Modules - Medusa Documentation, https://docs.medusajs.com/resources/commerce-modules/order/links-to-other-modules

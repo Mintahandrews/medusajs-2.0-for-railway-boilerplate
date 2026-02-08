@@ -9,6 +9,7 @@ import { useIntersection } from "@lib/hooks/use-in-view"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import WishlistButton from "@modules/common/components/wishlist-button"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
@@ -176,6 +177,14 @@ export default function ProductActions({
             ? "Out of stock"
             : "Add to cart"}
         </Button>
+        {product.handle && (
+          <LocalizedClientLink
+            href={`/customizer/${product.handle}`}
+            className="flex items-center justify-center w-full h-10 rounded-lg border-2 border-violet-600 text-violet-600 text-sm font-semibold hover:bg-violet-50 transition-colors"
+          >
+            Customize This Case
+          </LocalizedClientLink>
+        )}
         <MobileActions
           product={product}
           variant={selectedVariant}

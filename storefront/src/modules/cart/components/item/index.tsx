@@ -56,11 +56,21 @@ const Item = ({ item, type = "full" }: ItemProps) => {
             "small:w-24 w-12": type === "full",
           })}
         >
-          <Thumbnail
-            thumbnail={item.variant?.product?.thumbnail}
-            images={item.variant?.product?.images}
-            size="square"
-          />
+          {(item.metadata as any)?.is_customized && (item.metadata as any)?.preview_image ? (
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-ui-bg-subtle border border-ui-border-base">
+              <img
+                src={(item.metadata as any).preview_image}
+                alt="Custom design"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <Thumbnail
+              thumbnail={item.variant?.product?.thumbnail}
+              images={item.variant?.product?.images}
+              size="square"
+            />
+          )}
         </LocalizedClientLink>
       </Table.Cell>
 
@@ -71,6 +81,11 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         >
           {item.product_title}
         </Text>
+        {(item.metadata as any)?.is_customized && (
+          <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-violet-100 text-violet-700 rounded-full">
+            Customized
+          </span>
+        )}
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>
 
