@@ -63,76 +63,89 @@ function bleedPx(canvasWidth: number, widthMm: number, bleedMm: number): number 
   return Math.round((canvasWidth / widthMm) * bleedMm)
 }
 
+/** Compact helper to build a DeviceConfig from physical dimensions (mm). */
+function dev(
+  handle: string,
+  name: string,
+  widthMm: number,
+  heightMm: number,
+  r: number,
+  bleedMm = 3,
+  pxPerMm = 6,
+): DeviceConfig {
+  const cw = Math.round(widthMm * pxPerMm)
+  const ch = Math.round(heightMm * pxPerMm)
+  return {
+    name,
+    handle,
+    canvasWidth: cw,
+    canvasHeight: ch,
+    cornerRadius: r,
+    editorMaskPath: roundedRectPath(cw, ch, r),
+    overlayUrl: `/assets/phone-case/${handle}/overlay.png`,
+    mockupMaskUrl: `/assets/phone-case/${handle}/mask.svg`,
+    printSpec: { widthMm, heightMm, dpi: 300 },
+    bleedMm,
+    bleedPx: bleedPx(cw, widthMm, bleedMm),
+  }
+}
+
+/**
+ * Comprehensive device registry.
+ * Physical dimensions sourced from GSMArena, Apple, Samsung, Google specs.
+ * Canvas pixels ≈ 6 px/mm for a 300 DPI print-ready workspace.
+ */
 export const DEVICE_CONFIGS: Record<string, DeviceConfig> = {
-  "iphone-15-pro": {
-    name: "iPhone 15 Pro",
-    handle: "iphone-15-pro",
-    canvasWidth: 450,
-    canvasHeight: 920,
-    cornerRadius: 44,
-    editorMaskPath: roundedRectPath(450, 920, 44),
-    overlayUrl: "/assets/phone-case/iphone 15 pro/overlay.png",
-    mockupMaskUrl: "/assets/phone-case/iphone 15 pro/mask.svg",
-    printSpec: { widthMm: 75, heightMm: 153, dpi: 300 },
-    bleedMm: 3,
-    bleedPx: bleedPx(450, 75, 3),
-  },
+  /* ---- iPhone 11 series (2019) ----------------------------------------- */
+  //                         handle              name                    W mm    H mm    r
+  "iphone-11":       dev("iphone-11",       "iPhone 11",               75.7,  150.9,  38),
+  "iphone-11-pro":   dev("iphone-11-pro",   "iPhone 11 Pro",           71.4,  144.0,  38),
+  "iphone-11-pro-max": dev("iphone-11-pro-max", "iPhone 11 Pro Max",   77.8,  158.0,  38),
 
-  "iphone-14": {
-    name: "iPhone 14",
-    handle: "iphone-14",
-    canvasWidth: 430,
-    canvasHeight: 880,
-    cornerRadius: 40,
-    editorMaskPath: roundedRectPath(430, 880, 40),
-    overlayUrl: "/assets/phone-case/iphone-14/overlay.svg",
-    mockupMaskUrl: "/assets/phone-case/iphone-14/mask.svg",
-    printSpec: { widthMm: 71.5, heightMm: 146.7, dpi: 300 },
-    bleedMm: 3,
-    bleedPx: bleedPx(430, 71.5, 3),
-  },
+  /* ---- iPhone 12 series (2020) ----------------------------------------- */
+  "iphone-12":       dev("iphone-12",       "iPhone 12",               71.5,  146.7,  40),
+  "iphone-12-mini":  dev("iphone-12-mini",  "iPhone 12 mini",          64.2,  131.5,  40),
+  "iphone-12-pro":   dev("iphone-12-pro",   "iPhone 12 Pro",           71.5,  146.7,  40),
+  "iphone-12-pro-max": dev("iphone-12-pro-max", "iPhone 12 Pro Max",   78.1,  160.8,  40),
 
-  "iphone-16-pro": {
-    name: "iPhone 16 Pro",
-    handle: "iphone-16-pro",
-    canvasWidth: 460,
-    canvasHeight: 940,
-    cornerRadius: 46,
-    editorMaskPath: roundedRectPath(460, 940, 46),
-    overlayUrl: "/assets/phone-case/iphone-16-pro/overlay.svg",
-    mockupMaskUrl: "/assets/phone-case/iphone-16-pro/mask.svg",
-    printSpec: { widthMm: 76.5, heightMm: 156.5, dpi: 300 },
-    bleedMm: 3,
-    bleedPx: bleedPx(460, 76.5, 3),
-  },
+  /* ---- iPhone 13 series (2021) ----------------------------------------- */
+  "iphone-13":       dev("iphone-13",       "iPhone 13",               71.5,  146.7,  42),
+  "iphone-13-mini":  dev("iphone-13-mini",  "iPhone 13 mini",          64.2,  131.5,  42),
+  "iphone-13-pro":   dev("iphone-13-pro",   "iPhone 13 Pro",           71.5,  146.7,  42),
+  "iphone-13-pro-max": dev("iphone-13-pro-max", "iPhone 13 Pro Max",   78.1,  160.8,  42),
 
-  "samsung-s24": {
-    name: "Samsung Galaxy S24",
-    handle: "samsung-s24",
-    canvasWidth: 440,
-    canvasHeight: 900,
-    cornerRadius: 36,
-    editorMaskPath: roundedRectPath(440, 900, 36),
-    overlayUrl: "/assets/phone-case/samsung-s24/overlay.svg",
-    mockupMaskUrl: "/assets/phone-case/samsung-s24/mask.svg",
-    printSpec: { widthMm: 70.6, heightMm: 147.0, dpi: 300 },
-    bleedMm: 3,
-    bleedPx: bleedPx(440, 70.6, 3),
-  },
+  /* ---- iPhone 14 series (2022) ----------------------------------------- */
+  "iphone-14":       dev("iphone-14",       "iPhone 14",               71.5,  146.7,  44),
+  "iphone-14-plus":  dev("iphone-14-plus",  "iPhone 14 Plus",          78.1,  160.8,  44),
+  "iphone-14-pro":   dev("iphone-14-pro",   "iPhone 14 Pro",           71.5,  147.5,  44),
+  "iphone-14-pro-max": dev("iphone-14-pro-max", "iPhone 14 Pro Max",   77.6,  160.7,  44),
 
-  "pixel-9": {
-    name: "Google Pixel 9",
-    handle: "pixel-9",
-    canvasWidth: 440,
-    canvasHeight: 920,
-    cornerRadius: 42,
-    editorMaskPath: roundedRectPath(440, 920, 42),
-    overlayUrl: "/assets/phone-case/pixel-9/overlay.svg",
-    mockupMaskUrl: "/assets/phone-case/pixel-9/mask.svg",
-    printSpec: { widthMm: 72.0, heightMm: 152.8, dpi: 300 },
-    bleedMm: 3,
-    bleedPx: bleedPx(440, 72.0, 3),
-  },
+  /* ---- iPhone 15 series (2023) ----------------------------------------- */
+  "iphone-15":       dev("iphone-15",       "iPhone 15",               71.6,  147.6,  44),
+  "iphone-15-plus":  dev("iphone-15-plus",  "iPhone 15 Plus",          77.8,  160.9,  44),
+  "iphone-15-pro":   dev("iphone-15-pro",   "iPhone 15 Pro",           70.6,  146.6,  44),
+  "iphone-15-pro-max": dev("iphone-15-pro-max", "iPhone 15 Pro Max",   76.7,  159.9,  44),
+
+  /* ---- iPhone 16 series (2024) ----------------------------------------- */
+  "iphone-16":       dev("iphone-16",       "iPhone 16",               71.6,  147.6,  46),
+  "iphone-16-plus":  dev("iphone-16-plus",  "iPhone 16 Plus",          77.8,  160.9,  46),
+  "iphone-16-pro":   dev("iphone-16-pro",   "iPhone 16 Pro",           71.5,  149.6,  46),
+  "iphone-16-pro-max": dev("iphone-16-pro-max", "iPhone 16 Pro Max",   77.6,  163.0,  46),
+
+  /* ---- Samsung Galaxy S series ----------------------------------------- */
+  "samsung-s23":     dev("samsung-s23",     "Samsung Galaxy S23",       70.9,  146.3,  36),
+  "samsung-s23-ultra": dev("samsung-s23-ultra", "Samsung Galaxy S23 Ultra", 78.1, 163.4, 34),
+  "samsung-s24":     dev("samsung-s24",     "Samsung Galaxy S24",       70.6,  147.0,  36),
+  "samsung-s24-ultra": dev("samsung-s24-ultra", "Samsung Galaxy S24 Ultra", 79.0, 162.3, 34),
+  "samsung-s25":     dev("samsung-s25",     "Samsung Galaxy S25",       70.1,  146.9,  36),
+  "samsung-s25-ultra": dev("samsung-s25-ultra", "Samsung Galaxy S25 Ultra", 77.6, 162.8, 34),
+
+  /* ---- Google Pixel series --------------------------------------------- */
+  "pixel-8":         dev("pixel-8",         "Google Pixel 8",           70.8,  150.5,  40),
+  "pixel-8-pro":     dev("pixel-8-pro",     "Google Pixel 8 Pro",       76.5,  162.6,  40),
+  "pixel-9":         dev("pixel-9",         "Google Pixel 9",           72.0,  152.8,  42),
+  "pixel-9-pro":     dev("pixel-9-pro",     "Google Pixel 9 Pro",       72.0,  152.8,  42),
+  "pixel-9-pro-xl":  dev("pixel-9-pro-xl",  "Google Pixel 9 Pro XL",    76.6,  162.8,  42),
 }
 
 /* -------------------------------------------------------------------------- */
@@ -152,19 +165,9 @@ export function getAllDeviceHandles(): string[] {
 }
 
 /**
- * Keywords that identify each device model.
- * Order matters — more specific patterns should come first.
- */
-const DEVICE_KEYWORDS: { keywords: string[]; handle: string }[] = [
-  { keywords: ["iphone-16-pro", "iphone 16 pro", "i-phone-16-pro", "i-phone-16pro"], handle: "iphone-16-pro" },
-  { keywords: ["iphone-15-pro", "iphone 15 pro", "i-phone-15-pro", "i-phone-15pro"], handle: "iphone-15-pro" },
-  { keywords: ["iphone-14", "iphone 14", "i-phone-14", "iphone14"], handle: "iphone-14" },
-  { keywords: ["samsung-s24", "samsung s24", "galaxy-s24", "galaxy s24"], handle: "samsung-s24" },
-  { keywords: ["pixel-9", "pixel 9", "pixel9"], handle: "pixel-9" },
-]
-
-/**
  * Fuzzy-match a product handle, title, or description to a device config.
+ * Handles product handles like "iphone-15-pro-designer-cases",
+ * "i-phone-12pro-cases", "samsung-s24-ultra-case", "pixel-9-pro-case", etc.
  * Returns the matching DeviceConfig or null if no match.
  */
 export function detectDeviceFromProduct(
@@ -176,14 +179,75 @@ export function detectDeviceFromProduct(
     .filter(Boolean)
     .join(" ")
     .toLowerCase()
+    // normalise separators: "i-phone" → "iphone", "galaxy-s" → "galaxys"
+    .replace(/i-phone/g, "iphone")
+    .replace(/galaxy[\s-]?s/g, "galaxys")
 
-  for (const entry of DEVICE_KEYWORDS) {
-    for (const kw of entry.keywords) {
-      if (haystack.includes(kw)) {
-        return DEVICE_CONFIGS[entry.handle] ?? null
-      }
-    }
+  // --- iPhone detection ---
+  // Captures model number + optional "mini", "pro", "plus", "max" variants
+  const iphoneMatch = haystack.match(
+    /iphone[\s-]?(\d{2,})[\s-]?(mini|pro)?[\s-]?(max|plus)?/
+  )
+  if (iphoneMatch) {
+    const model = parseInt(iphoneMatch[1], 10)
+    const isPro = iphoneMatch[2] === "pro"
+    const isMini = iphoneMatch[2] === "mini"
+    const isMax = iphoneMatch[3] === "max"
+    const isPlus = iphoneMatch[3] === "plus"
+
+    // Build the ideal handle
+    let suffix = ""
+    if (isMini) suffix = "-mini"
+    else if (isPro && isMax) suffix = "-pro-max"
+    else if (isPro) suffix = "-pro"
+    else if (isPlus) suffix = "-plus"
+
+    // Try exact model match first
+    const exact = DEVICE_CONFIGS[`iphone-${model}${suffix}`]
+    if (exact) return exact
+
+    // Fallback: map to closest available generation
+    const clamp = Math.max(11, Math.min(model, 16))
+    const fallback = DEVICE_CONFIGS[`iphone-${clamp}${suffix}`]
+      ?? DEVICE_CONFIGS[`iphone-${clamp}`]
+    if (fallback) return fallback
+
+    // Last resort
+    return DEVICE_CONFIGS["iphone-15-pro"]
   }
+
+  // --- Samsung detection ---
+  // Matches "samsung s24 ultra", "galaxys25", "galaxy-s23-ultra", etc.
+  const samsungMatch = haystack.match(
+    /(?:samsung|galaxys)[\s-]?(\d{2,})[\s-]?(ultra|plus|\+)?/
+  )
+  if (samsungMatch) {
+    const model = parseInt(samsungMatch[1], 10)
+    const isUltra = samsungMatch[2] === "ultra"
+    const suffix = isUltra ? "-ultra" : ""
+    const clamp = Math.max(23, Math.min(model, 25))
+    return DEVICE_CONFIGS[`samsung-s${clamp}${suffix}`]
+      ?? DEVICE_CONFIGS["samsung-s24"]
+  }
+
+  // --- Pixel detection ---
+  // Matches "pixel 9 pro xl", "pixel-8-pro", "pixel9", etc.
+  const pixelMatch = haystack.match(
+    /pixel[\s-]?(\d+)[\s-]?(pro)?[\s-]?(xl)?/
+  )
+  if (pixelMatch) {
+    const model = parseInt(pixelMatch[1], 10)
+    const isPro = !!pixelMatch[2]
+    const isXl = !!pixelMatch[3]
+    let suffix = ""
+    if (isPro && isXl) suffix = "-pro-xl"
+    else if (isPro) suffix = "-pro"
+    const clamp = Math.max(8, Math.min(model, 9))
+    return DEVICE_CONFIGS[`pixel-${clamp}${suffix}`]
+      ?? DEVICE_CONFIGS[`pixel-${clamp}`]
+      ?? DEVICE_CONFIGS["pixel-9"]
+  }
+
   return null
 }
 

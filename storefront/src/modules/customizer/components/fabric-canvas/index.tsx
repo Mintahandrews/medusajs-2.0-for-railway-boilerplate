@@ -2,19 +2,189 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react"
 import { useCustomizer } from "../../context"
+import type { DeviceConfig } from "@lib/device-assets"
+
+/* -------------------------------------------------------------------------- */
+/*  Camera module overlay                                                      */
+/* -------------------------------------------------------------------------- */
+
+/** Determine camera family from device handle */
+function getCameraFamily(handle: string): string {
+  // iPhone mini / standard (dual lens diagonal)
+  if (/iphone-\d+(-mini)?$/.test(handle) || /iphone-\d+-plus$/.test(handle))
+    return "iphone-dual"
+  // iPhone Pro / Pro Max (triple lens triangle)
+  if (/iphone-\d+-pro/.test(handle)) return "iphone-triple"
+  // Samsung Ultra (quad individual lenses)
+  if (/samsung.*ultra/.test(handle)) return "samsung-ultra"
+  // Samsung standard (triple individual lenses)
+  if (/samsung/.test(handle)) return "samsung-triple"
+  // Pixel (horizontal bar)
+  if (/pixel/.test(handle)) return "pixel-bar"
+  return "iphone-dual" // fallback
+}
+
+/** Render a single CSS lens circle */
+function Lens({
+  cx, cy, d, s, type = "lens",
+}: {
+  cx: number; cy: number; d: number; s: number
+  type?: "lens" | "flash" | "sensor"
+}) {
+  if (type === "flash") {
+    return (
+      <div
+        className="absolute rounded-full"
+        style={{
+          left: (cx - d / 2) * s,
+          top: (cy - d / 2) * s,
+          width: d * s,
+          height: d * s,
+          background: "radial-gradient(circle, #ffeebb 30%, #997744 100%)",
+        }}
+      />
+    )
+  }
+  if (type === "sensor") {
+    return (
+      <div
+        className="absolute rounded-full"
+        style={{
+          left: (cx - d / 2) * s,
+          top: (cy - d / 2) * s,
+          width: d * s,
+          height: d * s,
+          background: "#222",
+        }}
+      />
+    )
+  }
+  return (
+    <div
+      className="absolute rounded-full"
+      style={{
+        left: (cx - d / 2) * s,
+        top: (cy - d / 2) * s,
+        width: d * s,
+        height: d * s,
+        background: "radial-gradient(circle, #1a1a3a 40%, #0d0d1a 70%, #333 100%)",
+        boxShadow: `inset 0 0 ${3 * s}px rgba(100,100,255,0.15), 0 0 0 ${2 * s}px rgba(80,80,80,0.5)`,
+      }}
+    />
+  )
+}
+
+/** Camera module overlay — positioned absolutely over the canvas container */
+function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number }) {
+  const family = getCameraFamily(config.handle)
+  const cw = config.canvasWidth
+  const s = scale // display scale
+
+  // Module dimensions in canvas-pixels (before scaling)
+  const modSize = Math.round(cw * 0.38)       // module width/height
+  const modTop = Math.round(cw * 0.04)         // top offset
+  const modLeft = Math.round(cw * 0.04)        // left offset
+  const modR = Math.round(modSize * 0.28)       // module corner radius
+  const lensD = Math.round(modSize * 0.33)      // lens diameter
+  const flashD = Math.round(modSize * 0.09)     // flash diameter
+  const sensorD = Math.round(modSize * 0.07)    // sensor diameter
+
+  if (family === "iphone-dual") {
+    // Dual diagonal lenses in square module
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modTop * s,
+          left: modLeft * s,
+          width: modSize * s,
+          height: modSize * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${2 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <Lens cx={modSize * 0.36} cy={modSize * 0.36} d={lensD} s={s} />
+        <Lens cx={modSize * 0.64} cy={modSize * 0.64} d={lensD} s={s} />
+        <Lens cx={modSize * 0.64} cy={modSize * 0.36} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  if (family === "iphone-triple") {
+    // Triple lenses in triangle arrangement
+    const bigMod = Math.round(cw * 0.42)
+    const bigR = Math.round(bigMod * 0.26)
+    const bigLens = Math.round(bigMod * 0.30)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modTop * s,
+          left: modLeft * s,
+          width: bigMod * s,
+          height: bigMod * s,
+          borderRadius: bigR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${2 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <Lens cx={bigMod * 0.34} cy={bigMod * 0.32} d={bigLens} s={s} />
+        <Lens cx={bigMod * 0.66} cy={bigMod * 0.32} d={bigLens} s={s} />
+        <Lens cx={bigMod * 0.50} cy={bigMod * 0.68} d={bigLens} s={s} />
+        <Lens cx={bigMod * 0.66} cy={bigMod * 0.68} d={flashD} s={s} type="flash" />
+        <Lens cx={bigMod * 0.34} cy={bigMod * 0.68} d={sensorD} s={s} type="sensor" />
+      </div>
+    )
+  }
+
+  if (family === "samsung-triple" || family === "samsung-ultra") {
+    // Individual circles stacked vertically, upper-left area (Samsung style)
+    const ld = Math.round(cw * 0.11)
+    const gap = Math.round(cw * 0.13)
+    const startY = Math.round(cw * 0.12)
+    const cx = Math.round(cw * 0.27)
+    const count = family === "samsung-ultra" ? 4 : 3
+    return (
+      <div className="absolute pointer-events-none z-10 inset-0">
+        {Array.from({ length: count }).map((_, i) => (
+          <Lens key={i} cx={cx} cy={startY + i * gap} d={ld} s={s} />
+        ))}
+        <Lens cx={cx} cy={startY + count * gap} d={flashD * 1.2} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  if (family === "pixel-bar") {
+    // Horizontal camera visor bar across upper back (Pixel style)
+    const barH = Math.round(cw * 0.15)
+    const barTop = Math.round(cw * 0.14)
+    const ld = Math.round(barH * 0.60)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: barTop * s,
+          left: 0,
+          width: cw * s,
+          height: barH * s,
+          background: "rgba(0,0,0,0.85)",
+          borderRadius: (barH / 2) * s,
+          boxShadow: `inset 0 0 0 ${2 * s}px rgba(60,60,60,0.4)`,
+        }}
+      >
+        <Lens cx={cw * 0.28} cy={barH * 0.50} d={ld} s={s} />
+        <Lens cx={cw * 0.50} cy={barH * 0.50} d={ld} s={s} />
+        <Lens cx={cw * 0.72} cy={barH * 0.50} d={flashD * 1.5} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  return null
+}
 
 /**
  * The core Fabric.js canvas component.
- *
- * Responsibilities:
- * 1. Initialise a `fabric.Canvas` on mount (dynamic import to dodge SSR).
- * 2. Apply the device's editor mask path as a `clipPath` so designs stay
- *    inside the phone outline.
- * 3. Load the realistic overlay PNG as `canvas.overlayImage` (renders on
- *    top of everything but is not selectable / part of the object list).
- * 4. Forward object-modified events to the history stack.
- * 5. Responsively scale the canvas display to fit its container.
- * 6. Keyboard shortcuts: Delete/Backspace, Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z.
  */
 export default function FabricCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -106,28 +276,7 @@ export default function FabricCanvas() {
       })
       fabricCanvas.clipPath = clipPath
 
-      /* 3. Load realistic overlay (URL-encoded for paths with spaces) ------- */
-      try {
-        const encodedUrl = encodeURI(deviceConfig.overlayUrl)
-        const overlayImg = await fabric.FabricImage.fromURL(encodedUrl, {
-          crossOrigin: "anonymous",
-        })
-        if (disposed) return
-
-        overlayImg.set({
-          originX: "left",
-          originY: "top",
-          left: 0,
-          top: 0,
-          scaleX: canvasWidth / (overlayImg.width || canvasWidth),
-          scaleY: canvasHeight / (overlayImg.height || canvasHeight),
-        })
-        fabricCanvas.overlayImage = overlayImg
-      } catch {
-        console.warn("[Customizer] Could not load overlay image — using CSS frame instead")
-      }
-
-      /* 4. Touch / mobile support ------------------------------------------- */
+      /* 3. Touch / mobile support ------------------------------------------- */
       // Allow touch gestures on the canvas (pinch to scale/rotate objects)
       fabricCanvas.allowTouchScrolling = false // prevent canvas from scrolling page
       fabricCanvas.on("touch:gesture", (e: any) => {
@@ -228,6 +377,8 @@ export default function FabricCanvas() {
             }}
           />
 
+          {/* Device-specific camera module overlay */}
+          <CameraOverlay config={deviceConfig} scale={displayScale} />
         </div>
       </div>
     </div>
