@@ -6,6 +6,7 @@ import {
   Upload,
   Type,
   Palette,
+  Shield,
   Smartphone,
   ShoppingCart,
   Undo2,
@@ -19,13 +20,15 @@ import TextPanel from "./text-panel"
 import BackgroundPanel from "./background-panel"
 import AddToCartPanel from "./add-to-cart-panel"
 import PreviewPanel from "./preview-panel"
+import CaseTypePanel from "./case-type-panel"
 import { HttpTypes } from "@medusajs/types"
 
 const TOOLS: { id: ActiveTool; label: string; icon: React.ReactNode }[] = [
   { id: "select", label: "Select", icon: <MousePointer2 className="w-5 h-5" /> },
   { id: "upload", label: "Uploads", icon: <Upload className="w-5 h-5" /> },
   { id: "text", label: "Text", icon: <Type className="w-5 h-5" /> },
-  { id: "background", label: "Background", icon: <Palette className="w-5 h-5" /> },
+  { id: "background", label: "Color", icon: <Palette className="w-5 h-5" /> },
+  { id: "case-type", label: "Case", icon: <Shield className="w-5 h-5" /> },
   { id: "preview", label: "Preview", icon: <Smartphone className="w-5 h-5" /> },
   { id: "cart", label: "Cart", icon: <ShoppingCart className="w-5 h-5" /> },
 ]
@@ -68,20 +71,20 @@ export default function Toolbar({ product, region }: ToolbarProps) {
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
-      {/* Tool tabs */}
-      <div className="flex border-b border-gray-200">
+      {/* Tool tabs — horizontally scrollable on mobile */}
+      <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-200 -mb-px">
         {TOOLS.map((tool) => (
           <button
             key={tool.id}
             onClick={() => dispatch({ type: "SET_TOOL", tool: tool.id })}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs transition-colors ${
+            className={`flex-shrink-0 flex-1 min-w-[56px] flex flex-col items-center gap-1 py-3 text-[11px] transition-colors ${
               state.activeTool === tool.id
                 ? "text-black border-b-2 border-black bg-gray-50"
                 : "text-gray-400 hover:text-gray-600"
             }`}
           >
             {tool.icon}
-            <span>{tool.label}</span>
+            <span className="truncate">{tool.label}</span>
           </button>
         ))}
       </div>
@@ -91,6 +94,7 @@ export default function Toolbar({ product, region }: ToolbarProps) {
         {state.activeTool === "upload" && <UploadPanel />}
         {state.activeTool === "text" && <TextPanel />}
         {state.activeTool === "background" && <BackgroundPanel />}
+        {state.activeTool === "case-type" && <CaseTypePanel />}
         {state.activeTool === "preview" && <PreviewPanel />}
         {state.activeTool === "select" && (
           <div className="p-4 text-sm text-gray-400">

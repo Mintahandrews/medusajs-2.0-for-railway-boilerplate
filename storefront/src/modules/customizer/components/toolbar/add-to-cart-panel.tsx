@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ShoppingCart, Check, Upload, Loader2 } from "lucide-react"
+import { ShoppingCart, Check } from "lucide-react"
 import { useCustomizer } from "../../context"
 import { addCustomizedToCart, ensureCart } from "@lib/data/cart"
 import { uploadDesignFiles } from "@lib/data/design-upload"
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function AddToCartPanel({ product, region }: Props) {
-  const { exportPrintFile, exportPreview, canvasRef, deviceConfig } = useCustomizer()
+  const { state, exportPrintFile, exportPreview, canvasRef, deviceConfig } = useCustomizer()
   const countryCode = useParams().countryCode as string
   const router = useRouter()
 
@@ -24,6 +24,7 @@ export default function AddToCartPanel({ product, region }: Props) {
   const [isAdding, setIsAdding] = useState(false)
   const [added, setAdded] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<string>("")
+  const [error, setError] = useState<string>("")
 
   const selectedVariant = useMemo(
     () => product.variants?.find((v) => v.id === selectedVariantId),
@@ -48,50 +49,67 @@ export default function AddToCartPanel({ product, region }: Props) {
 
     setIsAdding(true)
     setUploadStatus("")
+    setError("")
     try {
-      // 1. Ensure cart exists and get its ID (needed for upload auth)
+      // 1. Ensure cart exists
       setUploadStatus("Preparing…")
-      const cartId = await ensureCart(countryCode)
+      let cartId: string
+      try {
+        cartId = await ensureCart(countryCode)
+      } catch (e) {
+        throw new Error("Could not create cart. Please refresh and try again.")
+      }
 
-      // 2. Export canvas data
+      // 2. Export canvas data (skip canvas_json — too large for metadata)
       setUploadStatus("Exporting design…")
-      const canvasJSON = JSON.stringify(canvasRef.current.toJSON())
       const previewDataUrl = exportPreview() || ""
       const printFileDataUrl = (await exportPrintFile(4)) || ""
 
-      // 3. Upload design files to MinIO
-      setUploadStatus("Uploading to cloud…")
-      const uploaded = await uploadDesignFiles(previewDataUrl, printFileDataUrl, cartId)
+      // 3. Upload design files to cloud (optional — gracefully degrade)
+      let previewUrl = ""
+      let previewKey = ""
+      let printFileUrl = ""
+      let printFileKey = ""
+      try {
+        setUploadStatus("Uploading to cloud…")
+        const uploaded = await uploadDesignFiles(previewDataUrl, printFileDataUrl, cartId)
+        previewUrl = uploaded.previewUrl
+        previewKey = uploaded.previewKey
+        printFileUrl = uploaded.printFileUrl
+        printFileKey = uploaded.printFileKey
+      } catch (uploadErr) {
+        console.warn("[Customizer] Cloud upload failed, continuing with basic metadata:", uploadErr)
+        // Fall through — we'll still add to cart without cloud URLs
+      }
 
-      // 4. Add to cart with MinIO URLs + print specs
+      // 4. Add to cart with flat metadata (no nested objects, no huge canvas_json)
       setUploadStatus("Adding to cart…")
       await addCustomizedToCart({
         variantId: selectedVariantId,
         quantity: 1,
         countryCode,
         metadata: {
-          is_customized: true,
+          is_customized: "true",
+          case_type: state.caseType,
           device_model: deviceConfig.name,
-          canvas_json: canvasJSON,
-          preview_image: uploaded.previewUrl,
-          preview_key: uploaded.previewKey,
-          print_file: uploaded.printFileUrl,
-          print_file_key: uploaded.printFileKey,
-          specs: {
-            dpi: deviceConfig.printSpec.dpi,
-            width_mm: deviceConfig.printSpec.widthMm,
-            height_mm: deviceConfig.printSpec.heightMm,
-            bleed_mm: deviceConfig.bleedMm,
-          },
+          device_handle: deviceConfig.handle,
+          preview_image: previewUrl,
+          preview_key: previewKey,
+          print_file: printFileUrl,
+          print_file_key: printFileKey,
+          print_dpi: String(deviceConfig.printSpec.dpi),
+          print_width_mm: String(deviceConfig.printSpec.widthMm),
+          print_height_mm: String(deviceConfig.printSpec.heightMm),
+          print_bleed_mm: String(deviceConfig.bleedMm),
         },
       })
 
       setAdded(true)
       setUploadStatus("")
       setTimeout(() => setAdded(false), 3000)
-    } catch (err) {
+    } catch (err: any) {
       console.error("[Customizer] Failed to add to cart:", err)
-      alert("Failed to add to cart. Please try again.")
+      setError(err?.message || "Failed to add to cart. Please try again.")
       setUploadStatus("")
     } finally {
       setIsAdding(false)
@@ -167,6 +185,13 @@ export default function AddToCartPanel({ product, region }: Props) {
           </>
         )}
       </button>
+
+      {/* Error message */}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+          {error}
+        </div>
+      )}
 
       {/* View cart link */}
       {added && (

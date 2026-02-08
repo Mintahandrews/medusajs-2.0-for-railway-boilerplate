@@ -139,8 +139,8 @@ export async function addCustomizedToCart({
     throw new Error("Error retrieving or creating cart")
   }
 
-  await sdk.store.cart
-    .createLineItem(
+  try {
+    await sdk.store.cart.createLineItem(
       cart.id,
       {
         variant_id: variantId,
@@ -150,10 +150,15 @@ export async function addCustomizedToCart({
       {},
       await getAuthHeaders()
     )
-    .then(() => {
-      revalidateTag("cart")
-    })
-    .catch(medusaError)
+    revalidateTag("cart")
+  } catch (error: any) {
+    const msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Unknown error adding to cart"
+    console.error("[addCustomizedToCart]", msg, error)
+    throw new Error(msg)
+  }
 }
 
 export async function updateLineItem({

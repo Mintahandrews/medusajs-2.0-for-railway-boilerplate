@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Cookie, X } from "lucide-react"
 
 const COOKIE_CONSENT_KEY = "letscase_cookie_consent"
 
@@ -31,56 +30,60 @@ export default function CookieConsent() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 sm:p-6 pointer-events-none">
-      <div className="pointer-events-auto mx-auto max-w-lg w-full bg-white rounded-2xl shadow-2xl border border-gray-200 p-5 sm:p-6 animate-slide-up">
-        {/* Close button */}
-        <button
-          type="button"
-          onClick={handleDecline}
-          className="absolute top-3 right-3 h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition"
-          aria-label="Dismiss"
-        >
-          <X size={14} />
-        </button>
+    <div className="fixed bottom-0 left-0 right-0 z-[60] pointer-events-none">
+      <div className="pointer-events-auto w-full bg-[#2a2a2e] shadow-[0_-4px_24px_rgba(0,0,0,0.3)] animate-slide-up">
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-5 pb-4">
+          <h3 className="text-[15px] font-bold text-white flex items-center gap-2">
+            <span className="text-lg">🍪</span> Yes, we use cookies
+          </h3>
+          <p className="text-[13px] text-gray-400 mt-2 leading-relaxed max-w-2xl">
+            This website utilizes cookies to enable essential site functionality and analytics.
+            You may change your settings at any time or accept the default settings. You may close
+            this banner to continue with only essential cookies.
+            <br />
+            Read more about this in our{" "}
+            <a href="/privacy" className="font-bold text-white hover:underline">
+              privacy and cookie statement
+            </a>.
+          </p>
+        </div>
 
-        <div className="flex gap-4 items-start">
-          {/* Cookie icon */}
-          <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
-            <Cookie size={20} className="text-amber-500" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-bold text-gray-900">We use cookies</h3>
-            <p className="text-[13px] text-gray-500 mt-1 leading-relaxed">
-              We use cookies to improve your experience, remember your preferences, and analyze site traffic. By clicking &quot;Accept&quot;, you consent to our use of cookies.
-            </p>
-
-            <div className="flex items-center gap-2.5 mt-4">
-              <button
-                type="button"
-                onClick={handleAccept}
-                className="h-9 px-5 rounded-xl bg-black text-white text-[13px] font-bold hover:bg-gray-800 transition"
-              >
-                Accept All
-              </button>
-              <button
-                type="button"
-                onClick={handleDecline}
-                className="h-9 px-5 rounded-xl border border-gray-200 text-gray-600 text-[13px] font-semibold hover:bg-gray-50 hover:border-gray-300 transition"
-              >
-                Decline
-              </button>
-            </div>
+        {/* Buttons bar */}
+        <div className="border-t border-white/10">
+          <div className="max-w-4xl mx-auto px-5 sm:px-8 py-3.5 flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={handleAccept}
+              className="h-10 px-6 rounded-md bg-emerald-500 text-white text-[13px] font-bold hover:bg-emerald-600 transition"
+            >
+              Accept all
+            </button>
+            <button
+              type="button"
+              onClick={handleDecline}
+              className="h-10 px-6 rounded-md bg-emerald-500 text-white text-[13px] font-bold hover:bg-emerald-600 transition"
+            >
+              Reject all
+            </button>
+            <div className="flex-1" />
+            <button
+              type="button"
+              onClick={handleDecline}
+              className="h-10 px-6 rounded-md border border-gray-500 text-gray-300 text-[13px] font-semibold hover:border-gray-400 hover:text-white transition"
+            >
+              Manage preferences
+            </button>
           </div>
         </div>
 
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes slide-up {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(100%); }
             to { opacity: 1; transform: translateY(0); }
           }
           .animate-slide-up {
-            animation: slide-up 0.4s ease-out;
+            animation: slide-up 0.35s ease-out;
           }
         `}} />
       </div>

@@ -14,10 +14,13 @@ import type { DeviceConfig } from "@lib/device-assets"
 /*  Types                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export type ActiveTool = "select" | "text" | "upload" | "background" | "preview" | "cart"
+export type ActiveTool = "select" | "text" | "upload" | "background" | "case-type" | "preview" | "cart"
+
+export type CaseType = "slim" | "tough" | "clear" | "magsafe"
 
 export interface CustomizerState {
   activeTool: ActiveTool
+  caseType: CaseType
   backgroundColor: string
   fontFamily: string
   fontSize: number
@@ -29,6 +32,7 @@ export interface CustomizerState {
 
 type Action =
   | { type: "SET_TOOL"; tool: ActiveTool }
+  | { type: "SET_CASE_TYPE"; caseType: CaseType }
   | { type: "SET_BG_COLOR"; color: string }
   | { type: "SET_FONT_FAMILY"; family: string }
   | { type: "SET_FONT_SIZE"; size: number }
@@ -69,6 +73,7 @@ export interface CustomizerContextValue {
 
 const initialState: CustomizerState = {
   activeTool: "select",
+  caseType: "tough",
   backgroundColor: "#ffffff",
   fontFamily: "Arial",
   fontSize: 32,
@@ -82,6 +87,8 @@ function reducer(state: CustomizerState, action: Action): CustomizerState {
   switch (action.type) {
     case "SET_TOOL":
       return { ...state, activeTool: action.tool }
+    case "SET_CASE_TYPE":
+      return { ...state, caseType: action.caseType }
     case "SET_BG_COLOR":
       return { ...state, backgroundColor: action.color }
     case "SET_FONT_FAMILY":
