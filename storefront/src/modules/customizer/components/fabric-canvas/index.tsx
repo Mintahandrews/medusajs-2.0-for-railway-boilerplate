@@ -382,20 +382,6 @@ export default function FabricCanvas() {
       canvasRef.current = fabricCanvas
       fabricCanvas.renderAll()
 
-      // Apply initial CSS scaling so Fabric maps pointer coords correctly
-      if (containerRef.current) {
-        const cW = containerRef.current.clientWidth
-        const cH = containerRef.current.clientHeight
-        const sW = cW / canvasWidth
-        const sH = cH / canvasHeight
-        const initScale = Math.min(1, sW, sH)
-        setDisplayScale(initScale)
-        fabricCanvas.setDimensions(
-          { width: canvasWidth * initScale, height: canvasHeight * initScale },
-          { cssOnly: true }
-        )
-      }
-
       // push initial blank state
       pushHistory()
       dispatch({ type: "SET_CANVAS_READY", ready: true })
@@ -413,15 +399,21 @@ export default function FabricCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deviceConfig.handle])
 
-  /* ---- Responsive scaling ----------------------------------------------- */
+  /* ---- Responsive scaling (ResizeObserver for reliable initial layout) --- */
   useEffect(() => {
-    function handleResize() {
-      if (!containerRef.current) return
-      const containerW = containerRef.current.clientWidth
-      const containerH = containerRef.current.clientHeight
-      const scaleW = containerW / deviceConfig.canvasWidth
-      const scaleH = containerH / deviceConfig.canvasHeight
-      // fit inside container on both axes, cap at 1×
+    const el = containerRef.current
+    if (!el) return
+
+    const cw = deviceConfig.canvasWidth
+    const ch = deviceConfig.canvasHeight
+
+    function applyScale() {
+      const containerW = el!.clientWidth
+      const containerH = el!.clientHeight
+      // Guard: skip if container hasn't laid out yet (0×0)
+      if (containerW < 1 || containerH < 1) return
+      const scaleW = containerW / cw
+      const scaleH = containerH / ch
       const newScale = Math.min(1, scaleW, scaleH)
       setDisplayScale(newScale)
 
@@ -429,15 +421,17 @@ export default function FabricCanvas() {
       const canvas = canvasRef.current
       if (canvas) {
         canvas.setDimensions(
-          { width: deviceConfig.canvasWidth * newScale, height: deviceConfig.canvasHeight * newScale },
+          { width: cw * newScale, height: ch * newScale },
           { cssOnly: true }
         )
       }
     }
 
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    // ResizeObserver fires on initial layout AND on every size change
+    const ro = new ResizeObserver(() => applyScale())
+    ro.observe(el)
+
+    return () => ro.disconnect()
   }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight, canvasRef])
 
   const r = deviceConfig.cornerRadius

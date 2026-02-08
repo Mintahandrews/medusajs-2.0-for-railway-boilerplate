@@ -93,28 +93,28 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  // iPhone — person holding white iPhone case (Xzx_5wp72Fk)
-  iphone: "https://images.unsplash.com/photo-1737280423495-b43202fece9b?w=800&h=1000&fit=crop&q=80",
-  // Cases — group of different colored iPhone cases (G8NI0ml2b-4)
-  cases: "https://images.unsplash.com/photo-1735972335727-16c141aa5621?w=800&h=1000&fit=crop&q=80",
-  // Android — close up of cell phone near a laptop (8e2VsJ0dOPM)
-  "android phones": "https://images.unsplash.com/photo-1724341039339-036842055cae?w=800&h=1000&fit=crop&q=80",
-  // Earbuds — white objects on wooden table (Ykn9N6Oq1XA)
-  earphones: "https://images.unsplash.com/photo-1723940801444-5a0ab8a6da29?w=800&h=1000&fit=crop&q=80",
-  // Headphones — earbuds (Ykn9N6Oq1XA)
-  headphones: "https://images.unsplash.com/photo-1723940801444-5a0ab8a6da29?w=800&h=1000&fit=crop&q=80",
-  // Laptops — MacBook Pro displaying music (lzh3hPtJz9c)
-  laptops: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&h=1000&fit=crop&q=80",
-  // Speakers — black and orange JBL portable speaker (eMw1fBx4_Wk)
-  speakers: "https://images.unsplash.com/photo-1588131153911-a4ea5189fe19?w=800&h=1000&fit=crop&q=80",
-  // Chargers — white wires sitting next to each other (f0EpYkZ-cp4)
-  chargers: "https://images.unsplash.com/photo-1731616103600-3fe7ccdc5a59?w=800&h=1000&fit=crop&q=80",
-  // Cables — white wires (f0EpYkZ-cp4)
-  cables: "https://images.unsplash.com/photo-1731616103600-3fe7ccdc5a59?w=800&h=1000&fit=crop&q=80",
-  // Screen protectors — android phone closeup (8e2VsJ0dOPM)
-  "screen protectors": "https://images.unsplash.com/photo-1724341039339-036842055cae?w=800&h=1000&fit=crop&q=80",
-  // Laptop bags — black Nike backpack on purple surface (a-k2PQJ4_4U)
-  "laptop bags": "https://images.unsplash.com/photo-1622560481979-f5b0174242a0?w=800&h=1000&fit=crop&q=80",
+  // iPhone — gold iPhone on marble
+  iphone: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800&h=1000&fit=crop&q=80",
+  // Cases — colorful phone cases
+  cases: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&h=1000&fit=crop&q=80",
+  // Android — Samsung Galaxy in hand
+  "android phones": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&h=1000&fit=crop&q=80",
+  // Earbuds — AirPods on surface
+  earphones: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800&h=1000&fit=crop&q=80",
+  // Headphones — classic over-ear headphones
+  headphones: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=1000&fit=crop&q=80",
+  // Laptops — MacBook on desk
+  laptops: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=1000&fit=crop&q=80",
+  // Speakers — portable bluetooth speaker
+  speakers: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&h=1000&fit=crop&q=80",
+  // Chargers — USB cables and charger
+  chargers: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&h=1000&fit=crop&q=80",
+  // Cables — same as chargers
+  cables: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&h=1000&fit=crop&q=80",
+  // Screen protectors — phone screen close-up
+  "screen protectors": "https://images.unsplash.com/photo-1530319067432-f2a729c03db5?w=800&h=1000&fit=crop&q=80",
+  // Laptop bags — backpack
+  "laptop bags": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=1000&fit=crop&q=80",
   // Watches — minimal watch product shot
   watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=1000&fit=crop&q=80",
   // Smartwatch — Apple Watch on wrist
@@ -123,7 +123,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
   tablets: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&h=1000&fit=crop&q=80",
   // Accessories — tech accessories flat lay
   accessories: "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=800&h=1000&fit=crop&q=80",
-  // Default — general tech
+  // Default — general tech gadgets
   default: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&h=1000&fit=crop&q=80",
 }
 

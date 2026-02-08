@@ -1,5 +1,11 @@
-const MEDUSA_BACKEND_URL =
-  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+/** Resolve backend URL at call time so HTTPS upgrade works on the client */
+function getBackendUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+  if (typeof window !== "undefined" && window.location.protocol === "https:" && raw.startsWith("http://")) {
+    return raw.replace("http://", "https://")
+  }
+  return raw
+}
 
 export interface DesignUploadResult {
   previewUrl: string
@@ -25,7 +31,7 @@ export async function uploadDesignFiles(
   }
 
   const response = await fetch(
-    `${MEDUSA_BACKEND_URL}/store/custom/design-upload`,
+    `${getBackendUrl()}/store/custom/design-upload`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

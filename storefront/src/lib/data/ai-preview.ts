@@ -1,15 +1,45 @@
-const _raw = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
-// Ensure HTTPS in production to avoid Mixed Content errors
-const BACKEND_URL =
-  typeof window !== "undefined" && window.location.protocol === "https:" && _raw.startsWith("http://")
-    ? _raw.replace("http://", "https://")
-    : _raw
-
 export interface AiPreviewResult {
   /** Base64-encoded result image */
   data: string
   /** Remaining Pebblely API credits */
   credits: number
+}
+
+/** Resolve backend URL at call time so HTTPS upgrade works on the client */
+function getBackendUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+  if (typeof window !== "undefined" && window.location.protocol === "https:" && raw.startsWith("http://")) {
+    return raw.replace("http://", "https://")
+  }
+  return raw
+}
+
+/**
+ * Downsize a data-URL image to fit within maxDim (default 1024) to keep
+ * the JSON payload small. Returns a smaller base64 data URL.
+ */
+function downsizeImage(dataUrl: string, maxDim = 1024): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      if (width <= maxDim && height <= maxDim) {
+        resolve(dataUrl)
+        return
+      }
+      const ratio = Math.min(maxDim / width, maxDim / height)
+      width = Math.round(width * ratio)
+      height = Math.round(height * ratio)
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext("2d")!
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL("image/png"))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
 }
 
 /**
@@ -25,10 +55,13 @@ export async function generateAiPreview(
   description?: string,
   theme?: string
 ): Promise<AiPreviewResult> {
-  const res = await fetch(`${BACKEND_URL}/store/custom/ai-preview`, {
+  // Downsize large canvas exports to keep payload under backend limits
+  const image = await downsizeImage(imageBase64, 1024)
+
+  const res = await fetch(`${getBackendUrl()}/store/custom/ai-preview`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image: imageBase64, description, theme }),
+    body: JSON.stringify({ image, description, theme }),
   })
 
   if (!res.ok) {
