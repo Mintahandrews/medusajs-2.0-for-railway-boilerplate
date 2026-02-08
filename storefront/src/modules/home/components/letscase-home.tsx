@@ -93,28 +93,28 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
 }
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  // iPhone — iPhone 14 Pro deep purple on dark surface
-  iphone: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&h=1000&fit=crop&q=80",
-  // Cases — colorful phone cases flat lay
-  cases: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&h=1000&fit=crop&q=80",
-  // Android — Samsung Galaxy on table
-  "android phones": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&h=1000&fit=crop&q=80",
-  // Earphones — AirPods Pro on marble
-  earphones: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800&h=1000&fit=crop&q=80",
-  // Headphones — white headphones product shot
-  headphones: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=1000&fit=crop&q=80",
-  // Laptops — MacBook Pro on desk
-  laptops: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=1000&fit=crop&q=80",
-  // Speakers — portable bluetooth speaker
-  speakers: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&h=1000&fit=crop&q=80",
-  // Chargers — white charger and cable on clean background
-  chargers: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&h=1000&fit=crop&q=80",
-  // Cables — USB-C cables neatly arranged
-  cables: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=1000&fit=crop&q=80",
+  // iPhone — person holding white iPhone case
+  iphone: "https://images.unsplash.com/photo-1695048065655-44a2b779cec6?w=800&h=1000&fit=crop&q=80",
+  // Cases — group of different colored iPhone cases
+  cases: "https://images.unsplash.com/photo-1695048064827-59804383a4da?w=800&h=1000&fit=crop&q=80",
+  // Android — close up of cell phone near a laptop
+  "android phones": "https://images.unsplash.com/photo-1706795930706-7b213c300617?w=800&h=1000&fit=crop&q=80",
+  // Earbuds — white objects on wooden table
+  earphones: "https://images.unsplash.com/photo-1706014650658-1a4707089539?w=800&h=1000&fit=crop&q=80",
+  // Headphones — white objects on wooden table (earbuds)
+  headphones: "https://images.unsplash.com/photo-1706014650658-1a4707089539?w=800&h=1000&fit=crop&q=80",
+  // Laptops — MacBook Pro displaying music
+  laptops: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=1000&fit=crop&q=80",
+  // Speakers — black and orange JBL portable speaker
+  speakers: "https://images.unsplash.com/photo-1589003077984-894e133dabab?w=800&h=1000&fit=crop&q=80",
+  // Chargers — white wires sitting next to each other
+  chargers: "https://images.unsplash.com/photo-1707924894519-30b2e4e73dba?w=800&h=1000&fit=crop&q=80",
+  // Cables — white wires (charger)
+  cables: "https://images.unsplash.com/photo-1707924894519-30b2e4e73dba?w=800&h=1000&fit=crop&q=80",
   // Screen protectors — phone screen closeup
-  "screen protectors": "https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800&h=1000&fit=crop&q=80",
-  // Laptop bags — stylish backpack
-  "laptop bags": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=1000&fit=crop&q=80",
+  "screen protectors": "https://images.unsplash.com/photo-1706795930706-7b213c300617?w=800&h=1000&fit=crop&q=80",
+  // Laptop bags — black Nike backpack on purple surface
+  "laptop bags": "https://images.unsplash.com/photo-1581605405669-fcdf81165afa?w=800&h=1000&fit=crop&q=80",
   // Watches — minimal watch product shot
   watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=1000&fit=crop&q=80",
   // Smartwatch — Apple Watch on wrist

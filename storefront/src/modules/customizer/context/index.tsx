@@ -58,7 +58,7 @@ export interface CustomizerContextValue {
   /** Set the canvas background color */
   setBackgroundColor: (color: string) => void
   /** Export the current design as a data-URL PNG (print file, no overlay) */
-  exportPrintFile: (multiplier?: number) => string | null
+  exportPrintFile: (multiplier?: number) => Promise<string | null>
   /** Export a preview mockup (design + overlay) */
   exportPreview: () => string | null
 }
@@ -201,14 +201,11 @@ export function CustomizerProvider({
         // scale to fit ~60% of canvas width
         const maxW = deviceConfig.canvasWidth * 0.6
         const scale = maxW / (img.width ?? maxW)
-        // Center within the visible phone area (offset by bleed)
-        const centerX = deviceConfig.bleedPx + deviceConfig.canvasWidth / 2
-        const centerY = deviceConfig.bleedPx + deviceConfig.canvasHeight / 2
         img.set({
           scaleX: scale,
           scaleY: scale,
-          left: centerX,
-          top: centerY,
+          left: deviceConfig.canvasWidth / 2,
+          top: deviceConfig.canvasHeight / 2,
           originX: "center",
           originY: "center",
         })
@@ -229,11 +226,9 @@ export function CustomizerProvider({
       if (!canvas) return
 
       const { IText } = await import("fabric")
-      const centerX = deviceConfig.bleedPx + deviceConfig.canvasWidth / 2
-      const centerY = deviceConfig.bleedPx + deviceConfig.canvasHeight / 2
       const t = new IText(text || "Your Text", {
-        left: centerX,
-        top: centerY,
+        left: deviceConfig.canvasWidth / 2,
+        top: deviceConfig.canvasHeight / 2,
         originX: "center",
         originY: "center",
         fontFamily: state.fontFamily,
@@ -265,19 +260,23 @@ export function CustomizerProvider({
   /* ---- export helpers ---------------------------------------------------- */
 
   const exportPrintFile = useCallback(
-    (multiplier = 4): string | null => {
+    async (multiplier = 4): Promise<string | null> => {
       const canvas = canvasRef.current
       if (!canvas) return null
 
+      const bpx = deviceConfig.bleedPx
+      const cw = deviceConfig.canvasWidth
+      const ch = deviceConfig.canvasHeight
+
       // temporarily remove overlay and clipPath for clean print export
-      // this exposes the full canvas including bleed area
       const savedOverlay = canvas.overlayImage
       const savedClipPath = canvas.clipPath
       canvas.overlayImage = null
       canvas.clipPath = undefined
       canvas.renderAll()
 
-      const dataUrl = canvas.toDataURL({
+      // Export the visible canvas area (no bleed yet)
+      const coreDataUrl = canvas.toDataURL({
         format: "png",
         multiplier,
         quality: 1,
@@ -287,9 +286,42 @@ export function CustomizerProvider({
       canvas.overlayImage = savedOverlay
       canvas.clipPath = savedClipPath
       canvas.renderAll()
-      return dataUrl
+
+      // If no bleed needed, return the core export directly
+      if (bpx <= 0) return coreDataUrl
+
+      // Create an offscreen canvas with bleed padding and draw the
+      // core export centered within it. The bleed area extends the
+      // background color so the print file has no white edges.
+      try {
+        const outW = (cw + 2 * bpx) * multiplier
+        const outH = (ch + 2 * bpx) * multiplier
+        const offscreen = document.createElement("canvas")
+        offscreen.width = outW
+        offscreen.height = outH
+        const ctx = offscreen.getContext("2d")
+        if (!ctx) return coreDataUrl
+
+        // Fill with the current background color so bleed has color
+        ctx.fillStyle = (canvas.backgroundColor as string) || "#ffffff"
+        ctx.fillRect(0, 0, outW, outH)
+
+        // Wait for the image to load before drawing
+        const img = new Image()
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve()
+          img.onerror = reject
+          img.src = coreDataUrl
+        })
+        ctx.drawImage(img, bpx * multiplier, bpx * multiplier)
+
+        return offscreen.toDataURL("image/png", 1)
+      } catch {
+        // Fallback: return without bleed
+        return coreDataUrl
+      }
     },
-    []
+    [deviceConfig]
   )
 
   const exportPreview = useCallback((): string | null => {

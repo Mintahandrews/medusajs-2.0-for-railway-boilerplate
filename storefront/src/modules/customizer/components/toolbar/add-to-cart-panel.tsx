@@ -57,7 +57,7 @@ export default function AddToCartPanel({ product, region }: Props) {
       setUploadStatus("Exporting design…")
       const canvasJSON = JSON.stringify(canvasRef.current.toJSON())
       const previewDataUrl = exportPreview() || ""
-      const printFileDataUrl = exportPrintFile(4) || ""
+      const printFileDataUrl = (await exportPrintFile(4)) || ""
 
       // 3. Upload design files to MinIO
       setUploadStatus("Uploading to cloud…")

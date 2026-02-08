@@ -85,26 +85,23 @@ export default function FabricCanvas() {
       const fabric = await import("fabric")
       if (disposed || !canvasElRef.current) return
 
-      const { canvasWidth, canvasHeight, editorMaskPath, bleedPx: bpx } = deviceConfig
-      // Full canvas includes bleed on all sides for print-ready exports
-      const fullW = canvasWidth + 2 * bpx
-      const fullH = canvasHeight + 2 * bpx
+      const { canvasWidth, canvasHeight, editorMaskPath } = deviceConfig
 
       /* 1. Create the canvas ------------------------------------------------ */
       fabricCanvas = new fabric.Canvas(canvasElRef.current, {
-        width: fullW,
-        height: fullH,
+        width: canvasWidth,
+        height: canvasHeight,
         backgroundColor: "#ffffff",
         selection: true,
         preserveObjectStacking: true,
       })
 
-      /* 2. Apply clipPath — offset by bleed so user sees only phone shape --- */
+      /* 2. Apply clipPath — the rounded-rect phone outline ------------------ */
       const clipPath = new fabric.Path(editorMaskPath, {
         originX: "left",
         originY: "top",
-        left: bpx,
-        top: bpx,
+        left: 0,
+        top: 0,
         absolutePositioned: true,
       })
       fabricCanvas.clipPath = clipPath
@@ -120,8 +117,8 @@ export default function FabricCanvas() {
         overlayImg.set({
           originX: "left",
           originY: "top",
-          left: bpx,
-          top: bpx,
+          left: 0,
+          top: 0,
           scaleX: canvasWidth / (overlayImg.width || canvasWidth),
           scaleY: canvasHeight / (overlayImg.height || canvasHeight),
         })
@@ -170,16 +167,13 @@ export default function FabricCanvas() {
   }, [deviceConfig.handle])
 
   /* ---- Responsive scaling ----------------------------------------------- */
-  const fullW = deviceConfig.canvasWidth + 2 * deviceConfig.bleedPx
-  const fullH = deviceConfig.canvasHeight + 2 * deviceConfig.bleedPx
-
   useEffect(() => {
     function handleResize() {
       if (!containerRef.current) return
       const containerW = containerRef.current.clientWidth
       const containerH = containerRef.current.clientHeight
-      const scaleW = containerW / fullW
-      const scaleH = containerH / fullH
+      const scaleW = containerW / deviceConfig.canvasWidth
+      const scaleH = containerH / deviceConfig.canvasHeight
       // fit inside container on both axes, cap at 1×
       setDisplayScale(Math.min(1, scaleW, scaleH))
     }
@@ -187,11 +181,11 @@ export default function FabricCanvas() {
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [fullW, fullH])
+  }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight])
 
   const r = deviceConfig.cornerRadius
-  const w = fullW * displayScale
-  const h = fullH * displayScale
+  const w = deviceConfig.canvasWidth * displayScale
+  const h = deviceConfig.canvasHeight * displayScale
 
   /* ---- Render ----------------------------------------------------------- */
   return (
@@ -229,8 +223,8 @@ export default function FabricCanvas() {
             style={{
               transformOrigin: "top left",
               transform: `scale(${displayScale})`,
-              width: fullW,
-              height: fullH,
+              width: deviceConfig.canvasWidth,
+              height: deviceConfig.canvasHeight,
             }}
           />
 
@@ -238,8 +232,8 @@ export default function FabricCanvas() {
           <div
             className="absolute pointer-events-none"
             style={{
-              top: (deviceConfig.bleedPx + 28) * displayScale,
-              left: (deviceConfig.bleedPx + 28) * displayScale,
+              top: 28 * displayScale,
+              left: 28 * displayScale,
               width: 130 * displayScale,
               height: 130 * displayScale,
               borderRadius: 28 * displayScale,
