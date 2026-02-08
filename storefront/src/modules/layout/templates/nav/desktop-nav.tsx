@@ -267,6 +267,9 @@ function DesktopNavContent(props: {
         </div>
       </div>
 
+      <LocalizedClientLink href="/customizer" className={navLinkClass(normalized === "/customizer" || normalized.startsWith("/customizer/"))}>
+        Custom
+      </LocalizedClientLink>
       <LocalizedClientLink href="/deals" className={navLinkClass(isDeals)}>
         Deals
       </LocalizedClientLink>

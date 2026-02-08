@@ -6,6 +6,7 @@ import {
   Upload,
   Type,
   Palette,
+  Smartphone,
   ShoppingCart,
   Undo2,
   Redo2,
@@ -17,6 +18,7 @@ import UploadPanel from "./upload-panel"
 import TextPanel from "./text-panel"
 import BackgroundPanel from "./background-panel"
 import AddToCartPanel from "./add-to-cart-panel"
+import PreviewPanel from "./preview-panel"
 import { HttpTypes } from "@medusajs/types"
 
 const TOOLS: { id: ActiveTool; label: string; icon: React.ReactNode }[] = [
@@ -24,6 +26,7 @@ const TOOLS: { id: ActiveTool; label: string; icon: React.ReactNode }[] = [
   { id: "upload", label: "Uploads", icon: <Upload className="w-5 h-5" /> },
   { id: "text", label: "Text", icon: <Type className="w-5 h-5" /> },
   { id: "background", label: "Background", icon: <Palette className="w-5 h-5" /> },
+  { id: "preview", label: "Preview", icon: <Smartphone className="w-5 h-5" /> },
   { id: "cart", label: "Cart", icon: <ShoppingCart className="w-5 h-5" /> },
 ]
 
@@ -88,6 +91,7 @@ export default function Toolbar({ product, region }: ToolbarProps) {
         {state.activeTool === "upload" && <UploadPanel />}
         {state.activeTool === "text" && <TextPanel />}
         {state.activeTool === "background" && <BackgroundPanel />}
+        {state.activeTool === "preview" && <PreviewPanel />}
         {state.activeTool === "select" && (
           <div className="p-4 text-sm text-gray-400">
             <p className="mb-2">Click an object on the canvas to select it.</p>

@@ -14,7 +14,7 @@ import type { DeviceConfig } from "@lib/device-assets"
 /*  Types                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export type ActiveTool = "select" | "text" | "upload" | "background" | "cart"
+export type ActiveTool = "select" | "text" | "upload" | "background" | "preview" | "cart"
 
 export interface CustomizerState {
   activeTool: ActiveTool
