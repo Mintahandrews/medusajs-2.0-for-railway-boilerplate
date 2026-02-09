@@ -104,7 +104,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: pillW * s, height: pillH * s,
           borderRadius: pillR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={pillW * 0.50} cy={pillH * 0.32} d={ld} s={s} />
@@ -134,7 +134,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
@@ -165,7 +165,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
@@ -195,7 +195,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
@@ -225,7 +225,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
@@ -256,7 +256,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
@@ -332,7 +332,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: barW * s, height: barH * s,
           borderRadius: barR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={barW * 0.18} cy={barH * 0.50} d={ld} s={s} />
@@ -365,7 +365,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: barW * s, height: barH * s,
           borderRadius: barR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.3)`,
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
         }}
       >
         <Lens cx={barW * 0.22} cy={barH * 0.50} d={ld} s={s} />
@@ -480,6 +480,133 @@ function ToughCornerBumpers({
         />
       ))}
     </>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  3D Case shell elements                                                     */
+/* -------------------------------------------------------------------------- */
+
+/** Visible side button cutouts on the case edges */
+function CaseSideButtons({ h, s }: {
+  h: number; s: number
+}) {
+  const btnDepth = Math.max(2, 3 * s)
+  const btnBg = 'linear-gradient(to bottom, #333, #1a1a1a)'
+  const btnShadow = `inset 0 ${0.5 * s}px ${1 * s}px rgba(255,255,255,0.08)`
+
+  const buttons: Array<{ top: number; height: number; side: 'left' | 'right' }> = [
+    { top: h * 0.28, height: Math.max(16, 28 * s), side: 'right' },
+    { top: h * 0.18, height: Math.max(10, 18 * s), side: 'left' },
+    { top: h * 0.27, height: Math.max(10, 18 * s), side: 'left' },
+    { top: h * 0.11, height: Math.max(6, 10 * s), side: 'left' },
+  ]
+
+  return (
+    <>
+      {buttons.map((btn, i) => (
+        <div
+          key={i}
+          className="absolute pointer-events-none"
+          style={{
+            top: btn.top,
+            [btn.side]: -btnDepth,
+            width: btnDepth,
+            height: btn.height,
+            borderRadius: btnDepth / 2,
+            background: btnBg,
+            boxShadow: btnShadow,
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
+/** Bottom charging port and speaker grille cutouts */
+function CaseBottomPort({ w, h, s }: {
+  w: number; h: number; s: number
+}) {
+  const portW = Math.max(10, 16 * s)
+  const portH = Math.max(2.5, 3.5 * s)
+  const dotD = Math.max(1.5, 2 * s)
+  const dotGap = Math.max(3, 4 * s)
+  const cx = w / 2
+  const bottomY = h - portH / 2
+
+  return (
+    <>
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          left: cx - portW / 2,
+          top: bottomY,
+          width: portW,
+          height: portH,
+          borderRadius: portH / 2,
+          background: '#0a0a0a',
+          boxShadow: `inset 0 ${0.5 * s}px ${1 * s}px rgba(0,0,0,0.6)`,
+        }}
+      />
+      {[0, 1, 2].map((i) => (
+        <div
+          key={`sl${i}`}
+          className="absolute pointer-events-none"
+          style={{
+            left: cx - portW / 2 - (i + 1) * dotGap,
+            top: bottomY + (portH - dotD) / 2,
+            width: dotD,
+            height: dotD,
+            borderRadius: '50%',
+            background: '#0a0a0a',
+          }}
+        />
+      ))}
+      {[0, 1, 2].map((i) => (
+        <div
+          key={`sr${i}`}
+          className="absolute pointer-events-none"
+          style={{
+            left: cx + portW / 2 + i * dotGap + dotGap - dotD,
+            top: bottomY + (portH - dotD) / 2,
+            width: dotD,
+            height: dotD,
+            borderRadius: '50%',
+            background: '#0a0a0a',
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
+/** Material surface overlay — lighting and texture on the case back */
+function CaseSurfaceOverlay({ r, s, caseType }: {
+  r: number; s: number; caseType: CaseType
+}) {
+  const isGlossy = caseType === "clear"
+  return (
+    <div className="absolute inset-0 pointer-events-none z-[15]" style={{ borderRadius: r }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          borderRadius: r,
+          background: isGlossy
+            ? 'linear-gradient(175deg, rgba(255,255,255,0.14) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.06) 100%)'
+            : 'linear-gradient(175deg, rgba(255,255,255,0.06) 0%, transparent 25%, transparent 80%, rgba(0,0,0,0.04) 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          borderRadius: r,
+          boxShadow: [
+            `inset ${1 * s}px ${1 * s}px ${3 * s}px rgba(255,255,255,${isGlossy ? 0.12 : 0.05})`,
+            `inset -${1 * s}px -${1 * s}px ${3 * s}px rgba(0,0,0,0.08)`,
+          ].join(', '),
+        }}
+      />
+    </div>
   )
 }
 
@@ -629,8 +756,10 @@ export default function FabricCanvas() {
       const containerH = el!.clientHeight
       // Guard: skip if container hasn't laid out yet (0×0)
       if (containerW < 1 || containerH < 1) return
-      const scaleW = containerW / cw
-      const scaleH = containerH / ch
+      // Reserve space for case edge rim, side buttons, and shadow
+      const edgePad = 48
+      const scaleW = (containerW - edgePad) / cw
+      const scaleH = (containerH - edgePad) / ch
       const newScale = Math.min(1, scaleW, scaleH)
       setDisplayScale(newScale)
 
@@ -656,13 +785,21 @@ export default function FabricCanvas() {
   const r = deviceConfig.cornerRadius
   const w = deviceConfig.canvasWidth * displayScale
   const h = deviceConfig.canvasHeight * displayScale
+  const sr = r * displayScale // scaled radius
 
   /* ---- Case-type visual properties -------------------------------------- */
-  const frameWidth = caseType === "tough" ? Math.max(3, 5 * displayScale)
-    : caseType === "slim" ? Math.max(1, 1.5 * displayScale)
-    : Math.max(2, 3 * displayScale) // clear & magsafe — normal
+  // Edge thickness — how thick the case rim looks
+  const edgeW = caseType === "tough" ? Math.max(5, 8 * displayScale)
+    : caseType === "slim" ? Math.max(2, 3 * displayScale)
+    : Math.max(3, 5 * displayScale) // clear & magsafe
 
-  const frameColor = caseType === "clear" ? "rgba(180,180,180,0.5)" : "#1a1a1a"
+  const edgeColor = caseType === "clear" ? "#c8c8c8" : "#1a1a1a"
+  const isGlossy = caseType === "clear"
+
+  // Outer case body dimensions (canvas + rim on each side)
+  const outerW = w + 2 * edgeW
+  const outerH = h + 2 * edgeW
+  const outerR = sr + edgeW
 
   /* ---- Render ----------------------------------------------------------- */
   return (
@@ -670,30 +807,55 @@ export default function FabricCanvas() {
       ref={containerRef}
       className="flex items-center justify-center w-full h-full"
     >
-      {/* Phone frame wrapper */}
+      {/* Outer case body — the full 3D case shell */}
       <div
         className="relative"
-        style={{ width: w, height: h }}
+        style={{ width: outerW, height: outerH }}
       >
-        {/* Shadow behind the case */}
+        {/* Realistic multi-layer shadow beneath the case */}
         <div
-          className="absolute inset-0 bg-black/5"
+          className="absolute pointer-events-none"
           style={{
-            borderRadius: r * displayScale,
-            filter: "blur(20px)",
-            transform: "translateY(8px)",
+            inset: edgeW * 0.3,
+            borderRadius: outerR,
+            boxShadow: [
+              `0 ${2 * displayScale}px ${6 * displayScale}px rgba(0,0,0,0.1)`,
+              `0 ${6 * displayScale}px ${16 * displayScale}px rgba(0,0,0,0.12)`,
+              `0 ${12 * displayScale}px ${32 * displayScale}px rgba(0,0,0,0.14)`,
+            ].join(', '),
           }}
         />
 
-        {/* Canvas container — use box-shadow instead of border so the
-             content area stays exactly w×h and the clipPath aligns flush */}
+        {/* Case rim — the visible edge thickness with 3D lighting gradient */}
         <div
-          className="relative overflow-hidden"
+          className="absolute pointer-events-none"
           style={{
+            inset: 0,
+            borderRadius: outerR,
+            background: isGlossy
+              ? `linear-gradient(155deg, rgba(255,255,255,0.35) 0%, ${edgeColor} 20%, ${edgeColor} 80%, rgba(0,0,0,0.12) 100%)`
+              : `linear-gradient(155deg, #2e2e2e 0%, ${edgeColor} 20%, ${edgeColor} 80%, #111 100%)`,
+            boxShadow: isGlossy
+              ? `inset 0 ${1 * displayScale}px ${2 * displayScale}px rgba(255,255,255,0.3)`
+              : `inset 0 ${1 * displayScale}px ${2 * displayScale}px rgba(255,255,255,0.06)`,
+          }}
+        />
+
+        {/* Side buttons — volume (left), power (right), mute (left) */}
+        <CaseSideButtons h={outerH} s={displayScale} />
+
+        {/* Bottom port and speaker grille cutouts */}
+        <CaseBottomPort w={outerW} h={outerH} s={displayScale} />
+
+        {/* Canvas container — the back panel surface, inset by edgeW */}
+        <div
+          className="absolute overflow-hidden"
+          style={{
+            left: edgeW,
+            top: edgeW,
             width: w,
             height: h,
-            borderRadius: r * displayScale,
-            boxShadow: `0 0 0 ${frameWidth}px ${frameColor}`,
+            borderRadius: sr,
           }}
         >
           <canvas
@@ -703,13 +865,16 @@ export default function FabricCanvas() {
           {/* Device-specific camera module overlay */}
           <CameraOverlay config={deviceConfig} scale={displayScale} />
 
-          {/* Case-type visual overlays */}
-          <CaseTypeOverlay caseType={caseType} w={w} h={h} r={r * displayScale} s={displayScale} />
+          {/* Case-type visual overlays (clear sheen, magsafe ring) */}
+          <CaseTypeOverlay caseType={caseType} w={w} h={h} r={sr} s={displayScale} />
+
+          {/* Material surface + lighting overlay */}
+          <CaseSurfaceOverlay r={sr} s={displayScale} caseType={caseType} />
         </div>
 
-        {/* Tough case: corner bumper accents outside the frame */}
+        {/* Tough case: corner bumper accents on the outer shell */}
         {caseType === "tough" && (
-          <ToughCornerBumpers w={w} h={h} r={r * displayScale} s={displayScale} frameWidth={frameWidth} />
+          <ToughCornerBumpers w={outerW} h={outerH} r={outerR} s={displayScale} frameWidth={Math.max(1, 2 * displayScale)} />
         )}
       </div>
     </div>
