@@ -128,7 +128,7 @@ export async function addCustomizedToCart({
   variantId: string
   quantity: number
   countryCode: string
-  metadata: Record<string, unknown>
+  metadata: Record<string, string>
 }) {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
@@ -140,16 +140,45 @@ export async function addCustomizedToCart({
   }
 
   try {
-    await sdk.store.cart.createLineItem(
+    // Step 1: Create the line item (Medusa v2 Store API does NOT support metadata here)
+    const { cart: updatedCart } = await sdk.store.cart.createLineItem(
       cart.id,
       {
         variant_id: variantId,
         quantity,
-        metadata,
       },
       {},
       await getAuthHeaders()
     )
+
+    // Step 2: Find the newly added line item (last item with matching variant_id)
+    const newItem = [...(updatedCart.items || [])]
+      .reverse()
+      .find((item: any) => item.variant_id === variantId)
+
+    if (!newItem) {
+      throw new Error("Line item was created but could not be found in the cart")
+    }
+
+    // Step 3: Set metadata via custom backend endpoint
+    const backendUrl =
+      process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const metaRes = await fetch(`${backendUrl}/store/custom/line-item-metadata`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cart_id: cart.id,
+        line_item_id: newItem.id,
+        metadata,
+      }),
+    })
+
+    if (!metaRes.ok) {
+      const err = await metaRes.json().catch(() => ({}))
+      console.error("[addCustomizedToCart] metadata update failed:", err)
+      // Don't throw — the item IS in the cart, metadata just didn't save
+    }
+
     revalidateTag("cart")
   } catch (error: any) {
     const msg =

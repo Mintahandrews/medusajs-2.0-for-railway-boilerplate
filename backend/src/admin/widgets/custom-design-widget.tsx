@@ -28,26 +28,48 @@ type CustomLineItem = {
 /**
  * Admin widget that displays custom design previews for customized order items.
  * Shown on the order detail page in the Medusa admin dashboard.
+ *
+ * The widget receives { data } where data is the AdminOrder object directly.
+ * It extracts line items with is_customized metadata and shows preview/print links.
  */
 const CustomDesignWidget = ({ data }: { data: any }) => {
   const [customItems, setCustomItems] = useState<CustomLineItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!data?.order?.id) return
+    if (!data?.id) {
+      setLoading(false)
+      return
+    }
 
-    // Extract customized line items from the order
-    const items = (data.order.items || [])
-      .filter((item: any) => item.metadata?.is_customized === "true")
+    // The order data from the widget prop may or may not include items.
+    // Try extracting items from the data directly first.
+    const orderItems = data.items || []
+
+    const items = orderItems
+      .filter((item: any) => {
+        const meta = item.metadata
+        return meta?.is_customized === "true" || meta?.is_customized === true
+      })
       .map((item: any) => ({
         id: item.id,
         title: item.title || item.product_title || "Custom Case",
         variant_title: item.variant_title || item.variant?.title || "",
         quantity: item.quantity,
-        metadata: item.metadata as LineItemMetadata,
+        metadata: (item.metadata || {}) as LineItemMetadata,
       }))
 
     setCustomItems(items)
-  }, [data?.order?.id, data?.order?.items])
+    setLoading(false)
+  }, [data])
+
+  if (loading) {
+    return (
+      <Container className="p-6">
+        <Text className="text-ui-fg-subtle text-sm">Loading custom designs…</Text>
+      </Container>
+    )
+  }
 
   if (customItems.length === 0) return null
 
@@ -122,7 +144,7 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
                   >
-                    View Preview
+                    🔍 View Preview
                   </a>
                 )}
                 {item.metadata.print_file && (
@@ -132,7 +154,7 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs font-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
                   >
-                    Download Print File
+                    📥 Download Print File
                   </a>
                 )}
               </div>
