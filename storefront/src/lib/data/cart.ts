@@ -163,9 +163,14 @@ export async function addCustomizedToCart({
     // Step 3: Set metadata via custom backend endpoint
     const backendUrl =
       process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const publishableKey =
+      process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
     const metaRes = await fetch(`${backendUrl}/store/custom/line-item-metadata`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(publishableKey ? { "x-publishable-api-key": publishableKey } : {}),
+      },
       body: JSON.stringify({
         cart_id: cart.id,
         line_item_id: newItem.id,

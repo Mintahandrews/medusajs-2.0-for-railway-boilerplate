@@ -30,11 +30,16 @@ export async function uploadDesignFiles(
     return idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl
   }
 
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
   const response = await fetch(
     `${getBackendUrl()}/store/custom/design-upload`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(publishableKey ? { "x-publishable-api-key": publishableKey } : {}),
+      },
       body: JSON.stringify({
         cart_id: cartId,
         files: [

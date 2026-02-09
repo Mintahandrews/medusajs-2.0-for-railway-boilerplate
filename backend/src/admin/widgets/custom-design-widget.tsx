@@ -25,6 +25,11 @@ type CustomLineItem = {
   metadata: LineItemMetadata
 }
 
+/** Check if a URL is a cloud URL (not a base64 data URL) */
+function isCloudUrl(url?: string): boolean {
+  return !!url && (url.startsWith("http://") || url.startsWith("https://"))
+}
+
 /**
  * Admin widget that displays custom design previews for customized order items.
  * Shown on the order detail page in the Medusa admin dashboard.
@@ -42,8 +47,6 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
       return
     }
 
-    // The order data from the widget prop may or may not include items.
-    // Try extracting items from the data directly first.
     const orderItems = data.items || []
 
     const items = orderItems
@@ -66,7 +69,7 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
   if (loading) {
     return (
       <Container className="p-6">
-        <Text className="text-ui-fg-subtle text-sm">Loading custom designs…</Text>
+        <Text className="text-ui-fg-subtle text-sm">Loading custom designs...</Text>
       </Container>
     )
   }
@@ -84,83 +87,107 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
       </Text>
 
       <div className="grid gap-4">
-        {customItems.map((item) => (
-          <div
-            key={item.id}
-            className="flex gap-4 p-4 rounded-lg border border-ui-border-base bg-ui-bg-subtle"
-          >
-            {/* Preview thumbnail */}
-            {item.metadata.preview_image && (
+        {customItems.map((item) => {
+          const hasPreview = !!item.metadata.preview_image
+          const hasCloudPreview = isCloudUrl(item.metadata.preview_image)
+          const hasPrintFile = isCloudUrl(item.metadata.print_file)
+
+          return (
+            <div
+              key={item.id}
+              className="flex gap-4 p-4 rounded-lg border border-ui-border-base bg-ui-bg-subtle"
+            >
+              {/* Preview thumbnail — works with both cloud URLs and base64 data URLs */}
               <div className="shrink-0">
-                <a
-                  href={item.metadata.preview_image}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={item.metadata.preview_image}
-                    alt="Design preview"
-                    className="w-24 h-36 object-cover rounded-md border border-ui-border-base shadow-sm hover:shadow-md transition-shadow"
-                  />
-                </a>
-              </div>
-            )}
-
-            {/* Item info */}
-            <div className="flex-1 min-w-0">
-              <Text weight="plus" className="truncate">
-                {item.title}
-              </Text>
-              {item.variant_title && (
-                <Text size="small" className="text-ui-fg-subtle">
-                  {item.variant_title}
-                </Text>
-              )}
-              <Text size="small" className="text-ui-fg-subtle">
-                Qty: {item.quantity}
-              </Text>
-              {item.metadata.case_type && (
-                <Text size="small" className="text-ui-fg-subtle">
-                  Case Type: {item.metadata.case_type.charAt(0).toUpperCase() + item.metadata.case_type.slice(1)}
-                </Text>
-              )}
-              {item.metadata.device_model && (
-                <Text size="small" className="text-ui-fg-subtle">
-                  Device: {item.metadata.device_model}
-                </Text>
-              )}
-              {item.metadata.print_dpi && item.metadata.print_width_mm && item.metadata.print_height_mm && (
-                <Text size="small" className="text-ui-fg-subtle">
-                  Print: {item.metadata.print_dpi} DPI &middot; {item.metadata.print_width_mm}&times;{item.metadata.print_height_mm}mm &middot; {item.metadata.print_bleed_mm}mm bleed
-                </Text>
-              )}
-
-              {/* Action links */}
-              <div className="flex flex-wrap gap-3 mt-3">
-                {item.metadata.preview_image && (
+                {hasPreview ? (
                   <a
-                    href={item.metadata.preview_image}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+                    href={hasCloudPreview ? item.metadata.preview_image : undefined}
+                    target={hasCloudPreview ? "_blank" : undefined}
+                    rel={hasCloudPreview ? "noopener noreferrer" : undefined}
                   >
-                    🔍 View Preview
+                    <img
+                      src={item.metadata.preview_image}
+                      alt="Design preview"
+                      className="w-28 h-40 object-cover rounded-md border border-ui-border-base shadow-sm hover:shadow-md transition-shadow"
+                    />
                   </a>
+                ) : (
+                  <div className="w-28 h-40 rounded-md border border-dashed border-ui-border-base bg-ui-bg-base flex items-center justify-center">
+                    <Text size="small" className="text-ui-fg-muted text-center px-2">
+                      No preview
+                    </Text>
+                  </div>
                 )}
-                {item.metadata.print_file && (
-                  <a
-                    href={item.metadata.print_file}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-                  >
-                    📥 Download Print File
-                  </a>
+              </div>
+
+              {/* Item info */}
+              <div className="flex-1 min-w-0">
+                <Text weight="plus" className="truncate">
+                  {item.title}
+                </Text>
+                {item.variant_title && (
+                  <Text size="small" className="text-ui-fg-subtle">
+                    {item.variant_title}
+                  </Text>
+                )}
+                <Text size="small" className="text-ui-fg-subtle">
+                  Qty: {item.quantity}
+                </Text>
+                {item.metadata.case_type && (
+                  <Text size="small" className="text-ui-fg-subtle">
+                    Case Type: {item.metadata.case_type.charAt(0).toUpperCase() + item.metadata.case_type.slice(1)}
+                  </Text>
+                )}
+                {item.metadata.device_model && (
+                  <Text size="small" className="text-ui-fg-subtle">
+                    Device: {item.metadata.device_model}
+                  </Text>
+                )}
+                {item.metadata.print_dpi && item.metadata.print_width_mm && item.metadata.print_height_mm && (
+                  <Text size="small" className="text-ui-fg-subtle">
+                    Print: {item.metadata.print_dpi} DPI &middot; {item.metadata.print_width_mm}&times;{item.metadata.print_height_mm}mm &middot; {item.metadata.print_bleed_mm}mm bleed
+                  </Text>
+                )}
+
+                {/* Action buttons */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {hasCloudPreview && (
+                    <a
+                      href={item.metadata.preview_image}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-ui-bg-base border border-ui-border-base text-ui-fg-base hover:bg-ui-bg-base-hover transition-colors"
+                    >
+                      View Preview
+                    </a>
+                  )}
+                  {hasPrintFile && (
+                    <a
+                      href={item.metadata.print_file}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-ui-button-inverted text-ui-fg-on-inverted hover:bg-ui-button-inverted-hover transition-colors"
+                    >
+                      Download Print File
+                    </a>
+                  )}
+                </div>
+
+                {/* Warning when cloud files are missing */}
+                {!hasPrintFile && (
+                  <div className="mt-3 px-3 py-2 rounded-md bg-ui-bg-base border border-orange-200">
+                    <Text size="small" className="text-orange-700">
+                      Print file not available. The cloud upload may have failed during checkout.
+                      {hasPreview && !hasCloudPreview && " A low-res preview thumbnail is shown instead."}
+                      {" "}Contact the customer if a high-resolution print file is needed.
+                    </Text>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </Container>
   )

@@ -73,9 +73,14 @@ export async function generateAiPreview(
   // Downsize large canvas exports to keep payload under backend limits
   const image = await downsizeImage(imageDataUrl, 1024)
 
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
   const res = await fetch(`${getBackendUrl()}/store/custom/ai-preview`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(publishableKey ? { "x-publishable-api-key": publishableKey } : {}),
+    },
     body: JSON.stringify({
       image,
       scene,

@@ -8,6 +8,31 @@ import { addCustomizedToCart, ensureCart } from "@lib/data/cart"
 import { uploadDesignFiles } from "@lib/data/design-upload"
 import { HttpTypes } from "@medusajs/types"
 
+/**
+ * Downsize a data-URL image to a small thumbnail for metadata fallback.
+ * Returns a base64 data URL that fits within Medusa's metadata size limits.
+ */
+function downsizeToThumbnail(dataUrl: string, maxDim: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      const ratio = Math.min(maxDim / width, maxDim / height, 1)
+      width = Math.round(width * ratio)
+      height = Math.round(height * ratio)
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext("2d")
+      if (!ctx) return reject(new Error("No 2D context"))
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL("image/jpeg", 0.7))
+    }
+    img.onerror = () => reject(new Error("Image load failed"))
+    img.src = dataUrl
+  })
+}
+
 interface Props {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
@@ -78,8 +103,14 @@ export default function AddToCartPanel({ product, region }: Props) {
         printFileUrl = uploaded.printFileUrl
         printFileKey = uploaded.printFileKey
       } catch (uploadErr) {
-        console.warn("[Customizer] Cloud upload failed, continuing with basic metadata:", uploadErr)
-        // Fall through — we'll still add to cart without cloud URLs
+        console.warn("[Customizer] Cloud upload failed, storing thumbnail fallback:", uploadErr)
+        // Fallback: store a small preview thumbnail as base64 in metadata
+        // so the admin always has something to display
+        try {
+          previewUrl = await downsizeToThumbnail(previewDataUrl, 300)
+        } catch {
+          // Last resort — no preview at all
+        }
       }
 
       // 4. Add to cart with flat metadata (no nested objects, no huge canvas_json)
