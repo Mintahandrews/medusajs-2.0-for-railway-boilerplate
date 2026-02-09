@@ -1,4 +1,4 @@
-import { defineWidgetConfig } from "@medusajs/admin-shared"
+import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 
