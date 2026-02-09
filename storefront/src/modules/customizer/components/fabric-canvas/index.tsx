@@ -1,8 +1,42 @@
 "use client"
 
-import React, { useRef, useEffect, useState, useCallback } from "react"
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { useCustomizer, type CaseType } from "../../context"
 import type { DeviceConfig } from "@lib/device-assets"
+
+/* -------------------------------------------------------------------------- */
+/*  Color utilities for case rim                                               */
+/* -------------------------------------------------------------------------- */
+
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "")
+  if (h.length === 3) {
+    return [parseInt(h[0] + h[0], 16), parseInt(h[1] + h[1], 16), parseInt(h[2] + h[2], 16)]
+  }
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return "#" + [r, g, b].map((c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, "0")).join("")
+}
+
+/** Darken a hex color by a factor (0 = black, 1 = original) */
+function darken(hex: string, factor: number): string {
+  const [r, g, b] = hexToRgb(hex)
+  return rgbToHex(r * factor, g * factor, b * factor)
+}
+
+/** Lighten a hex color by mixing with white */
+function lighten(hex: string, factor: number): string {
+  const [r, g, b] = hexToRgb(hex)
+  return rgbToHex(r + (255 - r) * factor, g + (255 - g) * factor, b + (255 - b) * factor)
+}
+
+/** Get perceived brightness (0–255) */
+function luminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex)
+  return 0.299 * r + 0.587 * g + 0.114 * b
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Camera module overlay — accurate dimensions from device specs              */
@@ -42,35 +76,69 @@ function getCameraFamily(handle: string): string {
   return "iphone-diagonal"
 }
 
-/** Render a single CSS lens circle */
+/** Render a single camera component (lens / flash / sensor / mic) */
 function Lens({
   cx, cy, d, s, type = "lens",
 }: {
   cx: number; cy: number; d: number; s: number
-  type?: "lens" | "flash" | "sensor"
+  type?: "lens" | "flash" | "sensor" | "mic"
 }) {
-  const base = {
-    position: "absolute" as const,
+  const sz = d * s
+  const base: React.CSSProperties = {
+    position: "absolute",
     left: (cx - d / 2) * s,
     top: (cy - d / 2) * s,
-    width: d * s,
-    height: d * s,
+    width: sz,
+    height: sz,
     borderRadius: "50%",
   }
+
   if (type === "flash") {
-    return <div style={{ ...base, background: "radial-gradient(circle, #ffeebb 30%, #997744 100%)" }} />
-  }
-  if (type === "sensor") {
-    return <div style={{ ...base, background: "#1a1a1a", boxShadow: `inset 0 0 ${1.5 * s}px rgba(60,60,60,0.6)` }} />
-  }
-  return (
-    <div
-      style={{
+    return (
+      <div style={{
         ...base,
-        background: "radial-gradient(circle, #1a1a3a 40%, #0d0d1a 70%, #333 100%)",
-        boxShadow: `inset 0 0 ${3 * s}px rgba(100,100,255,0.15), 0 0 0 ${1.5 * s}px rgba(80,80,80,0.6)`,
-      }}
-    />
+        background: "radial-gradient(circle, #ffeebb 15%, #cc9944 55%, #886633 100%)",
+        boxShadow: `0 0 ${2 * s}px rgba(255,238,187,0.2), 0 0 0 ${0.5 * s}px rgba(150,120,60,0.5)`,
+      }} />
+    )
+  }
+
+  if (type === "sensor") {
+    return (
+      <div style={{
+        ...base,
+        background: "radial-gradient(circle, #1a1a1a 50%, #111 100%)",
+        boxShadow: `inset 0 0 ${1.5 * s}px rgba(40,40,40,0.5), 0 0 0 ${0.5 * s}px rgba(80,80,80,0.4)`,
+      }} />
+    )
+  }
+
+  if (type === "mic") {
+    return <div style={{ ...base, background: "#0a0a0a", boxShadow: `inset 0 0 ${0.5 * s}px rgba(0,0,0,0.5)` }} />
+  }
+
+  // Camera lens — realistic multi-ring glass
+  const ring = Math.max(1, sz * 0.07)
+  return (
+    <div style={{ ...base, overflow: "hidden" }}>
+      {/* Metal bezel ring with directional lighting */}
+      <div style={{
+        position: "absolute", inset: 0, borderRadius: "50%",
+        background: "linear-gradient(145deg, #555 0%, #2a2a2a 40%, #3a3a3a 100%)",
+        boxShadow: `0 0 0 ${0.5 * s}px rgba(70,70,70,0.5)`,
+      }} />
+      {/* Dark glass lens area */}
+      <div style={{
+        position: "absolute", inset: ring, borderRadius: "50%",
+        background: "radial-gradient(circle at 42% 42%, #1a1a3a 0%, #0a0a18 55%, #151515 100%)",
+        boxShadow: `inset 0 0 ${2.5 * s}px rgba(0,0,0,0.6)`,
+      }} />
+      {/* Glass specular highlight */}
+      <div style={{
+        position: "absolute", inset: ring * 1.5, borderRadius: "50%",
+        background: "linear-gradient(140deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 30%, transparent 50%)",
+      }} />
+    </div>
   )
 }
 
@@ -84,18 +152,23 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
   const ch = config.canvasHeight
   const s = scale
 
+  // Common module shadow for raised camera bump effect
+  const modShadow = `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`
+
   /* ================================================================== */
   /*  1. iPhone 16 / 16 Plus — vertical pill, 2 stacked lenses          */
-  /*  Real: pill ~14mm W × 28mm H on 71.6mm body                       */
+  /*  Real: pill ~14mm W × 30mm H on 71.6mm body, 2×48MP lenses        */
+  /*  Flash LED centered between lenses on right side of pill           */
   /* ================================================================== */
   if (family === "iphone-16-vertical") {
     const pillW = Math.round(cw * 0.196)
-    const pillH = Math.round(ch * 0.190)
+    const pillH = Math.round(ch * 0.203)
     const pillX = Math.round(cw * 0.112)
     const pillY = Math.round(ch * 0.034)
     const pillR = Math.round(pillW / 2)
-    const ld = Math.round(pillW * 0.78)
-    const flashD = Math.round(pillW * 0.18)
+    const ld = Math.round(pillW * 0.76)
+    const flashD = Math.round(pillW * 0.16)
+    const micD = Math.round(pillW * 0.06)
     return (
       <div
         className="absolute pointer-events-none z-10"
@@ -104,28 +177,36 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: pillW * s, height: pillH * s,
           borderRadius: pillR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={pillW * 0.50} cy={pillH * 0.32} d={ld} s={s} />
-        <Lens cx={pillW * 0.50} cy={pillH * 0.68} d={ld} s={s} />
-        <Lens cx={pillW * 0.82} cy={pillH * 0.12} d={flashD} s={s} type="flash" />
+        {/* 48MP Fusion — top */}
+        <Lens cx={pillW * 0.50} cy={pillH * 0.30} d={ld} s={s} />
+        {/* 12MP Ultra Wide — bottom */}
+        <Lens cx={pillW * 0.50} cy={pillH * 0.70} d={ld} s={s} />
+        {/* True Tone flash — right side, between lenses */}
+        <Lens cx={pillW * 0.84} cy={pillH * 0.50} d={flashD} s={s} type="flash" />
+        {/* Mic hole */}
+        <Lens cx={pillW * 0.16} cy={pillH * 0.50} d={micD} s={s} type="mic" />
       </div>
     )
   }
 
   /* ================================================================== */
-  /*  2. iPhone 16 Pro / Pro Max — larger triple module (~39mm)          */
-  /*  Real: module ~39mm on 71.5mm body → 54.5% of width                */
+  /*  2. iPhone 16 Pro / Pro Max — larger triple in ~40mm module         */
+  /*  Real: ~40mm on 71.5mm body → 56% width. L-shaped lens layout:     */
+  /*  UW=top-left, Main=top-right, Tele=bottom-left                     */
+  /*  Flash + LiDAR on right side                                       */
   /* ================================================================== */
   if (family === "iphone-16-pro-triple") {
-    const mod = Math.round(cw * 0.545)
-    const modX = Math.round(cw * 0.044)
-    const modY = Math.round(ch * 0.021)
-    const modR = Math.round(mod * 0.26)
-    const ld = Math.round(mod * 0.34)
-    const flashD = Math.round(mod * 0.09)
-    const sensorD = Math.round(mod * 0.06)
+    const mod = Math.round(cw * 0.560)
+    const modX = Math.round(cw * 0.040)
+    const modY = Math.round(ch * 0.020)
+    const modR = Math.round(mod * 0.25)
+    const ld = Math.round(mod * 0.33)
+    const flashD = Math.round(mod * 0.08)
+    const sensorD = Math.round(mod * 0.065)
+    const micD = Math.round(mod * 0.03)
     return (
       <div
         className="absolute pointer-events-none z-10"
@@ -134,29 +215,38 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
-        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
-        <Lens cx={mod * 0.28} cy={mod * 0.70} d={sensorD} s={s} type="sensor" />
+        {/* 48MP Ultra Wide — top-left */}
+        <Lens cx={mod * 0.31} cy={mod * 0.31} d={ld} s={s} />
+        {/* 48MP Fusion/Main — top-right */}
+        <Lens cx={mod * 0.69} cy={mod * 0.31} d={ld} s={s} />
+        {/* 12MP 5× Telephoto — bottom-left */}
+        <Lens cx={mod * 0.31} cy={mod * 0.69} d={ld} s={s} />
+        {/* True Tone flash — right center */}
+        <Lens cx={mod * 0.69} cy={mod * 0.57} d={flashD} s={s} type="flash" />
+        {/* LiDAR scanner — right bottom */}
+        <Lens cx={mod * 0.69} cy={mod * 0.76} d={sensorD} s={s} type="sensor" />
+        {/* Mic hole */}
+        <Lens cx={mod * 0.50} cy={mod * 0.50} d={micD} s={s} type="mic" />
       </div>
     )
   }
 
   /* ================================================================== */
   /*  3. iPhone 11 Pro / Pro Max — triple in ~36mm module                */
-  /*  Real: module ~36mm on 71.4mm body → 50.4% of width                */
+  /*  Real: equilateral triangle layout (no LiDAR on 11 series)         */
+  /*  UW=top-left, Wide=top-right, Tele=bottom-center                   */
   /* ================================================================== */
   if (family === "iphone-11-triple") {
     const mod = Math.round(cw * 0.504)
     const modX = Math.round(cw * 0.050)
     const modY = Math.round(ch * 0.025)
     const modR = Math.round(mod * 0.27)
-    const ld = Math.round(mod * 0.36)
-    const flashD = Math.round(mod * 0.09)
+    const ld = Math.round(mod * 0.34)
+    const flashD = Math.round(mod * 0.08)
+    const micD = Math.round(mod * 0.03)
     return (
       <div
         className="absolute pointer-events-none z-10"
@@ -165,20 +255,26 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
-        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
+        {/* Ultra Wide — top-left */}
+        <Lens cx={mod * 0.31} cy={mod * 0.30} d={ld} s={s} />
+        {/* Wide — top-right */}
+        <Lens cx={mod * 0.69} cy={mod * 0.30} d={ld} s={s} />
+        {/* Telephoto — bottom-center */}
+        <Lens cx={mod * 0.50} cy={mod * 0.72} d={ld} s={s} />
+        {/* Flash — right side between top and bottom lenses */}
+        <Lens cx={mod * 0.77} cy={mod * 0.56} d={flashD} s={s} type="flash" />
+        {/* Mic */}
+        <Lens cx={mod * 0.23} cy={mod * 0.56} d={micD} s={s} type="mic" />
       </div>
     )
   }
 
   /* ================================================================== */
   /*  4. iPhone 11 standard — smaller dual in ~25mm module               */
-  /*  Real: module ~25mm on 75.7mm body → 33% of width                  */
+  /*  Real: diagonal layout — UW top-left, Wide bottom-right            */
   /* ================================================================== */
   if (family === "iphone-11-dual") {
     const mod = Math.round(cw * 0.330)
@@ -186,7 +282,7 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
     const modY = Math.round(ch * 0.028)
     const modR = Math.round(mod * 0.28)
     const ld = Math.round(mod * 0.40)
-    const flashD = Math.round(mod * 0.12)
+    const flashD = Math.round(mod * 0.11)
     return (
       <div
         className="absolute pointer-events-none z-10"
@@ -195,28 +291,33 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
-        <Lens cx={mod * 0.67} cy={mod * 0.67} d={ld} s={s} />
-        <Lens cx={mod * 0.67} cy={mod * 0.33} d={flashD} s={s} type="flash" />
+        {/* Ultra Wide — top-left */}
+        <Lens cx={mod * 0.34} cy={mod * 0.34} d={ld} s={s} />
+        {/* Wide — bottom-right */}
+        <Lens cx={mod * 0.66} cy={mod * 0.66} d={ld} s={s} />
+        {/* Flash — top-right */}
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
   /* ================================================================== */
-  /*  5. iPhone 12–15 Pro — triple in ~36mm module                      */
-  /*  Real: module ~36mm on 71.5mm body → 50.3% of width                */
+  /*  5. iPhone 12–15 Pro — triple in ~36–38mm module                   */
+  /*  Real: L-shaped layout — UW top-left, Wide top-right,              */
+  /*  Tele bottom-left. Flash + LiDAR on right side.                    */
   /* ================================================================== */
   if (family === "iphone-triple") {
-    const mod = Math.round(cw * 0.503)
-    const modX = Math.round(cw * 0.049)
-    const modY = Math.round(ch * 0.023)
-    const modR = Math.round(mod * 0.27)
-    const ld = Math.round(mod * 0.35)
-    const flashD = Math.round(mod * 0.09)
+    const mod = Math.round(cw * 0.510)
+    const modX = Math.round(cw * 0.046)
+    const modY = Math.round(ch * 0.022)
+    const modR = Math.round(mod * 0.26)
+    const ld = Math.round(mod * 0.34)
+    const flashD = Math.round(mod * 0.08)
     const sensorD = Math.round(mod * 0.06)
+    const micD = Math.round(mod * 0.03)
     return (
       <div
         className="absolute pointer-events-none z-10"
@@ -225,21 +326,29 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
-        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
-        <Lens cx={mod * 0.28} cy={mod * 0.70} d={sensorD} s={s} type="sensor" />
+        {/* Ultra Wide — top-left */}
+        <Lens cx={mod * 0.31} cy={mod * 0.31} d={ld} s={s} />
+        {/* Wide/Main — top-right */}
+        <Lens cx={mod * 0.69} cy={mod * 0.31} d={ld} s={s} />
+        {/* Telephoto — bottom-left */}
+        <Lens cx={mod * 0.31} cy={mod * 0.69} d={ld} s={s} />
+        {/* Flash — right center */}
+        <Lens cx={mod * 0.68} cy={mod * 0.56} d={flashD} s={s} type="flash" />
+        {/* LiDAR — right bottom */}
+        <Lens cx={mod * 0.68} cy={mod * 0.76} d={sensorD} s={s} type="sensor" />
+        {/* Mic */}
+        <Lens cx={mod * 0.50} cy={mod * 0.50} d={micD} s={s} type="mic" />
       </div>
     )
   }
 
   /* ================================================================== */
   /*  6. iPhone 12–15 standard / mini / Plus — diagonal dual ~28mm      */
-  /*  Real: module ~28mm on 71.5mm body → 39.2% of width                */
+  /*  Real: 12=UW top-right/Wide bottom-left, 13+=reversed diagonal     */
+  /*  Using 13+ layout (covers most models): Wide top-right, UW bot-left */
   /* ================================================================== */
   if (family === "iphone-diagonal") {
     const mod = Math.round(cw * 0.392)
@@ -256,73 +365,88 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: mod * s, height: mod * s,
           borderRadius: modR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
-        <Lens cx={mod * 0.67} cy={mod * 0.67} d={ld} s={s} />
-        <Lens cx={mod * 0.67} cy={mod * 0.33} d={flashD} s={s} type="flash" />
+        {/* Wide/Main — top-right */}
+        <Lens cx={mod * 0.65} cy={mod * 0.35} d={ld} s={s} />
+        {/* Ultra Wide — bottom-left */}
+        <Lens cx={mod * 0.35} cy={mod * 0.65} d={ld} s={s} />
+        {/* Flash — top-left */}
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
   /* ================================================================== */
   /*  7. Samsung Galaxy S23/S24/S25 — 3 individual raised circles       */
-  /*  Real: lens ~13mm on ~70.6mm body, cx ~17%, gap ~9.5% of height    */
+  /*  Real: ~13mm lenses vertically stacked on left side, equal gaps    */
+  /*  50MP main (top), 12MP UW (mid), 10MP 3× tele (bottom)            */
   /* ================================================================== */
   if (family === "samsung-triple") {
-    const ld = Math.round(cw * 0.184)
-    const cx = Math.round(cw * 0.170)
-    const startY = Math.round(ch * 0.095)
-    const gap = Math.round(ch * 0.095)
-    const flashD = Math.round(cw * 0.04)
+    const ld = Math.round(cw * 0.175)
+    const cx = Math.round(cw * 0.165)
+    const startY = Math.round(ch * 0.085)
+    const gap = Math.round(ch * 0.090)
+    const flashD = Math.round(cw * 0.035)
     return (
       <div className="absolute pointer-events-none z-10 inset-0">
+        {/* 50MP Main — top */}
         <Lens cx={cx} cy={startY} d={ld} s={s} />
+        {/* 12MP Ultra Wide — middle */}
         <Lens cx={cx} cy={startY + gap} d={ld} s={s} />
+        {/* 10MP Telephoto — bottom */}
         <Lens cx={cx} cy={startY + gap * 2} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap * 2 + gap * 0.65} d={flashD} s={s} type="flash" />
+        {/* Flash */}
+        <Lens cx={cx} cy={startY + gap * 2.65} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
   /* ================================================================== */
   /*  8. Samsung Galaxy S Ultra — 4 individual circles, graduated sizes */
-  /*  Real: lenses decrease top→bottom: 200MP wide > ultrawide > 3x    */
-  /*  tele > 5x periscope. cx ~15.2%, varied gaps                       */
+  /*  Real: 200MP main > 50MP UW > 10MP 3× tele > 50MP 5× periscope   */
+  /*  Vertically stacked on left side, graduated lens diameters          */
   /* ================================================================== */
   if (family === "samsung-quad") {
-    const cx = Math.round(cw * 0.152)
-    const startY = Math.round(ch * 0.075)
-    const gap = Math.round(ch * 0.082)
-    const d1 = Math.round(cw * 0.185)  // wide — largest
-    const d2 = Math.round(cw * 0.170)  // ultrawide
-    const d3 = Math.round(cw * 0.150)  // 3x telephoto
-    const d4 = Math.round(cw * 0.135)  // 5x periscope — smallest
-    const flashD = Math.round(cw * 0.04)
+    const cx = Math.round(cw * 0.155)
+    const startY = Math.round(ch * 0.070)
+    const gap = Math.round(ch * 0.078)
+    const d1 = Math.round(cw * 0.180)
+    const d2 = Math.round(cw * 0.165)
+    const d3 = Math.round(cw * 0.148)
+    const d4 = Math.round(cw * 0.132)
+    const flashD = Math.round(cw * 0.035)
     return (
       <div className="absolute pointer-events-none z-10 inset-0">
+        {/* 200MP Main — largest, top */}
         <Lens cx={cx} cy={startY} d={d1} s={s} />
+        {/* 50MP Ultra Wide */}
         <Lens cx={cx} cy={startY + gap} d={d2} s={s} />
+        {/* 10MP 3× Telephoto */}
         <Lens cx={cx} cy={startY + gap * 2.05} d={d3} s={s} />
+        {/* 50MP 5× Periscope — smallest */}
         <Lens cx={cx} cy={startY + gap * 3.15} d={d4} s={s} />
-        <Lens cx={cx} cy={startY + gap * 3.15 + gap * 0.7} d={flashD} s={s} type="flash" />
+        {/* Flash */}
+        <Lens cx={cx} cy={startY + gap * 3.15 + gap * 0.72} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
   /* ================================================================== */
   /*  9. Google Pixel 8 / 8 Pro — edge-to-edge camera visor bar         */
-  /*  Real: visor ~18-20mm tall, spans full width flush with edges       */
+  /*  Real: visor ~18mm tall, spans full width flush with edges          */
+  /*  Lenses horizontally arranged: Wide, UW, (Pro: Tele), Flash        */
   /* ================================================================== */
   if (family === "pixel-8-bar") {
-    const barW = Math.round(cw * 0.92)
-    const barH = Math.round(ch * 0.115)
+    const barW = Math.round(cw * 0.94)
+    const barH = Math.round(ch * 0.112)
     const barX = Math.round((cw - barW) / 2)
-    const barY = Math.round(ch * 0.045)
-    const barR = Math.round(barH * 0.15)
-    const ld = Math.round(barH * 0.58)
-    const flashD = Math.round(barH * 0.25)
+    const barY = Math.round(ch * 0.042)
+    const barR = Math.round(barH * 0.14)
+    const ld = Math.round(barH * 0.56)
+    const flashD = Math.round(barH * 0.22)
+    const sensorD = Math.round(barH * 0.14)
     const isPro = config.handle.includes("pro")
     return (
       <div
@@ -332,30 +456,37 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: barW * s, height: barH * s,
           borderRadius: barR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={barW * 0.18} cy={barH * 0.50} d={ld} s={s} />
-        <Lens cx={barW * 0.36} cy={barH * 0.50} d={ld} s={s} />
-        {isPro && <Lens cx={barW * 0.54} cy={barH * 0.50} d={ld * 0.85} s={s} />}
-        <Lens cx={barW * (isPro ? 0.72 : 0.56)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
-        {isPro && <Lens cx={barW * 0.82} cy={barH * 0.50} d={flashD * 0.6} s={s} type="sensor" />}
+        {/* Main — left */}
+        <Lens cx={barW * 0.17} cy={barH * 0.50} d={ld} s={s} />
+        {/* Ultra Wide */}
+        <Lens cx={barW * 0.34} cy={barH * 0.50} d={ld} s={s} />
+        {/* Telephoto (Pro only) */}
+        {isPro && <Lens cx={barW * 0.51} cy={barH * 0.50} d={ld * 0.82} s={s} />}
+        {/* Flash */}
+        <Lens cx={barW * (isPro ? 0.68 : 0.54)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
+        {/* Spectral sensor (Pro only) */}
+        {isPro && <Lens cx={barW * 0.79} cy={barH * 0.50} d={sensorD} s={s} type="sensor" />}
       </div>
     )
   }
 
   /* ================================================================== */
   /*  10. Google Pixel 9 / 9 Pro / 9 Pro XL — floating pill island      */
-  /*  Real: pill ~18mm tall, doesn't touch edges, rounded pill ends      */
+  /*  Real: pill ~55mm W × 18mm H, doesn't reach edges, rounded ends    */
+  /*  Lenses horizontally arranged with more spacing than Pixel 8        */
   /* ================================================================== */
   if (family === "pixel-9-pill") {
-    const barW = Math.round(cw * 0.78)
-    const barH = Math.round(ch * 0.105)
+    const barW = Math.round(cw * 0.76)
+    const barH = Math.round(ch * 0.102)
     const barX = Math.round((cw - barW) / 2)
-    const barY = Math.round(ch * 0.050)
+    const barY = Math.round(ch * 0.048)
     const barR = Math.round(barH / 2)
-    const ld = Math.round(barH * 0.60)
-    const flashD = Math.round(barH * 0.25)
+    const ld = Math.round(barH * 0.58)
+    const flashD = Math.round(barH * 0.22)
+    const sensorD = Math.round(barH * 0.14)
     const isPro = config.handle.includes("pro")
     return (
       <div
@@ -365,14 +496,19 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           width: barW * s, height: barH * s,
           borderRadius: barR * s,
           background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.35), 0 0 ${4 * s}px rgba(0,0,0,0.2), 0 ${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+          boxShadow: modShadow,
         }}
       >
-        <Lens cx={barW * 0.22} cy={barH * 0.50} d={ld} s={s} />
-        <Lens cx={barW * 0.42} cy={barH * 0.50} d={ld} s={s} />
-        {isPro && <Lens cx={barW * 0.62} cy={barH * 0.50} d={ld * 0.85} s={s} />}
-        <Lens cx={barW * (isPro ? 0.80 : 0.65)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
-        {isPro && <Lens cx={barW * 0.90} cy={barH * 0.50} d={flashD * 0.6} s={s} type="sensor" />}
+        {/* Main */}
+        <Lens cx={barW * 0.20} cy={barH * 0.50} d={ld} s={s} />
+        {/* Ultra Wide */}
+        <Lens cx={barW * 0.40} cy={barH * 0.50} d={ld} s={s} />
+        {/* Telephoto (Pro only) */}
+        {isPro && <Lens cx={barW * 0.60} cy={barH * 0.50} d={ld * 0.82} s={s} />}
+        {/* Flash */}
+        <Lens cx={barW * (isPro ? 0.78 : 0.63)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
+        {/* Sensor (Pro only) */}
+        {isPro && <Lens cx={barW * 0.88} cy={barH * 0.50} d={sensorD} s={s} type="sensor" />}
       </div>
     )
   }
@@ -391,23 +527,36 @@ function CaseTypeOverlay({
   caseType: CaseType; w: number; h: number; r: number; s: number
 }) {
   if (caseType === "clear") {
-    // Glass sheen diagonal highlight + subtle frosted edge
+    // Multi-layer glass effect — sheen, refraction, frosted edge
     return (
       <div className="absolute inset-0 pointer-events-none z-20" style={{ borderRadius: r }}>
-        {/* Diagonal glass sheen */}
+        {/* Primary diagonal glass sheen */}
         <div
           className="absolute inset-0"
           style={{
             borderRadius: r,
-            background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.08) 100%)",
+            background: "linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 35%, transparent 55%, rgba(255,255,255,0.06) 80%, rgba(255,255,255,0.12) 100%)",
           }}
         />
-        {/* Frosted edge glow */}
+        {/* Secondary cross-sheen for depth */}
         <div
           className="absolute inset-0"
           style={{
             borderRadius: r,
-            boxShadow: `inset 0 0 ${12 * s}px rgba(255,255,255,0.15), inset 0 0 ${3 * s}px rgba(255,255,255,0.1)`,
+            background: "linear-gradient(225deg, rgba(255,255,255,0.08) 0%, transparent 30%, transparent 100%)",
+          }}
+        />
+        {/* Subtle prismatic edge highlight — rainbow refraction at the case edge */}
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: r,
+            boxShadow: [
+              `inset 0 0 ${12 * s}px rgba(255,255,255,0.12)`,
+              `inset 0 0 ${3 * s}px rgba(255,255,255,0.08)`,
+              `inset ${2 * s}px 0 ${8 * s}px rgba(140,180,255,0.04)`,
+              `inset -${2 * s}px 0 ${8 * s}px rgba(255,180,140,0.04)`,
+            ].join(', '),
           }}
         />
       </div>
@@ -488,12 +637,12 @@ function ToughCornerBumpers({
 /* -------------------------------------------------------------------------- */
 
 /** Visible side button cutouts on the case edges */
-function CaseSideButtons({ h, s }: {
-  h: number; s: number
+function CaseSideButtons({ h, s, btnBg, btnHighlight }: {
+  h: number; s: number; btnBg?: string; btnHighlight?: string
 }) {
   const btnDepth = Math.max(2, 3 * s)
-  const btnBg = 'linear-gradient(to bottom, #333, #1a1a1a)'
-  const btnShadow = `inset 0 ${0.5 * s}px ${1 * s}px rgba(255,255,255,0.08)`
+  const btnBackground = btnBg || 'linear-gradient(to bottom, #333, #1a1a1a)'
+  const btnShadow = `inset 0 ${0.5 * s}px ${1 * s}px ${btnHighlight || 'rgba(255,255,255,0.08)'}`
 
   const buttons: Array<{ top: number; height: number; side: 'left' | 'right' }> = [
     { top: h * 0.28, height: Math.max(16, 28 * s), side: 'right' },
@@ -514,7 +663,7 @@ function CaseSideButtons({ h, s }: {
             width: btnDepth,
             height: btn.height,
             borderRadius: btnDepth / 2,
-            background: btnBg,
+            background: btnBackground,
             boxShadow: btnShadow,
           }}
         />
@@ -781,20 +930,47 @@ export default function FabricCanvas() {
   }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight, canvasRef])
 
   const caseType = state.caseType
+  const bgColor = state.backgroundColor || "#ffffff"
 
   const r = deviceConfig.cornerRadius
   const w = deviceConfig.canvasWidth * displayScale
   const h = deviceConfig.canvasHeight * displayScale
   const sr = r * displayScale // scaled radius
+  const s = displayScale
 
   /* ---- Case-type visual properties -------------------------------------- */
   // Edge thickness — how thick the case rim looks
-  const edgeW = caseType === "tough" ? Math.max(5, 8 * displayScale)
-    : caseType === "slim" ? Math.max(2, 3 * displayScale)
-    : Math.max(3, 5 * displayScale) // clear & magsafe
+  const edgeW = caseType === "tough" ? Math.max(5, 8 * s)
+    : caseType === "slim" ? Math.max(2, 3 * s)
+    : Math.max(3, 5 * s) // clear & magsafe
 
-  const edgeColor = caseType === "clear" ? "#c8c8c8" : "#1a1a1a"
   const isGlossy = caseType === "clear"
+
+  // Derive rim color from the user's background color
+  const rimColors = useMemo(() => {
+    if (isGlossy) {
+      return { base: "#c8c8c8", highlight: "rgba(255,255,255,0.4)", shadow: "rgba(0,0,0,0.12)" }
+    }
+    const lum = luminance(bgColor)
+    // For very light backgrounds, use a dark rim (classic black case with light design)
+    if (lum > 200) {
+      return { base: "#1a1a1a", highlight: "#2e2e2e", shadow: "#111" }
+    }
+    // For medium/dark backgrounds, derive rim from bg color (colored case)
+    const base = darken(bgColor, 0.55)
+    const highlight = lighten(base, 0.25)
+    const shadow = darken(base, 0.5)
+    return { base, highlight, shadow }
+  }, [bgColor, isGlossy])
+
+  // Button color matches the rim
+  const btnColor = useMemo(() => {
+    if (isGlossy) return { bg: "linear-gradient(to bottom, #d0d0d0, #aaa)", shadow: "rgba(255,255,255,0.15)" }
+    return {
+      bg: `linear-gradient(to bottom, ${rimColors.highlight}, ${rimColors.base})`,
+      shadow: `rgba(255,255,255,0.08)`,
+    }
+  }, [rimColors, isGlossy])
 
   // Outer case body dimensions (canvas + rim on each side)
   const outerW = w + 2 * edgeW
@@ -807,75 +983,105 @@ export default function FabricCanvas() {
       ref={containerRef}
       className="flex items-center justify-center w-full h-full"
     >
-      {/* Outer case body — the full 3D case shell */}
+      {/* 3D perspective wrapper — subtle tilt for depth feel */}
       <div
-        className="relative"
-        style={{ width: outerW, height: outerH }}
+        style={{
+          perspective: `${Math.max(600, 900 * s)}px`,
+          perspectiveOrigin: "50% 42%",
+        }}
       >
-        {/* Realistic multi-layer shadow beneath the case */}
+        {/* Outer case body — the full 3D case shell */}
         <div
-          className="absolute pointer-events-none"
+          className="relative"
           style={{
-            inset: edgeW * 0.3,
-            borderRadius: outerR,
-            boxShadow: [
-              `0 ${2 * displayScale}px ${6 * displayScale}px rgba(0,0,0,0.1)`,
-              `0 ${6 * displayScale}px ${16 * displayScale}px rgba(0,0,0,0.12)`,
-              `0 ${12 * displayScale}px ${32 * displayScale}px rgba(0,0,0,0.14)`,
-            ].join(', '),
-          }}
-        />
-
-        {/* Case rim — the visible edge thickness with 3D lighting gradient */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            inset: 0,
-            borderRadius: outerR,
-            background: isGlossy
-              ? `linear-gradient(155deg, rgba(255,255,255,0.35) 0%, ${edgeColor} 20%, ${edgeColor} 80%, rgba(0,0,0,0.12) 100%)`
-              : `linear-gradient(155deg, #2e2e2e 0%, ${edgeColor} 20%, ${edgeColor} 80%, #111 100%)`,
-            boxShadow: isGlossy
-              ? `inset 0 ${1 * displayScale}px ${2 * displayScale}px rgba(255,255,255,0.3)`
-              : `inset 0 ${1 * displayScale}px ${2 * displayScale}px rgba(255,255,255,0.06)`,
-          }}
-        />
-
-        {/* Side buttons — volume (left), power (right), mute (left) */}
-        <CaseSideButtons h={outerH} s={displayScale} />
-
-        {/* Bottom port and speaker grille cutouts */}
-        <CaseBottomPort w={outerW} h={outerH} s={displayScale} />
-
-        {/* Canvas container — the back panel surface, inset by edgeW */}
-        <div
-          className="absolute overflow-hidden"
-          style={{
-            left: edgeW,
-            top: edgeW,
-            width: w,
-            height: h,
-            borderRadius: sr,
+            width: outerW,
+            height: outerH,
+            transform: "rotateX(1.5deg)",
+            transformStyle: "preserve-3d",
           }}
         >
-          <canvas
-            ref={canvasElRef}
+          {/* Realistic multi-layer shadow beneath the case */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              inset: edgeW * 0.3,
+              borderRadius: outerR,
+              boxShadow: [
+                `0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.1)`,
+                `0 ${6 * s}px ${16 * s}px rgba(0,0,0,0.12)`,
+                `0 ${12 * s}px ${32 * s}px rgba(0,0,0,0.14)`,
+                `0 ${4 * s}px ${20 * s}px ${rimColors.base}22`,
+              ].join(', '),
+            }}
           />
 
-          {/* Device-specific camera module overlay */}
-          <CameraOverlay config={deviceConfig} scale={displayScale} />
+          {/* Case rim — the visible edge thickness with 3D lighting gradient */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              inset: 0,
+              borderRadius: outerR,
+              background: isGlossy
+                ? `linear-gradient(155deg, rgba(255,255,255,0.35) 0%, ${rimColors.base} 20%, ${rimColors.base} 80%, ${rimColors.shadow} 100%)`
+                : `linear-gradient(155deg, ${rimColors.highlight} 0%, ${rimColors.base} 20%, ${rimColors.base} 80%, ${rimColors.shadow} 100%)`,
+              boxShadow: isGlossy
+                ? `inset 0 ${1 * s}px ${2 * s}px rgba(255,255,255,0.3), inset 0 -${1 * s}px ${2 * s}px rgba(0,0,0,0.1)`
+                : `inset 0 ${1 * s}px ${2 * s}px rgba(255,255,255,0.06), inset 0 -${1 * s}px ${2 * s}px rgba(0,0,0,0.15)`,
+            }}
+          />
 
-          {/* Case-type visual overlays (clear sheen, magsafe ring) */}
-          <CaseTypeOverlay caseType={caseType} w={w} h={h} r={sr} s={displayScale} />
+          {/* Inner groove — where the back panel recesses into the rim */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: edgeW - Math.max(1, 0.5 * s),
+              top: edgeW - Math.max(1, 0.5 * s),
+              right: edgeW - Math.max(1, 0.5 * s),
+              bottom: edgeW - Math.max(1, 0.5 * s),
+              borderRadius: sr + Math.max(1, 0.5 * s),
+              boxShadow: [
+                `inset 0 ${0.5 * s}px ${1 * s}px rgba(0,0,0,0.25)`,
+                `0 ${0.5 * s}px ${0.5 * s}px rgba(255,255,255,${isGlossy ? 0.15 : 0.04})`,
+              ].join(', '),
+            }}
+          />
 
-          {/* Material surface + lighting overlay */}
-          <CaseSurfaceOverlay r={sr} s={displayScale} caseType={caseType} />
+          {/* Side buttons — volume (left), power (right), mute (left) */}
+          <CaseSideButtons h={outerH} s={s} btnBg={btnColor.bg} btnHighlight={btnColor.shadow} />
+
+          {/* Bottom port and speaker grille cutouts */}
+          <CaseBottomPort w={outerW} h={outerH} s={s} />
+
+          {/* Canvas container — the back panel surface, inset by edgeW */}
+          <div
+            className="absolute overflow-hidden"
+            style={{
+              left: edgeW,
+              top: edgeW,
+              width: w,
+              height: h,
+              borderRadius: sr,
+            }}
+          >
+            <canvas
+              ref={canvasElRef}
+            />
+
+            {/* Device-specific camera module overlay */}
+            <CameraOverlay config={deviceConfig} scale={s} />
+
+            {/* Case-type visual overlays (clear sheen, magsafe ring) */}
+            <CaseTypeOverlay caseType={caseType} w={w} h={h} r={sr} s={s} />
+
+            {/* Material surface + lighting overlay */}
+            <CaseSurfaceOverlay r={sr} s={s} caseType={caseType} />
+          </div>
+
+          {/* Tough case: corner bumper accents on the outer shell */}
+          {caseType === "tough" && (
+            <ToughCornerBumpers w={outerW} h={outerH} r={outerR} s={s} frameWidth={Math.max(1, 2 * s)} />
+          )}
         </div>
-
-        {/* Tough case: corner bumper accents on the outer shell */}
-        {caseType === "tough" && (
-          <ToughCornerBumpers w={outerW} h={outerH} r={outerR} s={displayScale} frameWidth={Math.max(1, 2 * displayScale)} />
-        )}
       </div>
     </div>
   )

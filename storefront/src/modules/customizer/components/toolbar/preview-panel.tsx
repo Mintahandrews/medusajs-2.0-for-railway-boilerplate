@@ -43,7 +43,7 @@ const BG_OPTIONS = [
 ]
 
 export default function PreviewPanel() {
-  const { exportPreview, deviceConfig } = useCustomizer()
+  const { exportPreview, deviceConfig, state } = useCustomizer()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const [mode, setMode] = useState<PreviewMode>("ai")
@@ -139,6 +139,25 @@ export default function PreviewPanel() {
       ctx.transform(scaleX, skewY, skewX, scaleY, 0, 0)
       ctx.translate(-mockupW / 2, -mockupH / 2)
 
+      // Case-type-aware rim (matches fabric-canvas 3D rim)
+      const caseType = state.caseType
+      const bgColor = state.backgroundColor || "#ffffff"
+      const bw = caseType === "tough" ? 6 : caseType === "slim" ? 2 : 4
+      const isGlossy = caseType === "clear"
+
+      // Derive rim color from background (same logic as fabric-canvas)
+      let rimColor = "#1a1a1a"
+      if (!isGlossy) {
+        const hex = bgColor.replace("#", "")
+        const rr = parseInt(hex.slice(0, 2), 16), gg = parseInt(hex.slice(2, 4), 16), bb = parseInt(hex.slice(4, 6), 16)
+        const lum = 0.299 * rr + 0.587 * gg + 0.114 * bb
+        if (lum <= 200) {
+          rimColor = "#" + [rr, gg, bb].map(c => Math.max(0, Math.round(c * 0.55)).toString(16).padStart(2, "0")).join("")
+        }
+      } else {
+        rimColor = "#c8c8c8"
+      }
+
       // Shadow
       ctx.save()
       ctx.shadowColor = "rgba(0,0,0,0.25)"
@@ -150,11 +169,26 @@ export default function PreviewPanel() {
       ctx.fill()
       ctx.restore()
 
-      // Phone border
-      const bw = 4
+      // Phone rim border with gradient
       ctx.save()
       drawRoundedRect(ctx, phoneX - bw, phoneY - bw, phoneW + bw * 2, phoneH + bw * 2, r + bw)
-      ctx.fillStyle = "#1a1a1a"
+      const rimGrad = ctx.createLinearGradient(phoneX - bw, phoneY - bw, phoneX + phoneW + bw, phoneY + phoneH + bw)
+      if (isGlossy) {
+        rimGrad.addColorStop(0, "rgba(255,255,255,0.35)")
+        rimGrad.addColorStop(0.2, rimColor)
+        rimGrad.addColorStop(0.8, rimColor)
+        rimGrad.addColorStop(1, "rgba(0,0,0,0.12)")
+      } else {
+        const hex = rimColor.replace("#", "")
+        const rr = parseInt(hex.slice(0, 2), 16), gg = parseInt(hex.slice(2, 4), 16), bb = parseInt(hex.slice(4, 6), 16)
+        const hl = "#" + [rr, gg, bb].map(c => Math.min(255, Math.round(c + (255 - c) * 0.25)).toString(16).padStart(2, "0")).join("")
+        const sh = "#" + [rr, gg, bb].map(c => Math.max(0, Math.round(c * 0.5)).toString(16).padStart(2, "0")).join("")
+        rimGrad.addColorStop(0, hl)
+        rimGrad.addColorStop(0.2, rimColor)
+        rimGrad.addColorStop(0.8, rimColor)
+        rimGrad.addColorStop(1, sh)
+      }
+      ctx.fillStyle = rimGrad
       ctx.fill()
       ctx.restore()
 
@@ -171,7 +205,7 @@ export default function PreviewPanel() {
       // Edge highlight
       ctx.save()
       drawRoundedRect(ctx, phoneX - bw, phoneY - bw, phoneW + bw * 2, phoneH + bw * 2, r + bw)
-      ctx.strokeStyle = "rgba(255,255,255,0.15)"
+      ctx.strokeStyle = isGlossy ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)"
       ctx.lineWidth = 1
       ctx.stroke()
       ctx.restore()
@@ -179,7 +213,7 @@ export default function PreviewPanel() {
       ctx.restore()
     }
     img.src = designUrl
-  }, [mode, designUrl, angleIdx, bgIdx, deviceConfig])
+  }, [mode, designUrl, angleIdx, bgIdx, deviceConfig, state])
 
   /* ---- Download ---- */
   const handleDownload = useCallback(() => {
@@ -418,66 +452,185 @@ function drawRoundedRect(
   ctx.closePath()
 }
 
+/** Multi-ring realistic camera lens — matches CSS Lens component */
+function drawLens(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  // Outer metal bezel
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  const bezelGrad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r)
+  bezelGrad.addColorStop(0, "#555")
+  bezelGrad.addColorStop(0.4, "#2a2a2a")
+  bezelGrad.addColorStop(1, "#3a3a3a")
+  ctx.fillStyle = bezelGrad
+  ctx.fill()
+  ctx.strokeStyle = "rgba(70,70,70,0.5)"
+  ctx.lineWidth = 0.5
+  ctx.stroke()
+
+  // Dark glass inner
+  const innerR = r * 0.86
+  ctx.beginPath()
+  ctx.arc(cx, cy, innerR, 0, Math.PI * 2)
+  const glassGrad = ctx.createRadialGradient(cx - innerR * 0.15, cy - innerR * 0.15, 0, cx, cy, innerR)
+  glassGrad.addColorStop(0, "#1a1a3a")
+  glassGrad.addColorStop(0.55, "#0a0a18")
+  glassGrad.addColorStop(1, "#151515")
+  ctx.fillStyle = glassGrad
+  ctx.fill()
+
+  // Specular highlight
+  ctx.beginPath()
+  ctx.arc(cx - innerR * 0.2, cy - innerR * 0.2, innerR * 0.5, 0, Math.PI * 2)
+  const specGrad = ctx.createRadialGradient(cx - innerR * 0.2, cy - innerR * 0.2, 0, cx - innerR * 0.2, cy - innerR * 0.2, innerR * 0.5)
+  specGrad.addColorStop(0, "rgba(255,255,255,0.18)")
+  specGrad.addColorStop(0.5, "rgba(255,255,255,0.04)")
+  specGrad.addColorStop(1, "transparent")
+  ctx.fillStyle = specGrad
+  ctx.fill()
+}
+
+/** Flash LED */
+function drawFlash(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r)
+  grad.addColorStop(0.15, "#ffeebb")
+  grad.addColorStop(0.55, "#cc9944")
+  grad.addColorStop(1, "#886633")
+  ctx.fillStyle = grad
+  ctx.fill()
+}
+
+/** LiDAR / ToF sensor */
+function drawSensor(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.fillStyle = "#1a1a1a"
+  ctx.fill()
+  ctx.strokeStyle = "rgba(80,80,80,0.4)"
+  ctx.lineWidth = 0.5
+  ctx.stroke()
+}
+
+/**
+ * Draw camera module overlay on local preview mockup.
+ * Positions match CameraOverlay in fabric-canvas/index.tsx exactly.
+ */
 function drawCameraHint(
   ctx: CanvasRenderingContext2D,
   handle: string,
   px: number, py: number, pw: number, ph: number,
 ) {
   ctx.save()
-  ctx.globalAlpha = 0.85
+  ctx.globalAlpha = 0.88
 
+  /* ---- iPhone 16 / 16 Plus — vertical pill ---- */
   if (/^iphone-16(-plus)?$/.test(handle)) {
-    const pillW = pw * 0.17, pillH = ph * 0.13
-    const pillX = px + pw * 0.10, pillY = py + ph * 0.025
+    const pillW = pw * 0.196, pillH = ph * 0.203
+    const pillX = px + pw * 0.112, pillY = py + ph * 0.034
     drawRoundedRect(ctx, pillX, pillY, pillW, pillH, pillW / 2)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
-    const lr = pillW * 0.35
-    drawCircle(ctx, pillX + pillW * 0.50, pillY + pillH * 0.32, lr, "#1a1a3a")
-    drawCircle(ctx, pillX + pillW * 0.50, pillY + pillH * 0.68, lr, "#1a1a3a")
-  } else if (/iphone-\d+-pro/.test(handle)) {
-    const mod = pw * 0.50, modX = px + pw * 0.05, modY = py + ph * 0.02
+    const lr = pillW * 0.76 / 2
+    drawLens(ctx, pillX + pillW * 0.50, pillY + pillH * 0.30, lr)
+    drawLens(ctx, pillX + pillW * 0.50, pillY + pillH * 0.70, lr)
+    drawFlash(ctx, pillX + pillW * 0.84, pillY + pillH * 0.50, pillW * 0.08)
+  }
+  /* ---- iPhone 16 Pro / Pro Max — L-shaped triple ---- */
+  else if (/^iphone-16-pro/.test(handle)) {
+    const mod = pw * 0.560, modX = px + pw * 0.040, modY = py + ph * 0.020
     drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.25)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
-    const lr = mod * 0.14
-    drawCircle(ctx, modX + mod * 0.33, modY + mod * 0.33, lr, "#1a1a3a")
-    drawCircle(ctx, modX + mod * 0.67, modY + mod * 0.33, lr, "#1a1a3a")
-    drawCircle(ctx, modX + mod * 0.50, modY + mod * 0.67, lr, "#1a1a3a")
-  } else if (/^iphone-/.test(handle)) {
-    const mod = pw * 0.38, modX = px + pw * 0.05, modY = py + ph * 0.025
+    const lr = mod * 0.33 / 2
+    drawLens(ctx, modX + mod * 0.31, modY + mod * 0.31, lr)
+    drawLens(ctx, modX + mod * 0.69, modY + mod * 0.31, lr)
+    drawLens(ctx, modX + mod * 0.31, modY + mod * 0.69, lr)
+    drawFlash(ctx, modX + mod * 0.69, modY + mod * 0.57, mod * 0.04)
+    drawSensor(ctx, modX + mod * 0.69, modY + mod * 0.76, mod * 0.032)
+  }
+  /* ---- iPhone 11 Pro — equilateral triangle triple ---- */
+  else if (/^iphone-11-pro/.test(handle)) {
+    const mod = pw * 0.504, modX = px + pw * 0.050, modY = py + ph * 0.025
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.27)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.34 / 2
+    drawLens(ctx, modX + mod * 0.31, modY + mod * 0.30, lr)
+    drawLens(ctx, modX + mod * 0.69, modY + mod * 0.30, lr)
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.72, lr)
+    drawFlash(ctx, modX + mod * 0.77, modY + mod * 0.56, mod * 0.04)
+  }
+  /* ---- iPhone 11 standard — diagonal dual ---- */
+  else if (/^iphone-11$/.test(handle)) {
+    const mod = pw * 0.330, modX = px + pw * 0.055, modY = py + ph * 0.028
     drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.28)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
-    const lr = mod * 0.17
-    drawCircle(ctx, modX + mod * 0.36, modY + mod * 0.36, lr, "#1a1a3a")
-    drawCircle(ctx, modX + mod * 0.64, modY + mod * 0.64, lr, "#1a1a3a")
-  } else if (/samsung.*ultra/.test(handle)) {
-    const lr = pw * 0.055, cx = px + pw * 0.16, startY = py + ph * 0.04, gap = ph * 0.065
-    for (let i = 0; i < 4; i++) drawCircle(ctx, cx, startY + i * gap, lr, "#1a1a3a")
-  } else if (/samsung/.test(handle)) {
-    const lr = pw * 0.06, cx = px + pw * 0.16, startY = py + ph * 0.05, gap = ph * 0.08
-    for (let i = 0; i < 3; i++) drawCircle(ctx, cx, startY + i * gap, lr, "#1a1a3a")
-  } else if (/pixel/.test(handle)) {
-    const barW = pw * 0.80, barH = ph * 0.065
-    const barX = px + (pw - barW) / 2, barY = py + ph * 0.06
+    const lr = mod * 0.40 / 2
+    drawLens(ctx, modX + mod * 0.34, modY + mod * 0.34, lr)
+    drawLens(ctx, modX + mod * 0.66, modY + mod * 0.66, lr)
+    drawFlash(ctx, modX + mod * 0.70, modY + mod * 0.30, mod * 0.055)
+  }
+  /* ---- iPhone 12–15 Pro — L-shaped triple ---- */
+  else if (/iphone-\d+-pro/.test(handle)) {
+    const mod = pw * 0.510, modX = px + pw * 0.046, modY = py + ph * 0.022
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.26)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.34 / 2
+    drawLens(ctx, modX + mod * 0.31, modY + mod * 0.31, lr)
+    drawLens(ctx, modX + mod * 0.69, modY + mod * 0.31, lr)
+    drawLens(ctx, modX + mod * 0.31, modY + mod * 0.69, lr)
+    drawFlash(ctx, modX + mod * 0.68, modY + mod * 0.56, mod * 0.04)
+    drawSensor(ctx, modX + mod * 0.68, modY + mod * 0.76, mod * 0.03)
+  }
+  /* ---- iPhone 12–15 standard — diagonal dual ---- */
+  else if (/^iphone-/.test(handle)) {
+    const mod = pw * 0.392, modX = px + pw * 0.049, modY = py + ph * 0.024
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.28)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.38 / 2
+    drawLens(ctx, modX + mod * 0.65, modY + mod * 0.35, lr)
+    drawLens(ctx, modX + mod * 0.35, modY + mod * 0.65, lr)
+    drawFlash(ctx, modX + mod * 0.30, modY + mod * 0.30, mod * 0.05)
+  }
+  /* ---- Samsung Ultra — 4 individual graduated circles ---- */
+  else if (/samsung.*ultra/.test(handle)) {
+    const cx = px + pw * 0.155, startY = py + ph * 0.070, gap = ph * 0.078
+    const sizes = [pw * 0.090, pw * 0.082, pw * 0.074, pw * 0.066]
+    const offsets = [0, 1, 2.05, 3.15]
+    offsets.forEach((off, i) => drawLens(ctx, cx, startY + gap * off, sizes[i]))
+    drawFlash(ctx, cx, startY + gap * 3.15 + gap * 0.72, pw * 0.0175)
+  }
+  /* ---- Samsung S23/S24/S25 — 3 individual circles ---- */
+  else if (/samsung/.test(handle)) {
+    const lr = pw * 0.175 / 2, cx = px + pw * 0.165
+    const startY = py + ph * 0.085, gap = ph * 0.090
+    for (let i = 0; i < 3; i++) drawLens(ctx, cx, startY + gap * i, lr)
+    drawFlash(ctx, cx, startY + gap * 2.65, pw * 0.0175)
+  }
+  /* ---- Pixel 8 — edge-to-edge camera visor bar ---- */
+  else if (/^pixel-8/.test(handle)) {
+    const barW = pw * 0.94, barH = ph * 0.112
+    const barX = px + (pw - barW) / 2, barY = py + ph * 0.042
+    drawRoundedRect(ctx, barX, barY, barW, barH, barH * 0.14)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = barH * 0.28, isPro = handle.includes("pro")
+    drawLens(ctx, barX + barW * 0.17, barY + barH * 0.50, lr)
+    drawLens(ctx, barX + barW * 0.34, barY + barH * 0.50, lr)
+    if (isPro) drawLens(ctx, barX + barW * 0.51, barY + barH * 0.50, lr * 0.82)
+    drawFlash(ctx, barX + barW * (isPro ? 0.68 : 0.54), barY + barH * 0.50, barH * 0.11)
+    if (isPro) drawSensor(ctx, barX + barW * 0.79, barY + barH * 0.50, barH * 0.07)
+  }
+  /* ---- Pixel 9 — floating pill camera island ---- */
+  else if (/^pixel-9/.test(handle)) {
+    const barW = pw * 0.76, barH = ph * 0.102
+    const barX = px + (pw - barW) / 2, barY = py + ph * 0.048
     drawRoundedRect(ctx, barX, barY, barW, barH, barH / 2)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
-    const lr = barH * 0.30, pixPro = handle.includes("pro")
-    drawCircle(ctx, barX + barW * 0.22, barY + barH * 0.50, lr, "#1a1a3a")
-    drawCircle(ctx, barX + barW * 0.42, barY + barH * 0.50, lr, "#1a1a3a")
-    if (pixPro) drawCircle(ctx, barX + barW * 0.62, barY + barH * 0.50, lr * 0.85, "#1a1a3a")
+    const lr = barH * 0.29, isPro = handle.includes("pro")
+    drawLens(ctx, barX + barW * 0.20, barY + barH * 0.50, lr)
+    drawLens(ctx, barX + barW * 0.40, barY + barH * 0.50, lr)
+    if (isPro) drawLens(ctx, barX + barW * 0.60, barY + barH * 0.50, lr * 0.82)
+    drawFlash(ctx, barX + barW * (isPro ? 0.78 : 0.63), barY + barH * 0.50, barH * 0.11)
+    if (isPro) drawSensor(ctx, barX + barW * 0.88, barY + barH * 0.50, barH * 0.07)
   }
 
   ctx.restore()
-}
-
-function drawCircle(
-  ctx: CanvasRenderingContext2D,
-  cx: number, cy: number, r: number, color: string
-) {
-  ctx.beginPath()
-  ctx.arc(cx, cy, r, 0, Math.PI * 2)
-  ctx.fillStyle = color
-  ctx.fill()
-  ctx.strokeStyle = "rgba(80,80,80,0.5)"
-  ctx.lineWidth = 1.5
-  ctx.stroke()
 }
