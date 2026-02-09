@@ -1,21 +1,20 @@
-import { defineWidgetConfig } from "@medusajs/admin-sdk"
+import { defineWidgetConfig } from "@medusajs/admin-shared"
 import { Container, Heading, Text, Badge } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 
 type LineItemMetadata = {
-  is_customized?: boolean
+  is_customized?: string
+  case_type?: string
   device_model?: string
+  device_handle?: string
   preview_image?: string
   preview_key?: string
   print_file?: string
   print_file_key?: string
-  canvas_json?: string
-  specs?: {
-    dpi?: number
-    width_mm?: number
-    height_mm?: number
-    bleed_mm?: number
-  }
+  print_dpi?: string
+  print_width_mm?: string
+  print_height_mm?: string
+  print_bleed_mm?: string
 }
 
 type CustomLineItem = {
@@ -38,7 +37,7 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
 
     // Extract customized line items from the order
     const items = (data.order.items || [])
-      .filter((item: any) => item.metadata?.is_customized)
+      .filter((item: any) => item.metadata?.is_customized === "true")
       .map((item: any) => ({
         id: item.id,
         title: item.title || item.product_title || "Custom Case",
@@ -98,14 +97,19 @@ const CustomDesignWidget = ({ data }: { data: any }) => {
               <Text size="small" className="text-ui-fg-subtle">
                 Qty: {item.quantity}
               </Text>
+              {item.metadata.case_type && (
+                <Text size="small" className="text-ui-fg-subtle">
+                  Case Type: {item.metadata.case_type.charAt(0).toUpperCase() + item.metadata.case_type.slice(1)}
+                </Text>
+              )}
               {item.metadata.device_model && (
                 <Text size="small" className="text-ui-fg-subtle">
                   Device: {item.metadata.device_model}
                 </Text>
               )}
-              {item.metadata.specs && (
+              {item.metadata.print_dpi && item.metadata.print_width_mm && item.metadata.print_height_mm && (
                 <Text size="small" className="text-ui-fg-subtle">
-                  Print: {item.metadata.specs.dpi} DPI &middot; {item.metadata.specs.width_mm}&times;{item.metadata.specs.height_mm}mm &middot; {item.metadata.specs.bleed_mm}mm bleed
+                  Print: {item.metadata.print_dpi} DPI &middot; {item.metadata.print_width_mm}&times;{item.metadata.print_height_mm}mm &middot; {item.metadata.print_bleed_mm}mm bleed
                 </Text>
               )}
 

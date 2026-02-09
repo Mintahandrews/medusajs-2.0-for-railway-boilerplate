@@ -8,8 +8,21 @@ const WHATSAPP_MESSAGE = "Hi Letscase! I have a question about your products."
 export default function WhatsAppWidget() {
   const pathname = usePathname()
 
-  const isCheckout = pathname?.includes("/checkout")
-  if (isCheckout) return null
+  // Hide on checkout, customizer, account, admin, and cart pages
+  const excludedPaths = [
+    "/checkout",
+    "/customizer", 
+    "/account",
+    "/admin",
+    "/cart",
+    "/order",
+    "/reset-password",
+    "/login",
+    "/register"
+  ]
+  
+  const shouldHide = excludedPaths.some(path => pathname?.includes(path))
+  if (shouldHide) return null
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 

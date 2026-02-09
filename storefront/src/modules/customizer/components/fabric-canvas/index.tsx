@@ -73,6 +73,18 @@ function getCameraFamily(handle: string): string {
   if (/^pixel-8/.test(handle)) return "pixel-8-bar"
   // Pixel 9 / 9 Pro / 9 Pro XL — floating pill camera island
   if (/^pixel-9/.test(handle)) return "pixel-9-pill"
+  // OnePlus 12 — triple camera in centered circular module
+  if (/^oneplus-12$/.test(handle)) return "oneplus-12-triple"
+  // OnePlus 12R — dual camera in centered circular module
+  if (/^oneplus-12r/.test(handle)) return "oneplus-12r-dual"
+  // Xiaomi 14 Pro — triple camera in large square module
+  if (/xiaomi-14-pro/.test(handle)) return "xiaomi-14-pro-triple"
+  // Xiaomi 14 — triple camera in smaller square module
+  if (/^xiaomi-14$/.test(handle)) return "xiaomi-14-triple"
+  // Nothing Phone 2a series — dual camera with LED strip
+  if (/^nothing-phone-2a/.test(handle)) return "nothing-2a-dual"
+  // iPhone SE 3 — single camera centered
+  if (/^iphone-se-/.test(handle)) return "iphone-se-single"
   return "iphone-diagonal"
 }
 
@@ -509,6 +521,211 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
         <Lens cx={barW * (isPro ? 0.78 : 0.63)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
         {/* Sensor (Pro only) */}
         {isPro && <Lens cx={barW * 0.88} cy={barH * 0.50} d={sensorD} s={s} type="sensor" />}
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  11. OnePlus 12 — centered circular triple module                  */
+  /*  Real: ~31mm diameter circular module, 50MP main + 48MP UW + 64MP 3× */
+  /* ================================================================== */
+  if (family === "oneplus-12-triple") {
+    const mod = Math.round(cw * 0.434)
+    const modX = Math.round((cw - mod) / 2)
+    const modY = Math.round(ch * 0.025)
+    const ld = Math.round(mod * 0.32)
+    const flashD = Math.round(mod * 0.08)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: mod / 2 * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: modShadow,
+        }}
+      >
+        {/* 50MP Main — top */}
+        <Lens cx={mod * 0.50} cy={mod * 0.25} d={ld} s={s} />
+        {/* 48MP Ultra Wide — bottom-left */}
+        <Lens cx={mod * 0.30} cy={mod * 0.65} d={ld * 0.88} s={s} />
+        {/* 64MP 3× Telephoto — bottom-right */}
+        <Lens cx={mod * 0.70} cy={mod * 0.65} d={ld * 0.88} s={s} />
+        {/* Flash */}
+        <Lens cx={mod * 0.50} cy={mod * 0.85} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  12. OnePlus 12R — centered circular dual module                   */
+  /*  Real: ~31mm diameter, 50MP main + 16MP UW                           */
+  /* ================================================================== */
+  if (family === "oneplus-12r-dual") {
+    const mod = Math.round(cw * 0.434)
+    const modX = Math.round((cw - mod) / 2)
+    const modY = Math.round(ch * 0.025)
+    const ld = Math.round(mod * 0.38)
+    const flashD = Math.round(mod * 0.08)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: mod / 2 * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: modShadow,
+        }}
+      >
+        {/* 50MP Main — top */}
+        <Lens cx={mod * 0.50} cy={mod * 0.35} d={ld} s={s} />
+        {/* 16MP Ultra Wide — bottom */}
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld * 0.82} s={s} />
+        {/* Flash */}
+        <Lens cx={mod * 0.50} cy={mod * 0.90} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  13. Xiaomi 14 Pro — large square triple module                     */
+  /*  Real: ~35mm square, 50MP Leica main + 50MP UW + 50MP 3× tele       */
+  /* ================================================================== */
+  if (family === "xiaomi-14-pro-triple") {
+    const mod = Math.round(cw * 0.490)
+    const modX = Math.round((cw - mod) / 2)
+    const modY = Math.round(ch * 0.020)
+    const modR = Math.round(mod * 0.22)
+    const ld = Math.round(mod * 0.30)
+    const flashD = Math.round(mod * 0.07)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: modShadow,
+        }}
+      >
+        {/* 50MP Leica Main — top-left */}
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
+        {/* 50MP Ultra Wide — top-right */}
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
+        {/* 50MP 3× Telephoto — bottom-center */}
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld * 0.88} s={s} />
+        {/* Flash */}
+        <Lens cx={mod * 0.70} cy={mod * 0.70} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  14. Xiaomi 14 — smaller square triple module                       */
+  /*  Real: ~30mm square, similar Leica triple layout                    */
+  /* ================================================================== */
+  if (family === "xiaomi-14-triple") {
+    const mod = Math.round(cw * 0.420)
+    const modX = Math.round((cw - mod) / 2)
+    const modY = Math.round(ch * 0.022)
+    const modR = Math.round(mod * 0.24)
+    const ld = Math.round(mod * 0.32)
+    const flashD = Math.round(mod * 0.08)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: modShadow,
+        }}
+      >
+        {/* Main — top-left */}
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
+        {/* Ultra Wide — top-right */}
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
+        {/* Telephoto — bottom-center */}
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld * 0.88} s={s} />
+        {/* Flash */}
+        <Lens cx={mod * 0.70} cy={mod * 0.70} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  15. Nothing Phone 2a series — dual camera with LED strip           */
+  /*  Real: 50MP main + 50MP UW, distinctive LED strip below lenses      */
+  /* ================================================================== */
+  if (family === "nothing-2a-dual") {
+    const mod = Math.round(cw * 0.380)
+    const modX = Math.round((cw - mod) / 2)
+    const modY = Math.round(ch * 0.025)
+    const modR = Math.round(mod * 0.24)
+    const ld = Math.round(mod * 0.36)
+    const ledW = Math.round(mod * 0.12)
+    const ledH = Math.round(mod * 0.04)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: modShadow,
+        }}
+      >
+        {/* 50MP Main — top */}
+        <Lens cx={mod * 0.35} cy={mod * 0.35} d={ld} s={s} />
+        {/* 50MP Ultra Wide — bottom */}
+        <Lens cx={mod * 0.35} cy={mod * 0.65} d={ld} s={s} />
+        {/* LED strip — right side */}
+        <div
+          style={{
+            position: "absolute",
+            right: mod * 0.08 * s,
+            top: mod * 0.40 * s,
+            width: ledW * s,
+            height: ledH * s,
+            borderRadius: (ledH / 2) * s,
+            background: "linear-gradient(90deg, #00ff88 0%, #00cc66 50%, #00ff88 100%)",
+            boxShadow: `0 0 ${4 * s}px rgba(0,255,136,0.6)`,
+          }}
+        />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  16. iPhone SE 3 — single centered camera                           */
+  /*  Real: 12MP single lens, small circular module                      */
+  /* ================================================================== */
+  if (family === "iphone-se-single") {
+    const mod = Math.round(cw * 0.220)
+    const modX = Math.round((cw - mod) / 2)
+    const modY = Math.round(ch * 0.028)
+    const ld = Math.round(mod * 0.70)
+    const flashD = Math.round(mod * 0.18)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: mod / 2 * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: modShadow,
+        }}
+      >
+        {/* 12MP Main — centered */}
+        <Lens cx={mod * 0.50} cy={mod * 0.50} d={ld} s={s} />
+        {/* True Tone flash — right */}
+        <Lens cx={mod * 0.80} cy={mod * 0.50} d={flashD} s={s} type="flash" />
       </div>
     )
   }

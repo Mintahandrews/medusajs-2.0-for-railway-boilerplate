@@ -146,6 +146,21 @@ export const DEVICE_CONFIGS: Record<string, DeviceConfig> = {
   "pixel-9":         dev("pixel-9",         "Google Pixel 9",           72.0,  152.8,  54),
   "pixel-9-pro":     dev("pixel-9-pro",     "Google Pixel 9 Pro",       72.0,  152.8,  54),
   "pixel-9-pro-xl":  dev("pixel-9-pro-xl",  "Google Pixel 9 Pro XL",    76.6,  162.8,  54),
+
+  /* ---- OnePlus series ---------------------------------------------------- */
+  "oneplus-12":       dev("oneplus-12",       "OnePlus 12",               75.8,  164.3,  54),
+  "oneplus-12r":      dev("oneplus-12r",      "OnePlus 12R",              75.3,  163.3,  54),
+
+  /* ---- Xiaomi series ----------------------------------------------------- */
+  "xiaomi-14":        dev("xiaomi-14",        "Xiaomi 14",                71.5,  152.8,  54),
+  "xiaomi-14-pro":    dev("xiaomi-14-pro",    "Xiaomi 14 Pro",            75.3,  161.4,  54),
+
+  /* ---- Nothing Phone series --------------------------------------------- */
+  "nothing-phone-2a":     dev("nothing-phone-2a",     "Nothing Phone (2a)",        76.3,  161.7,  54),
+  "nothing-phone-2a-plus": dev("nothing-phone-2a-plus", "Nothing Phone (2a) Plus",   76.3,  161.7,  54),
+
+  /* ---- iPhone SE series ------------------------------------------------- */
+  "iphone-se-3":      dev("iphone-se-3",      "iPhone SE (3rd gen)",      67.3,  138.4,  48),
 }
 
 /* -------------------------------------------------------------------------- */
@@ -246,6 +261,68 @@ export function detectDeviceFromProduct(
     return DEVICE_CONFIGS[`pixel-${clamp}${suffix}`]
       ?? DEVICE_CONFIGS[`pixel-${clamp}`]
       ?? DEVICE_CONFIGS["pixel-9"]
+  }
+
+  // --- OnePlus detection ---
+  // Matches "oneplus 12", "oneplus12r", "one-plus-12", etc.
+  const oneplusMatch = haystack.match(
+    /one[ -]?plus[\s-]?(\d{2,})[\s-]?(r)?/
+  )
+  if (oneplusMatch) {
+    const model = parseInt(oneplusMatch[1], 10)
+    const isR = oneplusMatch[2] === "r"
+    const suffix = isR ? "r" : ""
+    const clamp = Math.max(12, Math.min(model, 13))
+    return DEVICE_CONFIGS[`oneplus-${clamp}${suffix}`]
+      ?? DEVICE_CONFIGS["oneplus-12"]
+  }
+
+  // --- Xiaomi detection ---
+  // Matches "xiaomi 14 pro", "xiaomi14", "mi-14-pro", etc.
+  const xiaomiMatch = haystack.match(
+    /(?:xiaomi|mi)[\s-]?(\d{2,})[\s-]?(pro)?/
+  )
+  if (xiaomiMatch) {
+    const model = parseInt(xiaomiMatch[1], 10)
+    const isPro = xiaomiMatch[2] === "pro"
+    const suffix = isPro ? "-pro" : ""
+    const clamp = Math.max(14, Math.min(model, 15))
+    return DEVICE_CONFIGS[`xiaomi-${clamp}${suffix}`]
+      ?? DEVICE_CONFIGS["xiaomi-14"]
+  }
+
+  // --- Nothing Phone detection ---
+  // Matches "nothing phone 2a", "nothing-phone-2a-plus", etc.
+  const nothingMatch = haystack.match(
+    /nothing[\s-]?phone[\s-]?(\d+)[\s-]?(a)?[\s-]?(plus)?/
+  )
+  if (nothingMatch) {
+    const model = parseInt(nothingMatch[1], 10)
+    const isA = nothingMatch[2] === "a"
+    const isPlus = nothingMatch[3] === "plus"
+    if (model === 2 && isA) {
+      const suffix = isPlus ? "-plus" : ""
+      return DEVICE_CONFIGS[`nothing-phone-${model}a${suffix}`]
+        ?? DEVICE_CONFIGS["nothing-phone-2a"]
+    }
+  }
+
+  // --- iPhone SE detection ---
+  // Matches "iphone se 3", "iphone-se-3rd", "iphone-se", etc.
+  const iphoneSeMatch = haystack.match(
+    /iphone[\s-]?se[\s-]?(\d{1,}|(?:\d{1,}st|\d{1,}nd|\d{1,}rd|\d{1,}th))?(?:[\s-]?gen)?/
+  )
+  if (iphoneSeMatch) {
+    // Default to 3rd gen (2022) if no generation specified
+    const genStr = iphoneSeMatch[1]
+    let gen = 3
+    if (genStr) {
+      // Convert "3rd", "3", "third" to number
+      const genNum = parseInt(genStr.replace(/\D/g, ""), 10)
+      if (!isNaN(genNum)) gen = Math.max(3, Math.min(genNum, 3))
+    }
+    return DEVICE_CONFIGS[`iphone-se-${gen}`]
+      ?? DEVICE_CONFIGS["iphone-se-3"]
   }
 
   return null

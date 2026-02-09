@@ -631,6 +631,71 @@ function drawCameraHint(
     drawFlash(ctx, barX + barW * (isPro ? 0.78 : 0.63), barY + barH * 0.50, barH * 0.11)
     if (isPro) drawSensor(ctx, barX + barW * 0.88, barY + barH * 0.50, barH * 0.07)
   }
+  /* ---- OnePlus 12 — centered circular triple ---- */
+  else if (/^oneplus-12$/.test(handle)) {
+    const mod = pw * 0.434, modX = (pw - mod) / 2, modY = ph * 0.025
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod / 2)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.32 / 2
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.25, lr)
+    drawLens(ctx, modX + mod * 0.30, modY + mod * 0.65, lr * 0.88)
+    drawLens(ctx, modX + mod * 0.70, modY + mod * 0.65, lr * 0.88)
+    drawFlash(ctx, modX + mod * 0.50, modY + mod * 0.85, mod * 0.04)
+  }
+  /* ---- OnePlus 12R — centered circular dual ---- */
+  else if (/^oneplus-12r/.test(handle)) {
+    const mod = pw * 0.434, modX = (pw - mod) / 2, modY = ph * 0.025
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod / 2)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.38 / 2
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.35, lr)
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.70, lr * 0.82)
+    drawFlash(ctx, modX + mod * 0.50, modY + mod * 0.90, mod * 0.04)
+  }
+  /* ---- Xiaomi 14 Pro — large square triple ---- */
+  else if (/xiaomi-14-pro/.test(handle)) {
+    const mod = pw * 0.490, modX = (pw - mod) / 2, modY = ph * 0.020
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.22)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.30 / 2
+    drawLens(ctx, modX + mod * 0.30, modY + mod * 0.30, lr)
+    drawLens(ctx, modX + mod * 0.70, modY + mod * 0.30, lr)
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.70, lr * 0.88)
+    drawFlash(ctx, modX + mod * 0.70, modY + mod * 0.70, mod * 0.035)
+  }
+  /* ---- Xiaomi 14 — smaller square triple ---- */
+  else if (/^xiaomi-14$/.test(handle)) {
+    const mod = pw * 0.420, modX = (pw - mod) / 2, modY = ph * 0.022
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.24)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.32 / 2
+    drawLens(ctx, modX + mod * 0.30, modY + mod * 0.30, lr)
+    drawLens(ctx, modX + mod * 0.70, modY + mod * 0.30, lr)
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.70, lr * 0.88)
+    drawFlash(ctx, modX + mod * 0.70, modY + mod * 0.70, mod * 0.04)
+  }
+  /* ---- Nothing Phone 2a series — dual camera with LED strip ---- */
+  else if (/^nothing-phone-2a/.test(handle)) {
+    const mod = pw * 0.380, modX = (pw - mod) / 2, modY = ph * 0.025
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.24)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.36 / 2
+    drawLens(ctx, modX + mod * 0.35, modY + mod * 0.35, lr)
+    drawLens(ctx, modX + mod * 0.35, modY + mod * 0.65, lr)
+    // LED strip
+    const ledW = mod * 0.12, ledH = mod * 0.04
+    ctx.fillStyle = "#00ff88"
+    ctx.fillRect(modX + mod * 0.80, modY + mod * 0.40, ledW, ledH)
+  }
+  /* ---- iPhone SE 3 — single centered camera ---- */
+  else if (/^iphone-se-/.test(handle)) {
+    const mod = pw * 0.220, modX = (pw - mod) / 2, modY = ph * 0.028
+    drawRoundedRect(ctx, modX, modY, mod, mod, mod / 2)
+    ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
+    const lr = mod * 0.70 / 2
+    drawLens(ctx, modX + mod * 0.50, modY + mod * 0.50, lr)
+    drawFlash(ctx, modX + mod * 0.80, modY + mod * 0.50, mod * 0.09)
+  }
 
   ctx.restore()
 }
