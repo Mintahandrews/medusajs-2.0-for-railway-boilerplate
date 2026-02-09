@@ -113,6 +113,12 @@ interface GeminiResponse {
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
+    // Diagnostic logging
+    console.log("[ai-preview] Request received — content-type:", req.headers["content-type"],
+      "content-length:", req.headers["content-length"],
+      "body type:", typeof req.body,
+      "body keys:", req.body && typeof req.body === "object" ? Object.keys(req.body) : "N/A")
+
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       return res.status(503).json({

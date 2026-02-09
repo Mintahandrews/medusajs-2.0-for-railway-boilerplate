@@ -8,12 +8,7 @@ import { defineMiddlewares } from "@medusajs/framework/http"
 export default defineMiddlewares({
   routes: [
     {
-      matcher: "/store/custom/ai-preview",
-      method: ["POST"],
-      bodyParser: { sizeLimit: "10mb" },
-    },
-    {
-      matcher: "/store/custom/design-upload",
+      matcher: "/store/custom/*",
       method: ["POST"],
       bodyParser: { sizeLimit: "10mb" },
     },
