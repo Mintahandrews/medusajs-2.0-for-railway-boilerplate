@@ -98,21 +98,21 @@ function dev(
 export const DEVICE_CONFIGS: Record<string, DeviceConfig> = {
   /* ---- iPhone 11 series (2019) ----------------------------------------- */
   //                         handle              name                    W mm    H mm    r
-  "iphone-11":       dev("iphone-11",       "iPhone 11",               75.7,  150.9,  38),
-  "iphone-11-pro":   dev("iphone-11-pro",   "iPhone 11 Pro",           71.4,  144.0,  38),
-  "iphone-11-pro-max": dev("iphone-11-pro-max", "iPhone 11 Pro Max",   77.8,  158.0,  38),
+  "iphone-11":       dev("iphone-11",       "iPhone 11",               75.7,  150.9,  48),
+  "iphone-11-pro":   dev("iphone-11-pro",   "iPhone 11 Pro",           71.4,  144.0,  48),
+  "iphone-11-pro-max": dev("iphone-11-pro-max", "iPhone 11 Pro Max",   77.8,  158.0,  48),
 
   /* ---- iPhone 12 series (2020) ----------------------------------------- */
-  "iphone-12":       dev("iphone-12",       "iPhone 12",               71.5,  146.7,  40),
-  "iphone-12-mini":  dev("iphone-12-mini",  "iPhone 12 mini",          64.2,  131.5,  40),
-  "iphone-12-pro":   dev("iphone-12-pro",   "iPhone 12 Pro",           71.5,  146.7,  40),
-  "iphone-12-pro-max": dev("iphone-12-pro-max", "iPhone 12 Pro Max",   78.1,  160.8,  40),
+  "iphone-12":       dev("iphone-12",       "iPhone 12",               71.5,  146.7,  44),
+  "iphone-12-mini":  dev("iphone-12-mini",  "iPhone 12 mini",          64.2,  131.5,  44),
+  "iphone-12-pro":   dev("iphone-12-pro",   "iPhone 12 Pro",           71.5,  146.7,  44),
+  "iphone-12-pro-max": dev("iphone-12-pro-max", "iPhone 12 Pro Max",   78.1,  160.8,  44),
 
   /* ---- iPhone 13 series (2021) ----------------------------------------- */
-  "iphone-13":       dev("iphone-13",       "iPhone 13",               71.5,  146.7,  42),
-  "iphone-13-mini":  dev("iphone-13-mini",  "iPhone 13 mini",          64.2,  131.5,  42),
-  "iphone-13-pro":   dev("iphone-13-pro",   "iPhone 13 Pro",           71.5,  146.7,  42),
-  "iphone-13-pro-max": dev("iphone-13-pro-max", "iPhone 13 Pro Max",   78.1,  160.8,  42),
+  "iphone-13":       dev("iphone-13",       "iPhone 13",               71.5,  146.7,  44),
+  "iphone-13-mini":  dev("iphone-13-mini",  "iPhone 13 mini",          64.2,  131.5,  44),
+  "iphone-13-pro":   dev("iphone-13-pro",   "iPhone 13 Pro",           71.5,  146.7,  44),
+  "iphone-13-pro-max": dev("iphone-13-pro-max", "iPhone 13 Pro Max",   78.1,  160.8,  44),
 
   /* ---- iPhone 14 series (2022) ----------------------------------------- */
   "iphone-14":       dev("iphone-14",       "iPhone 14",               71.5,  146.7,  44),
@@ -121,31 +121,31 @@ export const DEVICE_CONFIGS: Record<string, DeviceConfig> = {
   "iphone-14-pro-max": dev("iphone-14-pro-max", "iPhone 14 Pro Max",   77.6,  160.7,  44),
 
   /* ---- iPhone 15 series (2023) ----------------------------------------- */
-  "iphone-15":       dev("iphone-15",       "iPhone 15",               71.6,  147.6,  44),
-  "iphone-15-plus":  dev("iphone-15-plus",  "iPhone 15 Plus",          77.8,  160.9,  44),
-  "iphone-15-pro":   dev("iphone-15-pro",   "iPhone 15 Pro",           70.6,  146.6,  44),
-  "iphone-15-pro-max": dev("iphone-15-pro-max", "iPhone 15 Pro Max",   76.7,  159.9,  44),
+  "iphone-15":       dev("iphone-15",       "iPhone 15",               71.6,  147.6,  45),
+  "iphone-15-plus":  dev("iphone-15-plus",  "iPhone 15 Plus",          77.8,  160.9,  45),
+  "iphone-15-pro":   dev("iphone-15-pro",   "iPhone 15 Pro",           70.6,  146.6,  45),
+  "iphone-15-pro-max": dev("iphone-15-pro-max", "iPhone 15 Pro Max",   76.7,  159.9,  45),
 
   /* ---- iPhone 16 series (2024) ----------------------------------------- */
-  "iphone-16":       dev("iphone-16",       "iPhone 16",               71.6,  147.6,  46),
-  "iphone-16-plus":  dev("iphone-16-plus",  "iPhone 16 Plus",          77.8,  160.9,  46),
-  "iphone-16-pro":   dev("iphone-16-pro",   "iPhone 16 Pro",           71.5,  149.6,  46),
-  "iphone-16-pro-max": dev("iphone-16-pro-max", "iPhone 16 Pro Max",   77.6,  163.0,  46),
+  "iphone-16":       dev("iphone-16",       "iPhone 16",               71.6,  147.6,  48),
+  "iphone-16-plus":  dev("iphone-16-plus",  "iPhone 16 Plus",          77.8,  160.9,  48),
+  "iphone-16-pro":   dev("iphone-16-pro",   "iPhone 16 Pro",           71.5,  149.6,  48),
+  "iphone-16-pro-max": dev("iphone-16-pro-max", "iPhone 16 Pro Max",   77.6,  163.0,  48),
 
   /* ---- Samsung Galaxy S series ----------------------------------------- */
-  "samsung-s23":     dev("samsung-s23",     "Samsung Galaxy S23",       70.9,  146.3,  36),
-  "samsung-s23-ultra": dev("samsung-s23-ultra", "Samsung Galaxy S23 Ultra", 78.1, 163.4, 34),
-  "samsung-s24":     dev("samsung-s24",     "Samsung Galaxy S24",       70.6,  147.0,  36),
-  "samsung-s24-ultra": dev("samsung-s24-ultra", "Samsung Galaxy S24 Ultra", 79.0, 162.3, 34),
-  "samsung-s25":     dev("samsung-s25",     "Samsung Galaxy S25",       70.1,  146.9,  36),
-  "samsung-s25-ultra": dev("samsung-s25-ultra", "Samsung Galaxy S25 Ultra", 77.6, 162.8, 34),
+  "samsung-s23":     dev("samsung-s23",     "Samsung Galaxy S23",       70.9,  146.3,  48),
+  "samsung-s23-ultra": dev("samsung-s23-ultra", "Samsung Galaxy S23 Ultra", 78.1, 163.4, 33),
+  "samsung-s24":     dev("samsung-s24",     "Samsung Galaxy S24",       70.6,  147.0,  48),
+  "samsung-s24-ultra": dev("samsung-s24-ultra", "Samsung Galaxy S24 Ultra", 79.0, 162.3, 36),
+  "samsung-s25":     dev("samsung-s25",     "Samsung Galaxy S25",       70.1,  146.9,  51),
+  "samsung-s25-ultra": dev("samsung-s25-ultra", "Samsung Galaxy S25 Ultra", 77.6, 162.8, 48),
 
   /* ---- Google Pixel series --------------------------------------------- */
-  "pixel-8":         dev("pixel-8",         "Google Pixel 8",           70.8,  150.5,  40),
-  "pixel-8-pro":     dev("pixel-8-pro",     "Google Pixel 8 Pro",       76.5,  162.6,  40),
-  "pixel-9":         dev("pixel-9",         "Google Pixel 9",           72.0,  152.8,  42),
-  "pixel-9-pro":     dev("pixel-9-pro",     "Google Pixel 9 Pro",       72.0,  152.8,  42),
-  "pixel-9-pro-xl":  dev("pixel-9-pro-xl",  "Google Pixel 9 Pro XL",    76.6,  162.8,  42),
+  "pixel-8":         dev("pixel-8",         "Google Pixel 8",           70.8,  150.5,  54),
+  "pixel-8-pro":     dev("pixel-8-pro",     "Google Pixel 8 Pro",       76.5,  162.6,  60),
+  "pixel-9":         dev("pixel-9",         "Google Pixel 9",           72.0,  152.8,  54),
+  "pixel-9-pro":     dev("pixel-9-pro",     "Google Pixel 9 Pro",       72.0,  152.8,  54),
+  "pixel-9-pro-xl":  dev("pixel-9-pro-xl",  "Google Pixel 9 Pro XL",    76.6,  162.8,  54),
 }
 
 /* -------------------------------------------------------------------------- */

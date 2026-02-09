@@ -73,8 +73,49 @@ function PhoneIcon({ handle }: { handle: string }) {
     )
   }
 
-  /* ---- iPhone Pro / Pro Max — square module, triangle 3 lenses ---- */
-  /* Real: module ~37mm square on 71.5mm-wide body → 51.7% of width */
+  /* ---- iPhone 16 Pro / Pro Max — larger module (~39mm → 54.5%) ---- */
+  if (/^iphone-16-pro/.test(handle)) {
+    const mx = 2, my = 2, ms = 31, mr = 8
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <rect x={mx} y={my} width={ms} height={ms} rx={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+        <circle cx={mx + ms * 0.28} cy={my + ms * 0.70} r="1.2"
+          className="fill-gray-400 group-hover:fill-emerald-400" />
+      </svg>
+    )
+  }
+
+  /* ---- iPhone 11 Pro / Pro Max — triple ~36mm, no LiDAR ---- */
+  if (/^iphone-11-pro/.test(handle)) {
+    const mx = 3, my = 3, ms = 28, mr = 8
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <rect x={mx} y={my} width={ms} height={ms} rx={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- iPhone 12–15 Pro — triple ~36mm with LiDAR ---- */
   if (/iphone-\d+-pro/.test(handle)) {
     const mx = 3, my = 2, ms = 29, mr = 8
     return (
@@ -82,25 +123,39 @@ function PhoneIcon({ handle }: { handle: string }) {
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
           className="fill-gray-300 group-hover:fill-emerald-200" />
-        {/* Triangle: top-left, top-right, bottom-center */}
         <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
         <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
         <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        {/* Flash */}
         <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
-        {/* LiDAR */}
         <circle cx={mx + ms * 0.28} cy={my + ms * 0.70} r="1.2"
           className="fill-gray-400 group-hover:fill-emerald-400" />
       </svg>
     )
   }
 
-  /* ---- iPhone 11–15 standard / mini / Plus — square module, diagonal 2 lenses ---- */
-  /* Real: module ~28mm square on 71.5mm-wide body → 39.2% of width */
+  /* ---- iPhone 11 standard — smaller dual module (~25mm → 33%) ---- */
+  if (/^iphone-11$/.test(handle)) {
+    const mx = 4, my = 3, ms = 18, mr = 5
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <rect x={mx} y={my} width={ms} height={ms} rx={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={mx + ms * 0.33} cy={my + ms * 0.33} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.67} cy={my + ms * 0.67} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.67} cy={my + ms * 0.33} r="1.5"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- iPhone 12–15 standard / mini / Plus — diagonal dual ~28mm ---- */
   if (/^iphone-/.test(handle)) {
     const mx = 3, my = 2, ms = 22, mr = 6
     return (
@@ -108,25 +163,54 @@ function PhoneIcon({ handle }: { handle: string }) {
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
           className="fill-gray-300 group-hover:fill-emerald-200" />
-        {/* Diagonal: top-left, bottom-right */}
         <circle cx={mx + ms * 0.33} cy={my + ms * 0.33} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />
         <circle cx={mx + ms * 0.67} cy={my + ms * 0.67} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        {/* Flash */}
         <circle cx={mx + ms * 0.67} cy={my + ms * 0.33} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )
   }
 
-  /* ---- Samsung Ultra — 4 individual raised circles ---- */
-  /* Real: lens ~13mm on 79mm-wide body, cx at 15.2%, gap 8.6% of height */
-  if (/samsung.*ultra/.test(handle)) {
-    const lx = 9, startY = 8, gap = 8
+  /* ---- Samsung S25 Ultra — 4 circles, rounded body (new design) ---- */
+  /* Real: more rounded corners (~8mm), larger camera ring design */
+  if (/samsung-s25-ultra/.test(handle)) {
+    const lx = 10, startY = 9, gap = 8.5
+    const bodyR = (
+      <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={10}
+        className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+        strokeWidth="1.5" />
+    )
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
-        {body}
+        {bodyR}
+        {[0, 1, 2, 3].map(i => (
+          <g key={i}>
+            <circle cx={lx} cy={startY + i * gap} r="5"
+              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
+            <circle cx={lx} cy={startY + i * gap} r="3"
+              className="fill-gray-500 group-hover:fill-emerald-600" />
+          </g>
+        ))}
+        <circle cx={lx} cy={startY + 3 * gap + 7} r="1.5"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- Samsung S23/S24 Ultra — 4 circles, angular body ---- */
+  /* Real: boxy corners (~5.5-6mm), tighter lens spacing */
+  if (/samsung.*ultra/.test(handle)) {
+    const lx = 9, startY = 8, gap = 8
+    const bodyAngular = (
+      <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={6}
+        className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+        strokeWidth="1.5" />
+    )
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {bodyAngular}
         {[0, 1, 2, 3].map(i => (
           <g key={i}>
             <circle cx={lx} cy={startY + i * gap} r="4.5"
@@ -135,7 +219,6 @@ function PhoneIcon({ handle }: { handle: string }) {
               className="fill-gray-500 group-hover:fill-emerald-600" />
           </g>
         ))}
-        {/* Flash */}
         <circle cx={lx} cy={startY + 3 * gap + 6} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -165,44 +248,46 @@ function PhoneIcon({ handle }: { handle: string }) {
   }
 
   /* ---- Pixel 8 / 8 Pro — full-width camera bar (edge-to-edge) ---- */
+  /* Real: visor ~18-20mm tall on 162.6mm body ≈ 12% of height */
   if (/^pixel-8/.test(handle)) {
     const isPro = handle.includes("pro")
-    const barY = 14, barH = 14
+    const barY = 10, barH = 18
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         {/* Full-width bar that curves into phone edges */}
         <path d={`M1.5 ${barY + r} V${barY} h${w - 3} v${barH} H1.5 V${barY + barH - r}`}
           className="fill-gray-300 group-hover:fill-emerald-200" />
-        <circle cx="16" cy={barY + barH / 2} r="4.5"
+        <circle cx="14" cy={barY + barH / 2} r="5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        <circle cx="30" cy={barY + barH / 2} r="4.5"
+        <circle cx="27" cy={barY + barH / 2} r="5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        {isPro && <circle cx="42" cy={barY + barH / 2} r="3.5"
+        {isPro && <circle cx="39" cy={barY + barH / 2} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />}
-        <circle cx={isPro ? 50 : 42} cy={barY + barH / 2} r="1.5"
+        <circle cx={isPro ? 49 : 39} cy={barY + barH / 2} r="1.8"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )
   }
 
   /* ---- Pixel 9 / 9 Pro / 9 Pro XL — floating pill camera island ---- */
+  /* Real: pill ~18mm tall on ~152.8mm body ≈ 12% of height */
   if (/^pixel-9/.test(handle)) {
     const isPro = handle.includes("pro")
-    const barX = 5, barY = 12, barW = w - 10, barH = 16, barR = 8
+    const barX = 4, barY = 9, barW = w - 8, barH = 20, barR = 10
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         {/* Floating pill that doesn't touch edges */}
         <rect x={barX} y={barY} width={barW} height={barH} rx={barR}
           className="fill-gray-300 group-hover:fill-emerald-200" />
-        <circle cx={barX + 11} cy={barY + barH / 2} r="4.5"
+        <circle cx={barX + 11} cy={barY + barH / 2} r="5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        <circle cx={barX + 24} cy={barY + barH / 2} r="4.5"
+        <circle cx={barX + 25} cy={barY + barH / 2} r="5"
           className="fill-gray-500 group-hover:fill-emerald-600" />
-        {isPro && <circle cx={barX + 35} cy={barY + barH / 2} r="3.5"
+        {isPro && <circle cx={barX + 37} cy={barY + barH / 2} r="4"
           className="fill-gray-500 group-hover:fill-emerald-600" />}
-        <circle cx={barX + (isPro ? 43 : 35)} cy={barY + barH / 2} r="1.5"
+        <circle cx={barX + (isPro ? 45 : 37)} cy={barY + barH / 2} r="1.8"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )

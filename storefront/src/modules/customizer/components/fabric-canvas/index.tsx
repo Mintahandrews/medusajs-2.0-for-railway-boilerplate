@@ -17,24 +17,28 @@ import type { DeviceConfig } from "@lib/device-assets"
  *
  * - iphone-16-vertical : iPhone 16 / 16 Plus  — vertical pill, 2 lenses
  * - iphone-diagonal    : iPhone 11–15 standard — diagonal dual in square
- * - iphone-triple      : All iPhone Pro/Pro Max — square module, 3 lenses
- * - samsung-triple     : Galaxy S23/S24/S25     — 3 individual circles
- * - samsung-quad       : Galaxy S Ultra         — 4 individual circles
- * - pixel-bar          : Pixel 8/9 all          — horizontal pill visor
  */
 function getCameraFamily(handle: string): string {
-  // iPhone 16 / 16 Plus → new vertical pill layout
+  // iPhone 16 / 16 Plus — vertical pill (new for 2024)
   if (/^iphone-16(-plus)?$/.test(handle)) return "iphone-16-vertical"
-  // All iPhone Pro / Pro Max → square triple-lens module
+  // iPhone 16 Pro / Pro Max — larger triple module (~39mm)
+  if (/^iphone-16-pro/.test(handle)) return "iphone-16-pro-triple"
+  // iPhone 11 Pro / Pro Max — triple in ~36mm module
+  if (/^iphone-11-pro/.test(handle)) return "iphone-11-triple"
+  // iPhone 11 standard — smaller dual in ~25mm module
+  if (/^iphone-11$/.test(handle)) return "iphone-11-dual"
+  // iPhone 12–15 Pro — triple in ~36mm module
   if (/iphone-\d+-pro/.test(handle)) return "iphone-triple"
-  // iPhone 11–15 standard / mini / Plus → diagonal dual in square
+  // iPhone 12–15 standard / mini / Plus — diagonal dual in ~28mm module
   if (/^iphone-/.test(handle)) return "iphone-diagonal"
-  // Samsung Ultra → 4 individual circles
+  // Samsung Ultra — 4 individual circles
   if (/samsung.*ultra/.test(handle)) return "samsung-quad"
-  // Samsung standard → 3 individual circles
+  // Samsung standard — 3 individual circles
   if (/samsung/.test(handle)) return "samsung-triple"
-  // Google Pixel → horizontal pill visor bar
-  if (/pixel/.test(handle)) return "pixel-bar"
+  // Pixel 8 / 8 Pro — edge-to-edge camera visor bar
+  if (/^pixel-8/.test(handle)) return "pixel-8-bar"
+  // Pixel 9 / 9 Pro / 9 Pro XL — floating pill camera island
+  if (/^pixel-9/.test(handle)) return "pixel-9-pill"
   return "iphone-diagonal"
 }
 
@@ -80,11 +84,10 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
   const ch = config.canvasHeight
   const s = scale
 
-  /* ------------------------------------------------------------------ */
-  /*  iPhone 16 / 16 Plus — vertical pill, 2 lenses stacked             */
-  /*  Pill ~18% of width, ~10% of height, positioned upper-left         */
-  /* ------------------------------------------------------------------ */
-  /* Real: pill ~14mm W × 28mm H on 71.6mm body → 19.6% × 19.0% */
+  /* ================================================================== */
+  /*  1. iPhone 16 / 16 Plus — vertical pill, 2 stacked lenses          */
+  /*  Real: pill ~14mm W × 28mm H on 71.6mm body                       */
+  /* ================================================================== */
   if (family === "iphone-16-vertical") {
     const pillW = Math.round(cw * 0.196)
     const pillH = Math.round(ch * 0.190)
@@ -111,11 +114,133 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
     )
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  iPhone 11–15 standard / mini / Plus — diagonal dual in square     */
-  /*  Module ~40% of width, positioned ~4% from top-left                */
-  /* ------------------------------------------------------------------ */
-  /* Real: module ~28mm square on 71.5mm body → 39.2% of width */
+  /* ================================================================== */
+  /*  2. iPhone 16 Pro / Pro Max — larger triple module (~39mm)          */
+  /*  Real: module ~39mm on 71.5mm body → 54.5% of width                */
+  /* ================================================================== */
+  if (family === "iphone-16-pro-triple") {
+    const mod = Math.round(cw * 0.545)
+    const modX = Math.round(cw * 0.044)
+    const modY = Math.round(ch * 0.021)
+    const modR = Math.round(mod * 0.26)
+    const ld = Math.round(mod * 0.34)
+    const flashD = Math.round(mod * 0.09)
+    const sensorD = Math.round(mod * 0.06)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
+        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
+        <Lens cx={mod * 0.28} cy={mod * 0.70} d={sensorD} s={s} type="sensor" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  3. iPhone 11 Pro / Pro Max — triple in ~36mm module                */
+  /*  Real: module ~36mm on 71.4mm body → 50.4% of width                */
+  /* ================================================================== */
+  if (family === "iphone-11-triple") {
+    const mod = Math.round(cw * 0.504)
+    const modX = Math.round(cw * 0.050)
+    const modY = Math.round(ch * 0.025)
+    const modR = Math.round(mod * 0.27)
+    const ld = Math.round(mod * 0.36)
+    const flashD = Math.round(mod * 0.09)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
+        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  4. iPhone 11 standard — smaller dual in ~25mm module               */
+  /*  Real: module ~25mm on 75.7mm body → 33% of width                  */
+  /* ================================================================== */
+  if (family === "iphone-11-dual") {
+    const mod = Math.round(cw * 0.330)
+    const modX = Math.round(cw * 0.055)
+    const modY = Math.round(ch * 0.028)
+    const modR = Math.round(mod * 0.28)
+    const ld = Math.round(mod * 0.40)
+    const flashD = Math.round(mod * 0.12)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
+        <Lens cx={mod * 0.67} cy={mod * 0.67} d={ld} s={s} />
+        <Lens cx={mod * 0.67} cy={mod * 0.33} d={flashD} s={s} type="flash" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  5. iPhone 12–15 Pro — triple in ~36mm module                      */
+  /*  Real: module ~36mm on 71.5mm body → 50.3% of width                */
+  /* ================================================================== */
+  if (family === "iphone-triple") {
+    const mod = Math.round(cw * 0.503)
+    const modX = Math.round(cw * 0.049)
+    const modY = Math.round(ch * 0.023)
+    const modR = Math.round(mod * 0.27)
+    const ld = Math.round(mod * 0.35)
+    const flashD = Math.round(mod * 0.09)
+    const sensorD = Math.round(mod * 0.06)
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: modY * s, left: modX * s,
+          width: mod * s, height: mod * s,
+          borderRadius: modR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
+        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
+        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
+        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
+        <Lens cx={mod * 0.28} cy={mod * 0.70} d={sensorD} s={s} type="sensor" />
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  6. iPhone 12–15 standard / mini / Plus — diagonal dual ~28mm      */
+  /*  Real: module ~28mm on 71.5mm body → 39.2% of width                */
+  /* ================================================================== */
   if (family === "iphone-diagonal") {
     const mod = Math.round(cw * 0.392)
     const modX = Math.round(cw * 0.049)
@@ -134,59 +259,17 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
         }}
       >
-        {/* Diagonal: top-left and bottom-right */}
         <Lens cx={mod * 0.33} cy={mod * 0.33} d={ld} s={s} />
         <Lens cx={mod * 0.67} cy={mod * 0.67} d={ld} s={s} />
-        {/* Flash: top-right area */}
         <Lens cx={mod * 0.67} cy={mod * 0.33} d={flashD} s={s} type="flash" />
       </div>
     )
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  All iPhone Pro / Pro Max — square module, triangle triple lens     */
-  /*  Module ~53% of width (~38mm on 71mm phone), ~3% from top-left     */
-  /*  Triangle: 2 lenses top row, 1 bottom-center + flash + LiDAR      */
-  /* ------------------------------------------------------------------ */
-  /* Real: module ~37mm square on 71.5mm body → 51.7% of width */
-  if (family === "iphone-triple") {
-    const mod = Math.round(cw * 0.517)
-    const modX = Math.round(cw * 0.049)
-    const modY = Math.round(ch * 0.023)
-    const modR = Math.round(mod * 0.27)
-    const ld = Math.round(mod * 0.35)
-    const flashD = Math.round(mod * 0.09)
-    const sensorD = Math.round(mod * 0.06)
-    return (
-      <div
-        className="absolute pointer-events-none z-10"
-        style={{
-          top: modY * s, left: modX * s,
-          width: mod * s, height: mod * s,
-          borderRadius: modR * s,
-          background: "rgba(0,0,0,0.88)",
-          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.5), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
-        }}
-      >
-        {/* Top row: wide (left) + ultrawide (right) */}
-        <Lens cx={mod * 0.30} cy={mod * 0.30} d={ld} s={s} />
-        <Lens cx={mod * 0.70} cy={mod * 0.30} d={ld} s={s} />
-        {/* Bottom center: telephoto */}
-        <Lens cx={mod * 0.50} cy={mod * 0.70} d={ld} s={s} />
-        {/* Flash: between top-right and bottom-center */}
-        <Lens cx={mod * 0.72} cy={mod * 0.70} d={flashD} s={s} type="flash" />
-        {/* LiDAR sensor: between top-left and bottom-center */}
-        <Lens cx={mod * 0.28} cy={mod * 0.70} d={sensorD} s={s} type="sensor" />
-      </div>
-    )
-  }
-
-  /* ------------------------------------------------------------------ */
-  /*  Samsung Galaxy S23/S24/S25 — 3 individual raised circles          */
-  /*  No surrounding frame. Vertical stack in upper-left.               */
-  /*  Each lens ~13% of width, spaced ~5.5% of height apart             */
-  /* ------------------------------------------------------------------ */
-  /* Real: lens ~13mm on 70.6mm body, cx at 17%, gap 9.5% of height */
+  /* ================================================================== */
+  /*  7. Samsung Galaxy S23/S24/S25 — 3 individual raised circles       */
+  /*  Real: lens ~13mm on ~70.6mm body, cx ~17%, gap ~9.5% of height    */
+  /* ================================================================== */
   if (family === "samsung-triple") {
     const ld = Math.round(cw * 0.184)
     const cx = Math.round(cw * 0.170)
@@ -203,11 +286,10 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
     )
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Samsung Galaxy S Ultra — 4 individual circles (+ periscope)       */
-  /*  Same vertical stack layout but with 4th periscope lens             */
-  /* ------------------------------------------------------------------ */
-  /* Real: lens ~13mm on 79mm body, cx at 15.2%, gap 8.6% of height */
+  /* ================================================================== */
+  /*  8. Samsung Galaxy S Ultra — 4 individual circles                  */
+  /*  Real: lens ~13mm on ~79mm body, cx ~15.2%, gap ~8.6% of height    */
+  /* ================================================================== */
   if (family === "samsung-quad") {
     const ld = Math.round(cw * 0.165)
     const cx = Math.round(cw * 0.152)
@@ -225,19 +307,18 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
     )
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Google Pixel 8/9 — horizontal pill-shaped camera visor bar         */
-  /*  Bar ~80% of width centered, ~11% of height, ~8% from top          */
-  /*  Rounded pill ends, 2 large lenses + flash inside                   */
-  /* ------------------------------------------------------------------ */
-  if (family === "pixel-bar") {
-    const barW = Math.round(cw * 0.80)
-    const barH = Math.round(ch * 0.065)
+  /* ================================================================== */
+  /*  9. Google Pixel 8 / 8 Pro — edge-to-edge camera visor bar         */
+  /*  Real: visor ~18-20mm tall, spans full width flush with edges       */
+  /* ================================================================== */
+  if (family === "pixel-8-bar") {
+    const barW = Math.round(cw * 0.92)
+    const barH = Math.round(ch * 0.115)
     const barX = Math.round((cw - barW) / 2)
-    const barY = Math.round(ch * 0.06)
-    const barR = Math.round(barH / 2)
-    const ld = Math.round(barH * 0.65)
-    const flashD = Math.round(barH * 0.30)
+    const barY = Math.round(ch * 0.045)
+    const barR = Math.round(barH * 0.15)
+    const ld = Math.round(barH * 0.58)
+    const flashD = Math.round(barH * 0.25)
     const isPro = config.handle.includes("pro")
     return (
       <div
@@ -250,16 +331,44 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
           boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 0 ${4 * s}px rgba(0,0,0,0.3)`,
         }}
       >
-        {/* Main wide lens */}
+        <Lens cx={barW * 0.18} cy={barH * 0.50} d={ld} s={s} />
+        <Lens cx={barW * 0.36} cy={barH * 0.50} d={ld} s={s} />
+        {isPro && <Lens cx={barW * 0.54} cy={barH * 0.50} d={ld * 0.85} s={s} />}
+        <Lens cx={barW * (isPro ? 0.72 : 0.56)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
+        {isPro && <Lens cx={barW * 0.82} cy={barH * 0.50} d={flashD * 0.6} s={s} type="sensor" />}
+      </div>
+    )
+  }
+
+  /* ================================================================== */
+  /*  10. Google Pixel 9 / 9 Pro / 9 Pro XL — floating pill island      */
+  /*  Real: pill ~18mm tall, doesn't touch edges, rounded pill ends      */
+  /* ================================================================== */
+  if (family === "pixel-9-pill") {
+    const barW = Math.round(cw * 0.78)
+    const barH = Math.round(ch * 0.105)
+    const barX = Math.round((cw - barW) / 2)
+    const barY = Math.round(ch * 0.050)
+    const barR = Math.round(barH / 2)
+    const ld = Math.round(barH * 0.60)
+    const flashD = Math.round(barH * 0.25)
+    const isPro = config.handle.includes("pro")
+    return (
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          top: barY * s, left: barX * s,
+          width: barW * s, height: barH * s,
+          borderRadius: barR * s,
+          background: "rgba(0,0,0,0.88)",
+          boxShadow: `inset 0 0 0 ${1.5 * s}px rgba(60,60,60,0.4), 0 ${2 * s}px ${6 * s}px rgba(0,0,0,0.3)`,
+        }}
+      >
         <Lens cx={barW * 0.22} cy={barH * 0.50} d={ld} s={s} />
-        {/* Ultra-wide lens */}
         <Lens cx={barW * 0.42} cy={barH * 0.50} d={ld} s={s} />
-        {/* Telephoto (Pro only) or flash */}
         {isPro && <Lens cx={barW * 0.62} cy={barH * 0.50} d={ld * 0.85} s={s} />}
-        {/* Flash */}
         <Lens cx={barW * (isPro ? 0.80 : 0.65)} cy={barH * 0.50} d={flashD} s={s} type="flash" />
-        {/* Sensor */}
-        <Lens cx={barW * (isPro ? 0.90 : 0.78)} cy={barH * 0.50} d={flashD * 0.6} s={s} type="sensor" />
+        {isPro && <Lens cx={barW * 0.90} cy={barH * 0.50} d={flashD * 0.6} s={s} type="sensor" />}
       </div>
     )
   }
