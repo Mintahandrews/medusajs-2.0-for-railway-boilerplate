@@ -4,103 +4,123 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
  * POST /store/custom/ai-preview
  *
  * Generates a realistic AI product photo of the user's phone case design
- * using Replicate (SDXL img2img). The flat canvas export is transformed
- * into a lifestyle product shot while preserving the design.
+ * using Google Gemini 2.5 Flash Image (Nano Banana). The user's flat
+ * canvas design is sent as a reference image, and Gemini generates a
+ * photorealistic mockup of the case with that exact design printed on it.
  *
  * Body: {
- *   image: string  — base64 PNG data URL of the case preview
- *   scene: string  — one of: lifestyle | desk | nature | studio | flat
+ *   image:        string  — base64 PNG data URL of the case design
+ *   scene:        string  — lifestyle | desk | nature | studio | flat
+ *   case_type:    string  — slim | tough | clear | magsafe  (optional)
+ *   device_model: string  — e.g. "iPhone 16 Pro Max"       (optional)
+ *   device_handle:string  — e.g. "iphone-16-pro-max"       (optional)
  * }
  *
- * Returns: { imageUrl: string }
+ * Returns: { imageUrl: string }   (base64 data URL of generated image)
  *
- * Requires REPLICATE_API_TOKEN env var.
+ * Requires GEMINI_API_KEY env var (Google AI Studio key).
  */
 
-const SCENE_PROMPTS: Record<string, { prompt: string; strength: number }> = {
-  lifestyle: {
-    prompt:
-      "A realistic photo of a custom phone case held in a person's hand, bright modern café background, soft bokeh, product photography, natural lighting, 8k, ultra detailed",
-    strength: 0.55,
-  },
-  desk: {
-    prompt:
-      "A realistic photo of a custom phone case lying on a clean minimal white desk next to a laptop and coffee cup, top-down product photography, soft studio lighting, 8k",
-    strength: 0.55,
-  },
-  nature: {
-    prompt:
-      "A realistic photo of a custom phone case resting on a moss-covered stone in a lush forest, soft golden hour light filtering through trees, product photography, 8k",
-    strength: 0.55,
-  },
-  studio: {
-    prompt:
-      "A realistic photo of a custom phone case floating on a pure white studio background, dramatic directional lighting, subtle shadow, professional product photography, 8k",
-    strength: 0.45,
-  },
-  flat: {
-    prompt:
-      "A realistic high-quality product photo of a custom phone case, slight 3D perspective, subtle shadow and reflection, clean white background, professional product photography, 8k",
-    strength: 0.35,
-  },
+/* ---------- Scene prompt templates ---------- */
+
+const SCENE_DESCRIPTIONS: Record<string, string> = {
+  lifestyle:
+    "The case is being held in a person's hand in a bright modern café. " +
+    "Soft bokeh background, warm natural lighting from a nearby window, " +
+    "the person's hand is relaxed and stylish.",
+  desk:
+    "The case is lying flat on a clean minimal white desk next to a laptop " +
+    "and a cup of coffee. Top-down product photography angle, soft even " +
+    "studio lighting, shallow depth of field.",
+  nature:
+    "The case is resting on a moss-covered stone in a lush green forest. " +
+    "Soft golden hour sunlight filtering through the trees, dewdrops " +
+    "visible on nearby leaves, serene atmosphere.",
+  studio:
+    "The case is standing upright on a pure white studio background with " +
+    "dramatic directional lighting from the upper left, creating a subtle " +
+    "shadow and rim light on the edges. Clean, minimal, professional.",
+  flat:
+    "The case is photographed from a slight 3D perspective on a clean " +
+    "white surface with subtle shadow and reflection underneath. " +
+    "Professional product photography, even lighting.",
 }
 
-const NEGATIVE_PROMPT =
-  "blurry, low quality, distorted, deformed, ugly, text, watermark, logo, oversaturated, cartoon, illustration, painting, sketch, drawing"
+const CASE_TYPE_DESCRIPTIONS: Record<string, string> = {
+  slim: "ultra-thin slim-fit case with minimal bezels and a sleek matte finish",
+  tough: "rugged tough protective case with reinforced corners and a textured grip",
+  clear: "transparent clear case with glossy finish that lets the design show through",
+  magsafe: "MagSafe-compatible case with a visible magnetic ring on the back",
+}
 
 /**
- * Upload a base64 data-URL image to Replicate's file API and return a
- * short-lived serving URL that can be used as model input.
- * Falls back to the raw data URL if the upload fails.
+ * Build the Gemini prompt that instructs the model to generate a
+ * realistic phone case mockup using the provided design as reference.
  */
-async function uploadToReplicate(
-  dataUrl: string,
-  apiToken: string
-): Promise<string> {
-  try {
-    // Strip the data-URL prefix to get raw base64
-    const base64Match = dataUrl.match(/^data:([^;]+);base64,(.+)$/)
-    if (!base64Match) return dataUrl
+function buildPrompt(
+  scene: string,
+  caseType?: string,
+  deviceModel?: string,
+): string {
+  const deviceLabel = deviceModel || "smartphone"
+  const caseDesc = CASE_TYPE_DESCRIPTIONS[caseType || "tough"] || CASE_TYPE_DESCRIPTIONS.tough
+  const sceneDesc = SCENE_DESCRIPTIONS[scene] || SCENE_DESCRIPTIONS.lifestyle
 
-    const mimeType = base64Match[1]
-    const base64Data = base64Match[2]
-    const buffer = Buffer.from(base64Data, "base64")
-
-    const uploadRes = await fetch("https://api.replicate.com/v1/files", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-        "Content-Type": mimeType,
-      },
-      body: buffer,
-    })
-
-    if (uploadRes.ok) {
-      const file = (await uploadRes.json()) as { urls?: { get: string } }
-      if (file.urls?.get) {
-        console.log("[ai-preview] Uploaded image to Replicate file API")
-        return file.urls.get
-      }
-    }
-
-    console.warn("[ai-preview] File upload failed, falling back to data URL")
-    return dataUrl
-  } catch (err) {
-    console.warn("[ai-preview] File upload error, falling back to data URL:", err)
-    return dataUrl
-  }
+  return [
+    `Generate a ultra-realistic, high-resolution product photograph of a ${deviceLabel} phone case.`,
+    `The case is a ${caseDesc}.`,
+    `CRITICAL: The design/artwork shown in the provided reference image must be faithfully and exactly reproduced on the back surface of the phone case.`,
+    `Do NOT alter, crop, add to, or remove any element of the design. The design must wrap naturally around the case surface with realistic curvature and edge blending.`,
+    `Scene: ${sceneDesc}`,
+    `The photo must look like it was taken by a professional product photographer with a DSLR camera.`,
+    `8K resolution, ultra sharp detail, realistic materials (plastic/silicone texture), proper light reflections on the case edges, photorealistic rendering.`,
+    `Do NOT add any text, logos, watermarks, or branding that is not in the original design.`,
+  ].join(" ")
 }
+
+/**
+ * Strip the data-URL prefix and return raw base64 + mime type.
+ */
+function parseDataUrl(dataUrl: string): { base64: string; mimeType: string } {
+  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/)
+  if (match) {
+    return { mimeType: match[1], base64: match[2] }
+  }
+  // Assume raw base64 PNG if no prefix
+  return { mimeType: "image/png", base64: dataUrl }
+}
+
+/* ---------- Gemini API types ---------- */
+
+interface GeminiPart {
+  text?: string
+  inlineData?: { mimeType: string; data: string }
+  inline_data?: { mime_type: string; data: string }
+}
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: GeminiPart[]
+    }
+    finishReason?: string
+  }>
+  error?: { message: string; code: number }
+  promptFeedback?: { blockReason?: string }
+}
+
+/* ---------- Route handler ---------- */
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
-    const apiToken = process.env.REPLICATE_API_TOKEN
-    if (!apiToken) {
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
       return res.status(503).json({
-        error: "AI preview is not configured. Set REPLICATE_API_TOKEN in environment.",
+        error: "AI preview is not configured. Set GEMINI_API_KEY in environment.",
       })
     }
 
-    // Defensive: log body shape for debugging
+    // Parse request body
     const body = req.body as Record<string, unknown> | undefined
     if (!body || typeof body !== "object") {
       console.error("[ai-preview] req.body is empty or not an object:", typeof body)
@@ -111,6 +131,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     const image = body.image as string | undefined
     const scene = (body.scene as string) || "lifestyle"
+    const caseType = (body.case_type as string) || "tough"
+    const deviceModel = body.device_model as string | undefined
 
     if (!image || typeof image !== "string" || image.length < 100) {
       console.error(
@@ -122,123 +144,126 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(400).json({ error: "Missing 'image' field (base64 PNG)." })
     }
 
-    // Ensure data URL format
+    // Ensure data URL format then extract raw base64
     const dataUrl = image.startsWith("data:")
       ? image
       : `data:image/png;base64,${image}`
+    const { base64, mimeType } = parseDataUrl(dataUrl)
 
-    // Upload image to Replicate's file API for reliable delivery
-    // (avoids large base64 strings in JSON prediction input)
-    const imageInput = await uploadToReplicate(dataUrl, apiToken)
-
-    const sceneConfig = SCENE_PROMPTS[scene] || SCENE_PROMPTS.lifestyle
+    const prompt = buildPrompt(scene, caseType, deviceModel)
 
     console.log(
-      "[ai-preview] Creating prediction — scene:",
+      "[ai-preview] Calling Gemini (Nano Banana) — scene:",
       scene,
-      "image input type:",
-      imageInput.startsWith("http") ? "url" : "data-url",
+      "case:",
+      caseType,
+      "device:",
+      deviceModel || "unknown",
       "image size:",
-      image.length
+      Math.round(base64.length / 1024),
+      "KB"
     )
 
-    // Call Replicate — use SDXL img2img via the predictions endpoint
-    // Pin to a known version that supports img2img via the `image` input
-    const predictionRes = await fetch(
-      "https://api.replicate.com/v1/predictions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          "Content-Type": "application/json",
-          Prefer: "wait=60",
-        },
-        body: JSON.stringify({
-          version:
-            "39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
-          input: {
-            image: imageInput,
-            prompt: sceneConfig.prompt,
-            negative_prompt: NEGATIVE_PROMPT,
-            prompt_strength: sceneConfig.strength,
-            num_outputs: 1,
-            width: 1024,
-            height: 1024,
-            num_inference_steps: 30,
-            guidance_scale: 7.5,
-            scheduler: "K_EULER",
+    // Call Google Gemini 2.5 Flash Image (Nano Banana) REST API
+    const geminiUrl =
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent`
+
+    const geminiRes = await fetch(geminiUrl, {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: base64,
+                },
+              },
+            ],
           },
-        }),
-      }
-    )
+        ],
+        generationConfig: {
+          responseModalities: ["IMAGE", "TEXT"],
+        },
+      }),
+    })
 
-    if (!predictionRes.ok) {
-      const errText = await predictionRes.text()
-      console.error("[ai-preview] Replicate API error:", predictionRes.status, errText)
+    if (!geminiRes.ok) {
+      const errText = await geminiRes.text()
+      console.error("[ai-preview] Gemini API error:", geminiRes.status, errText.slice(0, 500))
       return res.status(502).json({
-        error: `AI preview generation failed (${predictionRes.status}).`,
+        error: `AI preview generation failed (${geminiRes.status}).`,
         detail: errText.slice(0, 300),
       })
     }
 
-    const prediction = (await predictionRes.json()) as {
-      id: string
-      status: string
-      output?: string[]
-      error?: string
-      urls?: { get: string }
-    }
+    const geminiData = (await geminiRes.json()) as GeminiResponse
 
-    // If "Prefer: wait" returned a completed prediction
-    if (prediction.status === "succeeded" && prediction.output?.length) {
-      return res.status(200).json({ imageUrl: prediction.output[0] })
-    }
-
-    // If still processing, poll until done (fallback for slow generations)
-    if (prediction.status === "starting" || prediction.status === "processing") {
-      const getUrl = prediction.urls?.get
-      if (!getUrl) {
-        return res.status(502).json({ error: "No polling URL returned from Replicate." })
-      }
-
-      const maxWait = 90_000 // 90 seconds max
-      const start = Date.now()
-      let result = prediction
-
-      while (
-        (result.status === "starting" || result.status === "processing") &&
-        Date.now() - start < maxWait
-      ) {
-        await new Promise((r) => setTimeout(r, 2000))
-        const pollRes = await fetch(getUrl, {
-          headers: { Authorization: `Bearer ${apiToken}` },
-        })
-        result = await pollRes.json()
-      }
-
-      if (result.status === "succeeded" && result.output?.length) {
-        return res.status(200).json({ imageUrl: result.output[0] })
-      }
-
-      if (result.status === "failed") {
-        console.error("[ai-preview] Replicate prediction failed:", result.error)
-        return res.status(502).json({
-          error: result.error || "AI preview generation failed.",
-        })
-      }
-
-      return res.status(504).json({ error: "AI preview timed out. Please try again." })
-    }
-
-    // Prediction failed immediately
-    if (prediction.status === "failed") {
-      console.error("[ai-preview] Replicate prediction failed:", prediction.error)
+    // Check for API-level errors
+    if (geminiData.error) {
+      console.error("[ai-preview] Gemini error:", geminiData.error)
       return res.status(502).json({
-        error: prediction.error || "AI preview generation failed.",
+        error: geminiData.error.message || "AI preview generation failed.",
       })
     }
 
-    return res.status(502).json({ error: "Unexpected prediction status: " + prediction.status })
+    // Check for safety blocks
+    if (geminiData.promptFeedback?.blockReason) {
+      console.warn("[ai-preview] Prompt blocked:", geminiData.promptFeedback.blockReason)
+      return res.status(422).json({
+        error: `Content blocked by safety filter: ${geminiData.promptFeedback.blockReason}`,
+      })
+    }
+
+    // Extract the generated image from the response
+    const parts = geminiData.candidates?.[0]?.content?.parts
+    if (!parts || parts.length === 0) {
+      console.error("[ai-preview] No parts in Gemini response:", JSON.stringify(geminiData).slice(0, 500))
+      return res.status(502).json({ error: "AI returned no image. Try a different scene." })
+    }
+
+    // Find the image part (could be inlineData or inline_data depending on API version)
+    let imageBase64: string | null = null
+    let imageMime: string = "image/png"
+
+    for (const part of parts) {
+      if (part.inlineData?.data) {
+        imageBase64 = part.inlineData.data
+        imageMime = part.inlineData.mimeType || "image/png"
+        break
+      }
+      if (part.inline_data?.data) {
+        imageBase64 = part.inline_data.data
+        imageMime = part.inline_data.mime_type || "image/png"
+        break
+      }
+    }
+
+    if (!imageBase64) {
+      // Log any text parts for debugging
+      const textParts = parts.filter((p) => p.text).map((p) => p.text)
+      console.error("[ai-preview] No image in response. Text parts:", textParts)
+      return res.status(502).json({
+        error: "AI did not generate an image. Try again or use a different scene.",
+      })
+    }
+
+    // Return as a data URL
+    const resultUrl = `data:${imageMime};base64,${imageBase64}`
+
+    console.log(
+      "[ai-preview] Success — generated image:",
+      Math.round(imageBase64.length / 1024),
+      "KB"
+    )
+
+    return res.status(200).json({ imageUrl: resultUrl })
   } catch (err: any) {
     console.error("[ai-preview] Error:", err)
     return res.status(500).json({ error: err.message || "Internal server error" })

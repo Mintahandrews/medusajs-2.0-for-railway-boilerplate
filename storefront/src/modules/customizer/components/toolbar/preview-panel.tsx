@@ -8,8 +8,9 @@ import { generateAiPreview } from "@lib/data/ai-preview"
 /**
  * Preview Panel — Two modes:
  *
- *  1. **AI (Replicate SDXL)** — Sends the design to Replicate via our backend
- *     proxy to generate a realistic product photo. Requires REPLICATE_API_TOKEN.
+ *  1. **AI (Nano Banana / Gemini)** — Sends the design to Google Gemini 2.5
+ *     Flash Image via our backend proxy. The AI reproduces the exact design
+ *     onto a realistic phone case mockup. Requires GEMINI_API_KEY.
  *
  *  2. **Local** — Client-side Canvas 2D perspective mockup (free, instant).
  *     Used as fallback when AI is unavailable or for quick previews.
@@ -79,7 +80,12 @@ export default function PreviewPanel() {
         return
       }
 
-      const result = await generateAiPreview(preview, sceneId)
+      const result = await generateAiPreview(preview, {
+        scene: sceneId,
+        caseType: state.caseType,
+        deviceModel: deviceConfig.name,
+        deviceHandle: deviceConfig.handle,
+      })
       setAiImageUrl(result.imageUrl)
     } catch (err: any) {
       console.error("[Preview] AI generation failed:", err)
@@ -87,7 +93,7 @@ export default function PreviewPanel() {
     } finally {
       setGenerating(false)
     }
-  }, [exportPreview, sceneIdx])
+  }, [exportPreview, sceneIdx, state.caseType, deviceConfig.name, deviceConfig.handle])
 
   /* ---- Local generation ---- */
   const generateLocal = useCallback(() => {
@@ -266,7 +272,7 @@ export default function PreviewPanel() {
       {mode === "ai" && (
         <>
           <p className="text-xs text-gray-500">
-            Generate a realistic product photo of your {deviceConfig.name} case using AI. Takes ~10-15 seconds.
+            Generate a realistic product photo of your {deviceConfig.name} case using Nano Banana AI. Takes ~10-20 seconds.
           </p>
 
           {/* Scene selector */}
@@ -296,7 +302,7 @@ export default function PreviewPanel() {
             className="w-full py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {generating ? (
-              <><RotateCcw size={14} className="animate-spin" /> Generating (~15s)...</>
+              <><RotateCcw size={14} className="animate-spin" /> Generating...</>
             ) : (
               <><Sparkles size={14} /> Generate AI Preview</>
             )}
@@ -633,7 +639,7 @@ function drawCameraHint(
   }
   /* ---- OnePlus 12 — centered circular triple ---- */
   else if (/^oneplus-12$/.test(handle)) {
-    const mod = pw * 0.434, modX = (pw - mod) / 2, modY = ph * 0.025
+    const mod = pw * 0.434, modX = px + (pw - mod) / 2, modY = py + ph * 0.025
     drawRoundedRect(ctx, modX, modY, mod, mod, mod / 2)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
     const lr = mod * 0.32 / 2
@@ -644,7 +650,7 @@ function drawCameraHint(
   }
   /* ---- OnePlus 12R — centered circular dual ---- */
   else if (/^oneplus-12r/.test(handle)) {
-    const mod = pw * 0.434, modX = (pw - mod) / 2, modY = ph * 0.025
+    const mod = pw * 0.434, modX = px + (pw - mod) / 2, modY = py + ph * 0.025
     drawRoundedRect(ctx, modX, modY, mod, mod, mod / 2)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
     const lr = mod * 0.38 / 2
@@ -654,7 +660,7 @@ function drawCameraHint(
   }
   /* ---- Xiaomi 14 Pro — large square triple ---- */
   else if (/xiaomi-14-pro/.test(handle)) {
-    const mod = pw * 0.490, modX = (pw - mod) / 2, modY = ph * 0.020
+    const mod = pw * 0.490, modX = px + (pw - mod) / 2, modY = py + ph * 0.020
     drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.22)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
     const lr = mod * 0.30 / 2
@@ -665,7 +671,7 @@ function drawCameraHint(
   }
   /* ---- Xiaomi 14 — smaller square triple ---- */
   else if (/^xiaomi-14$/.test(handle)) {
-    const mod = pw * 0.420, modX = (pw - mod) / 2, modY = ph * 0.022
+    const mod = pw * 0.420, modX = px + (pw - mod) / 2, modY = py + ph * 0.022
     drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.24)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
     const lr = mod * 0.32 / 2
@@ -676,7 +682,7 @@ function drawCameraHint(
   }
   /* ---- Nothing Phone 2a series — dual camera with LED strip ---- */
   else if (/^nothing-phone-2a/.test(handle)) {
-    const mod = pw * 0.380, modX = (pw - mod) / 2, modY = ph * 0.025
+    const mod = pw * 0.380, modX = px + (pw - mod) / 2, modY = py + ph * 0.025
     drawRoundedRect(ctx, modX, modY, mod, mod, mod * 0.24)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
     const lr = mod * 0.36 / 2
@@ -689,7 +695,7 @@ function drawCameraHint(
   }
   /* ---- iPhone SE 3 — single centered camera ---- */
   else if (/^iphone-se-/.test(handle)) {
-    const mod = pw * 0.220, modX = (pw - mod) / 2, modY = ph * 0.028
+    const mod = pw * 0.220, modX = px + (pw - mod) / 2, modY = py + ph * 0.028
     drawRoundedRect(ctx, modX, modY, mod, mod, mod / 2)
     ctx.fillStyle = "rgba(0,0,0,0.88)"; ctx.fill()
     const lr = mod * 0.70 / 2

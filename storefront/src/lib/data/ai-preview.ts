@@ -1,6 +1,17 @@
 export interface AiPreviewResult {
-  /** URL of the generated image (hosted on Replicate CDN) */
+  /** Data URL (base64) of the generated mockup image */
   imageUrl: string
+}
+
+export interface AiPreviewOptions {
+  /** Scene type: lifestyle | desk | nature | studio | flat */
+  scene?: string
+  /** Case type: slim | tough | clear | magsafe */
+  caseType?: string
+  /** Human-readable device name, e.g. "iPhone 16 Pro Max" */
+  deviceModel?: string
+  /** Device handle, e.g. "iphone-16-pro-max" */
+  deviceHandle?: string
 }
 
 /** Resolve backend URL at call time so HTTPS upgrade works on the client */
@@ -42,22 +53,36 @@ function downsizeImage(dataUrl: string, maxDim = 1024): Promise<string> {
 
 /**
  * Generate an AI lifestyle preview of the user's phone case design
- * using Replicate (SDXL img2img) via our backend proxy.
+ * using Google Gemini 2.5 Flash Image (Nano Banana) via our backend proxy.
+ * The AI reproduces the exact design onto a realistic phone case mockup.
  *
- * @param imageDataUrl - The case preview export (data URL)
- * @param scene - Scene type: lifestyle | desk | nature | studio | flat
+ * @param imageDataUrl - The case design export (data URL)
+ * @param options - Scene, case type, and device info for the AI prompt
  */
 export async function generateAiPreview(
   imageDataUrl: string,
-  scene: string = "lifestyle"
+  options: AiPreviewOptions = {}
 ): Promise<AiPreviewResult> {
+  const {
+    scene = "lifestyle",
+    caseType = "tough",
+    deviceModel,
+    deviceHandle,
+  } = options
+
   // Downsize large canvas exports to keep payload under backend limits
   const image = await downsizeImage(imageDataUrl, 1024)
 
   const res = await fetch(`${getBackendUrl()}/store/custom/ai-preview`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image, scene }),
+    body: JSON.stringify({
+      image,
+      scene,
+      case_type: caseType,
+      device_model: deviceModel,
+      device_handle: deviceHandle,
+    }),
   })
 
   if (!res.ok) {
