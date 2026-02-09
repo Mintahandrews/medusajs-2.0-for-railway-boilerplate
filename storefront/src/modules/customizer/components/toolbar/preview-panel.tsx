@@ -25,7 +25,7 @@ const AI_SCENES = [
   { label: "Nature", scene: "nature" },
   { label: "Studio", scene: "studio" },
   { label: "Flat", scene: "flat" },
-  { label: "Transparent", scene: "__transparent__" },
+  { label: "Transparent", scene: "transparent" },
 ]
 
 /* ---- Angle & BG for local mode ---- */
@@ -42,6 +42,54 @@ const BG_OPTIONS = [
   { label: "Warm", gradient: ["#fef3c7", "#fcd34d"] },
   { label: "Cool", gradient: ["#dbeafe", "#93c5fd"] },
 ]
+
+/**
+ * Chroma-key green screen removal.
+ * Loads the image into an off-screen canvas, walks every pixel,
+ * and sets green-ish pixels to transparent. Returns a PNG data URL.
+ */
+async function removeGreenScreen(dataUrl: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      const cv = document.createElement("canvas")
+      cv.width = img.width
+      cv.height = img.height
+      const ctx = cv.getContext("2d")!
+      ctx.drawImage(img, 0, 0)
+      const imageData = ctx.getImageData(0, 0, cv.width, cv.height)
+      const d = imageData.data
+
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2]
+        // Detect green-screen pixels:
+        // Green channel dominant, red & blue are low relative to green
+        if (g > 80 && g > r * 1.4 && g > b * 1.4) {
+          // Compute how "green" this pixel is (0 = not green, 1 = pure green)
+          const greenness = Math.min(1, Math.max(0,
+            (g - Math.max(r, b)) / g
+          ))
+          // Soft edge: partially transparent for semi-green pixels
+          if (greenness > 0.25) {
+            const alpha = Math.round(255 * (1 - greenness))
+            d[i + 3] = Math.min(d[i + 3], alpha)
+            // Remove green cast from semi-transparent edge pixels
+            if (alpha > 0 && alpha < 255) {
+              d[i] = Math.min(255, Math.round(r * (255 / Math.max(1, alpha))))
+              d[i + 2] = Math.min(255, Math.round(b * (255 / Math.max(1, alpha))))
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0)
+      resolve(cv.toDataURL("image/png"))
+    }
+    img.onerror = () => resolve(dataUrl) // fallback: return original
+    img.src = dataUrl
+  })
+}
 
 export default function PreviewPanel() {
   const { exportPreview, deviceConfig, state } = useCustomizer()
@@ -73,20 +121,20 @@ export default function PreviewPanel() {
 
       const sceneId = AI_SCENES[sceneIdx].scene
 
-      // Transparent mode — show the exported design directly (no AI, no background)
-      if (sceneId === "__transparent__") {
-        setAiImageUrl(preview)
-        setGenerating(false)
-        return
-      }
-
       const result = await generateAiPreview(preview, {
         scene: sceneId,
         caseType: state.caseType,
         deviceModel: deviceConfig.name,
         deviceHandle: deviceConfig.handle,
       })
-      setAiImageUrl(result.imageUrl)
+
+      // For transparent scene: remove the green chroma-key background
+      if (sceneId === "transparent") {
+        const cleaned = await removeGreenScreen(result.imageUrl)
+        setAiImageUrl(cleaned)
+      } else {
+        setAiImageUrl(result.imageUrl)
+      }
     } catch (err: any) {
       console.error("[Preview] AI generation failed:", err)
       setError(err.message || "AI preview unavailable. Try Local mode.")
@@ -313,10 +361,15 @@ export default function PreviewPanel() {
             <div
               className="relative rounded-xl overflow-hidden border border-gray-200 cursor-pointer"
               onClick={() => { setFullscreenUrl(aiImageUrl); setFullscreen(true) }}
+              style={AI_SCENES[sceneIdx].scene === "transparent" ? {
+                backgroundImage: "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)",
+                backgroundSize: "16px 16px",
+                backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0px",
+              } : undefined}
             >
               <img src={aiImageUrl} alt="AI Preview" className="w-full h-auto block" />
               <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
-                AI Generated
+                {AI_SCENES[sceneIdx].scene === "transparent" ? "Transparent PNG" : "AI Generated"}
               </div>
             </div>
           )}
@@ -432,7 +485,16 @@ export default function PreviewPanel() {
           >
             <X size={20} />
           </button>
-          <img src={fullscreenUrl} alt="Preview" className="max-w-full max-h-full rounded-2xl shadow-2xl" />
+          <img
+            src={fullscreenUrl}
+            alt="Preview"
+            className="max-w-full max-h-full rounded-2xl shadow-2xl"
+            style={AI_SCENES[sceneIdx]?.scene === "transparent" ? {
+              backgroundImage: "linear-gradient(45deg, #666 25%, transparent 25%), linear-gradient(-45deg, #666 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #666 75%), linear-gradient(-45deg, transparent 75%, #666 75%)",
+              backgroundSize: "20px 20px",
+              backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+            } : undefined}
+          />
         </div>
       )}
     </div>
