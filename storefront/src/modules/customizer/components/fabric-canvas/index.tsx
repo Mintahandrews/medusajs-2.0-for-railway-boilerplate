@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useEffect, useState, useCallback } from "react"
-import { useCustomizer } from "../../context"
+import { useCustomizer, type CaseType } from "../../context"
 import type { DeviceConfig } from "@lib/device-assets"
 
 /* -------------------------------------------------------------------------- */
@@ -287,22 +287,26 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
   }
 
   /* ================================================================== */
-  /*  8. Samsung Galaxy S Ultra — 4 individual circles                  */
-  /*  Real: lens ~13mm on ~79mm body, cx ~15.2%, gap ~8.6% of height    */
+  /*  8. Samsung Galaxy S Ultra — 4 individual circles, graduated sizes */
+  /*  Real: lenses decrease top→bottom: 200MP wide > ultrawide > 3x    */
+  /*  tele > 5x periscope. cx ~15.2%, varied gaps                       */
   /* ================================================================== */
   if (family === "samsung-quad") {
-    const ld = Math.round(cw * 0.165)
     const cx = Math.round(cw * 0.152)
-    const startY = Math.round(ch * 0.086)
-    const gap = Math.round(ch * 0.086)
+    const startY = Math.round(ch * 0.075)
+    const gap = Math.round(ch * 0.082)
+    const d1 = Math.round(cw * 0.185)  // wide — largest
+    const d2 = Math.round(cw * 0.170)  // ultrawide
+    const d3 = Math.round(cw * 0.150)  // 3x telephoto
+    const d4 = Math.round(cw * 0.135)  // 5x periscope — smallest
     const flashD = Math.round(cw * 0.04)
     return (
       <div className="absolute pointer-events-none z-10 inset-0">
-        <Lens cx={cx} cy={startY} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap * 2} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap * 3} d={ld} s={s} />
-        <Lens cx={cx} cy={startY + gap * 3 + gap * 0.65} d={flashD} s={s} type="flash" />
+        <Lens cx={cx} cy={startY} d={d1} s={s} />
+        <Lens cx={cx} cy={startY + gap} d={d2} s={s} />
+        <Lens cx={cx} cy={startY + gap * 2.05} d={d3} s={s} />
+        <Lens cx={cx} cy={startY + gap * 3.15} d={d4} s={s} />
+        <Lens cx={cx} cy={startY + gap * 3.15 + gap * 0.7} d={flashD} s={s} type="flash" />
       </div>
     )
   }
@@ -376,6 +380,109 @@ function CameraOverlay({ config, scale }: { config: DeviceConfig; scale: number 
   return null
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Case-type visual overlays                                                 */
+/* -------------------------------------------------------------------------- */
+
+/** Renders visual effects inside the canvas container based on case type */
+function CaseTypeOverlay({
+  caseType, w, h, r, s,
+}: {
+  caseType: CaseType; w: number; h: number; r: number; s: number
+}) {
+  if (caseType === "clear") {
+    // Glass sheen diagonal highlight + subtle frosted edge
+    return (
+      <div className="absolute inset-0 pointer-events-none z-20" style={{ borderRadius: r }}>
+        {/* Diagonal glass sheen */}
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: r,
+            background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.08) 100%)",
+          }}
+        />
+        {/* Frosted edge glow */}
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: r,
+            boxShadow: `inset 0 0 ${12 * s}px rgba(255,255,255,0.15), inset 0 0 ${3 * s}px rgba(255,255,255,0.1)`,
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (caseType === "magsafe") {
+    // Centered magnet ring
+    const ringSize = Math.min(w, h) * 0.42
+    const ringThickness = Math.max(2, 3 * s)
+    return (
+      <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+        <div
+          style={{
+            width: ringSize,
+            height: ringSize,
+            borderRadius: "50%",
+            border: `${ringThickness}px solid rgba(120,120,120,0.35)`,
+            boxShadow: `0 0 ${6 * s}px rgba(100,100,100,0.15), inset 0 0 ${4 * s}px rgba(100,100,100,0.1)`,
+          }}
+        />
+      </div>
+    )
+  }
+
+  return null
+}
+
+/** Tough case corner bumper accents — positioned outside the frame */
+function ToughCornerBumpers({
+  w, h, r, s, frameWidth,
+}: {
+  w: number; h: number; r: number; s: number; frameWidth: number
+}) {
+  const bumpW = Math.max(8, 14 * s)
+  const bumpH = Math.max(3, 4 * s)
+  const offset = frameWidth + Math.max(1, 1.5 * s)
+  const cornerOffset = r * 0.55
+
+  // Each corner gets two small bumps (one horizontal, one vertical)
+  const corners = [
+    // top-left
+    { x: cornerOffset, y: -offset, rotate: 0 },
+    { x: -offset, y: cornerOffset, rotate: 90 },
+    // top-right
+    { x: w - cornerOffset - bumpW, y: -offset, rotate: 0 },
+    { x: w + offset - bumpH, y: cornerOffset, rotate: 90 },
+    // bottom-left
+    { x: cornerOffset, y: h + offset - bumpH, rotate: 0 },
+    { x: -offset, y: h - cornerOffset - bumpW, rotate: 90 },
+    // bottom-right
+    { x: w - cornerOffset - bumpW, y: h + offset - bumpH, rotate: 0 },
+    { x: w + offset - bumpH, y: h - cornerOffset - bumpW, rotate: 90 },
+  ]
+
+  return (
+    <>
+      {corners.map((c, i) => (
+        <div
+          key={i}
+          className="absolute pointer-events-none"
+          style={{
+            left: c.x,
+            top: c.y,
+            width: c.rotate === 90 ? bumpH : bumpW,
+            height: c.rotate === 90 ? bumpW : bumpH,
+            borderRadius: bumpH / 2,
+            background: "#2a2a2a",
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
 /**
  * The core Fabric.js canvas component.
  */
@@ -383,6 +490,7 @@ export default function FabricCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasElRef = useRef<HTMLCanvasElement>(null)
   const {
+    state,
     canvasRef,
     deviceConfig,
     pushHistory,
@@ -543,9 +651,18 @@ export default function FabricCanvas() {
     return () => ro.disconnect()
   }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight, canvasRef])
 
+  const caseType = state.caseType
+
   const r = deviceConfig.cornerRadius
   const w = deviceConfig.canvasWidth * displayScale
   const h = deviceConfig.canvasHeight * displayScale
+
+  /* ---- Case-type visual properties -------------------------------------- */
+  const frameWidth = caseType === "tough" ? Math.max(3, 5 * displayScale)
+    : caseType === "slim" ? Math.max(1, 1.5 * displayScale)
+    : Math.max(2, 3 * displayScale) // clear & magsafe — normal
+
+  const frameColor = caseType === "clear" ? "rgba(180,180,180,0.5)" : "#1a1a1a"
 
   /* ---- Render ----------------------------------------------------------- */
   return (
@@ -568,14 +685,15 @@ export default function FabricCanvas() {
           }}
         />
 
-        {/* Canvas container */}
+        {/* Canvas container — use box-shadow instead of border so the
+             content area stays exactly w×h and the clipPath aligns flush */}
         <div
-          className="relative overflow-hidden bg-white"
+          className="relative overflow-hidden"
           style={{
             width: w,
             height: h,
             borderRadius: r * displayScale,
-            border: `${Math.max(2, 3 * displayScale)}px solid #1a1a1a`,
+            boxShadow: `0 0 0 ${frameWidth}px ${frameColor}`,
           }}
         >
           <canvas
@@ -584,7 +702,15 @@ export default function FabricCanvas() {
 
           {/* Device-specific camera module overlay */}
           <CameraOverlay config={deviceConfig} scale={displayScale} />
+
+          {/* Case-type visual overlays */}
+          <CaseTypeOverlay caseType={caseType} w={w} h={h} r={r * displayScale} s={displayScale} />
         </div>
+
+        {/* Tough case: corner bumper accents outside the frame */}
+        {caseType === "tough" && (
+          <ToughCornerBumpers w={w} h={h} r={r * displayScale} s={displayScale} frameWidth={frameWidth} />
+        )}
       </div>
     </div>
   )

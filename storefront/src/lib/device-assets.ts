@@ -253,7 +253,16 @@ export function detectDeviceFromProduct(
 
 /**
  * Check whether a product is a customizable phone case.
- * Looks for "case" in the handle, title, tags, or collection names.
+ *
+ * A product qualifies when BOTH conditions are met:
+ *  1. A known device model can be detected from the product data
+ *     (via detectDeviceFromProduct — matches iPhone, Samsung Galaxy, Pixel).
+ *  2. The product data contains a phone-case-related keyword
+ *     ("case", "cover", "shell", "bumper", "sleeve", "protector").
+ *
+ * This two-pronged check prevents false positives on non-case products
+ * that happen to mention a phone model, and non-phone products that
+ * happen to contain the word "case".
  */
 export function isCustomizableCase(product: {
   handle?: string | null
@@ -263,10 +272,18 @@ export function isCustomizableCase(product: {
   collection?: { handle?: string; title?: string } | null
   type?: { value?: string } | null
 }): boolean {
+  // 1. Must match a known device
+  const device = detectDeviceFromProduct(
+    product.handle,
+    product.title,
+    product.description
+  )
+  if (!device) return false
+
+  // 2. Must contain a phone-case keyword
   const text = [
     product.handle,
     product.title,
-    product.description,
     product.collection?.handle,
     product.collection?.title,
     product.type?.value,
@@ -276,6 +293,6 @@ export function isCustomizableCase(product: {
     .join(" ")
     .toLowerCase()
 
-  // Must contain "case" somewhere in the product data
-  return text.includes("case")
+  const caseKeywords = ["case", "cover", "shell", "bumper", "sleeve", "protector", "customiz"]
+  return caseKeywords.some((kw) => text.includes(kw))
 }

@@ -8,8 +8,8 @@ import { generateAiPreview } from "@lib/data/ai-preview"
 /**
  * Preview Panel — Two modes:
  *
- *  1. **AI (Pebblely)** — Sends the design to Pebblely's API via our backend
- *     proxy to generate a lifestyle product photo. Requires PEBBLELY_API_KEY.
+ *  1. **AI (Replicate SDXL)** — Sends the design to Replicate via our backend
+ *     proxy to generate a realistic product photo. Requires REPLICATE_API_TOKEN.
  *
  *  2. **Local** — Client-side Canvas 2D perspective mockup (free, instant).
  *     Used as fallback when AI is unavailable or for quick previews.
@@ -17,13 +17,14 @@ import { generateAiPreview } from "@lib/data/ai-preview"
 
 type PreviewMode = "ai" | "local"
 
-/* ---- Scene prompts for AI mode ---- */
+/* ---- Scene options for AI mode (IDs match backend SCENE_PROMPTS keys) ---- */
 const AI_SCENES = [
-  { label: "Lifestyle", description: "A custom phone case held in a person's hand in a bright modern lifestyle setting, product photography, soft lighting" },
-  { label: "Desk", description: "A custom phone case on a clean minimal desk with a laptop and coffee cup, top-down product photography" },
-  { label: "Nature", description: "A custom phone case resting on a smooth stone in a forest with soft natural light, product photography" },
-  { label: "Studio", description: "A custom phone case on white studio background with dramatic lighting and subtle shadow, product photography" },
-  { label: "Transparent", description: "__transparent__" },
+  { label: "Lifestyle", scene: "lifestyle" },
+  { label: "Desk", scene: "desk" },
+  { label: "Nature", scene: "nature" },
+  { label: "Studio", scene: "studio" },
+  { label: "Flat", scene: "flat" },
+  { label: "Transparent", scene: "__transparent__" },
 ]
 
 /* ---- Angle & BG for local mode ---- */
@@ -49,6 +50,7 @@ export default function PreviewPanel() {
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState("")
   const [fullscreen, setFullscreen] = useState(false)
+  const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null)
 
   // AI mode state
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null)
@@ -68,17 +70,17 @@ export default function PreviewPanel() {
       const preview = exportPreview()
       if (!preview) throw new Error("Could not export design")
 
-      const scene = AI_SCENES[sceneIdx]
+      const sceneId = AI_SCENES[sceneIdx].scene
 
-      // Transparent mode — just show the exported design directly (no AI call)
-      if (scene.description === "__transparent__") {
+      // Transparent mode — show the exported design directly (no AI, no background)
+      if (sceneId === "__transparent__") {
         setAiImageUrl(preview)
         setGenerating(false)
         return
       }
 
-      const result = await generateAiPreview(preview, scene.description)
-      setAiImageUrl(`data:image/png;base64,${result.data}`)
+      const result = await generateAiPreview(preview, sceneId)
+      setAiImageUrl(result.imageUrl)
     } catch (err: any) {
       console.error("[Preview] AI generation failed:", err)
       setError(err.message || "AI preview unavailable. Try Local mode.")
@@ -230,7 +232,7 @@ export default function PreviewPanel() {
       {mode === "ai" && (
         <>
           <p className="text-xs text-gray-500">
-            Generate a realistic lifestyle photo of your {deviceConfig.name} case using AI. Takes ~5 seconds.
+            Generate a realistic product photo of your {deviceConfig.name} case using AI. Takes ~10-15 seconds.
           </p>
 
           {/* Scene selector */}
@@ -260,7 +262,7 @@ export default function PreviewPanel() {
             className="w-full py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {generating ? (
-              <><RotateCcw size={14} className="animate-spin" /> Generating (~5s)...</>
+              <><RotateCcw size={14} className="animate-spin" /> Generating (~15s)...</>
             ) : (
               <><Sparkles size={14} /> Generate AI Preview</>
             )}
@@ -270,11 +272,11 @@ export default function PreviewPanel() {
           {aiImageUrl && (
             <div
               className="relative rounded-xl overflow-hidden border border-gray-200 cursor-pointer"
-              onClick={() => setFullscreen(true)}
+              onClick={() => { setFullscreenUrl(aiImageUrl); setFullscreen(true) }}
             >
               <img src={aiImageUrl} alt="AI Preview" className="w-full h-auto block" />
               <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
-                Powered by Pebblely AI
+                AI Generated
               </div>
             </div>
           )}
@@ -346,7 +348,12 @@ export default function PreviewPanel() {
               {/* Preview canvas */}
               <div
                 className="relative rounded-xl overflow-hidden border border-gray-200 cursor-pointer"
-                onClick={() => setFullscreen(true)}
+                onClick={() => {
+                  if (canvasRef.current) {
+                    setFullscreenUrl(canvasRef.current.toDataURL("image/png", 1))
+                  }
+                  setFullscreen(true)
+                }}
               >
                 <canvas ref={canvasRef} className="w-full h-auto" style={{ display: "block" }} />
               </div>
@@ -373,23 +380,19 @@ export default function PreviewPanel() {
         </button>
       )}
 
-      {/* Fullscreen modal */}
-      {fullscreen && hasPreview && (
+      {/* Fullscreen modal — always uses a captured image, never the live canvas */}
+      {fullscreen && fullscreenUrl && (
         <div
           className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setFullscreen(false)}
+          onClick={() => { setFullscreen(false); setFullscreenUrl(null) }}
         >
           <button
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30"
-            onClick={() => setFullscreen(false)}
+            onClick={() => { setFullscreen(false); setFullscreenUrl(null) }}
           >
             <X size={20} />
           </button>
-          {mode === "ai" && aiImageUrl ? (
-            <img src={aiImageUrl} alt="AI Preview" className="max-w-full max-h-full rounded-2xl shadow-2xl" />
-          ) : (
-            <canvas ref={canvasRef} className="max-w-full max-h-full rounded-2xl shadow-2xl" style={{ display: "block" }} />
-          )}
+          <img src={fullscreenUrl} alt="Preview" className="max-w-full max-h-full rounded-2xl shadow-2xl" />
         </div>
       )}
     </div>

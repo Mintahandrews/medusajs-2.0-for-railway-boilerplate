@@ -1,8 +1,6 @@
 export interface AiPreviewResult {
-  /** Base64-encoded result image */
-  data: string
-  /** Remaining Pebblely API credits */
-  credits: number
+  /** URL of the generated image (hosted on Replicate CDN) */
+  imageUrl: string
 }
 
 /** Resolve backend URL at call time so HTTPS upgrade works on the client */
@@ -44,24 +42,22 @@ function downsizeImage(dataUrl: string, maxDim = 1024): Promise<string> {
 
 /**
  * Generate an AI lifestyle preview of the user's phone case design
- * using the Pebblely AI backend proxy.
+ * using Replicate (SDXL img2img) via our backend proxy.
  *
- * @param imageBase64 - The case preview export (data URL or raw base64)
- * @param description - Optional custom scene prompt
- * @param theme - Optional Pebblely theme (ignored if description is set)
+ * @param imageDataUrl - The case preview export (data URL)
+ * @param scene - Scene type: lifestyle | desk | nature | studio | flat
  */
 export async function generateAiPreview(
-  imageBase64: string,
-  description?: string,
-  theme?: string
+  imageDataUrl: string,
+  scene: string = "lifestyle"
 ): Promise<AiPreviewResult> {
   // Downsize large canvas exports to keep payload under backend limits
-  const image = await downsizeImage(imageBase64, 1024)
+  const image = await downsizeImage(imageDataUrl, 1024)
 
   const res = await fetch(`${getBackendUrl()}/store/custom/ai-preview`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image, description, theme }),
+    body: JSON.stringify({ image, scene }),
   })
 
   if (!res.ok) {

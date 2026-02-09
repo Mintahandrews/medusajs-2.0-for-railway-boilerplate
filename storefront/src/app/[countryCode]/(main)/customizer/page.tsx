@@ -173,53 +173,59 @@ function PhoneIcon({ handle }: { handle: string }) {
     )
   }
 
-  /* ---- Samsung S25 Ultra — 4 circles, rounded body (new design) ---- */
-  /* Real: more rounded corners (~8mm), larger camera ring design */
+  /* ---- Samsung S25 Ultra — 4 graduated circles, rounded body ---- */
+  /* Real: lenses decrease top→bottom: wide > ultrawide > 3x > 5x periscope */
   if (/samsung-s25-ultra/.test(handle)) {
-    const lx = 10, startY = 9, gap = 8.5
-    const bodyR = (
-      <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={10}
-        className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
-        strokeWidth="1.5" />
-    )
+    const lx = 10
+    const sizes = [
+      { cy: 8, outerR: 5.5, innerR: 3.5 },   // wide — largest
+      { cy: 17, outerR: 5.0, innerR: 3.0 },   // ultrawide
+      { cy: 26, outerR: 4.3, innerR: 2.5 },   // 3x telephoto
+      { cy: 35, outerR: 3.8, innerR: 2.2 },   // 5x periscope — smallest
+    ]
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
-        {bodyR}
-        {[0, 1, 2, 3].map(i => (
+        <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={10}
+          className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+          strokeWidth="1.5" />
+        {sizes.map((l, i) => (
           <g key={i}>
-            <circle cx={lx} cy={startY + i * gap} r="5"
+            <circle cx={lx} cy={l.cy} r={l.outerR}
               className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
-            <circle cx={lx} cy={startY + i * gap} r="3"
+            <circle cx={lx} cy={l.cy} r={l.innerR}
               className="fill-gray-500 group-hover:fill-emerald-600" />
           </g>
         ))}
-        <circle cx={lx} cy={startY + 3 * gap + 7} r="1.5"
+        <circle cx={lx} cy={42} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )
   }
 
-  /* ---- Samsung S23/S24 Ultra — 4 circles, angular body ---- */
-  /* Real: boxy corners (~5.5-6mm), tighter lens spacing */
+  /* ---- Samsung S23/S24 Ultra — 4 graduated circles, angular body ---- */
+  /* Real: boxy corners, lenses also decrease in size top→bottom */
   if (/samsung.*ultra/.test(handle)) {
-    const lx = 9, startY = 8, gap = 8
-    const bodyAngular = (
-      <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={6}
-        className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
-        strokeWidth="1.5" />
-    )
+    const lx = 9
+    const sizes = [
+      { cy: 7, outerR: 5.0, innerR: 3.0 },
+      { cy: 16, outerR: 4.5, innerR: 2.7 },
+      { cy: 24.5, outerR: 4.0, innerR: 2.3 },
+      { cy: 33, outerR: 3.5, innerR: 2.0 },
+    ]
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
-        {bodyAngular}
-        {[0, 1, 2, 3].map(i => (
+        <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={6}
+          className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+          strokeWidth="1.5" />
+        {sizes.map((l, i) => (
           <g key={i}>
-            <circle cx={lx} cy={startY + i * gap} r="4.5"
+            <circle cx={lx} cy={l.cy} r={l.outerR}
               className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
-            <circle cx={lx} cy={startY + i * gap} r="2.5"
+            <circle cx={lx} cy={l.cy} r={l.innerR}
               className="fill-gray-500 group-hover:fill-emerald-600" />
           </g>
         ))}
-        <circle cx={lx} cy={startY + 3 * gap + 6} r="1.5"
+        <circle cx={lx} cy={39} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
     )
