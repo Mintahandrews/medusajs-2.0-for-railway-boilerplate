@@ -120,8 +120,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    // Parse request body
-    const body = req.body as Record<string, unknown> | undefined
+    // Parse request body — defensive: handle cases where body parser may not
+    // have run (e.g. middleware mismatch) by reading raw stream as fallback.
+    let body = req.body as Record<string, unknown> | undefined
+    if (!body || typeof body !== "object" || Object.keys(body).length === 0) {
+      // Attempt manual parse as fallback
+      try {
+        const chunks: Buffer[] = []
+        for await (const chunk of req as any) chunks.push(Buffer.from(chunk))
+        if (chunks.length > 0) {
+          body = JSON.parse(Buffer.concat(chunks).toString("utf-8"))
+        }
+      } catch (parseErr) {
+        console.error("[ai-preview] Fallback body parse failed:", parseErr)
+      }
+    }
     if (!body || typeof body !== "object") {
       console.error("[ai-preview] req.body is empty or not an object:", typeof body)
       return res.status(400).json({

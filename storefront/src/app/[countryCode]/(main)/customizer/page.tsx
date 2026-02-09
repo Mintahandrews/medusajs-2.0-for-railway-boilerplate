@@ -299,6 +299,103 @@ function PhoneIcon({ handle }: { handle: string }) {
     )
   }
 
+  /* ---- OnePlus 12 — centered circular module, triple lenses ---- */
+  if (/^oneplus-12$/.test(handle)) {
+    const cx = w / 2, cy = 18, mr = 15
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <circle cx={cx} cy={cy} r={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={cx} cy={cy - 6} r="4"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={cx - 5} cy={cy + 5} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={cx + 5} cy={cy + 5} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={cx} cy={cy + 12} r="1.3"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- OnePlus 12R — centered circular module, dual lenses ---- */
+  if (/^oneplus-12r/.test(handle)) {
+    const cx = w / 2, cy = 16, mr = 14
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <circle cx={cx} cy={cy} r={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={cx} cy={cy - 4.5} r="4"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={cx} cy={cy + 4.5} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={cx} cy={cy + 11} r="1.3"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- Xiaomi 14 Pro — large square module, triple lenses ---- */
+  if (/xiaomi-14-pro/.test(handle)) {
+    const mx = (w - 28) / 2, my = 3, ms = 28, mr = 7
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <rect x={mx} y={my} width={ms} height={ms} rx={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.3"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- Xiaomi 14 — smaller square module, triple lenses ---- */
+  if (/^xiaomi-14/.test(handle)) {
+    const mx = (w - 24) / 2, my = 3, ms = 24, mr = 6
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <rect x={mx} y={my} width={ms} height={ms} rx={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="3.5"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="3"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.3"
+          className="fill-amber-300 group-hover:fill-amber-400" />
+      </svg>
+    )
+  }
+
+  /* ---- Nothing Phone (2a / 2a Plus) — square module with LED accent ---- */
+  if (/^nothing-phone/.test(handle)) {
+    const mx = (w - 22) / 2, my = 4, ms = 22, mr = 6
+    return (
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+        {body}
+        <rect x={mx} y={my} width={ms} height={ms} rx={mr}
+          className="fill-gray-300 group-hover:fill-emerald-200" />
+        <circle cx={mx + ms * 0.40} cy={my + ms * 0.35} r="4"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        <circle cx={mx + ms * 0.40} cy={my + ms * 0.65} r="4"
+          className="fill-gray-500 group-hover:fill-emerald-600" />
+        {/* Glyph LED accent strip */}
+        <rect x={mx + ms * 0.72} y={my + ms * 0.35} width="3" height="7" rx="1.5"
+          className="fill-emerald-400 group-hover:fill-emerald-500" />
+      </svg>
+    )
+  }
+
   /* ---- Fallback ---- */
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
