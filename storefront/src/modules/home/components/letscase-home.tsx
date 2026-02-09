@@ -111,8 +111,8 @@ const CATEGORY_IMAGES: Record<string, string> = {
   chargers: "https://images.unsplash.com/photo-1731616103600-3fe7ccdc5a59?w=800&h=1000&fit=crop&q=80",
   // Cables — white wires
   cables: "https://images.unsplash.com/photo-1731616103600-3fe7ccdc5a59?w=800&h=1000&fit=crop&q=80",
-  // Screen protectors — android phone closeup
-  "screen protectors": "https://images.unsplash.com/photo-1724341039339-036842055cae?w=800&h=1000&fit=crop&q=80",
+  // Screen protectors — phone with tempered glass screen protector
+  "screen protectors": "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800&h=1000&fit=crop&q=80",
   // Laptop bags — black Nike backpack on purple surface
   "laptop bags": "https://images.unsplash.com/photo-1622560481979-f5b0174242a0?w=800&h=1000&fit=crop&q=80",
   // Watches — minimal watch product shot

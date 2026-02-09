@@ -48,6 +48,49 @@ const SCENE_PROMPTS: Record<string, { prompt: string; strength: number }> = {
 const NEGATIVE_PROMPT =
   "blurry, low quality, distorted, deformed, ugly, text, watermark, logo, oversaturated, cartoon, illustration, painting, sketch, drawing"
 
+/**
+ * Upload a base64 data-URL image to Replicate's file API and return a
+ * short-lived serving URL that can be used as model input.
+ * Falls back to the raw data URL if the upload fails.
+ */
+async function uploadToReplicate(
+  dataUrl: string,
+  apiToken: string
+): Promise<string> {
+  try {
+    // Strip the data-URL prefix to get raw base64
+    const base64Match = dataUrl.match(/^data:([^;]+);base64,(.+)$/)
+    if (!base64Match) return dataUrl
+
+    const mimeType = base64Match[1]
+    const base64Data = base64Match[2]
+    const buffer = Buffer.from(base64Data, "base64")
+
+    const uploadRes = await fetch("https://api.replicate.com/v1/files", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        "Content-Type": mimeType,
+      },
+      body: buffer,
+    })
+
+    if (uploadRes.ok) {
+      const file = (await uploadRes.json()) as { urls?: { get: string } }
+      if (file.urls?.get) {
+        console.log("[ai-preview] Uploaded image to Replicate file API")
+        return file.urls.get
+      }
+    }
+
+    console.warn("[ai-preview] File upload failed, falling back to data URL")
+    return dataUrl
+  } catch (err) {
+    console.warn("[ai-preview] File upload error, falling back to data URL:", err)
+    return dataUrl
+  }
+}
+
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
     const apiToken = process.env.REPLICATE_API_TOKEN
@@ -57,26 +100,52 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
-    const { image, scene = "lifestyle" } = req.body as {
-      image: string
-      scene?: string
+    // Defensive: log body shape for debugging
+    const body = req.body as Record<string, unknown> | undefined
+    if (!body || typeof body !== "object") {
+      console.error("[ai-preview] req.body is empty or not an object:", typeof body)
+      return res.status(400).json({
+        error: "Request body is empty. Ensure Content-Type is application/json.",
+      })
     }
 
-    if (!image) {
+    const image = body.image as string | undefined
+    const scene = (body.scene as string) || "lifestyle"
+
+    if (!image || typeof image !== "string" || image.length < 100) {
+      console.error(
+        "[ai-preview] Missing or invalid 'image' field. Body keys:",
+        Object.keys(body),
+        "image length:",
+        image ? image.length : 0
+      )
       return res.status(400).json({ error: "Missing 'image' field (base64 PNG)." })
     }
 
-    // Ensure data URL format for Replicate
+    // Ensure data URL format
     const dataUrl = image.startsWith("data:")
       ? image
       : `data:image/png;base64,${image}`
 
+    // Upload image to Replicate's file API for reliable delivery
+    // (avoids large base64 strings in JSON prediction input)
+    const imageInput = await uploadToReplicate(dataUrl, apiToken)
+
     const sceneConfig = SCENE_PROMPTS[scene] || SCENE_PROMPTS.lifestyle
 
-    // Call Replicate — use SDXL img2img via the models endpoint (auto-latest version)
-    // Prefer: wait blocks until prediction completes (up to 60s)
+    console.log(
+      "[ai-preview] Creating prediction — scene:",
+      scene,
+      "image input type:",
+      imageInput.startsWith("http") ? "url" : "data-url",
+      "image size:",
+      image.length
+    )
+
+    // Call Replicate — use SDXL img2img via the predictions endpoint
+    // Pin to a known version that supports img2img via the `image` input
     const predictionRes = await fetch(
-      "https://api.replicate.com/v1/models/stability-ai/sdxl/predictions",
+      "https://api.replicate.com/v1/predictions",
       {
         method: "POST",
         headers: {
@@ -85,8 +154,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           Prefer: "wait=60",
         },
         body: JSON.stringify({
+          version:
+            "39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
           input: {
-            image: dataUrl,
+            image: imageInput,
             prompt: sceneConfig.prompt,
             negative_prompt: NEGATIVE_PROMPT,
             prompt_strength: sceneConfig.strength,
@@ -106,6 +177,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       console.error("[ai-preview] Replicate API error:", predictionRes.status, errText)
       return res.status(502).json({
         error: `AI preview generation failed (${predictionRes.status}).`,
+        detail: errText.slice(0, 300),
       })
     }
 

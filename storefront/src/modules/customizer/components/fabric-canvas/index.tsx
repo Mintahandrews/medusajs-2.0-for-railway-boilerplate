@@ -853,20 +853,61 @@ function ToughCornerBumpers({
 /*  3D Case shell elements                                                     */
 /* -------------------------------------------------------------------------- */
 
-/** Visible side button cutouts on the case edges */
-function CaseSideButtons({ h, s, btnBg, btnHighlight }: {
-  h: number; s: number; btnBg?: string; btnHighlight?: string
+/** Visible side button cutouts on the case edges — device-specific positions */
+function CaseSideButtons({ h, s, btnBg, btnHighlight, handle }: {
+  h: number; s: number; btnBg?: string; btnHighlight?: string; handle?: string
 }) {
   const btnDepth = Math.max(2, 3 * s)
   const btnBackground = btnBg || 'linear-gradient(to bottom, #333, #1a1a1a)'
   const btnShadow = `inset 0 ${0.5 * s}px ${1 * s}px ${btnHighlight || 'rgba(255,255,255,0.08)'}`
 
-  const buttons: Array<{ top: number; height: number; side: 'left' | 'right' }> = [
-    { top: h * 0.28, height: Math.max(16, 28 * s), side: 'right' },
-    { top: h * 0.18, height: Math.max(10, 18 * s), side: 'left' },
-    { top: h * 0.27, height: Math.max(10, 18 * s), side: 'left' },
-    { top: h * 0.11, height: Math.max(6, 10 * s), side: 'left' },
-  ]
+  const h_ = handle || ""
+
+  let buttons: Array<{ top: number; height: number; side: 'left' | 'right' }>
+
+  if (/^pixel/.test(h_)) {
+    // Pixel: power + volume both on RIGHT side, no left buttons
+    buttons = [
+      { top: h * 0.30, height: Math.max(14, 20 * s), side: 'right' },   // Power
+      { top: h * 0.40, height: Math.max(20, 30 * s), side: 'right' },   // Volume rocker
+    ]
+  } else if (/samsung/.test(h_)) {
+    // Samsung: power RIGHT, volume rocker LEFT (single long rocker)
+    buttons = [
+      { top: h * 0.35, height: Math.max(14, 20 * s), side: 'right' },   // Power / Side key
+      { top: h * 0.22, height: Math.max(22, 34 * s), side: 'left' },    // Volume rocker
+    ]
+  } else if (/oneplus/.test(h_)) {
+    // OnePlus: power RIGHT, volume LEFT, alert slider LEFT (above volume)
+    buttons = [
+      { top: h * 0.35, height: Math.max(14, 20 * s), side: 'right' },   // Power
+      { top: h * 0.24, height: Math.max(10, 16 * s), side: 'left' },    // Volume up
+      { top: h * 0.33, height: Math.max(10, 16 * s), side: 'left' },    // Volume down
+      { top: h * 0.14, height: Math.max(6, 10 * s), side: 'left' },     // Alert slider
+    ]
+  } else if (/xiaomi/.test(h_)) {
+    // Xiaomi: power RIGHT, volume LEFT
+    buttons = [
+      { top: h * 0.35, height: Math.max(14, 20 * s), side: 'right' },   // Power
+      { top: h * 0.22, height: Math.max(10, 18 * s), side: 'left' },    // Volume up
+      { top: h * 0.31, height: Math.max(10, 18 * s), side: 'left' },    // Volume down
+    ]
+  } else if (/nothing/.test(h_)) {
+    // Nothing Phone: power RIGHT, volume LEFT
+    buttons = [
+      { top: h * 0.35, height: Math.max(14, 20 * s), side: 'right' },   // Power
+      { top: h * 0.24, height: Math.max(10, 16 * s), side: 'left' },    // Volume up
+      { top: h * 0.33, height: Math.max(10, 16 * s), side: 'left' },    // Volume down
+    ]
+  } else {
+    // iPhone (default): power RIGHT (~30%), volume up/down LEFT, action button LEFT
+    buttons = [
+      { top: h * 0.30, height: Math.max(16, 28 * s), side: 'right' },   // Side / Power
+      { top: h * 0.20, height: Math.max(10, 18 * s), side: 'left' },    // Volume up
+      { top: h * 0.29, height: Math.max(10, 18 * s), side: 'left' },    // Volume down
+      { top: h * 0.13, height: Math.max(6, 10 * s), side: 'left' },     // Action / Mute
+    ]
+  }
 
   return (
     <>
@@ -1264,7 +1305,7 @@ export default function FabricCanvas() {
           />
 
           {/* Side buttons — volume (left), power (right), mute (left) */}
-          <CaseSideButtons h={outerH} s={s} btnBg={btnColor.bg} btnHighlight={btnColor.shadow} />
+          <CaseSideButtons h={outerH} s={s} btnBg={btnColor.bg} btnHighlight={btnColor.shadow} handle={deviceConfig.handle} />
 
           {/* Bottom port and speaker grille cutouts */}
           <CaseBottomPort w={outerW} h={outerH} s={s} />
