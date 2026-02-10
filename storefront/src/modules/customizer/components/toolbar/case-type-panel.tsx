@@ -10,6 +10,7 @@ const CASE_TYPES: {
   description: string
   icon: React.ReactNode
   features: string[]
+  priceTag: string
 }[] = [
   {
     id: "slim",
@@ -17,6 +18,7 @@ const CASE_TYPES: {
     description: "Ultra-thin profile, minimal bulk",
     icon: <Feather className="w-5 h-5" />,
     features: ["0.8mm thin", "Lightweight", "Scratch resistant"],
+    priceTag: "Base price",
   },
   {
     id: "tough",
@@ -24,6 +26,7 @@ const CASE_TYPES: {
     description: "Military-grade drop protection",
     icon: <Shield className="w-5 h-5" />,
     features: ["4X drop tested", "Raised bezels", "Shock absorbing"],
+    priceTag: "+25%",
   },
   {
     id: "clear",
@@ -31,6 +34,7 @@ const CASE_TYPES: {
     description: "Show off your phone's color",
     icon: <Eye className="w-5 h-5" />,
     features: ["Crystal clear", "Anti-yellowing", "UV resistant"],
+    priceTag: "+15%",
   },
   {
     id: "magsafe",
@@ -38,6 +42,7 @@ const CASE_TYPES: {
     description: "Built-in magnet ring for MagSafe",
     icon: <Magnet className="w-5 h-5" />,
     features: ["Strong magnets", "Wireless charging", "MagSafe compatible"],
+    priceTag: "+50%",
   },
 ]
 
@@ -82,6 +87,13 @@ export default function CaseTypePanel() {
                     }`}
                   >
                     {ct.label}
+                  </span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    selected
+                      ? "text-emerald-600 bg-emerald-100"
+                      : "text-gray-500 bg-gray-100"
+                  }`}>
+                    {ct.priceTag}
                   </span>
                   {selected && (
                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">

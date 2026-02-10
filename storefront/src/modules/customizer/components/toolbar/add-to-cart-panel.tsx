@@ -3,10 +3,25 @@
 import React, { useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { ShoppingCart, Check } from "lucide-react"
-import { useCustomizer } from "../../context"
+import { useCustomizer, type CaseType } from "../../context"
 import { addCustomizedToCart, ensureCart } from "@lib/data/cart"
 import { uploadDesignFiles } from "@lib/data/design-upload"
 import { HttpTypes } from "@medusajs/types"
+
+/** Price multiplier per case type (relative to base variant price) */
+const CASE_TYPE_MULTIPLIER: Record<CaseType, number> = {
+  slim: 1.0,
+  tough: 1.25,
+  clear: 1.15,
+  magsafe: 1.5,
+}
+
+const CASE_TYPE_LABEL: Record<CaseType, string> = {
+  slim: "Slim",
+  tough: "Tough",
+  clear: "Clear",
+  magsafe: "MagSafe",
+}
 
 /**
  * Downsize a data-URL image to a small thumbnail for metadata fallback.
@@ -56,18 +71,24 @@ export default function AddToCartPanel({ product, region }: Props) {
     [product.variants, selectedVariantId]
   )
 
-  const price = useMemo(() => {
-    if (!selectedVariant) return null
+  const { baseAmount, price, currencyCode } = useMemo(() => {
+    if (!selectedVariant) return { baseAmount: null, price: null, currencyCode: "" }
     const cp = (selectedVariant as any).calculated_price
-    if (!cp) return null
+    if (!cp) return { baseAmount: null, price: null, currencyCode: "" }
     const amount = cp.calculated_amount ?? cp.amount
     const currency = cp.currency_code ?? region.currency_code
-    if (amount == null) return null
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currency.toUpperCase(),
-    }).format(amount)
-  }, [selectedVariant, region.currency_code])
+    if (amount == null) return { baseAmount: null, price: null, currencyCode: currency }
+    const multiplier = CASE_TYPE_MULTIPLIER[state.caseType] ?? 1
+    const adjusted = amount * multiplier
+    return {
+      baseAmount: amount,
+      price: new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currency.toUpperCase(),
+      }).format(adjusted),
+      currencyCode: currency,
+    }
+  }, [selectedVariant, region.currency_code, state.caseType])
 
   async function handleAddToCart() {
     if (!selectedVariantId || !canvasRef.current) return
@@ -174,7 +195,10 @@ export default function AddToCartPanel({ product, region }: Props) {
 
       {/* Price display */}
       <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-        <span className="text-sm text-gray-600">Price</span>
+        <div className="flex flex-col">
+          <span className="text-sm text-gray-600">Price</span>
+          <span className="text-[10px] text-gray-400">{CASE_TYPE_LABEL[state.caseType]} case</span>
+        </div>
         <span className="text-lg font-bold text-gray-900">
           {price ?? "—"}
         </span>

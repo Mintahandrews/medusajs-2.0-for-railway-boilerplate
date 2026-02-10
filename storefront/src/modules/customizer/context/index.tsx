@@ -203,11 +203,19 @@ export function CustomizerProvider({
         if (!dataUrl) return
 
         const { FabricImage } = await import("fabric")
+
+        // Remove all existing images so the new one overrides
+        const existingImages = canvas.getObjects().filter(
+          (obj: any) => obj.type === "image"
+        )
+        existingImages.forEach((obj: any) => canvas.remove(obj))
+
         const img = await FabricImage.fromURL(dataUrl)
 
-        // scale to fit ~60% of canvas width
-        const maxW = deviceConfig.canvasWidth * 0.6
-        const scale = maxW / (img.width ?? maxW)
+        // Auto-fill: scale to cover the entire case area
+        const scaleX = deviceConfig.canvasWidth / (img.width ?? 1)
+        const scaleY = deviceConfig.canvasHeight / (img.height ?? 1)
+        const scale = Math.max(scaleX, scaleY)
         img.set({
           scaleX: scale,
           scaleY: scale,
