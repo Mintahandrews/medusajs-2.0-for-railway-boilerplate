@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
@@ -85,12 +85,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { sortBy, page } = searchParams
 
-  const { product_categories } = await getCategoryByHandle(
-    params.category
-  )
+  let product_categories
+  try {
+    const result = await getCategoryByHandle(params.category)
+    product_categories = result.product_categories
+  } catch {
+    // Category not found or backend error — redirect to store
+    redirect(`/${params.countryCode}/store`)
+  }
 
-  if (!product_categories) {
-    notFound()
+  if (!product_categories || product_categories.length === 0) {
+    redirect(`/${params.countryCode}/store`)
   }
 
   return (
