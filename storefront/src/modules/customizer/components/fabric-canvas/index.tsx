@@ -1099,6 +1099,8 @@ export default function FabricCanvas() {
         backgroundColor: "#ffffff",
         selection: true,
         preserveObjectStacking: true,
+        allowTouchScrolling: false,
+        enableRetinaScaling: true,
       })
 
       /* 2. Apply clipPath — the rounded-rect phone outline ------------------ */
@@ -1112,16 +1114,79 @@ export default function FabricCanvas() {
       fabricCanvas.clipPath = clipPath
 
       /* 3. Touch / mobile support ------------------------------------------- */
-      fabricCanvas.allowTouchScrolling = false
+      // Large touch targets for resize/rotate handles
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      fabric.FabricObject.prototype.set({
+        cornerSize: isTouchDevice ? 24 : 14,
+        touchCornerSize: 44,            // 44px = Apple's minimum touch target
+        cornerColor: '#0ea5e9',
+        cornerStrokeColor: '#ffffff',
+        cornerStyle: 'circle',
+        transparentCorners: false,
+        borderColor: '#0ea5e9',
+        borderScaleFactor: 2,
+        padding: isTouchDevice ? 12 : 4, // extra hit area around object
+        rotatingPointOffset: isTouchDevice ? 40 : 30,
+      })
 
       // Ensure Fabric's upper canvas (interaction layer) blocks browser gestures
       const upperEl = fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl?.querySelector('canvas.upper-canvas')
       if (upperEl) {
         upperEl.style.touchAction = 'none'
       }
-      // Also set on the wrapper Fabric creates
       if (fabricCanvas.wrapperEl) {
         fabricCanvas.wrapperEl.style.touchAction = 'none'
+      }
+
+      // Improve touch responsiveness: lower the long-press threshold
+      fabricCanvas.set({
+        targetFindTolerance: isTouchDevice ? 15 : 5,
+      })
+
+      /* 4. Pinch-to-scale gesture for objects ------------------------------- */
+      let lastPinchDist = 0
+      let pinchStartScale = 1
+
+      const getDistance = (t1: Touch, t2: Touch) =>
+        Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY)
+
+      const handleTouchStart = (e: TouchEvent) => {
+        if (e.touches.length === 2) {
+          const active = fabricCanvas.getActiveObject?.()
+          if (active) {
+            lastPinchDist = getDistance(e.touches[0], e.touches[1])
+            pinchStartScale = active.scaleX ?? 1
+            e.preventDefault()
+          }
+        }
+      }
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (e.touches.length === 2 && lastPinchDist > 0) {
+          const active = fabricCanvas.getActiveObject?.()
+          if (active) {
+            const newDist = getDistance(e.touches[0], e.touches[1])
+            const ratio = newDist / lastPinchDist
+            const newScale = Math.max(0.1, Math.min(10, pinchStartScale * ratio))
+            active.set({ scaleX: newScale, scaleY: newScale })
+            fabricCanvas.renderAll()
+            e.preventDefault()
+          }
+        }
+      }
+
+      const handleTouchEnd = (e: TouchEvent) => {
+        if (e.touches.length < 2 && lastPinchDist > 0) {
+          lastPinchDist = 0
+          pushHistory()
+        }
+      }
+
+      const canvasEl = fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl
+      if (canvasEl) {
+        canvasEl.addEventListener('touchstart', handleTouchStart, { passive: false })
+        canvasEl.addEventListener('touchmove', handleTouchMove, { passive: false })
+        canvasEl.addEventListener('touchend', handleTouchEnd, { passive: false })
       }
 
       /* 5. Canvas events → history ----------------------------------------- */
@@ -1238,6 +1303,13 @@ export default function FabricCanvas() {
     <div
       ref={containerRef}
       className="flex items-center justify-center w-full h-full"
+      style={{ touchAction: "none" }}
+      onTouchMove={(e) => {
+        // Prevent page scroll/zoom while interacting with canvas
+        if (canvasRef.current?.getActiveObject?.()) {
+          e.preventDefault()
+        }
+      }}
     >
       {/* 3D perspective wrapper — subtle tilt for depth feel */}
       <div

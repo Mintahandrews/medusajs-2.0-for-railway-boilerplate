@@ -14,10 +14,11 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const { cart_id, line_item_id, metadata } = req.body as {
+    const { cart_id, line_item_id, metadata, unit_price } = req.body as {
       cart_id: string
       line_item_id: string
       metadata: Record<string, string>
+      unit_price?: number
     }
 
     if (!cart_id || !line_item_id || !metadata) {
@@ -46,13 +47,20 @@ export async function POST(
       return
     }
 
-    // Update the line item metadata using the Cart Module service
-    await cartModuleService.updateLineItems(line_item_id, {
+    // Update the line item metadata (and optionally unit_price) using the Cart Module service
+    const updateData: Record<string, any> = {
       metadata: {
         ...(lineItem.metadata || {}),
         ...metadata,
       },
-    })
+    }
+
+    // If a custom unit_price is provided (e.g. case type price adjustment), set it
+    if (typeof unit_price === "number" && unit_price > 0) {
+      updateData.unit_price = unit_price
+    }
+
+    await cartModuleService.updateLineItems(line_item_id, updateData)
 
     res.json({ success: true })
   } catch (error: any) {

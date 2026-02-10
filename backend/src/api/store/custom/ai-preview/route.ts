@@ -274,14 +274,21 @@ function buildPrompt(
 
   const lines: string[] = [
     `Generate an ultra-realistic, high-resolution product photograph showing the BACK of a ${deviceLabel} phone case.`,
+    `IMPORTANT: This case is specifically designed for a ${deviceLabel}. The phone model is ${deviceLabel} — NOT any other phone.`,
     `The case is a ${caseDesc}.`,
   ]
 
   if (deviceDesc) {
     lines.push(
-      `DEVICE SHAPE — This is critical for accuracy: ${deviceDesc}`,
-      `The generated phone case MUST match this exact device shape, proportions, camera cutout position, and aspect ratio.`,
-      `The camera cutout in the case must be in the EXACT position described above — do not move it or change its shape.`,
+      `DEVICE SHAPE — This is the most critical requirement: ${deviceDesc}`,
+      `You MUST generate a case that matches this EXACT device: ${deviceLabel}.`,
+      `The case shape, proportions, camera cutout position, number of camera lenses, and aspect ratio MUST match the ${deviceLabel} precisely.`,
+      `The camera cutout in the case MUST be in the EXACT position and shape described above — do NOT use a generic phone shape or a different phone model.`,
+      `If you are unsure about the device shape, prioritize the physical description provided above over any other knowledge.`,
+    )
+  } else {
+    lines.push(
+      `The case must clearly be shaped for a ${deviceLabel} with the correct camera cutout position and phone proportions.`,
     )
   }
 
@@ -295,6 +302,7 @@ function buildPrompt(
     `Ultra sharp detail, realistic plastic/silicone/TPU material texture, proper specular highlights and light reflections on the case edges, photorealistic shadows.`,
     `Do NOT add any text, logos, watermarks, or branding that is not in the original design.`,
     `Do NOT show the front screen of the phone — only the back of the case should be visible.`,
+    `REMINDER: The phone is a ${deviceLabel}. Generate a case for EXACTLY this model.`,
   )
 
   return lines.join("\n")

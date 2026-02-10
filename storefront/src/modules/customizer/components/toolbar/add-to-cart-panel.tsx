@@ -138,6 +138,11 @@ export default function AddToCartPanel({ product, region }: Props) {
 
       // 4. Add to cart with flat metadata (no nested objects, no huge canvas_json)
       setUploadStatus("Adding to cart…")
+
+      // Calculate the adjusted unit price based on case type multiplier
+      const multiplier = CASE_TYPE_MULTIPLIER[state.caseType] ?? 1
+      const adjustedPrice = baseAmount != null ? baseAmount * multiplier : undefined
+
       await addCustomizedToCart({
         variantId: selectedVariantId,
         quantity: 1,
@@ -145,6 +150,7 @@ export default function AddToCartPanel({ product, region }: Props) {
         metadata: {
           is_customized: "true",
           case_type: state.caseType,
+          case_type_label: CASE_TYPE_LABEL[state.caseType],
           device_model: deviceConfig.name,
           device_handle: deviceConfig.handle,
           preview_image: previewUrl,
@@ -156,6 +162,7 @@ export default function AddToCartPanel({ product, region }: Props) {
           print_height_mm: String(deviceConfig.printSpec.heightMm),
           print_bleed_mm: String(deviceConfig.bleedMm),
         },
+        unit_price: adjustedPrice,
       })
 
       setAdded(true)

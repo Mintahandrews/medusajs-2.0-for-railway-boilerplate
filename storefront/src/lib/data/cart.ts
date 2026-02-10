@@ -129,11 +129,13 @@ export async function addCustomizedToCart({
   quantity,
   countryCode,
   metadata,
+  unit_price,
 }: {
   variantId: string
   quantity: number
   countryCode: string
   metadata: Record<string, string>
+  unit_price?: number
 }) {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
@@ -196,6 +198,7 @@ export async function addCustomizedToCart({
         cart_id: cart.id,
         line_item_id: newItem.id,
         metadata,
+        ...(unit_price ? { unit_price } : {}),
       }),
     })
 
@@ -254,6 +257,35 @@ export async function deleteLineItem(lineId: string) {
   const cartId = await getCartId()
   if (!cartId) {
     throw new Error("Missing cart ID when deleting line item")
+  }
+
+  // Clean up cloud design files before removing the line item
+  try {
+    const { cart } = await sdk.store.cart.retrieve(
+      cartId,
+      {},
+      { next: { tags: ["cart"] }, ...(await getAuthHeaders()) }
+    )
+    const item = cart?.items?.find((i: any) => i.id === lineId) as any
+    if (item?.metadata?.is_customized === "true") {
+      const keysToDelete: string[] = []
+      if (item.metadata.preview_key) keysToDelete.push(item.metadata.preview_key)
+      if (item.metadata.print_file_key) keysToDelete.push(item.metadata.print_file_key)
+      if (keysToDelete.length > 0) {
+        const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+        const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+        fetch(`${backendUrl}/store/custom/design-cleanup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(publishableKey ? { "x-publishable-api-key": publishableKey } : {}),
+          },
+          body: JSON.stringify({ file_keys: keysToDelete }),
+        }).catch((err) => console.warn("[deleteLineItem] design cleanup failed:", err))
+      }
+    }
+  } catch {
+    // Non-critical — proceed with deletion even if cleanup fails
   }
 
   try {
