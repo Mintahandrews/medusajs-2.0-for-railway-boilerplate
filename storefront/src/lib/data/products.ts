@@ -41,6 +41,24 @@ export const getProductByHandle = cache(async function (
     .then(({ products }) => products[0])
 })
 
+export const searchProducts = cache(async function (
+  query: string,
+  regionId: string,
+  limit = 20
+) {
+  return sdk.store.product
+    .list(
+      {
+        q: query,
+        region_id: regionId,
+        limit,
+        fields: "*variants.calculated_price,+variants.inventory_quantity",
+      },
+      { next: { tags: ["products"] } }
+    )
+    .then(({ products }) => products)
+})
+
 export const getProductsList = cache(async function ({
   pageParam = 1,
   queryParams,

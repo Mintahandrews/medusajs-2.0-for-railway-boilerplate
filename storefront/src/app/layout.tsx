@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/letscase-logo.svg",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Letscase",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Letscase",
-    images: ["/letscase-logo.svg"],
+    images: ["/og-image.jpg"],
   },
   icons: {
     icon: [

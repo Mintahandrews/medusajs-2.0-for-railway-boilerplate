@@ -152,12 +152,28 @@ export async function addCustomizedToCart({
     )
 
     // Step 2: Find the newly added line item (last item with matching variant_id)
-    const newItem = [...(updatedCart.items || [])]
+    let newItem = [...(updatedCart?.items || [])]
       .reverse()
       .find((item: any) => item.variant_id === variantId)
 
+    // Fallback: if createLineItem response didn't include items, re-fetch the cart
     if (!newItem) {
-      throw new Error("Line item was created but could not be found in the cart")
+      const freshCart = await sdk.store.cart
+        .retrieve(cart.id, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+        .then(({ cart: c }) => c)
+        .catch(() => null)
+      if (freshCart?.items) {
+        newItem = [...freshCart.items]
+          .reverse()
+          .find((item: any) => item.variant_id === variantId)
+      }
+    }
+
+    if (!newItem) {
+      console.error("[addCustomizedToCart] Line item not found after creation")
+      // Item was added to cart but we can't set metadata — still revalidate
+      revalidateTag("cart")
+      return
     }
 
     // Step 3: Set metadata via custom backend endpoint

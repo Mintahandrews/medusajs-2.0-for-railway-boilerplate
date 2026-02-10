@@ -106,8 +106,18 @@ export default function Toolbar({ product, region }: ToolbarProps) {
           <AddToCartPanel product={product} region={region} />
         )}
         {state.activeTool === "cart" && (!product || !region) && (
-          <div className="p-4 text-sm text-gray-400">
-            <p>Product data not available. Add to cart from the product page.</p>
+          <div className="p-4 flex flex-col gap-3">
+            <p className="text-sm text-gray-500">
+              No matching product found for this device. You can still design
+              and download your case, or browse the store to find the right product.
+            </p>
+            <a
+              href={`/${typeof window !== "undefined" ? window.location.pathname.split("/")[1] : "us"}/store`}
+              className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
+                         bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+            >
+              Browse Store
+            </a>
           </div>
         )}
       </div>

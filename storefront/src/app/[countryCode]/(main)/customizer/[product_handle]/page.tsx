@@ -3,8 +3,9 @@ import {
   getDeviceConfig,
   getDefaultDevice,
   detectDeviceFromProduct,
+  isCustomizableCase,
 } from "@lib/device-assets"
-import { getProductByHandle } from "@lib/data/products"
+import { getProductByHandle, searchProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import CustomizerLoader from "@modules/customizer/templates/customizer-loader"
 
@@ -32,7 +33,25 @@ export default async function CustomizerPage({ params }: Props) {
   try {
     region = (await getRegion(countryCode)) ?? null
     if (region) {
+      // 1. Try exact handle match (works when coming from a product page)
       product = (await getProductByHandle(product_handle, region.id)) ?? null
+
+      // 2. If no exact match, search by device name (works when coming from
+      //    the customizer landing page where URL uses a device handle like
+      //    "iphone-15-pro" but the Medusa product handle might be different)
+      if (!product) {
+        const deviceConf = getDeviceConfig(product_handle) ?? detectDeviceFromProduct(product_handle)
+        if (deviceConf) {
+          const searchQuery = deviceConf.name.replace(/[()]/g, "")
+          const candidates = await searchProducts(searchQuery, region.id, 20)
+          // Pick the first customizable case product that matches this device
+          product = candidates?.find((p) => {
+            if (!isCustomizableCase(p)) return false
+            const detected = detectDeviceFromProduct(p.handle, p.title, p.description)
+            return detected?.handle === deviceConf.handle
+          }) ?? candidates?.find((p) => isCustomizableCase(p)) ?? null
+        }
+      }
     }
   } catch {
     // Product data not available — customizer still works, just no cart integration
