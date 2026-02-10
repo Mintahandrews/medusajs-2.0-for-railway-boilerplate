@@ -81,8 +81,10 @@ export default function AddToCartPanel({ product, region }: Props) {
       let cartId: string
       try {
         cartId = await ensureCart(countryCode)
-      } catch (e) {
-        throw new Error("Could not create cart. Please refresh and try again.")
+      } catch (e: any) {
+        const detail = e?.message || "Unknown error"
+        console.error("[Customizer] ensureCart failed:", detail)
+        throw new Error(`Could not create cart: ${detail}. Please refresh and try again.`)
       }
 
       // 2. Export canvas data (skip canvas_json — too large for metadata)

@@ -72,12 +72,12 @@ export default function Toolbar({ product, region }: ToolbarProps) {
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       {/* Tool tabs — horizontally scrollable on mobile */}
-      <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-200 -mb-px">
+      <div className="flex overflow-x-auto lg:flex-wrap scrollbar-hide border-b border-gray-200 -mb-px">
         {TOOLS.map((tool) => (
           <button
             key={tool.id}
             onClick={() => dispatch({ type: "SET_TOOL", tool: tool.id })}
-            className={`flex-shrink-0 flex-1 min-w-[56px] flex flex-col items-center gap-1 py-3 text-[11px] transition-colors ${
+            className={`flex-shrink-0 flex-1 min-w-[44px] flex flex-col items-center gap-1 py-2.5 lg:py-2 text-[11px] transition-colors ${
               state.activeTool === tool.id
                 ? "text-black border-b-2 border-black bg-gray-50"
                 : "text-gray-400 hover:text-gray-600"

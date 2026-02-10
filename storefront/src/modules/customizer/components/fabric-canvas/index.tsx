@@ -1112,19 +1112,17 @@ export default function FabricCanvas() {
       fabricCanvas.clipPath = clipPath
 
       /* 3. Touch / mobile support ------------------------------------------- */
-      // Allow touch gestures on the canvas (pinch to scale/rotate objects)
-      fabricCanvas.allowTouchScrolling = false // prevent canvas from scrolling page
-      fabricCanvas.on("touch:gesture", (e: any) => {
-        // Pinch-to-scale the active object
-        if (e.e?.touches?.length === 2 && e.self?.scale) {
-          const active = fabricCanvas.getActiveObject()
-          if (active) {
-            active.scaleX = (active.scaleX || 1) * e.self.scale
-            active.scaleY = (active.scaleY || 1) * e.self.scale
-            fabricCanvas.renderAll()
-          }
-        }
-      })
+      fabricCanvas.allowTouchScrolling = false
+
+      // Ensure Fabric's upper canvas (interaction layer) blocks browser gestures
+      const upperEl = fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl?.querySelector('canvas.upper-canvas')
+      if (upperEl) {
+        upperEl.style.touchAction = 'none'
+      }
+      // Also set on the wrapper Fabric creates
+      if (fabricCanvas.wrapperEl) {
+        fabricCanvas.wrapperEl.style.touchAction = 'none'
+      }
 
       /* 5. Canvas events → history ----------------------------------------- */
       fabricCanvas.on("object:modified", () => pushHistory())
@@ -1319,10 +1317,12 @@ export default function FabricCanvas() {
               width: w,
               height: h,
               borderRadius: sr,
+              touchAction: "none",
             }}
           >
             <canvas
               ref={canvasElRef}
+              style={{ touchAction: "none" }}
             />
 
             {/* Device-specific camera module overlay */}
