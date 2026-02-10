@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -21,8 +21,9 @@ type CarouselItem =
     price: string
   }
 
-export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
+export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
+  const [paused, setPaused] = useState(false)
 
   const normalized = useMemo(() => {
     return items.map((item, idx) => {
@@ -37,7 +38,7 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
     })
   }, [items])
 
-  const scrollByCards = (direction: "left" | "right") => {
+  const scrollByCards = useCallback((direction: "left" | "right") => {
     const viewport = viewportRef.current
     if (!viewport) return
     const width = viewport.clientWidth
@@ -45,7 +46,23 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
       left: direction === "left" ? -width : width,
       behavior: "smooth",
     })
-  }
+  }, [])
+
+  // Auto-scroll: scroll right by one card width every 3s, loop back at end
+  useEffect(() => {
+    if (!autoScroll || paused) return
+    const id = setInterval(() => {
+      const vp = viewportRef.current
+      if (!vp) return
+      const atEnd = vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 4
+      if (atEnd) {
+        vp.scrollTo({ left: 0, behavior: "smooth" })
+      } else {
+        vp.scrollBy({ left: 260, behavior: "smooth" })
+      }
+    }, 3000)
+    return () => clearInterval(id)
+  }, [autoScroll, paused])
 
   return (
     <div className="relative">
@@ -68,6 +85,10 @@ export default function ProductCarousel({ items }: { items: CarouselItem[] }) {
 
       <div
         ref={viewportRef}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onTouchStart={() => setPaused(true)}
+        onTouchEnd={() => setPaused(false)}
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
       >
         {normalized.slice(0, 8).map((item) => (
