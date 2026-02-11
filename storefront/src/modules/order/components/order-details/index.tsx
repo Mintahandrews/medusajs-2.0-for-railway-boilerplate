@@ -9,8 +9,37 @@ type OrderDetailsProps = {
 const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
   const formatStatus = (str: string) => {
     const formatted = str.split("_").join(" ")
-
     return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
+  }
+
+  const getOrderStatus = () => {
+    const status = (order as any).status
+    if (status) return formatStatus(status)
+    // Derive from fulfillments if available
+    const fulfillments = (order as any).fulfillments
+    if (fulfillments?.length) {
+      const allDelivered = fulfillments.every((f: any) => f.delivered_at)
+      const allShipped = fulfillments.every((f: any) => f.shipped_at)
+      if (allDelivered) return "Delivered"
+      if (allShipped) return "Shipped"
+      return "Processing"
+    }
+    return "Pending"
+  }
+
+  const getPaymentStatus = () => {
+    const collections = (order as any).payment_collections
+    if (collections?.length) {
+      const collection = collections[0]
+      if (collection.status) return formatStatus(collection.status)
+      const payments = collection.payments
+      if (payments?.length) {
+        const captured = payments.some((p: any) => p.captured_at)
+        if (captured) return "Paid"
+        return "Awaiting payment"
+      }
+    }
+    return "Pending"
   }
 
   return (
@@ -35,28 +64,25 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
         Order number: <span data-testid="order-id">{order.display_id}</span>
       </Text>
 
-      <div className="flex items-center text-compact-small gap-x-4 mt-4">
-        {showStatus && (
-          <>
-            <Text>
-              Order status:{" "}
-              <span className="text-ui-fg-subtle " data-testid="order-status">
-                {/* TODO: Check where the statuses should come from */}
-                {/* {formatStatus(order.fulfillment_status)} */}
-              </span>
-            </Text>
-            <Text>
-              Payment status:{" "}
-              <span
-                className="text-ui-fg-subtle "
-                sata-testid="order-payment-status"
-              >
-                {/* {formatStatus(order.payment_status)} */}
-              </span>
-            </Text>
-          </>
-        )}
-      </div>
+      {showStatus && (
+        <div className="flex flex-col small:flex-row small:items-center text-compact-small gap-y-2 small:gap-x-6 mt-6">
+          <Text>
+            Order status:{" "}
+            <span className="text-ui-fg-subtle font-medium" data-testid="order-status">
+              {getOrderStatus()}
+            </span>
+          </Text>
+          <Text>
+            Payment status:{" "}
+            <span
+              className="text-ui-fg-subtle font-medium"
+              data-testid="order-payment-status"
+            >
+              {getPaymentStatus()}
+            </span>
+          </Text>
+        </div>
+      )}
     </div>
   )
 }

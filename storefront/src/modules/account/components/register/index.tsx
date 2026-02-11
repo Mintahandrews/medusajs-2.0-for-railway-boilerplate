@@ -86,8 +86,8 @@ const Register = ({ setCurrentView }: Props) => {
             {showAddress ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           {showAddress && (
-            <div className="flex flex-col gap-y-2 p-4 pt-2">
-              <p className="text-ui-fg-subtle text-xsmall-regular mb-1">
+            <div className="flex flex-col gap-y-3 p-4 pt-3">
+              <p className="text-ui-fg-subtle text-xsmall-regular mb-2">
                 Save your shipping address now so it auto-fills at checkout.
               </p>
               <Input
@@ -102,7 +102,7 @@ const Register = ({ setCurrentView }: Props) => {
                 autoComplete="address-line2"
                 data-testid="address-2-input"
               />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   label="City"
                   name="city"
@@ -116,7 +116,7 @@ const Register = ({ setCurrentView }: Props) => {
                   data-testid="postal-code-input"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   label="State / Province"
                   name="province"

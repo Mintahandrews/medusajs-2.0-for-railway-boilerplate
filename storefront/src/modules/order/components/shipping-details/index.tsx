@@ -14,9 +14,9 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
         Delivery
       </Heading>
-      <div className="flex items-start gap-x-8">
+      <div className="grid grid-cols-1 small:grid-cols-3 gap-6 small:gap-x-8">
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col"
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
@@ -26,13 +26,16 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
             {order.shipping_address?.first_name}{" "}
             {order.shipping_address?.last_name}
           </Text>
+          {order.shipping_address?.address_1 && (
+            <Text className="txt-medium text-ui-fg-subtle">
+              {order.shipping_address.address_1}
+              {order.shipping_address.address_2 ? `, ${order.shipping_address.address_2}` : ""}
+            </Text>
+          )}
           <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.address_1}{" "}
-            {order.shipping_address?.address_2}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.postal_code},{" "}
-            {order.shipping_address?.city}
+            {[order.shipping_address?.postal_code, order.shipping_address?.city]
+              .filter(Boolean)
+              .join(", ")}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.country_code?.toUpperCase()}
@@ -40,7 +43,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3 "
+          className="flex flex-col"
           data-testid="shipping-contact-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Contact</Text>
@@ -51,7 +54,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col"
           data-testid="shipping-method-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Method</Text>
