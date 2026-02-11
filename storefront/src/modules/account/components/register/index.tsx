@@ -118,13 +118,13 @@ const Register = ({ setCurrentView }: Props) => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="State / Province"
+                  label="State"
                   name="province"
                   autoComplete="address-level1"
                   data-testid="province-input"
                 />
                 <Input
-                  label="Country code (e.g. GH)"
+                  label="Country (e.g. GH)"
                   name="country_code"
                   autoComplete="country"
                   data-testid="country-code-input"

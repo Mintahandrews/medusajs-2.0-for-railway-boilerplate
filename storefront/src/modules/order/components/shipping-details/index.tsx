@@ -16,7 +16,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
       </Heading>
       <div className="grid grid-cols-1 small:grid-cols-3 gap-6 small:gap-x-8">
         <div
-          className="flex flex-col"
+          className="flex flex-col min-w-0"
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
@@ -43,18 +43,18 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col"
+          className="flex flex-col min-w-0"
           data-testid="shipping-contact-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Contact</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address?.phone}
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
+          <Text className="txt-medium text-ui-fg-subtle truncate">{order.email}</Text>
         </div>
 
         <div
-          className="flex flex-col"
+          className="flex flex-col min-w-0"
           data-testid="shipping-method-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">Method</Text>
