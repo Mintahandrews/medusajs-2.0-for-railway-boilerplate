@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from "react"
 import { ChevronUp, ChevronDown, Upload, Type, Palette, Shield, Smartphone, ShoppingCart } from "lucide-react"
-import { CustomizerProvider } from "../context"
+import { CustomizerProvider, useCustomizer, type ActiveTool } from "../context"
 import FabricCanvas from "../components/fabric-canvas"
 import Toolbar from "../components/toolbar"
 import type { DeviceConfig } from "@lib/device-assets"
@@ -16,14 +16,41 @@ interface Props {
 }
 
 export default function CustomizerTemplate({ deviceConfig, productHandle, product, region }: Props) {
+  return (
+    <CustomizerProvider deviceConfig={deviceConfig}>
+      <CustomizerLayout
+        deviceConfig={deviceConfig}
+        product={product}
+        region={region}
+      />
+    </CustomizerProvider>
+  )
+}
+
+/** Inner layout — can use useCustomizer() since it's inside the provider */
+function CustomizerLayout({
+  deviceConfig,
+  product,
+  region,
+}: {
+  deviceConfig: DeviceConfig
+  product?: HttpTypes.StoreProduct | null
+  region?: HttpTypes.StoreRegion | null
+}) {
+  const { dispatch } = useCustomizer()
   const [mobileExpanded, setMobileExpanded] = useState(false)
 
   const toggleMobilePanel = useCallback(() => {
     setMobileExpanded((prev) => !prev)
   }, [])
 
+  const openTool = useCallback((tool: ActiveTool) => {
+    dispatch({ type: "SET_TOOL", tool })
+    setMobileExpanded(true)
+  }, [dispatch])
+
   return (
-    <CustomizerProvider deviceConfig={deviceConfig}>
+    <>
       <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px)] bg-gray-100 overflow-hidden">
 
         {/* ---- Desktop sidebar ---- */}
@@ -80,9 +107,26 @@ export default function CustomizerTemplate({ deviceConfig, productHandle, produc
           </div>
 
           {/* Collapsed quick-access tabs — show tool icons when collapsed */}
-          {!mobileExpanded && <MobileQuickBar onExpand={() => setMobileExpanded(true)} />}
+          {!mobileExpanded && <MobileQuickBar onExpand={openTool} />}
         </div>
       </div>
+
+      {/* ---- Floating Add-to-Cart button on mobile ---- */}
+      {product && region && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+          <div className="px-4 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] pt-2">
+            <button
+              onClick={() => openTool("cart")}
+              className="pointer-events-auto w-full flex items-center justify-center gap-2 py-4 rounded-2xl
+                         bg-black text-white text-base font-bold shadow-[0_4px_24px_rgba(0,0,0,0.25)]
+                         active:scale-[0.98] transition-transform"
+            >
+              <ShoppingCart size={20} strokeWidth={2.5} />
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Global touch-friendly styles */}
       <style dangerouslySetInnerHTML={{ __html: `
@@ -92,7 +136,7 @@ export default function CustomizerTemplate({ deviceConfig, productHandle, produc
           /* Dynamic viewport height for mobile browsers */
         }
       `}} />
-    </CustomizerProvider>
+    </>
   )
 }
 
@@ -100,22 +144,21 @@ export default function CustomizerTemplate({ deviceConfig, productHandle, produc
  * Quick-access toolbar icons shown in the collapsed mobile bottom bar.
  * Tapping any icon expands the full toolbar and switches to that tool.
  */
-const QUICK_TOOLS = [
-  { label: "Upload", icon: Upload },
-  { label: "Text", icon: Type },
-  { label: "Color", icon: Palette },
-  { label: "Case", icon: Shield },
-  { label: "Preview", icon: Smartphone },
-  { label: "Cart", icon: ShoppingCart },
+const QUICK_TOOLS: { label: string; icon: any; tool: ActiveTool }[] = [
+  { label: "Upload", icon: Upload, tool: "upload" },
+  { label: "Text", icon: Type, tool: "text" },
+  { label: "Color", icon: Palette, tool: "background" },
+  { label: "Case", icon: Shield, tool: "case-type" },
+  { label: "Preview", icon: Smartphone, tool: "preview" },
 ]
 
-function MobileQuickBar({ onExpand }: { onExpand: () => void }) {
+function MobileQuickBar({ onExpand }: { onExpand: (tool: ActiveTool) => void }) {
   return (
-    <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
-      {QUICK_TOOLS.map(({ label, icon: Icon }) => (
+    <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,48px)]">
+      {QUICK_TOOLS.map(({ label, icon: Icon, tool }) => (
         <button
           key={label}
-          onClick={onExpand}
+          onClick={() => onExpand(tool)}
           className="flex flex-col items-center gap-0.5 py-1.5 px-1 text-gray-500 active:text-black min-w-[48px] min-h-[44px] justify-center"
         >
           <Icon size={18} strokeWidth={1.8} />

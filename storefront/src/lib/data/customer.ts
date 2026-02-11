@@ -36,6 +36,11 @@ export async function signup(_currentState: unknown, formData: FormData) {
     phone: formData.get("phone") as string,
   }
 
+  // Optional shipping address fields from registration
+  const addressLine1 = formData.get("address_1") as string
+  const city = formData.get("city") as string
+  const countryCode = formData.get("country_code") as string
+
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
@@ -64,6 +69,32 @@ export async function signup(_currentState: unknown, formData: FormData) {
     }
 
     await setAuthToken(loginToken)
+
+    // Save shipping address if provided during registration
+    if (addressLine1 && city && countryCode) {
+      try {
+        const authHeaders = { authorization: `Bearer ${loginToken}` }
+        await sdk.store.customer.createAddress(
+          {
+            first_name: customerForm.first_name,
+            last_name: customerForm.last_name,
+            address_1: addressLine1,
+            address_2: (formData.get("address_2") as string) || "",
+            city,
+            postal_code: (formData.get("postal_code") as string) || "",
+            province: (formData.get("province") as string) || "",
+            country_code: countryCode,
+            phone: customerForm.phone || "",
+            company: (formData.get("company") as string) || "",
+          },
+          {},
+          authHeaders
+        )
+      } catch (addrErr) {
+        // Non-critical — account is created, address can be added later
+        console.warn("[signup] Failed to save address:", addrErr)
+      }
+    }
 
     revalidateTag("customer")
     return createdCustomer

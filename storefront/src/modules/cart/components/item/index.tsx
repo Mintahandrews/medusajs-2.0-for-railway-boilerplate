@@ -13,6 +13,7 @@ import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { convertToLocale } from "@lib/util/money"
 import { useState } from "react"
 
 type ItemProps = {
@@ -25,6 +26,8 @@ const Item = ({ item, type = "full" }: ItemProps) => {
   const [error, setError] = useState<string | null>(null)
 
   const { handle } = item.variant?.product ?? {}
+  const meta = item.metadata as Record<string, any> | undefined
+  const isCustomized = meta?.is_customized === "true"
 
   const changeQuantity = async (quantity: number) => {
     setError(null)
@@ -56,10 +59,10 @@ const Item = ({ item, type = "full" }: ItemProps) => {
             "small:w-24 w-12": type === "full",
           })}
         >
-          {(item.metadata as any)?.is_customized && (item.metadata as any)?.preview_image ? (
+          {isCustomized && meta?.preview_image ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-ui-bg-subtle border border-ui-border-base">
               <img
-                src={(item.metadata as any).preview_image}
+                src={meta.preview_image}
                 alt="Custom design"
                 className="w-full h-full object-cover"
               />
@@ -79,14 +82,23 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-title"
         >
-          {item.product_title}
+          {isCustomized ? `Custom ${meta?.device_model || item.product_title}` : item.product_title}
         </Text>
-        {(item.metadata as any)?.is_customized && (
-          <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-violet-100 text-violet-700 rounded-full">
-            Customized
-          </span>
+        {isCustomized && (
+          <div className="flex flex-wrap items-center gap-1 mt-1">
+            <span className="inline-block px-2 py-0.5 text-[10px] font-semibold bg-violet-100 text-violet-700 rounded-full">
+              Custom Design
+            </span>
+            {meta?.case_type_label && (
+              <span className="inline-block px-2 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-600 rounded-full">
+                {meta.case_type_label} Case
+              </span>
+            )}
+          </div>
         )}
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
+        {!isCustomized && (
+          <LineItemOptions variant={item.variant} data-testid="product-variant" />
+        )}
       </Table.Cell>
 
       {type === "full" && (
@@ -123,7 +135,18 @@ const Item = ({ item, type = "full" }: ItemProps) => {
 
       {type === "full" && (
         <Table.Cell className="hidden small:table-cell">
-          <LineItemUnitPrice item={item} style="tight" />
+          {isCustomized && (item as any).unit_price != null ? (
+            <div className="flex flex-col text-ui-fg-muted justify-center h-full">
+              <span className="text-base-regular" data-testid="product-unit-price">
+                {convertToLocale({
+                  amount: (item as any).unit_price,
+                  currency_code: (item as any).variant?.calculated_price?.currency_code || "usd",
+                })}
+              </span>
+            </div>
+          ) : (
+            <LineItemUnitPrice item={item} style="tight" />
+          )}
         </Table.Cell>
       )}
 
@@ -136,10 +159,28 @@ const Item = ({ item, type = "full" }: ItemProps) => {
           {type === "preview" && (
             <span className="flex gap-x-1 ">
               <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice item={item} style="tight" />
+              {isCustomized && (item as any).unit_price != null ? (
+                <span className="text-base-regular">
+                  {convertToLocale({
+                    amount: (item as any).unit_price,
+                    currency_code: (item as any).variant?.calculated_price?.currency_code || "usd",
+                  })}
+                </span>
+              ) : (
+                <LineItemUnitPrice item={item} style="tight" />
+              )}
             </span>
           )}
-          <LineItemPrice item={item} style="tight" />
+          {isCustomized && (item as any).unit_price != null ? (
+            <span className="text-base-regular" data-testid="product-price">
+              {convertToLocale({
+                amount: (item as any).unit_price * item.quantity,
+                currency_code: (item as any).variant?.calculated_price?.currency_code || "usd",
+              })}
+            </span>
+          ) : (
+            <LineItemPrice item={item} style="tight" />
+          )}
         </span>
       </Table.Cell>
     </Table.Row>

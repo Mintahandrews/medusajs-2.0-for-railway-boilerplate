@@ -19,6 +19,7 @@ const SIZE_OPTIONS = [16, 20, 24, 28, 32, 40, 48, 56, 64, 72, 96]
 
 export default function TextPanel() {
   const { state, dispatch, addText, canvasRef } = useCustomizer()
+  const [inputText, setInputText] = React.useState("")
 
   function updateActiveText(prop: string, value: any) {
     const canvas = canvasRef.current
@@ -30,18 +31,42 @@ export default function TextPanel() {
     }
   }
 
+  function handleAddText() {
+    const text = inputText.trim() || "Your Text"
+    addText(text)
+    setInputText("")
+  }
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <h3 className="text-sm font-semibold text-gray-700">Text</h3>
 
-      <button
-        onClick={() => addText()}
-        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                   bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-      >
-        <Type className="w-4 h-4" />
-        Add Text
-      </button>
+      {/* Text input */}
+      <div className="flex flex-col gap-2">
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              handleAddText()
+            }
+          }}
+          placeholder="Type your text here…"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-black/10 placeholder:text-gray-400"
+        />
+        <button
+          onClick={handleAddText}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
+                     bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+        >
+          <Type className="w-4 h-4" />
+          Add Text to Design
+        </button>
+        <p className="text-[10px] text-gray-400">Tap text on the canvas to select it. Double-tap to edit.</p>
+      </div>
 
       {/* Font Family */}
       <div>
