@@ -1,5 +1,6 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
+import ScrollToTop from "@modules/common/components/scroll-to-top"
 import "styles/globals.css"
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-mode="light">
       <body>
+        <ScrollToTop />
         <main id="top" className="relative">{props.children}</main>
       </body>
     </html>
