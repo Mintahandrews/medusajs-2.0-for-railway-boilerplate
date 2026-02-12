@@ -20,8 +20,8 @@ export default function ProductJsonLd({ product, countryCode }: Props) {
     .filter((a): a is number => typeof a === "number" && a > 0)
 
   const currencyCode = (prices[0] as any)?.currency_code || "GHS"
-  const lowPrice = amounts.length ? Math.min(...amounts) / 100 : undefined
-  const highPrice = amounts.length ? Math.max(...amounts) / 100 : undefined
+  const lowPrice = amounts.length ? Math.min(...amounts) : undefined
+  const highPrice = amounts.length ? Math.max(...amounts) : undefined
 
   // Collect all images
   const images = [

@@ -23,6 +23,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: "https://letscasegh.com/sitemap.xml",
-    host: "https://letscasegh.com",
   }
 }

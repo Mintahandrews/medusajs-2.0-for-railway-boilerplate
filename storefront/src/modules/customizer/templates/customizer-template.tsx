@@ -5,6 +5,8 @@ import { ChevronUp, ChevronDown, Upload, Type, Palette, Shield, Smartphone, Shop
 import { CustomizerProvider, useCustomizer, type ActiveTool } from "../context"
 import FabricCanvas from "../components/fabric-canvas"
 import Toolbar from "../components/toolbar"
+import FloatingCart from "../components/floating-cart"
+import CustomizerOnboarding from "../components/onboarding"
 import type { DeviceConfig } from "@lib/device-assets"
 import { HttpTypes } from "@medusajs/types"
 
@@ -112,6 +114,14 @@ function CustomizerLayout({
       </div>
 
 
+      {/* Floating Add to Cart widget */}
+      {product && region && (
+        <FloatingCart product={product} region={region} />
+      )}
+
+      {/* First-time onboarding walkthrough */}
+      <CustomizerOnboarding />
+
       {/* Global touch-friendly styles */}
       <style dangerouslySetInnerHTML={{ __html: `
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -146,8 +156,8 @@ function MobileQuickBar({ onExpand }: { onExpand: (tool: ActiveTool) => void }) 
           onClick={() => onExpand(tool)}
           className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] min-h-[44px] justify-center ${
             highlight
-              ? "text-white bg-black rounded-xl mx-0.5"
-              : "text-gray-500 active:text-black"
+              ? "text-white bg-brand rounded-xl mx-0.5"
+              : "text-gray-500 active:text-brand"
           }`}
         >
           <Icon size={18} strokeWidth={1.8} />

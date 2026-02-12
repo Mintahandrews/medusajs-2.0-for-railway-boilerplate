@@ -290,7 +290,7 @@ export default function PreviewPanel() {
     <div className="p-4 flex flex-col gap-4">
       {/* Header */}
       <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-        <Smartphone size={16} className="text-emerald-600" />
+        <Smartphone size={16} className="text-brand" />
         Device Preview
       </div>
 
@@ -299,7 +299,7 @@ export default function PreviewPanel() {
         <button
           onClick={() => setMode("ai")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium transition-all ${
-            mode === "ai" ? "bg-white shadow-sm text-emerald-700" : "text-gray-500 hover:text-gray-700"
+            mode === "ai" ? "bg-white shadow-sm text-brand-dark" : "text-gray-500 hover:text-gray-700"
           }`}
         >
           <Sparkles size={13} />
@@ -333,7 +333,7 @@ export default function PreviewPanel() {
                   onClick={() => setSceneIdx(i)}
                   className={`py-2 rounded-lg text-xs font-medium transition-all ${
                     sceneIdx === i
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-brand text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
@@ -347,7 +347,7 @@ export default function PreviewPanel() {
           <button
             onClick={generateAi}
             disabled={generating}
-            className="w-full py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {generating ? (
               <><RotateCcw size={14} className="animate-spin" /> Generating...</>
@@ -387,7 +387,7 @@ export default function PreviewPanel() {
           <button
             onClick={generateLocal}
             disabled={generating}
-            className="w-full py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {generating ? (
               <><RotateCcw size={14} className="animate-spin" /> Rendering...</>
@@ -408,7 +408,7 @@ export default function PreviewPanel() {
                       onClick={() => setAngleIdx(i)}
                       className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors ${
                         angleIdx === i
-                          ? "bg-gray-900 text-white"
+                          ? "bg-brand text-white"
                           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       }`}
                     >
@@ -427,7 +427,7 @@ export default function PreviewPanel() {
                       key={bg.label}
                       onClick={() => setBgIdx(i)}
                       className={`w-8 h-8 rounded-full border-2 transition-all ${
-                        bgIdx === i ? "border-gray-900 scale-110" : "border-gray-200"
+                        bgIdx === i ? "border-brand scale-110" : "border-gray-200"
                       }`}
                       style={{
                         background: `linear-gradient(135deg, ${bg.gradient[0]}, ${bg.gradient[1]})`,

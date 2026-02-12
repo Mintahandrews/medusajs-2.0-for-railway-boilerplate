@@ -189,7 +189,7 @@ export default function AddToCartPanel({ product, region }: Props) {
             value={selectedVariantId}
             onChange={(e) => setSelectedVariantId(e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
-                       focus:outline-none focus:ring-2 focus:ring-black/10"
+                       focus:outline-none focus:ring-2 focus:ring-brand/20"
           >
             {product.variants.map((v) => (
               <option key={v.id} value={v.id}>
@@ -229,7 +229,7 @@ export default function AddToCartPanel({ product, region }: Props) {
                     font-semibold transition-all ${
                       added
                         ? "bg-green-600 text-white"
-                        : "bg-black text-white hover:bg-gray-800"
+                        : "bg-brand text-white hover:bg-brand-dark"
                     } disabled:opacity-40 disabled:cursor-not-allowed`}
       >
         {isAdding ? (
@@ -261,8 +261,8 @@ export default function AddToCartPanel({ product, region }: Props) {
       {added && (
         <button
           onClick={() => router.push(`/${countryCode}/cart`)}
-          className="text-sm text-center text-black underline underline-offset-4
-                     hover:text-gray-600 transition-colors"
+          className="text-sm text-center text-brand underline underline-offset-4
+                     hover:text-brand-dark transition-colors"
         >
           View Cart →
         </button>

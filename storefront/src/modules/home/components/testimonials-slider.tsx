@@ -91,17 +91,13 @@ export default function TestimonialsSlider() {
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(${index * -100}%)` }}
           >
-            {[0, 1].map((offset) => {
-              // Logic to show pairs of testimonials. Use modulo for wrapping if needed.
-              // For now, simpler implementation: render items in pairs
-              const item1 = items[index % items.length];
-              const item2 = items[(index + 1) % items.length];
-
+            {items.map((item, i) => {
+              const nextItem = items[(i + 1) % items.length]
               return (
-                <div key={index} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8">
-                  <TestimonialCard item={item1} />
+                <div key={i} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8">
+                  <TestimonialCard item={item} />
                   <div className="hidden small:block">
-                    <TestimonialCard item={item2} />
+                    <TestimonialCard item={nextItem} />
                   </div>
                 </div>
               )

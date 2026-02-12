@@ -55,12 +55,12 @@ export default function TextPanel() {
           }}
           placeholder="Type your text here…"
           className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-black/10 placeholder:text-gray-400"
+                     focus:outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-gray-400"
         />
         <button
           onClick={handleAddText}
           className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                     bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                     bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
         >
           <Type className="w-4 h-4" />
           Add Text to Design
@@ -78,7 +78,7 @@ export default function TextPanel() {
             updateActiveText("fontFamily", e.target.value)
           }}
           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-black/10"
+                     focus:outline-none focus:ring-2 focus:ring-brand/20"
         >
           {FONT_OPTIONS.map((f) => (
             <option key={f} value={f} style={{ fontFamily: f }}>
@@ -99,7 +99,7 @@ export default function TextPanel() {
             updateActiveText("fontSize", size)
           }}
           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-black/10"
+                     focus:outline-none focus:ring-2 focus:ring-brand/20"
         >
           {SIZE_OPTIONS.map((s) => (
             <option key={s} value={s}>

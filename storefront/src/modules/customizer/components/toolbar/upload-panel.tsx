@@ -74,7 +74,7 @@ export default function UploadPanel() {
       <button
         onClick={() => inputRef.current?.click()}
         className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                   bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                   bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
       >
         <Upload className="w-4 h-4" />
         Upload Photo

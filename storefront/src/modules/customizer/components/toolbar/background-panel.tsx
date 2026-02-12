@@ -41,7 +41,7 @@ export default function BackgroundPanel() {
             onClick={() => setBackgroundColor(color)}
             className={`w-full aspect-square rounded-lg border-2 transition-all ${
               state.backgroundColor === color
-                ? "border-black scale-110 shadow-md"
+                ? "border-brand scale-110 shadow-md"
                 : "border-gray-200 hover:border-gray-400"
             }`}
             style={{ backgroundColor: color }}

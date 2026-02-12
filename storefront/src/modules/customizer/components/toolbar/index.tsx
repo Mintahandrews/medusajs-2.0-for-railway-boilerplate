@@ -79,7 +79,7 @@ export default function Toolbar({ product, region }: ToolbarProps) {
             onClick={() => dispatch({ type: "SET_TOOL", tool: tool.id })}
             className={`flex-shrink-0 flex-1 min-w-[44px] flex flex-col items-center gap-1 py-2.5 lg:py-2 text-[11px] transition-colors ${
               state.activeTool === tool.id
-                ? "text-black border-b-2 border-black bg-gray-50"
+                ? "text-brand border-b-2 border-brand bg-brand/5"
                 : "text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -114,7 +114,7 @@ export default function Toolbar({ product, region }: ToolbarProps) {
             <a
               href={`/${typeof window !== "undefined" ? window.location.pathname.split("/")[1] : "us"}/store`}
               className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                         bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                         bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
             >
               Browse Store
             </a>
@@ -158,7 +158,7 @@ export default function Toolbar({ product, region }: ToolbarProps) {
         <button
           onClick={handleDownload}
           className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                     bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                     bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
         >
           <Download className="w-4 h-4" />
           Download Preview

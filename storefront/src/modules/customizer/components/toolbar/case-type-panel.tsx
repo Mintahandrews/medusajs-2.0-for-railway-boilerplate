@@ -63,7 +63,7 @@ export default function CaseTypePanel() {
               onClick={() => dispatch({ type: "SET_CASE_TYPE", caseType: ct.id })}
               className={`relative flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                 selected
-                  ? "border-emerald-500 bg-emerald-50"
+                  ? "border-brand bg-brand/10"
                   : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
               }`}
             >
@@ -71,7 +71,7 @@ export default function CaseTypePanel() {
               <div
                 className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                   selected
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-brand text-white"
                     : "bg-gray-100 text-gray-500"
                 }`}
               >
@@ -83,20 +83,20 @@ export default function CaseTypePanel() {
                 <div className="flex items-center gap-2">
                   <span
                     className={`text-sm font-semibold ${
-                      selected ? "text-emerald-700" : "text-gray-900"
+                      selected ? "text-brand-dark" : "text-gray-900"
                     }`}
                   >
                     {ct.label}
                   </span>
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                     selected
-                      ? "text-emerald-600 bg-emerald-100"
+                      ? "text-brand-dark bg-brand/20"
                       : "text-gray-500 bg-gray-100"
                   }`}>
                     {ct.priceTag}
                   </span>
                   {selected && (
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-brand-dark bg-brand/20 px-1.5 py-0.5 rounded-full">
                       Selected
                     </span>
                   )}
@@ -108,7 +108,7 @@ export default function CaseTypePanel() {
                       key={f}
                       className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                         selected
-                          ? "bg-emerald-100 text-emerald-700"
+                          ? "bg-brand/20 text-brand-dark"
                           : "bg-gray-100 text-gray-500"
                       }`}
                     >
