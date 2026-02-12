@@ -1,9 +1,6 @@
 import type { MetadataRoute } from "next"
-import { getBaseURL } from "@lib/util/env"
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = getBaseURL()
-
   return {
     rules: [
       {
@@ -16,9 +13,16 @@ export default function robots(): MetadataRoute.Robots {
           "/order/",
           "/cart/",
           "/results/",
+          "/search/",
         ],
       },
+      {
+        userAgent: "GPTBot",
+        allow: "/",
+        disallow: ["/api/", "/account/", "/checkout/"],
+      },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: "https://letscasegh.com/sitemap.xml",
+    host: "https://letscasegh.com",
   }
 }

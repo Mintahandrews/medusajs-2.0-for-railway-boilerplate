@@ -10,6 +10,10 @@ export const getBaseURL = () => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`
   }
+  // Production domain fallback
+  if (process.env.NODE_ENV === "production") {
+    return "https://letscasegh.com"
+  }
   return "http://localhost:8000"
 }
 

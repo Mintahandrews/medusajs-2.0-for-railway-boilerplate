@@ -8,6 +8,7 @@ import {
 import { listRegions } from "@lib/data/regions"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
+import BreadcrumbJsonLd from "@modules/seo/components/breadcrumb-jsonld"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 type Props = {
@@ -97,11 +98,21 @@ export default async function CollectionPage({ params, searchParams }: Props) {
   }
 
   return (
-    <CollectionTemplate
-      collection={collection}
-      page={page}
-      sortBy={sortBy}
-      countryCode={params.countryCode}
-    />
+    <>
+      <BreadcrumbJsonLd
+        countryCode={params.countryCode}
+        items={[
+          { name: "Home", path: "" },
+          { name: "Store", path: "/store" },
+          { name: collection.title || "Collection", path: `/collections/${params.handle}` },
+        ]}
+      />
+      <CollectionTemplate
+        collection={collection}
+        page={page}
+        sortBy={sortBy}
+        countryCode={params.countryCode}
+      />
+    </>
   )
 }

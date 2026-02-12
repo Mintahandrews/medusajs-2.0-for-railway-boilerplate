@@ -113,6 +113,14 @@ function stripLeadingCountryCode(pathname: string, regionMap: Map<string, unknow
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  // Redirect www to non-www for canonical SEO
+  const host = request.headers.get("host") || ""
+  if (host.startsWith("www.")) {
+    const newUrl = new URL(request.url)
+    newUrl.host = host.replace("www.", "")
+    return NextResponse.redirect(newUrl, 301)
+  }
+
   const searchParams = request.nextUrl.searchParams
   const isOnboarding = searchParams.get("onboarding") === "true"
   const cartId = searchParams.get("cart_id")

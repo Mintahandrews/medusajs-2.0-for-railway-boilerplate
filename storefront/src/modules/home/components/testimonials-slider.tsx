@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useMemo, useState } from "react"
 import {
   BadgeCheck,
@@ -13,9 +12,9 @@ import {
 
 type Testimonial = {
   name: string
-  role: string
-  avatarUrl: string
+  rating: number
   text: string
+  timeAgo: string
   verified?: boolean
 }
 
@@ -23,26 +22,26 @@ export default function TestimonialsSlider() {
   const items = useMemo<Testimonial[]>(
     () => [
       {
-        name: "K. John Smith",
-        role: "Tech Enthusiast",
-        avatarUrl: "https://i.pravatar.cc/150?img=12",
-        text: "I recently purchased the wireless headphones and I'm thoroughly impressed with the sound quality and build. The noise cancellation works like a charm. Highly recommend!",
+        name: "RAC LUXURY PERFUMES",
+        rating: 5,
+        text: "All kinds of quality phone accessories, can be found here. Great customer service.",
+        timeAgo: "6 weeks ago",
         verified: true,
       },
       {
-        name: "David Brown",
-        role: "Designer",
-        avatarUrl: "https://i.pravatar.cc/150?img=32",
-        text: "Letscase has the best customer service! I had an issue with my order and they resolved it immediately. The product quality is top-notch and my iPhone case is perfect. Totally satisfied!",
+        name: "Samuel Kumi Mensah",
+        rating: 5,
+        text: "Great experience shopping at LetsCase Gh. Excellent products and reliable service. Highly recommended!",
+        timeAgo: "35 weeks ago",
         verified: true,
       },
       {
-        name: "Sarah Jenkins",
-        role: "Photographer",
-        avatarUrl: "https://i.pravatar.cc/150?img=44",
-        text: "The camera accessories are game changers. Fast delivery and excellent packaging. Will definitely buy again!",
+        name: "Baba Karim Abdulai",
+        rating: 5,
+        text: "I had a faulty mouse and needed to get new one asap. I reached out to LetsCase Gh and in no time, I was sorted out. Customer Service was a topnotch, quick response and fast in delivery.",
+        timeAgo: "43 weeks ago",
         verified: true,
-      }
+      },
     ],
     []
   )
@@ -70,7 +69,7 @@ export default function TestimonialsSlider() {
             </p>
             {/* Google Business Reviews Link */}
             <a
-              href="https://g.page/r/YOUR_GOOGLE_BUSINESS_ID/review"
+              href="https://g.page/r/CYX94oQecG8MEAE/review"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-grey-20 text-[13px] font-medium text-grey-90 hover:border-brand hover:text-brand transition-colors"
@@ -134,6 +133,13 @@ export default function TestimonialsSlider() {
 }
 
 function TestimonialCard({ item }: { item: Testimonial }) {
+  const initials = item.name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <div className="relative rounded-[16px] border border-grey-20 bg-grey-5 p-8 h-full transition duration-300 hover:shadow-md">
       <div className="absolute right-8 top-8 flex items-center gap-1 text-grey-30">
@@ -141,13 +147,8 @@ function TestimonialCard({ item }: { item: Testimonial }) {
         <Quote size={20} />
       </div>
       <div className="flex items-center gap-4 mb-6">
-        <div className="relative h-12 w-12">
-          <Image
-            src={item.avatarUrl}
-            alt={item.name}
-            fill
-            className="rounded-full border-2 border-white object-cover shadow-sm"
-          />
+        <div className="h-12 w-12 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[16px] font-bold shrink-0">
+          {initials}
         </div>
         <div>
           <div className="flex items-center gap-1.5">
@@ -158,13 +159,21 @@ function TestimonialCard({ item }: { item: Testimonial }) {
               <BadgeCheck size={16} className="text-brand" />
             ) : null}
           </div>
-          <div className="text-[12px] text-grey-50">{item.role}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-[12px] text-grey-50">{item.timeAgo}</div>
+            <span className="text-[10px] text-grey-30">via Google</span>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-1 text-yellow-400 mb-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Star key={i} size={16} fill="currentColor" />
+          <Star
+            key={i}
+            size={16}
+            fill={i < item.rating ? "currentColor" : "none"}
+            className={i < item.rating ? "text-yellow-400" : "text-grey-20"}
+          />
         ))}
       </div>
       <p className="text-[15px] leading-[1.7] text-grey-60">
