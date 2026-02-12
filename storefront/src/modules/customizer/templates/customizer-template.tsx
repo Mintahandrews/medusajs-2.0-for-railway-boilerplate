@@ -111,22 +111,6 @@ function CustomizerLayout({
         </div>
       </div>
 
-      {/* ---- Floating Add-to-Cart button on mobile ---- */}
-      {product && region && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-          <div className="px-4 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] pt-2">
-            <button
-              onClick={() => openTool("cart")}
-              className="pointer-events-auto w-full flex items-center justify-center gap-2 py-4 rounded-2xl
-                         bg-black text-white text-base font-bold shadow-[0_4px_24px_rgba(0,0,0,0.25)]
-                         active:scale-[0.98] transition-transform"
-            >
-              <ShoppingCart size={20} strokeWidth={2.5} />
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Global touch-friendly styles */}
       <style dangerouslySetInnerHTML={{ __html: `
@@ -144,22 +128,27 @@ function CustomizerLayout({
  * Quick-access toolbar icons shown in the collapsed mobile bottom bar.
  * Tapping any icon expands the full toolbar and switches to that tool.
  */
-const QUICK_TOOLS: { label: string; icon: any; tool: ActiveTool }[] = [
+const QUICK_TOOLS: { label: string; icon: any; tool: ActiveTool; highlight?: boolean }[] = [
   { label: "Upload", icon: Upload, tool: "upload" },
   { label: "Text", icon: Type, tool: "text" },
   { label: "Color", icon: Palette, tool: "background" },
   { label: "Case", icon: Shield, tool: "case-type" },
+  { label: "Cart", icon: ShoppingCart, tool: "cart", highlight: true },
   { label: "Preview", icon: Smartphone, tool: "preview" },
 ]
 
 function MobileQuickBar({ onExpand }: { onExpand: (tool: ActiveTool) => void }) {
   return (
-    <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,48px)]">
-      {QUICK_TOOLS.map(({ label, icon: Icon, tool }) => (
+    <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,8px)]">
+      {QUICK_TOOLS.map(({ label, icon: Icon, tool, highlight }) => (
         <button
           key={label}
           onClick={() => onExpand(tool)}
-          className="flex flex-col items-center gap-0.5 py-1.5 px-1 text-gray-500 active:text-black min-w-[48px] min-h-[44px] justify-center"
+          className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] min-h-[44px] justify-center ${
+            highlight
+              ? "text-white bg-black rounded-xl mx-0.5"
+              : "text-gray-500 active:text-black"
+          }`}
         >
           <Icon size={18} strokeWidth={1.8} />
           <span className="text-[9px] font-medium leading-none">{label}</span>
