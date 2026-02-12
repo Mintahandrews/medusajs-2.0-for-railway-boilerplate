@@ -4,9 +4,9 @@ import FaqAccordion, { FaqItem } from "@modules/common/components/faq-accordion"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 export const metadata: Metadata = {
-  title: "FAQ | Letscase",
+  title: "Frequently Asked Questions",
   description:
-    "Answers to common questions about ordering, delivery, returns, and support at Letscase.",
+    "Answers to common questions about ordering, delivery, returns, custom phone cases, and support at Letscase Ghana.",
 }
 
 export default function FaqPage() {
@@ -49,8 +49,25 @@ export default function FaqPage() {
     },
   ]
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  }
+
   return (
     <div className="mx-auto max-w-[900px] px-5 small:px-10 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <h1 className="text-[32px] font-bold text-grey-90">Frequently Asked Questions</h1>
       <p className="mt-4 text-[15px] leading-[1.7] text-grey-60">
         Quick answers to help you shop with confidence. If you can’t find what you need,

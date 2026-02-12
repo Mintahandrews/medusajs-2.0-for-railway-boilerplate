@@ -5,8 +5,14 @@ import StoreTemplate from "@modules/store/templates"
 import { listCategories } from "@lib/data/categories"
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+  title: "Shop All Phone Cases & Tech Accessories",
+  description:
+    "Browse our full collection of premium phone cases, custom designer cases, laptop bags, chargers and tech accessories. Fast delivery across Ghana.",
+  openGraph: {
+    title: "Shop All | Letscase Ghana",
+    description:
+      "Browse our full collection of premium phone cases, custom designer cases, laptop bags, chargers and tech accessories.",
+  },
 }
 
 type Params = {

@@ -66,18 +66,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       product_categories[product_categories.length - 1].description ??
       `${title} category.`
 
+    const seoDescription = description !== `${title} category.`
+      ? description
+      : `Shop ${title} at Letscase Ghana. Browse premium phone cases and tech accessories. Fast delivery across Ghana.`
+
     return {
-      title: `${title} | Letscase`,
-      description,
+      title,
+      description: seoDescription,
+      openGraph: {
+        title: `${title} | Letscase`,
+        description: seoDescription,
+      },
       alternates: {
         canonical: `${params.category.join("/")}`,
       },
     }
   } catch (error) {
-    // Backend not reachable during build: avoid crashing the build.
     return {
-      title: "Category | Letscase",
-      description: "Category",
+      title: "Category",
+      description: "Browse premium phone cases and tech accessories at Letscase Ghana.",
     }
   }
 }

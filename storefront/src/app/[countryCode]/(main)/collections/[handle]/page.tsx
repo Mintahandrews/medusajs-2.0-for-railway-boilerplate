@@ -67,15 +67,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       notFound()
     }
 
+    const description = `Shop ${collection.title} at Letscase Ghana. Browse our curated collection of premium phone cases and tech accessories. Fast delivery across Ghana.`
+
     return {
-      title: `${collection.title} | Letscase`,
-      description: `${collection.title} collection`,
+      title: `${collection.title}`,
+      description,
+      openGraph: {
+        title: `${collection.title} | Letscase`,
+        description,
+      },
     } as Metadata
   } catch {
-    // If backend is down during build, keep metadata generation from crashing.
     return {
-      title: "Collection | Letscase",
-      description: "Collection",
+      title: "Collection",
+      description: "Browse premium phone cases and tech accessories at Letscase Ghana.",
     }
   }
 }
