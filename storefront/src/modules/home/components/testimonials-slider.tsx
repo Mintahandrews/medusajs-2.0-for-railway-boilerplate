@@ -1,8 +1,10 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Quote,
   Star,
@@ -15,6 +17,10 @@ type Testimonial = {
   timeAgo: string
   verified?: boolean
 }
+
+/** Auto-scroll interval in ms */
+const AUTO_SCROLL_INTERVAL = 6000
+const CARD_WIDTH = 464 // 440px card + 24px gap (desktop)
 
 export default function TestimonialsSlider() {
   const items = useMemo<Testimonial[]>(
@@ -44,13 +50,65 @@ export default function TestimonialsSlider() {
     []
   )
 
-  const [paused, setPaused] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
 
-  // Duplicate for seamless infinite loop
-  const loopItems = [...items, ...items]
+  /* ---- scroll state tracking ---- */
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 2)
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2)
+  }, [])
 
-  // ~6s per card for a comfortable reading pace
-  const duration = items.length * 6
+  /* ---- auto-scroll logic ---- */
+  const startAutoScroll = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
+      const el = scrollRef.current
+      if (!el) return
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" })
+      } else {
+        el.scrollBy({ left: CARD_WIDTH, behavior: "smooth" })
+      }
+    }, AUTO_SCROLL_INTERVAL)
+  }, [])
+
+  const stopAutoScroll = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  const pauseRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pauseAutoScroll = useCallback(() => {
+    stopAutoScroll()
+    if (pauseRef.current) clearTimeout(pauseRef.current)
+    pauseRef.current = setTimeout(() => startAutoScroll(), 10000)
+  }, [stopAutoScroll, startAutoScroll])
+
+  useEffect(() => {
+    startAutoScroll()
+    return () => {
+      stopAutoScroll()
+      if (pauseRef.current) clearTimeout(pauseRef.current)
+    }
+  }, [startAutoScroll, stopAutoScroll])
+
+  /* ---- manual navigation ---- */
+  const scrollPrev = useCallback(() => {
+    scrollRef.current?.scrollBy({ left: -CARD_WIDTH, behavior: "smooth" })
+    pauseAutoScroll()
+  }, [pauseAutoScroll])
+
+  const scrollNext = useCallback(() => {
+    scrollRef.current?.scrollBy({ left: CARD_WIDTH, behavior: "smooth" })
+    pauseAutoScroll()
+  }, [pauseAutoScroll])
 
   return (
     <div className="py-16 small:py-20 border-t border-grey-20">
@@ -91,21 +149,47 @@ export default function TestimonialsSlider() {
         </div>
 
         <div
-          className="relative overflow-hidden max-w-[1200px] mx-auto"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          onTouchStart={() => setPaused(true)}
-          onTouchEnd={() => setPaused(false)}
+          className="relative group max-w-[1200px] mx-auto"
+          onMouseEnter={stopAutoScroll}
+          onMouseLeave={startAutoScroll}
         >
+          {/* Left arrow */}
+          {canScrollLeft && (
+            <button
+              onClick={scrollPrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full
+                         bg-white/90 shadow-lg border border-gray-200 flex items-center justify-center
+                         text-gray-700 hover:bg-white hover:scale-105 transition-all
+                         opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-2"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
+
+          {/* Right arrow */}
+          {canScrollRight && (
+            <button
+              onClick={scrollNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full
+                         bg-white/90 shadow-lg border border-gray-200 flex items-center justify-center
+                         text-gray-700 hover:bg-white hover:scale-105 transition-all
+                         opacity-0 group-hover:opacity-100 translate-x-1 group-hover:-translate-x-2"
+              aria-label="Scroll right"
+            >
+              <ChevronRight size={20} />
+            </button>
+          )}
+
           <div
-            className="flex gap-8 w-max"
-            style={{
-              animation: `marquee ${duration}s linear infinite`,
-              animationPlayState: paused ? "paused" : "running",
-            }}
+            ref={scrollRef}
+            onScroll={updateScrollState}
+            onTouchStart={pauseAutoScroll}
+            className="flex gap-6 small:gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
+            style={{ WebkitOverflowScrolling: "touch" }}
           >
-            {loopItems.map((item, idx) => (
-              <div key={idx} className="w-[340px] small:w-[440px] shrink-0">
+            {items.map((item, idx) => (
+              <div key={idx} className="snap-start w-[340px] small:w-[440px] shrink-0">
                 <TestimonialCard item={item} />
               </div>
             ))}

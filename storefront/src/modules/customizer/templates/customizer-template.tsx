@@ -156,12 +156,12 @@ function MobileQuickBar({ onExpand }: { onExpand: (tool: ActiveTool) => void }) 
           onClick={() => onExpand(tool)}
           className={`flex flex-col items-center gap-0.5 py-1.5 px-1 min-w-[48px] min-h-[44px] justify-center ${
             highlight
-              ? "text-white bg-brand rounded-xl mx-0.5"
-              : "text-gray-500 active:text-brand"
+              ? "text-white bg-brand rounded-xl mx-0.5 font-bold"
+              : "text-gray-700 font-semibold active:text-brand"
           }`}
         >
-          <Icon size={18} strokeWidth={1.8} />
-          <span className="text-[9px] font-medium leading-none">{label}</span>
+          <Icon size={20} strokeWidth={2.2} />
+          <span className="text-[10px] font-bold leading-none">{label}</span>
         </button>
       ))}
     </div>
