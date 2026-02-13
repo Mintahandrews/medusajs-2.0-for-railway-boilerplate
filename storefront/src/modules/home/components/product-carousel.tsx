@@ -1,8 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useMemo, useState } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import WishlistButton from "@modules/common/components/wishlist-button"
@@ -22,7 +21,6 @@ type CarouselItem =
   }
 
 export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
-  const viewportRef = useRef<HTMLDivElement | null>(null)
   const [paused, setPaused] = useState(false)
 
   const normalized = useMemo(() => {
@@ -38,64 +36,35 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [items])
 
-  const scrollByCards = useCallback((direction: "left" | "right") => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-    const width = viewport.clientWidth
-    viewport.scrollBy({
-      left: direction === "left" ? -width : width,
-      behavior: "smooth",
-    })
-  }, [])
+  const displayItems = normalized.slice(0, 8)
+  // Duplicate items for seamless infinite loop
+  const loopItems = [...displayItems, ...displayItems]
 
-  // Auto-scroll: scroll right by one card width every 3s, loop back at end
-  useEffect(() => {
-    if (!autoScroll || paused) return
-    const id = setInterval(() => {
-      const vp = viewportRef.current
-      if (!vp) return
-      const atEnd = vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 4
-      if (atEnd) {
-        vp.scrollTo({ left: 0, behavior: "smooth" })
-      } else {
-        vp.scrollBy({ left: 260, behavior: "smooth" })
-      }
-    }, 3000)
-    return () => clearInterval(id)
-  }, [autoScroll, paused])
+  // Duration scales with item count for consistent speed (~4s per card)
+  const duration = displayItems.length * 4
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        className="hidden small:flex absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
-        aria-label="Previous"
-        onClick={() => scrollByCards("left")}
-      >
-        <ChevronLeft size={18} />
-      </button>
-      <button
-        type="button"
-        className="hidden small:flex absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-brand text-white hover:bg-brand-dark transition duration-300 shadow-md z-10 items-center justify-center"
-        aria-label="Next"
-        onClick={() => scrollByCards("right")}
-      >
-        <ChevronRight size={18} />
-      </button>
-
+    <div
+      className="relative overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+    >
       <div
-        ref={viewportRef}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onTouchStart={() => setPaused(true)}
-        onTouchEnd={() => setPaused(false)}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
+        className="flex gap-4 w-max pb-2"
+        style={{
+          animation: autoScroll
+            ? `marquee ${duration}s linear infinite`
+            : undefined,
+          animationPlayState: paused ? "paused" : "running",
+        }}
       >
-        {normalized.slice(0, 8).map((item) => (
+        {loopItems.map((item, idx) => (
           <LocalizedClientLink
-            key={item.id}
+            key={`${item.id}-${idx}`}
             href={item.href}
-            className="group snap-start shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block"
+            className="group shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block"
           >
             <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
               <div className="absolute right-3 top-3 z-10">
