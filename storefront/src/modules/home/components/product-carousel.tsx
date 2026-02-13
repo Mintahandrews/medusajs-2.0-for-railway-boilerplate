@@ -48,17 +48,18 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [])
 
-  // Auto-scroll: scroll right by one card width every 3s, loop back at end
+  // Auto-scroll: use viewport width for a smoother glide and avoid abrupt jumps
   useEffect(() => {
     if (!autoScroll || paused) return
     const id = setInterval(() => {
       const vp = viewportRef.current
       if (!vp) return
+      const step = Math.max(220, vp.clientWidth * 0.85)
       const atEnd = vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 4
       if (atEnd) {
         vp.scrollTo({ left: 0, behavior: "smooth" })
       } else {
-        vp.scrollBy({ left: 260, behavior: "smooth" })
+        vp.scrollBy({ left: step, behavior: "smooth" })
       }
     }, 3000)
     return () => clearInterval(id)
