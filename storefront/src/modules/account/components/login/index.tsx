@@ -1,3 +1,5 @@
+"use client"
+
 import { useFormState } from "react-dom"
 
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"

@@ -2,7 +2,7 @@
 
 import { Disclosure, Popover, Transition } from "@headlessui/react"
 import { Text, clx, useToggleState } from "@medusajs/ui"
-import { Fragment, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Menu, X, Search, ChevronRight } from "lucide-react"
 
