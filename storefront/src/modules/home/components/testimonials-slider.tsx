@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   BadgeCheck,
   ChevronLeft,
@@ -46,17 +46,39 @@ export default function TestimonialsSlider() {
     []
   )
 
-  const [index, setIndex] = useState(0)
+  const looped = useMemo(() => [...items, ...items], [items])
+
+  const viewportRef = useRef<HTMLDivElement | null>(null)
+  const rafRef = useRef<number | null>(null)
   const [paused, setPaused] = useState(false)
 
-  // Auto-advance with a gentle cadence
+  // Continuous, gentle scroll using requestAnimationFrame
   useEffect(() => {
-    if (paused) return
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % items.length)
-    }, 4500)
-    return () => clearInterval(id)
-  }, [items.length, paused])
+    const vp = viewportRef.current
+    if (!vp || paused) return
+
+    const tick = () => {
+      const maxLoopWidth = vp.scrollWidth / 2 // because items are duplicated
+      const speed = Math.max(0.25, vp.clientWidth * 0.0015)
+      vp.scrollLeft += speed
+      if (vp.scrollLeft >= maxLoopWidth) {
+        vp.scrollLeft -= maxLoopWidth
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [paused, looped.length])
+
+  const scrollByPane = (direction: "left" | "right") => {
+    const vp = viewportRef.current
+    if (!vp) return
+    const width = vp.clientWidth
+    vp.scrollBy({ left: direction === "left" ? -width : width, behavior: "smooth" })
+  }
 
   return (
     <div
@@ -104,13 +126,13 @@ export default function TestimonialsSlider() {
 
         <div className="relative overflow-hidden max-w-[1200px] mx-auto">
           <div
-            className="flex transition-transform duration-700 ease-[cubic-bezier(0.33,0.66,0.4,1)]"
-            style={{ transform: `translateX(${index * -100}%)` }}
+            ref={viewportRef}
+            className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory"
           >
-            {items.map((item, i) => {
-              const nextItem = items[(i + 1) % items.length]
+            {looped.map((item, i) => {
+              const nextItem = looped[(i + 1) % looped.length]
               return (
-                <div key={i} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8">
+                <div key={i} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8 snap-start">
                   <TestimonialCard item={item} />
                   <div className="hidden small:block">
                     <TestimonialCard item={nextItem} />
@@ -126,7 +148,7 @@ export default function TestimonialsSlider() {
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark leading-none"
             aria-label="Previous"
-            onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
+            onClick={() => scrollByPane("left")}
           >
             <ChevronLeft size={18} className="block" />
           </button>
@@ -134,7 +156,7 @@ export default function TestimonialsSlider() {
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark disabled:opacity-50 leading-none"
             aria-label="Next"
-            onClick={() => setIndex((i) => (i + 1) % items.length)}
+            onClick={() => scrollByPane("right")}
           >
             <ChevronRight size={18} className="block" />
           </button>

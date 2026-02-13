@@ -23,6 +23,7 @@ type CarouselItem =
 
 export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
+  const rafRef = useRef<number | null>(null)
   const [paused, setPaused] = useState(false)
 
   const normalized = useMemo(() => {
@@ -38,6 +39,9 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [items])
 
+  // duplicate items to allow seamless wrap-around
+  const looped = useMemo(() => [...normalized, ...normalized], [normalized])
+
   const scrollByCards = useCallback((direction: "left" | "right") => {
     const viewport = viewportRef.current
     if (!viewport) return
@@ -48,22 +52,26 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [])
 
-  // Auto-scroll: use viewport width for a smoother glide and avoid abrupt jumps
+  // Continuous auto-scroll loop using requestAnimationFrame
   useEffect(() => {
-    if (!autoScroll || paused) return
-    const id = setInterval(() => {
-      const vp = viewportRef.current
-      if (!vp) return
-      const step = Math.max(220, vp.clientWidth * 0.85)
-      const atEnd = vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 4
-      if (atEnd) {
-        vp.scrollTo({ left: 0, behavior: "smooth" })
-      } else {
-        vp.scrollBy({ left: step, behavior: "smooth" })
+    const vp = viewportRef.current
+    if (!vp || !autoScroll || paused) return
+
+    const tick = () => {
+      const maxLoopWidth = vp.scrollWidth / 2 // because items are duplicated
+      const speed = Math.max(0.3, vp.clientWidth * 0.002) // scale speed with viewport
+      vp.scrollLeft += speed
+      if (vp.scrollLeft >= maxLoopWidth) {
+        vp.scrollLeft -= maxLoopWidth
       }
-    }, 3000)
-    return () => clearInterval(id)
-  }, [autoScroll, paused])
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [autoScroll, paused, looped.length])
 
   return (
     <div className="relative">
