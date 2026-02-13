@@ -2,15 +2,13 @@
 
 import { Disclosure, Popover, Transition } from "@headlessui/react"
 import { Text, clx, useToggleState } from "@medusajs/ui"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { Fragment, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Menu, X, Search, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
-import { listCategories } from "@lib/data/categories"
-import { getCollectionsList } from "@lib/data/collections"
 import { getCategoryIcon } from "@lib/util/category-icon"
 
 /** Lock body scroll while the sidebar is open (works on iOS Safari too) */
@@ -75,64 +73,22 @@ const TRENDING_LINKS: Array<{ name: string; href: string }> = [
   { name: "Gift Ideas", href: "/store" },
 ]
 
-const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
+const SideMenu = ({
+  regions,
+  initialCategories = [],
+  initialCollections = [],
+}: {
+  regions: HttpTypes.StoreRegion[] | null
+  initialCategories?: Array<{ name: string; href: string }>
+  initialCollections?: Array<{ name: string; href: string }>
+}) => {
   const toggleState = useToggleState()
   const router = useRouter()
   const params = useParams()
   const countryCode = (params as any)?.countryCode as string | undefined
-  const [categoryLinks, setCategoryLinks] = useState<
-    Array<{ name: string; href: string }>
-  >([])
-  const [collectionLinks, setCollectionLinks] = useState<
-    Array<{ name: string; href: string }>
-  >([])
+  const categoryLinks = initialCategories
+  const collectionLinks = initialCollections
   const [searchValue, setSearchValue] = useState("")
-
-  useEffect(() => {
-    let cancelled = false
-
-    Promise.all([
-      listCategories().catch(() => [] as any[]),
-      getCollectionsList(0, 50).catch(() => ({ collections: [], count: 0 })),
-    ])
-      .then(([categories, collectionsResult]) => {
-        if (cancelled) {
-          return
-        }
-
-        const topLevelCategories = (categories as any[])
-          .filter((c) => !c?.parent_category_id && !c?.parent_category)
-          .filter((c) => c?.handle && c?.name)
-          .slice(0, 12)
-          .map((c) => ({
-            name: c.name as string,
-            href: `/categories/${c.handle}`,
-          }))
-
-        const collections = (collectionsResult as {
-          collections: HttpTypes.StoreCollection[]
-          count: number
-        })?.collections
-
-        const topCollections = (collections || [])
-          .filter((c) => c?.handle && c?.title)
-          .slice(0, 12)
-          .map((c) => ({
-            name: c.title as string,
-            href: `/collections/${c.handle}`,
-          }))
-
-        setCategoryLinks(topLevelCategories)
-        setCollectionLinks(topCollections)
-      })
-      .catch(() => {
-        // Ignore fetch failures; we'll fall back to static links.
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   const shopCategoryLinks = useMemo(() => {
     return categoryLinks.length ? categoryLinks.slice(0, 8) : []

@@ -129,7 +129,11 @@ export default async function Nav() {
         <nav className="flex items-center justify-between w-full h-full px-5 small:px-10">
           <div className="flex items-center gap-x-8 flex-1 basis-0">
             <div className="small:hidden">
-              <SideMenu regions={regions} />
+              <SideMenu
+                regions={regions}
+                initialCategories={shopCategories}
+                initialCollections={shopCollections}
+              />
             </div>
 
             <Suspense
