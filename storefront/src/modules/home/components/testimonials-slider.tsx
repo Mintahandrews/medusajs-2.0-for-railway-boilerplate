@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   BadgeCheck,
   ChevronLeft,
@@ -47,15 +47,6 @@ export default function TestimonialsSlider() {
   )
 
   const [index, setIndex] = useState(0)
-  const [paused, setPaused] = useState(false)
-
-  useEffect(() => {
-    if (items.length <= 1 || paused) return
-    const id = window.setInterval(() => {
-      setIndex((prev) => (prev + 1) % items.length)
-    }, 4500)
-    return () => window.clearInterval(id)
-  }, [items.length, paused])
 
   return (
     <div className="py-16 small:py-20 border-t border-grey-20">
@@ -95,15 +86,9 @@ export default function TestimonialsSlider() {
           </div>
         </div>
 
-        <div
-          className="relative overflow-hidden max-w-[1200px] mx-auto"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          onTouchStart={() => setPaused(true)}
-          onTouchEnd={() => setPaused(false)}
-        >
+        <div className="relative overflow-hidden max-w-[1200px] mx-auto">
           <div
-            className="flex transition-transform duration-[1200ms] ease-[cubic-bezier(0.45,0,0.2,1)]"
+            className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(${index * -100}%)` }}
           >
             {items.map((item, i) => {
