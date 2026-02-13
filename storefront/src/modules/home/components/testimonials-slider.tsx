@@ -3,8 +3,6 @@
 import { useMemo, useState } from "react"
 import {
   BadgeCheck,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   Quote,
   Star,
@@ -46,7 +44,13 @@ export default function TestimonialsSlider() {
     []
   )
 
-  const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
+
+  // Duplicate for seamless infinite loop
+  const loopItems = [...items, ...items]
+
+  // ~6s per card for a comfortable reading pace
+  const duration = items.length * 6
 
   return (
     <div className="py-16 small:py-20 border-t border-grey-20">
@@ -86,42 +90,26 @@ export default function TestimonialsSlider() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden max-w-[1200px] mx-auto">
+        <div
+          className="relative overflow-hidden max-w-[1200px] mx-auto"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={() => setPaused(true)}
+          onTouchEnd={() => setPaused(false)}
+        >
           <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(${index * -100}%)` }}
+            className="flex gap-8 w-max"
+            style={{
+              animation: `marquee ${duration}s linear infinite`,
+              animationPlayState: paused ? "paused" : "running",
+            }}
           >
-            {items.map((item, i) => {
-              const nextItem = items[(i + 1) % items.length]
-              return (
-                <div key={i} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8">
-                  <TestimonialCard item={item} />
-                  <div className="hidden small:block">
-                    <TestimonialCard item={nextItem} />
-                  </div>
-                </div>
-              )
-            })}
+            {loopItems.map((item, idx) => (
+              <div key={idx} className="w-[340px] small:w-[440px] shrink-0">
+                <TestimonialCard item={item} />
+              </div>
+            ))}
           </div>
-        </div>
-
-        <div className="mt-10 flex items-center justify-center gap-4">
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark leading-none"
-            aria-label="Previous"
-            onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
-          >
-            <ChevronLeft size={18} className="block" />
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark disabled:opacity-50 leading-none"
-            aria-label="Next"
-            onClick={() => setIndex((i) => (i + 1) % items.length)}
-          >
-            <ChevronRight size={18} className="block" />
-          </button>
         </div>
       </div>
     </div>
