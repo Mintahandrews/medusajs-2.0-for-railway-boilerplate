@@ -23,7 +23,6 @@ type CarouselItem =
 
 export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
-  const rafRef = useRef<number | null>(null)
   const [paused, setPaused] = useState(false)
 
   const normalized = useMemo(() => {
@@ -39,9 +38,6 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [items])
 
-  // duplicate items to allow seamless wrap-around
-  const looped = useMemo(() => [...normalized, ...normalized], [normalized])
-
   const scrollByCards = useCallback((direction: "left" | "right") => {
     const viewport = viewportRef.current
     if (!viewport) return
@@ -52,26 +48,21 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [])
 
-  // Continuous auto-scroll loop using requestAnimationFrame
+  // Auto-scroll: scroll right by one card width every 3s, loop back at end
   useEffect(() => {
-    const vp = viewportRef.current
-    if (!vp || !autoScroll || paused) return
-
-    const tick = () => {
-      const maxLoopWidth = vp.scrollWidth / 2 // because items are duplicated
-      const speed = Math.max(0.3, vp.clientWidth * 0.002) // scale speed with viewport
-      vp.scrollLeft += speed
-      if (vp.scrollLeft >= maxLoopWidth) {
-        vp.scrollLeft -= maxLoopWidth
+    if (!autoScroll || paused) return
+    const id = setInterval(() => {
+      const vp = viewportRef.current
+      if (!vp) return
+      const atEnd = vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 4
+      if (atEnd) {
+        vp.scrollTo({ left: 0, behavior: "smooth" })
+      } else {
+        vp.scrollBy({ left: 260, behavior: "smooth" })
       }
-      rafRef.current = requestAnimationFrame(tick)
-    }
-
-    rafRef.current = requestAnimationFrame(tick)
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [autoScroll, paused, looped.length])
+    }, 3000)
+    return () => clearInterval(id)
+  }, [autoScroll, paused])
 
   return (
     <div className="relative">

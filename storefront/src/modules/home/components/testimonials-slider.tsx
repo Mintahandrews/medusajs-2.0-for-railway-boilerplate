@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   BadgeCheck,
   ChevronLeft,
@@ -46,48 +46,10 @@ export default function TestimonialsSlider() {
     []
   )
 
-  const looped = useMemo(() => [...items, ...items], [items])
-
-  const viewportRef = useRef<HTMLDivElement | null>(null)
-  const rafRef = useRef<number | null>(null)
-  const [paused, setPaused] = useState(false)
-
-  // Continuous, gentle scroll using requestAnimationFrame
-  useEffect(() => {
-    const vp = viewportRef.current
-    if (!vp || paused) return
-
-    const tick = () => {
-      const maxLoopWidth = vp.scrollWidth / 2 // because items are duplicated
-      const speed = Math.max(0.25, vp.clientWidth * 0.0015)
-      vp.scrollLeft += speed
-      if (vp.scrollLeft >= maxLoopWidth) {
-        vp.scrollLeft -= maxLoopWidth
-      }
-      rafRef.current = requestAnimationFrame(tick)
-    }
-
-    rafRef.current = requestAnimationFrame(tick)
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [paused, looped.length])
-
-  const scrollByPane = (direction: "left" | "right") => {
-    const vp = viewportRef.current
-    if (!vp) return
-    const width = vp.clientWidth
-    vp.scrollBy({ left: direction === "left" ? -width : width, behavior: "smooth" })
-  }
+  const [index, setIndex] = useState(0)
 
   return (
-    <div
-      className="py-16 small:py-20 border-t border-grey-20"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onTouchStart={() => setPaused(true)}
-      onTouchEnd={() => setPaused(false)}
-    >
+    <div className="py-16 small:py-20 border-t border-grey-20">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10">
         <div className="flex flex-col small:flex-row items-start justify-between gap-8 mb-12">
           <div>
@@ -126,13 +88,13 @@ export default function TestimonialsSlider() {
 
         <div className="relative overflow-hidden max-w-[1200px] mx-auto">
           <div
-            ref={viewportRef}
-            className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory"
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(${index * -100}%)` }}
           >
-            {looped.map((item, i) => {
-              const nextItem = looped[(i + 1) % looped.length]
+            {items.map((item, i) => {
+              const nextItem = items[(i + 1) % items.length]
               return (
-                <div key={i} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8 snap-start">
+                <div key={i} className="w-full shrink-0 grid grid-cols-1 small:grid-cols-2 gap-8">
                   <TestimonialCard item={item} />
                   <div className="hidden small:block">
                     <TestimonialCard item={nextItem} />
@@ -148,7 +110,7 @@ export default function TestimonialsSlider() {
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark leading-none"
             aria-label="Previous"
-            onClick={() => scrollByPane("left")}
+            onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
           >
             <ChevronLeft size={18} className="block" />
           </button>
@@ -156,7 +118,7 @@ export default function TestimonialsSlider() {
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition duration-300 hover:bg-brand-dark disabled:opacity-50 leading-none"
             aria-label="Next"
-            onClick={() => scrollByPane("right")}
+            onClick={() => setIndex((i) => (i + 1) % items.length)}
           >
             <ChevronRight size={18} className="block" />
           </button>
