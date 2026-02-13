@@ -23,6 +23,8 @@ type CarouselItem =
 
 export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number | null>(null)
   const [paused, setPaused] = useState(false)
 
   const normalized = useMemo(() => {
@@ -38,6 +40,17 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     })
   }, [items])
 
+  const baseItems = useMemo(() => normalized.slice(0, 8), [normalized])
+
+  const renderedItems = useMemo(() => {
+    if (baseItems.length >= 4) {
+      return [...baseItems, ...baseItems]
+    }
+    return baseItems
+  }, [baseItems])
+
+  const shouldLoop = baseItems.length >= 4
+
   const scrollByCards = useCallback((direction: "left" | "right") => {
     const viewport = viewportRef.current
     if (!viewport) return
@@ -51,18 +64,43 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
   // Auto-scroll: scroll right by one card width every 3s, loop back at end
   useEffect(() => {
     if (!autoScroll || paused) return
-    const id = setInterval(() => {
-      const vp = viewportRef.current
-      if (!vp) return
-      const atEnd = vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 4
-      if (atEnd) {
-        vp.scrollTo({ left: 0, behavior: "smooth" })
-      } else {
-        vp.scrollBy({ left: 260, behavior: "smooth" })
+    const viewport = viewportRef.current
+    if (!viewport || renderedItems.length <= 1) return
+
+    const pxPerSecond = 32
+
+    const step = (timestamp: number) => {
+      if (lastTimeRef.current !== null) {
+        const deltaSeconds = (timestamp - lastTimeRef.current) / 1000
+        const increment = deltaSeconds * pxPerSecond
+        const loopLimit = shouldLoop ? viewport.scrollWidth / 2 : Math.max(viewport.scrollWidth - viewport.clientWidth, 0)
+
+        if (loopLimit > 0) {
+          viewport.scrollLeft += increment
+          if (shouldLoop) {
+            if (viewport.scrollLeft >= loopLimit) {
+              viewport.scrollLeft -= loopLimit
+            }
+          } else if (viewport.scrollLeft >= loopLimit) {
+            viewport.scrollLeft = 0
+          }
+        }
       }
-    }, 3000)
-    return () => clearInterval(id)
-  }, [autoScroll, paused])
+
+      lastTimeRef.current = timestamp
+      animationFrameRef.current = requestAnimationFrame(step)
+    }
+
+    animationFrameRef.current = requestAnimationFrame(step)
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+      animationFrameRef.current = null
+      lastTimeRef.current = null
+    }
+  }, [autoScroll, paused, renderedItems.length, shouldLoop])
 
   return (
     <div className="relative">
@@ -91,9 +129,9 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
         onTouchEnd={() => setPaused(false)}
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
       >
-        {normalized.slice(0, 8).map((item) => (
+        {renderedItems.map((item, idx) => (
           <LocalizedClientLink
-            key={item.id}
+            key={`${item.id}-${idx}`}
             href={item.href}
             className="group snap-start shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block"
           >
