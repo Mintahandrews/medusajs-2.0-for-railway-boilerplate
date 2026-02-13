@@ -219,15 +219,7 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
     data,
     context,
   }: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
-    console.log("[Paystack] initiatePayment called with:", {
-      currency_code,
-      amount,
-      hasData: !!data,
-      hasContext: !!context,
-      contextEmail: (context as any)?.email,
-      dataEmail: (data as any)?.email,
-      customerEmail: (context as any)?.customer?.email,
-    })
+
 
     const email =
       (context as any)?.customer?.email ??
@@ -235,7 +227,6 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
       (data as any)?.email
 
     if (!email) {
-      console.error("[Paystack] Missing email in context/data:", { context, data })
       throw new Error(
         "Paystack initiatePayment requires customer email (missing in context/data)"
       )
@@ -251,7 +242,12 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
     const metadata =
       data?.metadata && typeof data.metadata === "object" ? (data.metadata as any) : {}
 
-    const requestBody = {
+    // Extract channels array (e.g. ["mobile_money"], ["card"], ["bank"]) if provided
+    const channels = Array.isArray((data as any)?.channels)
+      ? (data as any).channels
+      : undefined
+
+    const requestBody: Record<string, unknown> = {
       email,
       amount: amountInSmallestUnit,
       currency: currency_code?.toUpperCase(),
@@ -262,7 +258,10 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
       },
     }
 
-    console.log("[Paystack] Initializing transaction with:", requestBody)
+    // Only include channels when explicitly specified to restrict payment options
+    if (channels && channels.length > 0) {
+      requestBody.channels = channels
+    }
 
     try {
       const initResp = await this.request<PaystackInitializeResponse>(
@@ -273,8 +272,6 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
           body: requestBody,
         }
       )
-      console.log("[Paystack] Transaction initialized successfully:", initResp)
-
       const reference = initResp.data.reference
 
       return {
@@ -291,7 +288,6 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
         },
       }
     } catch (error: any) {
-      console.error("[Paystack] Transaction initialization failed:", error?.message || error)
       throw error
     }
   }

@@ -183,29 +183,52 @@ export async function addCustomizedToCart({
       return
     }
 
-    // Step 3: Set metadata via custom backend endpoint
+    // Step 3: Set metadata via custom backend endpoint (with retry)
     const backendUrl =
       process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
     const publishableKey =
       process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-    const metaRes = await fetch(`${backendUrl}/store/custom/line-item-metadata`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(publishableKey ? { "x-publishable-api-key": publishableKey } : {}),
-      },
-      body: JSON.stringify({
-        cart_id: cart.id,
-        line_item_id: newItem.id,
-        metadata,
-        ...(unit_price ? { unit_price } : {}),
-      }),
-    })
 
-    if (!metaRes.ok) {
-      const err = await metaRes.json().catch(() => ({}))
-      console.error("[addCustomizedToCart] metadata update failed:", err)
-      // Don't throw — the item IS in the cart, metadata just didn't save
+    let metaSuccess = false
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const metaRes = await fetch(`${backendUrl}/store/custom/line-item-metadata`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(publishableKey ? { "x-publishable-api-key": publishableKey } : {}),
+          },
+          body: JSON.stringify({
+            cart_id: cart.id,
+            line_item_id: newItem.id,
+            metadata,
+            ...(unit_price ? { unit_price } : {}),
+          }),
+        })
+
+        if (metaRes.ok) {
+          metaSuccess = true
+          break
+        }
+
+        const err = await metaRes.json().catch(() => ({}))
+        console.error(`[addCustomizedToCart] metadata attempt ${attempt + 1} failed:`, err)
+      } catch (fetchErr) {
+        console.error(`[addCustomizedToCart] metadata fetch attempt ${attempt + 1} error:`, fetchErr)
+      }
+
+      // Wait briefly before retrying
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 500))
+    }
+
+    if (!metaSuccess) {
+      // Metadata failed after retries — remove the line item so user doesn't get a
+      // mystery product in cart, and surface the error
+      try {
+        await sdk.store.cart.deleteLineItem(cart.id, newItem.id, await getAuthHeaders())
+      } catch {}
+      revalidateTag("cart")
+      throw new Error("Failed to save custom design metadata. Please try again.")
     }
 
     revalidateTag("cart")

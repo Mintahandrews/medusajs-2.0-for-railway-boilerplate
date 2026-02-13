@@ -20,6 +20,8 @@ const SIZE_OPTIONS = [16, 20, 24, 28, 32, 40, 48, 56, 64, 72, 96]
 export default function TextPanel() {
   const { state, dispatch, addText, canvasRef } = useCustomizer()
   const [inputText, setInputText] = React.useState("")
+  const [isAdding, setIsAdding] = React.useState(false)
+  const [justAdded, setJustAdded] = React.useState(false)
 
   function updateActiveText(prop: string, value: any) {
     const canvas = canvasRef.current
@@ -31,11 +33,28 @@ export default function TextPanel() {
     }
   }
 
-  function handleAddText() {
-    const text = inputText.trim() || "Your Text"
-    addText(text)
-    setInputText("")
+  async function handleAddText() {
+    if (isAdding) return
+    const canvas = canvasRef.current
+    if (!canvas) {
+      console.warn("[TextPanel] Canvas not ready yet")
+      return
+    }
+    setIsAdding(true)
+    try {
+      const text = inputText.trim() || "Your Text"
+      await addText(text)
+      setInputText("")
+      setJustAdded(true)
+      setTimeout(() => setJustAdded(false), 2000)
+    } catch (err) {
+      console.error("[TextPanel] Failed to add text:", err)
+    } finally {
+      setIsAdding(false)
+    }
   }
+
+  const canvasReady = !!canvasRef.current
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -56,15 +75,39 @@ export default function TextPanel() {
           placeholder="Type your text here…"
           className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                      focus:outline-none focus:ring-2 focus:ring-brand/20 placeholder:text-gray-400"
+          autoComplete="off"
+          enterKeyHint="done"
         />
         <button
           onClick={handleAddText}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                     bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
+          disabled={!canvasReady || isAdding}
+          className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
+                     text-sm font-medium transition-colors
+                     ${justAdded
+                       ? "bg-green-600 text-white"
+                       : "bg-brand text-white hover:bg-brand-dark"
+                     } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          <Type className="w-4 h-4" />
-          Add Text to Design
+          {isAdding ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Adding…
+            </>
+          ) : justAdded ? (
+            <>
+              <Type className="w-4 h-4" />
+              Text Added ✓
+            </>
+          ) : (
+            <>
+              <Type className="w-4 h-4" />
+              Add Text to Design
+            </>
+          )}
         </button>
+        {!canvasReady && (
+          <p className="text-[10px] text-amber-500">Canvas is loading…</p>
+        )}
         <p className="text-[10px] text-gray-400">Tap text on the canvas to select it. Double-tap to edit.</p>
       </div>
 

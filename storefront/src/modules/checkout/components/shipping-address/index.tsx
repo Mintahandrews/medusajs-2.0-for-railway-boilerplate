@@ -1,7 +1,10 @@
+"use client"
+
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
+import GPSLocationButton, { type AddressFromGPS } from "@modules/common/components/gps-location-button"
 import { mapKeys } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
@@ -81,6 +84,17 @@ const ShippingAddress = ({
     })
   }
 
+  const handleGPSAddress = (addr: AddressFromGPS) => {
+    setFormData((prev: Record<string, any>) => ({
+      ...prev,
+      "shipping_address.address_1": addr.address_1 || "",
+      "shipping_address.city": addr.city || "",
+      "shipping_address.postal_code": addr.postal_code || "",
+      "shipping_address.province": addr.province || "",
+      "shipping_address.country_code": addr.country_code || "",
+    }))
+  }
+
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
@@ -99,6 +113,14 @@ const ShippingAddress = ({
           />
         </Container>
       )}
+      {/* GPS Location auto-fill */}
+      <div className="mb-4">
+        <GPSLocationButton
+          onAddressResolved={handleGPSAddress}
+          label="Use My GPS Location"
+          className="w-full"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"

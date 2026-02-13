@@ -41,16 +41,19 @@ export default async function designFileCleanupHandler({
     let deleted = 0
     for (const key of keysToDelete) {
       try {
-        await fileModuleService.deleteFiles(key)
+        await fileModuleService.deleteFiles([key])
         deleted++
       } catch (err: any) {
         console.warn(`[design-cleanup] Failed to delete ${key}:`, err.message)
       }
     }
 
-    console.log(
-      `[design-cleanup] Order ${order.id} (${name}): deleted ${deleted}/${keysToDelete.length} design files`
-    )
+    // Emit a lightweight debug log — safe for production
+    if (deleted > 0) {
+      console.debug(
+        `[design-cleanup] Order ${order.id} (${name}): deleted ${deleted}/${keysToDelete.length} design files`
+      )
+    }
   } catch (error: any) {
     console.error("[design-cleanup] Subscriber error:", error.message)
   }

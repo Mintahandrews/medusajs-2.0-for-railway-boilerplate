@@ -11,9 +11,19 @@ import { StripeCardElementOptions } from "@stripe/stripe-js"
 
 import Divider from "@modules/common/components/divider"
 import PaymentContainer from "@modules/checkout/components/payment-container"
+import PaystackChannelPicker, {
+  type PaystackChannel,
+} from "@modules/checkout/components/paystack-channel-picker"
 import { isPaystack, isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
+
+/** Human-readable labels for the Paystack channel summary */
+const channelLabels: Record<PaystackChannel, string> = {
+  mobile_money: "Mobile Money",
+  card: "Card Payment",
+  bank: "Bank Payment",
+}
 
 const Payment = ({
   cart,
@@ -56,6 +66,15 @@ const Payment = ({
   const [cardComplete, setCardComplete] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
     activeSession?.provider_id ?? ""
+  )
+  const [selectedPaystackChannel, setSelectedPaystackChannel] =
+    useState<PaystackChannel | null>(null)
+
+  /** True when the only (or selected) provider is Paystack */
+  const paystackSelected = isPaystack(selectedPaymentMethod)
+  /** True when Paystack is among the available providers */
+  const hasPaystack = availablePaymentMethods?.some(
+    (m) => isPaystack(m.id ?? m.provider_id)
   )
 
   const searchParams = useSearchParams()
@@ -113,6 +132,13 @@ const Payment = ({
       const shouldInputCard =
         isStripeFunc(selectedPaymentMethod) && !activeSession
 
+      // Require a channel selection when Paystack is selected
+      if (paystackSelected && !selectedPaystackChannel) {
+        setError("Please select a payment channel (Mobile Money, Card, or Bank).")
+        setIsLoading(false)
+        return
+      }
+
       if (!activeSession) {
         const callbackUrl = isPaystack(selectedPaymentMethod)
           ? `${window.location.origin}/${pathname.split("/")[1]}/checkout/paystack/verify`
@@ -127,6 +153,10 @@ const Payment = ({
           }
           if (cart?.email) {
             paymentData.email = cart.email
+          }
+          // Pass the selected Paystack channel so the backend can forward it
+          if (paystackSelected && selectedPaystackChannel) {
+            paymentData.channels = [selectedPaystackChannel]
           }
 
           await initiatePaymentSession(cart, {
@@ -161,6 +191,21 @@ const Payment = ({
     setError(null)
   }, [isOpen])
 
+  // Auto-select Paystack provider when it is the only available method
+  useEffect(() => {
+    if (
+      hasPaystack &&
+      !selectedPaymentMethod &&
+      availablePaymentMethods?.length === 1
+    ) {
+      const m = availablePaymentMethods[0]
+      const id = m.id ?? m.provider_id
+      if (isPaystack(id)) {
+        setSelectedPaymentMethod(id)
+      }
+    }
+  }, [hasPaystack, availablePaymentMethods, selectedPaymentMethod])
+
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
@@ -193,40 +238,69 @@ const Payment = ({
         <div className={isOpen ? "block" : "hidden"}>
           {!paidByGiftcard && availablePaymentMethods?.length && (
             <>
-              <RadioGroup
-                value={selectedPaymentMethod}
-                onChange={(value: string) => setSelectedPaymentMethod(value)}
-              >
-                {availablePaymentMethods
-                  .sort((a, b) => {
-                    const aId = a.id ?? a.provider_id
-                    const bId = b.id ?? b.provider_id
-
-                    const byRank = paymentSortRank(aId) - paymentSortRank(bId)
-                    if (byRank !== 0) {
-                      return byRank
+              {/* NON-Paystack providers still use the standard radio list */}
+              {availablePaymentMethods.some(
+                (m) => !isPaystack(m.id ?? m.provider_id)
+              ) && (
+                <RadioGroup
+                  value={selectedPaymentMethod}
+                  onChange={(value: string) => {
+                    setSelectedPaymentMethod(value)
+                    // Clear channel selection when switching away from Paystack
+                    if (!isPaystack(value)) {
+                      setSelectedPaystackChannel(null)
                     }
+                  }}
+                >
+                  {availablePaymentMethods
+                    .filter((m) => !isPaystack(m.id ?? m.provider_id))
+                    .sort((a, b) => {
+                      const aId = a.id ?? a.provider_id
+                      const bId = b.id ?? b.provider_id
+                      const byRank =
+                        paymentSortRank(aId) - paymentSortRank(bId)
+                      if (byRank !== 0) return byRank
+                      return String(aId).localeCompare(String(bId))
+                    })
+                    .map((paymentMethod) => {
+                      const paymentMethodId =
+                        paymentMethod.id ?? paymentMethod.provider_id
+                      if (!paymentMethodId) return null
+                      return (
+                        <PaymentContainer
+                          paymentInfoMap={paymentInfoMap}
+                          paymentProviderId={paymentMethodId}
+                          key={paymentMethodId}
+                          selectedPaymentOptionId={selectedPaymentMethod}
+                        />
+                      )
+                    })}
+                </RadioGroup>
+              )}
 
-                    return String(aId).localeCompare(String(bId))
-                  })
-                  .map((paymentMethod) => {
-                    const paymentMethodId =
-                      paymentMethod.id ?? paymentMethod.provider_id
-
-                    if (!paymentMethodId) {
-                      return null
-                    }
-
-                    return (
-                      <PaymentContainer
-                        paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethodId}
-                        key={paymentMethodId}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                      />
-                    )
-                  })}
-              </RadioGroup>
+              {/* Paystack channel selection */}
+              {hasPaystack && (
+                <div className="mt-1">
+                  <Text className="txt-medium-plus text-ui-fg-base mb-3">
+                    Choose a payment method
+                  </Text>
+                  <PaystackChannelPicker
+                    selected={selectedPaystackChannel}
+                    onChange={(channel) => {
+                      // Auto-select Paystack provider when a channel is picked
+                      const paystackMethod = availablePaymentMethods.find(
+                        (m) => isPaystack(m.id ?? m.provider_id)
+                      )
+                      if (paystackMethod) {
+                        setSelectedPaymentMethod(
+                          paystackMethod.id ?? paystackMethod.provider_id
+                        )
+                      }
+                      setSelectedPaystackChannel(channel)
+                    }}
+                  />
+                </div>
+              )}
               {isStripe && stripeReady && (
                 <div className="mt-5 transition-all duration-150 ease-in-out">
                   <Text className="txt-medium-plus text-ui-fg-base mb-1">
@@ -275,7 +349,8 @@ const Payment = ({
             isLoading={isLoading}
             disabled={
               (isStripe && !cardComplete) ||
-              (!selectedPaymentMethod && !paidByGiftcard)
+              (!selectedPaymentMethod && !paidByGiftcard) ||
+              (paystackSelected && !selectedPaystackChannel)
             }
             data-testid="submit-payment-button"
           >
@@ -296,8 +371,10 @@ const Payment = ({
                   className="txt-medium text-ui-fg-subtle"
                   data-testid="payment-method-summary"
                 >
-                  {paymentInfoMap[selectedPaymentMethod]?.title ||
-                    selectedPaymentMethod}
+                  {paystackSelected && selectedPaystackChannel
+                    ? channelLabels[selectedPaystackChannel]
+                    : paymentInfoMap[selectedPaymentMethod]?.title ||
+                      selectedPaymentMethod}
                 </Text>
               </div>
               <div className="flex flex-col">
@@ -316,7 +393,9 @@ const Payment = ({
                   <Text>
                     {isStripeFunc(selectedPaymentMethod) && cardBrand
                       ? cardBrand
-                      : "Another step will appear"}
+                      : paystackSelected && selectedPaystackChannel
+                        ? `Via Paystack (${channelLabels[selectedPaystackChannel]})`
+                        : "Another step will appear"}
                   </Text>
                 </div>
               </div>

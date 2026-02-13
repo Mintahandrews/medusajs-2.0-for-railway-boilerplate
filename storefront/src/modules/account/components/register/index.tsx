@@ -5,6 +5,7 @@ import { useFormState } from "react-dom"
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react"
 
 import Input from "@modules/common/components/input"
+import GPSLocationButton, { type AddressFromGPS } from "@modules/common/components/gps-location-button"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
@@ -18,6 +19,30 @@ type Props = {
 const Register = ({ setCurrentView }: Props) => {
   const [message, formAction] = useFormState(signup, null)
   const [showAddress, setShowAddress] = useState(false)
+  const [addressFields, setAddressFields] = useState({
+    address_1: "",
+    address_2: "",
+    city: "",
+    postal_code: "",
+    province: "",
+    country_code: "",
+  })
+
+  function handleGPSAddress(addr: AddressFromGPS) {
+    setAddressFields({
+      address_1: addr.address_1,
+      address_2: addr.address_2,
+      city: addr.city,
+      postal_code: addr.postal_code,
+      province: addr.province,
+      country_code: addr.country_code,
+    })
+    if (!showAddress) setShowAddress(true)
+  }
+
+  function handleAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setAddressFields((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
 
   return (
     <div
@@ -90,16 +115,25 @@ const Register = ({ setCurrentView }: Props) => {
               <p className="text-ui-fg-subtle text-xsmall-regular mb-2">
                 Save your shipping address now so it auto-fills at checkout.
               </p>
+              <GPSLocationButton
+                onAddressResolved={handleGPSAddress}
+                label="Use My GPS Location"
+                className="w-full"
+              />
               <Input
                 label="Address"
                 name="address_1"
                 autoComplete="address-line1"
+                value={addressFields.address_1}
+                onChange={handleAddressChange}
                 data-testid="address-input"
               />
               <Input
                 label="Apartment, suite, etc. (optional)"
                 name="address_2"
                 autoComplete="address-line2"
+                value={addressFields.address_2}
+                onChange={handleAddressChange}
                 data-testid="address-2-input"
               />
               <div className="grid grid-cols-2 gap-3">
@@ -107,12 +141,16 @@ const Register = ({ setCurrentView }: Props) => {
                   label="City"
                   name="city"
                   autoComplete="address-level2"
+                  value={addressFields.city}
+                  onChange={handleAddressChange}
                   data-testid="city-input"
                 />
                 <Input
                   label="Postal code"
                   name="postal_code"
                   autoComplete="postal-code"
+                  value={addressFields.postal_code}
+                  onChange={handleAddressChange}
                   data-testid="postal-code-input"
                 />
               </div>
@@ -121,12 +159,16 @@ const Register = ({ setCurrentView }: Props) => {
                   label="State"
                   name="province"
                   autoComplete="address-level1"
+                  value={addressFields.province}
+                  onChange={handleAddressChange}
                   data-testid="province-input"
                 />
                 <Input
                   label="Country (e.g. GH)"
                   name="country_code"
                   autoComplete="country"
+                  value={addressFields.country_code}
+                  onChange={handleAddressChange}
                   data-testid="country-code-input"
                 />
               </div>

@@ -1,3 +1,5 @@
+"use client"
+
 import { Listbox, Transition } from "@headlessui/react"
 import { ChevronsUpDown } from "lucide-react"
 import { clx } from "@medusajs/ui"

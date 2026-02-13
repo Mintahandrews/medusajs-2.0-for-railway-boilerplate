@@ -116,7 +116,11 @@ function CustomizerLayout({
 
       {/* Floating Add to Cart widget */}
       {product && region && (
-        <FloatingCart product={product} region={region} />
+        <>
+          <FloatingCart product={product} region={region} />
+          {/* Spacer for mobile sticky bottom bar so content isn't hidden */}
+          <div className="lg:hidden h-[88px]" />
+        </>
       )}
 
       {/* First-time onboarding walkthrough */}

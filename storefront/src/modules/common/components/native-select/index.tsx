@@ -1,3 +1,5 @@
+"use client"
+
 import { ChevronsUpDown } from "lucide-react"
 import { clx } from "@medusajs/ui"
 import {

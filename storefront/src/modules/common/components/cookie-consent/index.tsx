@@ -59,7 +59,7 @@ export default function CookieConsent() {
   const applyCookieSettings = (prefs: CookiePreferences) => {
     // Here you would typically integrate with your analytics/marketing tools
     // For now, we'll just store the preferences
-    console.log("Cookie preferences applied:", prefs)
+    // Preferences stored — integrate analytics/marketing tools here as needed
   }
 
   const togglePreference = (key: keyof CookiePreferences) => {
@@ -83,7 +83,7 @@ export default function CookieConsent() {
                 We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 
                 By clicking "Accept All", you consent to our use of cookies.
                 <br />
-                <a href="/privacy-policy" className="font-semibold text-blue-600 hover:underline">
+                <a href="/privacy-policy" className="font-semibold text-brand hover:text-brand-dark hover:underline">
                   Read our Privacy Policy
                 </a>.
               </p>
@@ -94,7 +94,7 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={handleAccept}
-                className="flex-1 h-10 px-6 rounded-lg bg-blue-600 text-white text-[14px] font-semibold hover:bg-blue-700 transition-colors"
+                className="flex-1 h-10 px-6 rounded-lg bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition-colors"
               >
                 Accept All
               </button>
@@ -148,7 +148,7 @@ export default function CookieConsent() {
                   <button
                     onClick={() => togglePreference("analytics")}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.analytics ? "bg-blue-600" : "bg-gray-300"
+                      preferences.analytics ? "bg-brand" : "bg-gray-300"
                     }`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -166,7 +166,7 @@ export default function CookieConsent() {
                   <button
                     onClick={() => togglePreference("marketing")}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.marketing ? "bg-blue-600" : "bg-gray-300"
+                      preferences.marketing ? "bg-brand" : "bg-gray-300"
                     }`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -184,7 +184,7 @@ export default function CookieConsent() {
                   <button
                     onClick={() => togglePreference("functional")}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.functional ? "bg-blue-600" : "bg-gray-300"
+                      preferences.functional ? "bg-brand" : "bg-gray-300"
                     }`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -207,7 +207,7 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={handleSavePreferences}
-                className="flex-1 h-10 px-6 rounded-lg bg-blue-600 text-white text-[14px] font-semibold hover:bg-blue-700 transition-colors"
+                className="flex-1 h-10 px-6 rounded-lg bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition-colors"
               >
                 Save Preferences
               </button>

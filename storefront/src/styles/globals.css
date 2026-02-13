@@ -82,6 +82,16 @@
     /* Firefox */
   }
 
+  /* Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   input:focus~label,
   input:not(:placeholder-shown)~label {
     @apply -translate-y-2 text-xsmall-regular;

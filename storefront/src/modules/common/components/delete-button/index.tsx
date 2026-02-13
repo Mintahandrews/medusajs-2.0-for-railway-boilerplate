@@ -1,3 +1,5 @@
+"use client"
+
 import { deleteLineItem } from "@lib/data/cart"
 import { Loader2 as Spinner, Trash2 as Trash } from "lucide-react"
 import { clx } from "@medusajs/ui"
