@@ -8,6 +8,19 @@ import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
+
+/** Server-side backend URL with HTTPS upgrade for production (matches SDK config). */
+function getServerBackendUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+  if (
+    process.env.NODE_ENV === "production" &&
+    raw.startsWith("http://") &&
+    !raw.includes("localhost")
+  ) {
+    return raw.replace("http://", "https://")
+  }
+  return raw
+}
 import { getRegion } from "./regions"
 
 export async function retrieveCart() {
@@ -119,8 +132,10 @@ export async function ensureCart(countryCode: string): Promise<string> {
     }
     return cart.id
   } catch (error: any) {
-    console.error("[ensureCart] Failed for country:", countryCode, error?.message || error)
-    throw error
+    const msg = error?.message || "Unknown error creating cart"
+    console.error("[ensureCart] Failed for country:", countryCode, msg)
+    // Always throw a plain Error so Next.js can serialize it for the client
+    throw new Error(msg)
   }
 }
 
@@ -141,12 +156,12 @@ export async function addCustomizedToCart({
     throw new Error("Missing variant ID when adding to cart")
   }
 
-  const cart = await getOrSetCart(countryCode)
-  if (!cart) {
-    throw new Error("Error retrieving or creating cart")
-  }
-
   try {
+    const cart = await getOrSetCart(countryCode)
+    if (!cart) {
+      throw new Error("Error retrieving or creating cart")
+    }
+
     // Step 1: Create the line item (Medusa v2 Store API does NOT support metadata here)
     const { cart: updatedCart } = await sdk.store.cart.createLineItem(
       cart.id,
@@ -184,8 +199,7 @@ export async function addCustomizedToCart({
     }
 
     // Step 3: Set metadata via custom backend endpoint (with retry)
-    const backendUrl =
-      process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const backendUrl = getServerBackendUrl()
     const publishableKey =
       process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
@@ -295,7 +309,7 @@ export async function deleteLineItem(lineId: string) {
       if (item.metadata.preview_key) keysToDelete.push(item.metadata.preview_key)
       if (item.metadata.print_file_key) keysToDelete.push(item.metadata.print_file_key)
       if (keysToDelete.length > 0) {
-        const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+        const backendUrl = getServerBackendUrl()
         const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
         fetch(`${backendUrl}/store/custom/design-cleanup`, {
           method: "POST",

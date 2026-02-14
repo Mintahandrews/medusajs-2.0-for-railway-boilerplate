@@ -1114,19 +1114,47 @@ export default function FabricCanvas() {
       fabricCanvas.clipPath = clipPath
 
       /* 3. Touch / mobile support ------------------------------------------- */
-      // Large touch targets for resize/rotate handles
+      // Detect touch devices for larger targets
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+      // Configure all FabricObject defaults — visible, large control handles
       fabric.FabricObject.prototype.set({
-        cornerSize: isTouchDevice ? 24 : 14,
-        touchCornerSize: 44,            // 44px = Apple's minimum touch target
-        cornerColor: '#0ea5e9',
+        // Corner (handle) appearance
+        cornerSize: isTouchDevice ? 30 : 18,   // visible handle diameter
+        touchCornerSize: 50,                    // invisible touch hit area (≥44 for Apple HIG)
+        cornerColor: '#5DABA6',                 // brand teal
         cornerStrokeColor: '#ffffff',
         cornerStyle: 'circle',
         transparentCorners: false,
-        borderColor: '#0ea5e9',
+        // Selection border
+        borderColor: '#5DABA6',
         borderScaleFactor: 2,
-        padding: isTouchDevice ? 12 : 4, // extra hit area around object
-        rotatingPointOffset: isTouchDevice ? 40 : 30,
+        borderDashArray: [6, 3],                // dashed for clarity
+        // Keep padding small so controls stay within the canvas viewport
+        padding: isTouchDevice ? 4 : 2,
+        // Allow non-uniform scaling so edge handles resize one axis
+        lockUniScaling: false,
+        // Ensure controls + border are enabled
+        hasBorders: true,
+        hasControls: true,
+      })
+
+      // In Fabric v6 the rotation offset lives on the control itself
+      const mtrControl = fabric.FabricObject.prototype.controls?.mtr
+      if (mtrControl) {
+        mtrControl.offsetY = isTouchDevice ? -40 : -30
+      }
+
+      // Ensure every object added to the canvas has all 9 controls visible
+      fabricCanvas.on('object:added', (opt: any) => {
+        const obj = opt.target
+        if (!obj) return
+        obj.setControlsVisibility({
+          tl: true, tr: true, bl: true, br: true,   // corners
+          mt: true, mb: true, ml: true, mr: true,   // mid-edges
+          mtr: true,                                  // rotation
+        })
+        obj.setCoords()  // recalculate control positions
       })
 
       // Ensure Fabric's upper canvas (interaction layer) blocks browser gestures
@@ -1138,9 +1166,9 @@ export default function FabricCanvas() {
         fabricCanvas.wrapperEl.style.touchAction = 'none'
       }
 
-      // Improve touch responsiveness: lower the long-press threshold
+      // Improve touch responsiveness: larger find tolerance, no delay
       fabricCanvas.set({
-        targetFindTolerance: isTouchDevice ? 15 : 5,
+        targetFindTolerance: isTouchDevice ? 18 : 8,
       })
 
       /* 4. Pinch-to-scale gesture for objects ------------------------------- */

@@ -212,10 +212,11 @@ export function CustomizerProvider({
 
         const img = await FabricImage.fromURL(dataUrl)
 
-        // Auto-fill: scale to cover the entire case area
+        // Scale to cover the case area, but leave a small margin (4%)
+        // so resize handles on every edge stay inside the canvas viewport.
         const scaleX = deviceConfig.canvasWidth / (img.width ?? 1)
         const scaleY = deviceConfig.canvasHeight / (img.height ?? 1)
-        const scale = Math.max(scaleX, scaleY)
+        const scale = Math.max(scaleX, scaleY) * 0.96
         img.set({
           scaleX: scale,
           scaleY: scale,
@@ -223,6 +224,10 @@ export function CustomizerProvider({
           top: deviceConfig.canvasHeight / 2,
           originX: "center",
           originY: "center",
+          // Ensure all resize handles are enabled
+          hasControls: true,
+          hasBorders: true,
+          lockUniScaling: false,
         })
 
         canvas.add(img)
@@ -252,6 +257,10 @@ export function CustomizerProvider({
         top: canvas.height! / 2,
         originX: "center",
         originY: "center",
+        // Ensure all resize handles are enabled for text
+        hasControls: true,
+        hasBorders: true,
+        lockUniScaling: false,
       })
 
       canvas.add(t)
