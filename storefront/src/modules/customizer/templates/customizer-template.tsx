@@ -57,7 +57,7 @@ function CustomizerLayout({
       <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px-68px)] lg:h-[calc(100dvh-64px)] bg-gray-100 overflow-hidden">
 
         {/* ---- Desktop sidebar ---- */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200">
+        <aside data-tour="desktop-sidebar" className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200">
           <Toolbar />
         </aside>
 
@@ -77,6 +77,7 @@ function CustomizerLayout({
 
           {/* Canvas wrapper — touch-action: none prevents browser scroll hijacking on canvas */}
           <div
+            data-tour="canvas-area"
             className="flex-1 flex items-center justify-center w-full max-w-lg min-h-0"
             style={{ touchAction: "none" }}
           >
@@ -149,7 +150,7 @@ const QUICK_TOOLS: { label: string; icon: any; tool: ActiveTool; highlight?: boo
 
 function MobileQuickBar({ onExpand }: { onExpand: (tool: ActiveTool) => void }) {
   return (
-    <div className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,8px)]">
+    <div data-tour="mobile-quick-bar" className="flex items-center justify-around px-1 pb-[env(safe-area-inset-bottom,8px)]">
       {QUICK_TOOLS.map(({ label, icon: Icon, tool, highlight }) => (
         <button
           key={label}

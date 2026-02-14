@@ -62,10 +62,11 @@ export default function Toolbar() {
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       {/* Tool tabs — horizontally scrollable on mobile */}
-      <div className="flex overflow-x-auto lg:flex-wrap scrollbar-hide border-b border-gray-200 -mb-px">
+      <div data-tour="toolbar-tabs" className="flex overflow-x-auto lg:flex-wrap scrollbar-hide border-b border-gray-200 -mb-px">
         {TOOLS.map((tool) => (
           <button
             key={tool.id}
+            data-tour={`tool-${tool.id}`}
             onClick={() => dispatch({ type: "SET_TOOL", tool: tool.id })}
             className={`flex-shrink-0 flex-1 min-w-[44px] flex flex-col items-center gap-1 py-2.5 lg:py-2 text-[11px] transition-colors ${
               state.activeTool === tool.id
@@ -96,7 +97,7 @@ export default function Toolbar() {
       </div>
 
       {/* Bottom actions */}
-      <div className="border-t border-gray-200 p-3 flex flex-col gap-2">
+      <div data-tour="actions-bar" className="border-t border-gray-200 p-3 flex flex-col gap-2">
         {/* Undo / Redo / Delete row */}
         <div className="flex items-center gap-1">
           <button
@@ -129,6 +130,7 @@ export default function Toolbar() {
 
         {/* Download */}
         <button
+          data-tour="download-btn"
           onClick={handleDownload}
           className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
                      bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"

@@ -33,7 +33,9 @@
       "react": "^19.0.0",
       "react-dom": "^19.0.0"
     },
-    "neverBuiltDependencies": ["canvas"]
+    "neverBuiltDependencies": [
+      "canvas"
+    ]
   },
   "dependencies": {
     "@headlessui/react": "^1.6.1",
@@ -50,6 +52,7 @@
     "algoliasearch": "^4.20.0",
     "axios": "^1.12.0",
     "fabric": "^6.9.1",
+    "intro.js": "^8.3.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.562.0",
     "medusajs-launch-utils": "0.0.18",
