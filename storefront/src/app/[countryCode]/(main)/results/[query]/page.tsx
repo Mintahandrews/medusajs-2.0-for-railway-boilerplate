@@ -22,7 +22,7 @@ export default async function SearchResults({ params, searchParams }: Params) {
   const { query, countryCode } = await params
   const { sortBy, page } = await searchParams
 
-  const hits = await search(query).then((data) => data)
+  const hits = await search(query)
 
   const ids = hits
     .map((h) => h.objectID || h.id)
