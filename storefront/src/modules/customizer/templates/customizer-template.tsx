@@ -53,7 +53,8 @@ function CustomizerLayout({
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px)] bg-gray-100 overflow-hidden">
+      {/* Mobile: subtract 64px header + compact cart bar; desktop: just header */}
+      <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px-68px)] lg:h-[calc(100dvh-64px)] bg-gray-100 overflow-hidden">
 
         {/* ---- Desktop sidebar ---- */}
         <aside className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200">
@@ -114,13 +115,9 @@ function CustomizerLayout({
       </div>
 
 
-      {/* Floating Add to Cart widget */}
+      {/* Floating Add to Cart widget — sticky bar on mobile, FAB on desktop */}
       {product && region && (
-        <>
-          <FloatingCart product={product} region={region} />
-          {/* Spacer for mobile sticky bottom bar so content isn't hidden */}
-          <div className="lg:hidden h-[88px]" />
-        </>
+        <FloatingCart product={product} region={region} />
       )}
 
       {/* First-time onboarding walkthrough */}

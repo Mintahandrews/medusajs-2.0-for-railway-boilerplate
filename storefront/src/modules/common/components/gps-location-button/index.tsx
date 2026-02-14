@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef, useCallback } from "react"
 import { MapPin, Loader2 } from "lucide-react"
 
 export interface AddressFromGPS {
@@ -21,10 +21,68 @@ interface Props {
   className?: string
 }
 
+/** In-memory geocode cache so repeat clicks are instant */
+const geocodeCache = new Map<string, AddressFromGPS>()
+
+/** Round coords to ~110 m grid so nearby positions share cache */
+function cacheKey(lat: number, lon: number) {
+  return `${lat.toFixed(3)},${lon.toFixed(3)}`
+}
+
+function parseNominatim(
+  addr: Record<string, string>,
+  latitude: number,
+  longitude: number
+): AddressFromGPS {
+  const road = addr.road || addr.pedestrian || addr.footway || ""
+  const houseNumber = addr.house_number || ""
+  const neighbourhood =
+    addr.neighbourhood || addr.suburb || addr.quarter || ""
+  const city =
+    addr.city ||
+    addr.town ||
+    addr.village ||
+    addr.municipality ||
+    addr.county ||
+    ""
+  const province = addr.state || addr.region || addr.state_district || ""
+  const countryCode = (addr.country_code || "").toLowerCase()
+
+  // Postal code: use Nominatim postcode or GPS-based digital address
+  let postalCode = addr.postcode || ""
+  if (!postalCode) {
+    postalCode = `GPS-${latitude.toFixed(4)},${longitude.toFixed(4)}`
+  }
+
+  // Build address_1 with neighbourhood for completeness
+  let addressLine1 = houseNumber ? `${houseNumber} ${road}`.trim() : road
+  if (neighbourhood && !addressLine1.includes(neighbourhood)) {
+    addressLine1 = addressLine1
+      ? `${addressLine1}, ${neighbourhood}`
+      : neighbourhood
+  }
+
+  return {
+    address_1: addressLine1,
+    address_2: neighbourhood,
+    city,
+    province,
+    postal_code: postalCode,
+    country_code: countryCode,
+  }
+}
+
 /**
  * GPS location button that uses the browser's Geolocation API
  * and OpenStreetMap Nominatim for reverse geocoding.
  * Works on mobile and desktop browsers.
+ *
+ * Performance optimisations:
+ * - First attempt uses fast Wi-Fi / cell position (enableHighAccuracy: false)
+ *   with a short 5 s timeout, then falls back to high-accuracy GPS.
+ * - In-memory geocode cache keyed to ~110 m grid avoids repeat network calls.
+ * - maximumAge 2 min so the browser can reuse a recent fix.
+ * - AbortController cancels duplicate clicks.
  */
 export default function GPSLocationButton({
   onAddressResolved,
@@ -33,8 +91,37 @@ export default function GPSLocationButton({
 }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const abortRef = useRef<AbortController | null>(null)
 
-  async function handleGetLocation() {
+  /** Try to get a position — fast first, then high-accuracy fallback */
+  const getPosition = useCallback(async (): Promise<GeolocationPosition> => {
+    // Fast attempt: network / Wi-Fi triangulation (usually < 2 s)
+    try {
+      return await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 120000, // 2 min cache
+        })
+      })
+    } catch {
+      // Fall back to high-accuracy GPS
+      return new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 120000,
+        })
+      })
+    }
+  }, [])
+
+  const handleGetLocation = useCallback(async () => {
+    // Cancel any in-flight request
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setLoading(true)
     setError("")
 
@@ -45,57 +132,42 @@ export default function GPSLocationButton({
     }
 
     try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 60000,
-          })
-        }
-      )
+      const position = await getPosition()
+      if (controller.signal.aborted) return
 
       const { latitude, longitude } = position.coords
+      const key = cacheKey(latitude, longitude)
+
+      // Return cached result instantly if available
+      const cached = geocodeCache.get(key)
+      if (cached) {
+        onAddressResolved(cached)
+        setLoading(false)
+        return
+      }
 
       // Reverse geocode using OpenStreetMap Nominatim (free, no API key)
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en`,
         {
-          headers: {
-            "User-Agent": "LetsCaseGH-Storefront/1.0",
-          },
+          headers: { "User-Agent": "LetsCaseGH-Storefront/1.0" },
+          signal: controller.signal,
         }
       )
 
-      if (!res.ok) {
-        throw new Error("Could not determine your address")
-      }
+      if (!res.ok) throw new Error("Could not determine your address")
 
       const data = await res.json()
-      const addr = data.address || {}
+      const address = parseNominatim(data.address || {}, latitude, longitude)
 
-      // Map Nominatim fields to our address format
-      const road = addr.road || addr.pedestrian || addr.footway || ""
-      const houseNumber = addr.house_number || ""
-      const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || ""
-      const city =
-        addr.city || addr.town || addr.village || addr.municipality || addr.county || ""
-      const province =
-        addr.state || addr.region || addr.state_district || ""
-      const postalCode = addr.postcode || ""
-      const countryCode = (addr.country_code || "").toLowerCase()
+      // Cache for instant reuse
+      geocodeCache.set(key, address)
 
-      const address: AddressFromGPS = {
-        address_1: houseNumber ? `${houseNumber} ${road}`.trim() : road,
-        address_2: neighbourhood,
-        city,
-        province,
-        postal_code: postalCode,
-        country_code: countryCode,
+      if (!controller.signal.aborted) {
+        onAddressResolved(address)
       }
-
-      onAddressResolved(address)
     } catch (err: any) {
+      if (err?.name === "AbortError") return
       if (err?.code === 1) {
         setError("Location access denied. Please enable location permissions.")
       } else if (err?.code === 2) {
@@ -106,9 +178,9 @@ export default function GPSLocationButton({
         setError(err?.message || "Could not get your location")
       }
     } finally {
-      setLoading(false)
+      if (!controller.signal.aborted) setLoading(false)
     }
-  }
+  }, [getPosition, onAddressResolved])
 
   return (
     <div className="flex flex-col gap-1">

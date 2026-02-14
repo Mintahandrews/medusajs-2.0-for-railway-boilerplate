@@ -13,7 +13,9 @@ import DesktopNav from "./desktop-nav"
 import DesktopSearch from "./desktop-search"
 
 export default async function Nav() {
-  const regions = await listRegions().then((regions: StoreRegion[]) => regions)
+  const regions = await listRegions()
+    .then((regions: StoreRegion[]) => regions)
+    .catch(() => [] as StoreRegion[])
 
   const [categories, collectionsResult] = await Promise.all([
     listCategories().catch(() => [] as any[]),

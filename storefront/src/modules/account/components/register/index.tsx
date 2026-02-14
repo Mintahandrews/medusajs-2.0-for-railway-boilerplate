@@ -156,7 +156,7 @@ const Register = ({ setCurrentView }: Props) => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="State"
+                  label="Region"
                   name="province"
                   autoComplete="address-level1"
                   value={addressFields.province}

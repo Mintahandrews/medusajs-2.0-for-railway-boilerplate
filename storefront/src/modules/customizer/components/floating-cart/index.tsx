@@ -240,54 +240,58 @@ export default function FloatingCart({ product, region }: Props) {
         </button>
       </div>
 
-      {/* ---- Mobile: Full-width sticky bottom bar ---- */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] safe-area-bottom" data-tour="floating-cart-mobile">
-        <div className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          {/* Price line */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">{CASE_TYPE_LABEL[state.caseType]} Case · {deviceConfig.name}</span>
+      {/* ---- Mobile: Full-width bottom bar — sits below content, not overlapping ---- */}
+      <div className="lg:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]" data-tour="floating-cart-mobile">
+        <div className="px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          {/* Compact: info + button in one row */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col min-w-0 shrink">
+              <span className="text-[11px] text-gray-500 truncate">
+                {CASE_TYPE_LABEL[state.caseType]} Case · {deviceConfig.name}
+              </span>
+              <span className="text-base font-bold text-gray-900 leading-tight">
+                {priceStr ?? "—"}
+              </span>
             </div>
-            <span className="text-lg font-bold text-gray-900">{priceStr ?? "—"}</span>
+
+            {/* Add to Cart button */}
+            <button
+              onClick={handleAddToCart}
+              disabled={isAdding || !variant?.id}
+              className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm
+                font-bold transition-all whitespace-nowrap ${
+                  added
+                    ? "bg-green-600 text-white"
+                    : "bg-brand text-white hover:bg-brand-dark active:scale-[0.98]"
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {isAdding ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="text-xs">{uploadStatus || "Processing…"}</span>
+                </>
+              ) : added ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Added!
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  Add to Cart — {priceStr || ""}
+                </>
+              )}
+            </button>
           </div>
 
-          {/* Full-width Add to Cart button */}
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdding || !variant?.id}
-            className={`flex items-center justify-center gap-2.5 w-full py-3.5 rounded-xl text-base
-              font-bold transition-all ${
-                added
-                  ? "bg-green-600 text-white"
-                  : "bg-brand text-white hover:bg-brand-dark active:scale-[0.98]"
-              } disabled:opacity-40 disabled:cursor-not-allowed`}
-          >
-            {isAdding ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>{uploadStatus || "Processing…"}</span>
-              </>
-            ) : added ? (
-              <>
-                <Check className="w-5 h-5" />
-                Added to Cart!
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart {priceStr ? `— ${priceStr}` : ""}
-              </>
-            )}
-          </button>
-
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1.5 mt-2">{error}</p>
+            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1.5 mt-1.5">{error}</p>
           )}
 
           {added && (
             <button
               onClick={() => router.push(`/${countryCode}/cart`)}
-              className="w-full text-sm text-center text-brand underline underline-offset-4 hover:text-brand-dark mt-2 py-1"
+              className="w-full text-xs text-center text-brand underline underline-offset-4 hover:text-brand-dark mt-1.5 py-0.5"
             >
               View Cart →
             </button>

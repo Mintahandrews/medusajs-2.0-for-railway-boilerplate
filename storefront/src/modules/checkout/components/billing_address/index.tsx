@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react"
 import Input from "@modules/common/components/input"
 import CountrySelect from "../country-select"
+import GPSLocationButton, { type AddressFromGPS } from "@modules/common/components/gps-location-button"
 import { HttpTypes } from "@medusajs/types"
 
 const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
@@ -33,8 +34,27 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
     })
   }
 
+  const handleGPSAddress = (addr: AddressFromGPS) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      "billing_address.address_1": addr.address_1 || "",
+      "billing_address.city": addr.city || "",
+      "billing_address.postal_code": addr.postal_code || "",
+      "billing_address.province": addr.province || "",
+      "billing_address.country_code": addr.country_code || "",
+    }))
+  }
+
   return (
     <>
+      {/* GPS Location auto-fill */}
+      <div className="mb-4">
+        <GPSLocationButton
+          onAddressResolved={handleGPSAddress}
+          label="Use My GPS Location"
+          className="w-full"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="First name"
@@ -99,7 +119,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           data-testid="billing-country-select"
         />
         <Input
-          label="State / Province"
+          label="Region"
           name="billing_address.province"
           autoComplete="address-level1"
           value={formData["billing_address.province"]}

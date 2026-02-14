@@ -88,6 +88,7 @@ const ShippingAddress = ({
     setFormData((prev: Record<string, any>) => ({
       ...prev,
       "shipping_address.address_1": addr.address_1 || "",
+      "shipping_address.address_2": addr.address_2 || "",
       "shipping_address.city": addr.city || "",
       "shipping_address.postal_code": addr.postal_code || "",
       "shipping_address.province": addr.province || "",
@@ -185,7 +186,7 @@ const ShippingAddress = ({
           data-testid="shipping-country-select"
         />
         <Input
-          label="State / Province"
+          label="Region"
           name="shipping_address.province"
           autoComplete="address-level1"
           value={formData["shipping_address.province"]}

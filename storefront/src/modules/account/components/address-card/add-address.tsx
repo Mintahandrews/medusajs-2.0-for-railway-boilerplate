@@ -110,7 +110,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
                 />
               </div>
               <Input
-                label="Province / State"
+                label="Region"
                 name="province"
                 autoComplete="address-level1"
                 data-testid="state-input"

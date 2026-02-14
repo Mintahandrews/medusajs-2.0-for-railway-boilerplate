@@ -175,9 +175,9 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
             key={`${item.id}-${idx}`}
             href={item.href}
             draggable={false}
-            onClick={(e) => {
+            onClick={(e?: React.MouseEvent<HTMLAnchorElement>) => {
               // Prevent navigation when finishing a drag
-              if (isDragging) e.preventDefault()
+              if (isDragging) e?.preventDefault()
             }}
             className="group shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block select-none"
           >

@@ -55,8 +55,10 @@ const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "About Us", href: "/about-us", testId: "about-us-link" },
   { name: "Account", href: "/account", testId: "account-link" },
   { name: "Wishlist", href: "/account/wishlist", testId: "wishlist-link" },
-  { name: "Search", href: "/search", testId: "search-link" },
-  { name: "Cart", href: "/cart", testId: "cart-link" },
+  { name: "Visit Our Store", href: "/visit-our-store", testId: "visit-store-link" },
+  { name: "Contact", href: "/contact", testId: "contact-link" },
+  { name: "FAQ", href: "/faq", testId: "faq-link" },
+  { name: "Order Tracking", href: "/order-tracking", testId: "order-tracking-link" },
 ]
 
 const SHOP_LINKS: Array<{ name: string; href: string }> = [
@@ -179,16 +181,16 @@ const SideMenu = ({
                             onSubmit={(e) => {
                               e.preventDefault()
                               const q = searchValue.trim()
-                              if (!q) {
-                                return
-                              }
+                              if (!q) return
 
-                              router.push(
-                                countryCode
-                                  ? `/${countryCode}/results/${encodeURIComponent(q)}`
-                                  : `/results/${encodeURIComponent(q)}`
-                              )
-                              close()
+                              const target = countryCode
+                                ? `/${countryCode}/results/${encodeURIComponent(q)}`
+                                : `/results/${encodeURIComponent(q)}`
+
+                              // Navigate first, then close menu after a tick
+                              // so the route change isn't interrupted by scroll-lock cleanup
+                              router.push(target)
+                              setTimeout(() => close(), 100)
                             }}
                           >
                             <label className="sr-only" htmlFor="drawer-search">
@@ -209,6 +211,13 @@ const SideMenu = ({
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 className="h-full w-full bg-transparent text-[14px] text-grey-90 placeholder:text-grey-40 focus:outline-none"
                               />
+                              <button
+                                type="submit"
+                                className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-brand text-white hover:bg-brand-dark transition"
+                                aria-label="Search"
+                              >
+                                <Search size={14} />
+                              </button>
                             </div>
                           </form>
 
@@ -243,7 +252,7 @@ const SideMenu = ({
                                                 key={item.href}
                                                 href={item.href}
                                                 className="flex items-center gap-2 py-1 hover:text-grey-90"
-                                                onClick={close}
+                                                onClick={() => setTimeout(() => close(), 50)}
                                               >
                                                 <span className="shrink-0 text-grey-50">
                                                   <Icon size={16} />
@@ -265,7 +274,7 @@ const SideMenu = ({
                                               key={item.href}
                                               href={item.href}
                                               className="py-1 hover:text-grey-90"
-                                              onClick={close}
+                                              onClick={() => setTimeout(() => close(), 50)}
                                             >
                                               {item.name}
                                             </LocalizedClientLink>
@@ -279,7 +288,7 @@ const SideMenu = ({
                                             key={item.name}
                                             href={item.href}
                                             className="py-1 hover:text-grey-90"
-                                            onClick={close}
+                                            onClick={() => setTimeout(() => close(), 50)}
                                           >
                                             {item.name}
                                           </LocalizedClientLink>
@@ -313,7 +322,7 @@ const SideMenu = ({
                                           key={item.href}
                                           href={item.href}
                                           className="py-1 hover:text-grey-90"
-                                          onClick={close}
+                                          onClick={() => setTimeout(() => close(), 50)}
                                         >
                                           {item.name}
                                         </LocalizedClientLink>
@@ -335,7 +344,7 @@ const SideMenu = ({
                                   <LocalizedClientLink
                                     href={item.href}
                                     className="block py-1 text-[14px] font-medium text-grey-90 hover:text-brand"
-                                    onClick={close}
+                                    onClick={() => setTimeout(() => close(), 50)}
                                     data-testid={item.testId}
                                   >
                                     {item.name}
