@@ -2,13 +2,12 @@
 
 import { placeOrder } from "@lib/data/cart"
 import Link from "next/link"
-import { useParams, useSearchParams, useRouter } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useState } from "react"
 
 function PaystackVerifyContent() {
   const params = useParams()
   const searchParams = useSearchParams()
-  const router = useRouter()
   
   const countryCode = (params.countryCode as string) || "gh"
   const reference = searchParams.get("reference") || searchParams.get("trxref")
@@ -26,8 +25,8 @@ function PaystackVerifyContent() {
     const completeOrder = async () => {
       try {
         await placeOrder()
+        // placeOrder() calls redirect() internally — if we reach here, it succeeded
         setStatus("success")
-        router.push(`/${countryCode}/order/confirmed`)
       } catch (error: any) {
         // NEXT_REDIRECT is thrown by Next.js redirect() - this is expected behavior
         if (error?.message?.includes("NEXT_REDIRECT") || error?.digest?.includes("NEXT_REDIRECT")) {
@@ -41,7 +40,7 @@ function PaystackVerifyContent() {
     }
 
     completeOrder()
-  }, [reference, countryCode, router])
+  }, [reference, countryCode])
 
   if (status === "loading") {
     return (

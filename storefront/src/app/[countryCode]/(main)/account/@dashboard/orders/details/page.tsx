@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation"
 
-export default function OrderDetailsIndexPage({
+export default async function OrderDetailsIndexPage({
   params,
 }: {
-  params: { countryCode: string }
+  params: Promise<{ countryCode: string }>
 }) {
+  const { countryCode } = await params
   // Redirect to orders list if no order ID is provided
-  redirect(`/${params.countryCode}/account/orders`)
+  redirect(`/${countryCode}/account/orders`)
 }

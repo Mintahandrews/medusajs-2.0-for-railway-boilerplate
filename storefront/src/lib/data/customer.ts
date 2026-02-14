@@ -9,10 +9,14 @@ import { cache } from "react"
 import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
 
 export const getCustomer = cache(async function () {
-  return await sdk.store.customer
-    .retrieve({}, { next: { tags: ["customer"] }, ...(await getAuthHeaders()) })
-    .then(({ customer }) => customer)
-    .catch(() => null)
+  try {
+    return await sdk.store.customer
+      .retrieve({}, { next: { tags: ["customer"] }, ...(await getAuthHeaders()) })
+      .then(({ customer }) => customer)
+  } catch {
+    // 401 for unauthenticated users is expected — return null silently
+    return null
+  }
 })
 
 export const updateCustomer = cache(async function (

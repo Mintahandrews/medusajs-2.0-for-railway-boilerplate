@@ -10,13 +10,15 @@ import {
   ORDER_DELIVERED,
   ORDER_CANCELLED
 } from './order-status'
+import { ContactFormEmail, CONTACT_FORM, isContactFormData } from './contact-form'
 
 export const EmailTemplates = {
   INVITE_USER,
   ORDER_PLACED,
   ORDER_SHIPPED,
   ORDER_DELIVERED,
-  ORDER_CANCELLED
+  ORDER_CANCELLED,
+  CONTACT_FORM,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -48,6 +50,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
     case EmailTemplates.ORDER_CANCELLED:
       return <OrderCancelledTemplate {...(data as any)} />
 
+    case EmailTemplates.CONTACT_FORM:
+      if (!isContactFormData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.CONTACT_FORM}"`
+        )
+      }
+      return <ContactFormEmail {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -56,4 +67,4 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
   }
 }
 
-export { InviteUserEmail, OrderPlacedTemplate }
+export { InviteUserEmail, OrderPlacedTemplate, ContactFormEmail }

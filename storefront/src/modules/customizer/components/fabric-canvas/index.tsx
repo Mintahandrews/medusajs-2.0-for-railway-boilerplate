@@ -1247,8 +1247,16 @@ export default function FabricCanvas() {
     const ro = new ResizeObserver(() => applyScale())
     ro.observe(el)
 
+    // Also apply scale immediately when the canvas becomes ready.
+    // This fixes a race condition: if the ResizeObserver fired before
+    // the async Fabric import completed, setDimensions was skipped.
+    if (state.isCanvasReady) {
+      applyScale()
+    }
+
     return () => ro.disconnect()
-  }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight, canvasRef])
+    // Include isCanvasReady so the effect re-runs once the canvas is initialised
+  }, [deviceConfig.canvasWidth, deviceConfig.canvasHeight, canvasRef, state.isCanvasReady])
 
   const caseType = state.caseType
   const bgColor = state.backgroundColor || "#ffffff"

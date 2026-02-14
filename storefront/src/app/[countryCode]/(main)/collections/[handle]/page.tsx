@@ -12,11 +12,11 @@ import BreadcrumbJsonLd from "@modules/seo/components/breadcrumb-jsonld"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 type Props = {
-  params: { handle: string; countryCode: string }
-  searchParams: {
+  params: Promise<{ handle: string; countryCode: string }>
+  searchParams: Promise<{
     page?: string
     sortBy?: SortOptions
-  }
+  }>
 }
 
 export const PRODUCT_LIMIT = 12
@@ -62,7 +62,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const collection = await getCollectionByHandle(params.handle)
+    const { handle } = await params
+    const collection = await getCollectionByHandle(handle)
 
     if (!collection) {
       notFound()
@@ -87,9 +88,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CollectionPage({ params, searchParams }: Props) {
-  const { sortBy, page } = searchParams
+  const { handle, countryCode } = await params
+  const { sortBy, page } = await searchParams
 
-  const collection = await getCollectionByHandle(params.handle).then(
+  const collection = await getCollectionByHandle(handle).then(
     (collection: StoreCollection) => collection
   )
 
@@ -100,18 +102,18 @@ export default async function CollectionPage({ params, searchParams }: Props) {
   return (
     <>
       <BreadcrumbJsonLd
-        countryCode={params.countryCode}
+        countryCode={countryCode}
         items={[
           { name: "Home", path: "" },
           { name: "Store", path: "/store" },
-          { name: collection.title || "Collection", path: `/collections/${params.handle}` },
+          { name: collection.title || "Collection", path: `/collections/${handle}` },
         ]}
       />
       <CollectionTemplate
         collection={collection}
         page={page}
         sortBy={sortBy}
-        countryCode={params.countryCode}
+        countryCode={countryCode}
       />
     </>
   )

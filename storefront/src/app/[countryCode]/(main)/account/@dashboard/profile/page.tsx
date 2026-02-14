@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Profile() {
-  const customer = await getCustomer()
+  const customer = await getCustomer().catch(() => null)
   if (!customer) {
     return null
   }

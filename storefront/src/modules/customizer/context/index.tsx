@@ -242,22 +242,30 @@ export function CustomizerProvider({
 
       const { IText } = await import("fabric")
       const t = new IText(text || "Your Text", {
-        left: deviceConfig.canvasWidth / 2,
-        top: deviceConfig.canvasHeight / 2,
-        originX: "center",
-        originY: "center",
         fontFamily: state.fontFamily,
         fontSize: state.fontSize,
         fill: state.textColor,
         editable: true,
+        // Place at canvas center using explicit coordinates so the text
+        // always lands in the visible area regardless of CSS scaling.
+        left: canvas.width! / 2,
+        top: canvas.height! / 2,
+        originX: "center",
+        originY: "center",
       })
 
       canvas.add(t)
+
+      // Force Fabric to measure the text box, then re-center precisely.
+      t.initDimensions()
+      canvas.centerObject(t)
+      t.setCoords()
+
       canvas.setActiveObject(t)
       canvas.renderAll()
       pushHistory()
     },
-    [deviceConfig, state.fontFamily, state.fontSize, state.textColor, pushHistory]
+    [state.fontFamily, state.fontSize, state.textColor, pushHistory]
   )
 
   const setBackgroundColor = useCallback(

@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 export default async function Addresses({
   params,
 }: {
-  params: { countryCode: string }
+  params: Promise<{ countryCode: string }>
 }) {
-  const { countryCode } = params
-  const customer = await getCustomer()
+  const { countryCode } = await params
+  const customer = await getCustomer().catch(() => null)
   const region = await getRegion(countryCode)
 
   if (!customer || !region) {

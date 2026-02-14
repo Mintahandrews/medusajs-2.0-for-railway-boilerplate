@@ -38,7 +38,7 @@ export default async function Checkout() {
     return notFound()
   }
 
-  const customer = await getCustomer()
+  const customer = await getCustomer().catch(() => null)
 
   return (
     <div className="content-container py-6 small:py-12">

@@ -8,11 +8,11 @@ import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 type Props = {
-  params: { category: string[]; countryCode: string }
-  searchParams: {
+  params: Promise<{ category: string[]; countryCode: string }>
+  searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
-  }
+  }>
 }
 
 export async function generateStaticParams() {
@@ -54,8 +54,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
+    const { category, countryCode } = await params
     const { product_categories } = await getCategoryByHandle(
-      params.category
+      category
     )
 
     const title = product_categories
@@ -78,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: seoDescription,
       },
       alternates: {
-        canonical: `${params.category.join("/")}`,
+        canonical: `${category.join("/")}`,
       },
     }
   } catch (error) {
@@ -90,19 +91,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
-  const { sortBy, page } = searchParams
+  const { category, countryCode } = await params
+  const { sortBy, page } = await searchParams
 
   let product_categories
   try {
-    const result = await getCategoryByHandle(params.category)
+    const result = await getCategoryByHandle(category)
     product_categories = result.product_categories
   } catch {
     // Category not found or backend error — redirect to store
-    redirect(`/${params.countryCode}/store`)
+    redirect(`/${countryCode}/store`)
   }
 
   if (!product_categories || product_categories.length === 0) {
-    redirect(`/${params.countryCode}/store`)
+    redirect(`/${countryCode}/store`)
   }
 
   return (
@@ -110,7 +112,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       categories={product_categories}
       sortBy={sortBy}
       page={page}
-      countryCode={params.countryCode}
+      countryCode={countryCode}
     />
   )
 }

@@ -151,14 +151,14 @@ export default async function Footer() {
             ].map((logo) => (
               <div
                 key={logo.alt}
-                className="flex items-center justify-center rounded-lg border border-grey-20 bg-white px-3 py-1.5 shadow-sm"
+                className="flex items-center justify-center rounded-lg border border-grey-20 bg-white shadow-sm w-[72px] h-[40px]"
               >
                 <Image
                   src={logo.src}
                   alt={logo.alt}
                   width={80}
-                  height={24}
-                  className="h-6 w-auto object-contain"
+                  height={32}
+                  className="max-h-[22px] max-w-[52px] w-auto h-auto object-contain"
                 />
               </div>
             ))}

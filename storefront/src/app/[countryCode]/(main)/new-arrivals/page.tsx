@@ -9,12 +9,13 @@ export const metadata: Metadata = {
 }
 
 type Params = {
-  params: {
+  params: Promise<{
     countryCode: string
-  }
+  }>
 }
 
 export default async function NewArrivalsPage({ params }: Params) {
+  const { countryCode } = await params
   const categories = await listCategories().catch(() => [])
   const topCategoryLinks = (categories || [])
     .filter((c: any) => !c?.parent_category_id && !c?.parent_category)
@@ -26,7 +27,7 @@ export default async function NewArrivalsPage({ params }: Params) {
     <StoreTemplate
       sortBy="created_at"
       page={"1"}
-      countryCode={params.countryCode}
+      countryCode={countryCode}
       title={"New Arrivals"}
       subtitle={"Fresh accessories added recently — check back often."}
       quickLinks={topCategoryLinks}

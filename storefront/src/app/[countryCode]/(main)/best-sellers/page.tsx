@@ -13,12 +13,13 @@ export const metadata: Metadata = {
 }
 
 type Params = {
-  params: {
+  params: Promise<{
     countryCode: string
-  }
+  }>
 }
 
 export default async function BestSellersPage({ params }: Params) {
+  const { countryCode } = await params
   const { collections } = await getCollectionsList(0, 1).catch(() => ({
     collections: [],
     count: 0,
@@ -80,7 +81,7 @@ export default async function BestSellersPage({ params }: Params) {
       <Suspense fallback={<SkeletonProductGrid />}>
         <PaginatedProducts
           page={1}
-          countryCode={params.countryCode}
+          countryCode={countryCode}
           collectionId={bestSellersCollection?.id}
         />
       </Suspense>

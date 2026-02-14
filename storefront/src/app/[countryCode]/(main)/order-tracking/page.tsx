@@ -9,13 +9,14 @@ export const metadata: Metadata = {
 }
 
 type Props = {
-  params: { countryCode: string }
-  searchParams?: { orderId?: string; email?: string }
+  params: Promise<{ countryCode: string }>
+  searchParams?: Promise<{ orderId?: string; email?: string }>
 }
 
 export default async function OrderTrackingPage({ searchParams }: Props) {
-  const orderId = (searchParams?.orderId || "").trim()
-  const email = (searchParams?.email || "").trim()
+  const sp = await searchParams
+  const orderId = (sp?.orderId || "").trim()
+  const email = (sp?.email || "").trim()
 
   return (
     <div className="mx-auto max-w-[900px] px-5 small:px-10 py-16">

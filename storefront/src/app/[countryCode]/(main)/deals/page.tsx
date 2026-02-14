@@ -9,12 +9,13 @@ export const metadata: Metadata = {
 }
 
 type Params = {
-  params: {
+  params: Promise<{
     countryCode: string
-  }
+  }>
 }
 
 export default async function DealsPage({ params }: Params) {
+  const { countryCode } = await params
   const categories = await listCategories().catch(() => [])
   const topCategoryLinks = (categories || [])
     .filter((c: any) => !c?.parent_category_id && !c?.parent_category)
@@ -26,7 +27,7 @@ export default async function DealsPage({ params }: Params) {
     <StoreTemplate
       onSale
       page={"1"}
-      countryCode={params.countryCode}
+      countryCode={countryCode}
       title={"Deals"}
       subtitle={"Save on selected accessories and limited-time offers."}
       quickLinks={topCategoryLinks}

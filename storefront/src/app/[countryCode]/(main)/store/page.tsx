@@ -16,18 +16,19 @@ export const metadata: Metadata = {
 }
 
 type Params = {
-  searchParams: {
+  searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
     onSale?: string
-  }
-  params: {
+  }>
+  params: Promise<{
     countryCode: string
-  }
+  }>
 }
 
 export default async function StorePage({ searchParams, params }: Params) {
-  const { sortBy, page, onSale } = searchParams
+  const { countryCode } = await params
+  const { sortBy, page, onSale } = await searchParams
 
   const categories = await listCategories().catch(() => [])
   const topCategoryLinks = (categories || [])
@@ -41,7 +42,7 @@ export default async function StorePage({ searchParams, params }: Params) {
       sortBy={sortBy}
       page={page}
       onSale={onSale === "1" || onSale === "true"}
-      countryCode={params.countryCode}
+      countryCode={countryCode}
       title={"Shop All"}
       subtitle={"Explore all Letscase products and accessories."}
       quickLinks={topCategoryLinks}
