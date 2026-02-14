@@ -95,7 +95,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
               />
               <div className="grid grid-cols-[144px_1fr] gap-x-2">
                 <Input
-                  label="Postal code"
+                  label="GPS Address"
                   name="postal_code"
                   required
                   autoComplete="postal-code"

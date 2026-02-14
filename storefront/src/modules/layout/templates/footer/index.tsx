@@ -16,6 +16,7 @@ export default async function Footer() {
                 alt="Letscase"
                 width={160}
                 height={40}
+                loading="lazy"
                 className="h-7 w-auto"
               />
             </LocalizedClientLink>
@@ -158,6 +159,7 @@ export default async function Footer() {
                   alt={logo.alt}
                   width={80}
                   height={32}
+                  loading="lazy"
                   className="max-h-[22px] max-w-[52px] w-auto h-auto object-contain"
                 />
               </div>

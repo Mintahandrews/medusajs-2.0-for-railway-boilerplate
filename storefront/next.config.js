@@ -41,6 +41,17 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Compress responses (gzip/brotli)
+  compress: true,
+  // Automatically optimize package imports for tree-shaking
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@medusajs/ui",
+      "lodash",
+      "@headlessui/react",
+    ],
+  },
   async headers() {
     return [
       {
@@ -59,10 +70,28 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400" },
         ],
       },
+      // Cache static assets aggressively
+      {
+        source: "/:path(.+\\.(?:ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2))",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      // Cache Next.js static chunks
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
     ]
   },
   images: {
-    unoptimized: true,
+    // Enable Next.js image optimization (sharp is already installed)
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: "http",

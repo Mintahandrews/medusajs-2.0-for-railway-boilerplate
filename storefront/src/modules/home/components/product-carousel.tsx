@@ -46,17 +46,32 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
   const displayItems = normalized.slice(0, 8)
 
   const rafRef = useRef<number | null>(null)
+  const isVisible = useRef(true)
+
+  // Pause rAF when carousel scrolls out of viewport
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisible.current = entry.isIntersecting },
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const step = useCallback(() => {
     const el = scrollRef.current
     if (!el) return
 
-    el.scrollLeft += AUTO_SCROLL_SPEED
+    if (isVisible.current) {
+      el.scrollLeft += AUTO_SCROLL_SPEED
 
-    // If we've scrolled past the first set, jump back seamlessly
-    const halfWidth = el.scrollWidth / 2
-    if (el.scrollLeft >= halfWidth) {
-      el.scrollLeft -= halfWidth
+      // If we've scrolled past the first set, jump back seamlessly
+      const halfWidth = el.scrollWidth / 2
+      if (el.scrollLeft >= halfWidth) {
+        el.scrollLeft -= halfWidth
+      }
     }
 
     rafRef.current = requestAnimationFrame(step)
@@ -199,6 +214,7 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
                   alt={item.title}
                   fill
                   sizes="280px"
+                  loading="lazy"
                   className="object-contain scale-[1.12] pointer-events-none"
                   draggable={false}
                 />

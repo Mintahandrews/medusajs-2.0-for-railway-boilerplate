@@ -71,7 +71,7 @@ export default function CookieConsent() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[60] max-w-4xl mx-auto pointer-events-none">
-      <div className="pointer-events-auto bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-slide-up">
+      <div className="pointer-events-auto bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-cookie-slide-up">
         {!showPreferences ? (
           <>
             {/* Content */}
@@ -215,15 +215,6 @@ export default function CookieConsent() {
           </>
         )}
 
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes slide-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .animate-slide-up {
-            animation: slide-up 0.4s ease-out;
-          }
-        `}} />
       </div>
     </div>
   )

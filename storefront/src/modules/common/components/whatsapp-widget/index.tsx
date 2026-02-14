@@ -48,19 +48,6 @@ export default function WhatsAppWidget() {
         Chat with us
         <span className="absolute right-[-4px] top-1/2 -translate-y-1/2 border-4 border-transparent border-l-grey-90" />
       </span>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes wa-bounce {
-          0%, 100% { transform: translateY(0); }
-          20% { transform: translateY(-8px); }
-          40% { transform: translateY(0); }
-          60% { transform: translateY(-4px); }
-          80% { transform: translateY(0); }
-        }
-        .animate-bounce-once {
-          animation: wa-bounce 1.5s ease-in-out 1s 1;
-        }
-      `}} />
     </a>
   )
 }

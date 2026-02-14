@@ -17,17 +17,21 @@ export default async function Home({
   params: Promise<{ countryCode: string }>
 }) {
   const { countryCode } = await params
-  const categories = await listCategories().catch(() => [] as any[])
-  const {
-    response: { products },
-  } = await getProductsList({
-    countryCode,
-    pageParam: 1,
-    queryParams: {
-      limit: 24,
-      order: "created_at",
-    },
-  }).catch(() => ({ response: { products: [], count: 0 }, nextPage: null }))
+
+  // Fetch categories and products in parallel for faster page load
+  const [categories, productResult] = await Promise.all([
+    listCategories().catch(() => [] as any[]),
+    getProductsList({
+      countryCode,
+      pageParam: 1,
+      queryParams: {
+        limit: 24,
+        order: "created_at",
+      },
+    }).catch(() => ({ response: { products: [], count: 0 }, nextPage: null })),
+  ])
+
+  const products = productResult.response.products
 
   return (
     <>

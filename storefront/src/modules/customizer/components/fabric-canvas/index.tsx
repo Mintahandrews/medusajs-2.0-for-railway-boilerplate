@@ -1117,56 +1117,86 @@ export default function FabricCanvas() {
       // Detect touch devices for larger targets
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
 
-      // Configure all FabricObject defaults — visible, large control handles
-      fabric.FabricObject.prototype.set({
-        // Corner (handle) appearance
-        cornerSize: isTouchDevice ? 30 : 18,   // visible handle diameter
-        touchCornerSize: 50,                    // invisible touch hit area (≥44 for Apple HIG)
-        cornerColor: '#5DABA6',                 // brand teal
-        cornerStrokeColor: '#ffffff',
-        cornerStyle: 'circle',
+      // ── Control handle styling (high-contrast: white fill + dark stroke) ──
+      // These must be visible on ANY background color the user picks.
+      const controlDefaults = {
+        cornerSize: isTouchDevice ? 28 : 16,
+        touchCornerSize: 48,
+        cornerColor: '#ffffff',
+        cornerStrokeColor: '#1a1a2e',
+        cornerStyle: 'circle' as const,
         transparentCorners: false,
-        // Selection border
-        borderColor: '#5DABA6',
-        borderScaleFactor: 2,
-        borderDashArray: [6, 3],                // dashed for clarity
-        // Keep padding small so controls stay within the canvas viewport
-        padding: isTouchDevice ? 4 : 2,
-        // Allow non-uniform scaling so edge handles resize one axis
+        borderColor: '#1a1a2e',
+        borderScaleFactor: 1.8,
+        borderDashArray: [5, 3],
+        padding: isTouchDevice ? 6 : 3,
         lockUniScaling: false,
-        // Ensure controls + border are enabled
         hasBorders: true,
         hasControls: true,
-      })
+        selectable: true,
+      }
+
+      // 1) Set on prototype so any object created later inherits them
+      Object.assign(fabric.FabricObject.prototype, controlDefaults)
+
+      // 2) Also patch ownDefaults (some Fabric v6 code paths read from here)
+      Object.assign(fabric.FabricObject.ownDefaults, controlDefaults)
 
       // In Fabric v6 the rotation offset lives on the control itself
       const mtrControl = fabric.FabricObject.prototype.controls?.mtr
       if (mtrControl) {
-        mtrControl.offsetY = isTouchDevice ? -40 : -30
+        mtrControl.offsetY = isTouchDevice ? -36 : -26
       }
 
-      // Ensure every object added to the canvas has all 9 controls visible
-      fabricCanvas.on('object:added', (opt: any) => {
-        const obj = opt.target
-        if (!obj) return
+      // Helper: apply control settings + visibility to a single object
+      function configureObjectControls(obj: any) {
+        if (!obj || obj === fabricCanvas.clipPath) return
+        // Apply styling
+        obj.set(controlDefaults)
+        // Force all 9 handles visible
         obj.setControlsVisibility({
-          tl: true, tr: true, bl: true, br: true,   // corners
-          mt: true, mb: true, ml: true, mr: true,   // mid-edges
-          mtr: true,                                  // rotation
+          tl: true, tr: true, bl: true, br: true,
+          mt: true, mb: true, ml: true, mr: true,
+          mtr: true,
         })
-        obj.setCoords()  // recalculate control positions
+        obj.setCoords()
+      }
+
+      // Every object added gets controls configured
+      fabricCanvas.on('object:added', (opt: any) => {
+        configureObjectControls(opt.target)
+      })
+
+      // When user selects an object, refresh its controls (guards against stale coords)
+      fabricCanvas.on('selection:created', () => {
+        const active = fabricCanvas.getActiveObject()
+        if (active) {
+          active.setCoords()
+          fabricCanvas.requestRenderAll()
+        }
+      })
+      fabricCanvas.on('selection:updated', () => {
+        const active = fabricCanvas.getActiveObject()
+        if (active) {
+          active.setCoords()
+          fabricCanvas.requestRenderAll()
+        }
       })
 
       // Ensure Fabric's upper canvas (interaction layer) blocks browser gestures
       const upperEl = fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl?.querySelector('canvas.upper-canvas')
       if (upperEl) {
         upperEl.style.touchAction = 'none'
+        upperEl.style.position = 'absolute'
+        upperEl.style.zIndex = '2'
       }
       if (fabricCanvas.wrapperEl) {
         fabricCanvas.wrapperEl.style.touchAction = 'none'
+        fabricCanvas.wrapperEl.style.position = 'relative'
+        fabricCanvas.wrapperEl.style.zIndex = '1'
       }
 
-      // Improve touch responsiveness: larger find tolerance, no delay
+      // Improve touch responsiveness: larger find tolerance
       fabricCanvas.set({
         targetFindTolerance: isTouchDevice ? 18 : 8,
       })
@@ -1268,6 +1298,15 @@ export default function FabricCanvas() {
           { width: cw * newScale, height: ch * newScale },
           { cssOnly: true }
         )
+
+        // CRITICAL: recalculate canvas offset for correct mouse→canvas mapping
+        canvas.calcOffset()
+
+        // Refresh all objects' control coordinates after the scale change
+        canvas.forEachObject((obj: any) => {
+          obj.setCoords()
+        })
+        canvas.requestRenderAll()
       }
     }
 
@@ -1426,11 +1465,14 @@ export default function FabricCanvas() {
               height: h,
               borderRadius: sr,
               touchAction: "none",
+              position: "relative",
             }}
           >
+            {/* Fabric wraps this <canvas> in its own div. z-index ensures the
+                interactive upper-canvas sits above the decorative overlays below. */}
             <canvas
               ref={canvasElRef}
-              style={{ touchAction: "none" }}
+              style={{ touchAction: "none", position: "relative", zIndex: 5 }}
             />
 
             {/* Device-specific camera module overlay */}

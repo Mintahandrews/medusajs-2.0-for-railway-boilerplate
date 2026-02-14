@@ -75,19 +75,36 @@ export default function TestimonialsSlider() {
   }, [items.length])
 
   /* -- auto-scroll with rAF (matches product carousel) -- */
+  const isVisible = useRef(true)
+
+  // Pause rAF when slider scrolls out of viewport
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisible.current = entry.isIntersecting },
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   const step = useCallback(() => {
     const el = scrollRef.current
     if (!el) return
 
-    el.scrollLeft += AUTO_SCROLL_SPEED
+    if (isVisible.current) {
+      el.scrollLeft += AUTO_SCROLL_SPEED
 
-    // seamless loop: once past the duplicated set, jump back
-    const half = el.scrollWidth / 2
-    if (el.scrollLeft >= half) {
-      el.scrollLeft -= half
+      // seamless loop: once past the duplicated set, jump back
+      const half = el.scrollWidth / 2
+      if (el.scrollLeft >= half) {
+        el.scrollLeft -= half
+      }
+
+      updateActiveCard()
     }
 
-    updateActiveCard()
     rafRef.current = requestAnimationFrame(step)
   }, [updateActiveCard])
 

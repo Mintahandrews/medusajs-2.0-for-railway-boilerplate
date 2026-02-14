@@ -146,7 +146,7 @@ const Register = ({ setCurrentView }: Props) => {
                   data-testid="city-input"
                 />
                 <Input
-                  label="Postal code"
+                  label="GPS Address"
                   name="postal_code"
                   autoComplete="postal-code"
                   value={addressFields.postal_code}

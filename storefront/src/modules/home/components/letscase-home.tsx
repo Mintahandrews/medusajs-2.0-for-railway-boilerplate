@@ -1,4 +1,5 @@
 import Image from "next/image"
+import dynamic from "next/dynamic"
 
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
@@ -12,8 +13,16 @@ import {
 } from "lucide-react"
 
 import ProductCarousel from "./product-carousel"
-import TestimonialsSlider from "./testimonials-slider"
-import NewsletterSignup from "./newsletter-signup"
+
+// Lazy-load below-fold sections to reduce initial JS bundle
+const TestimonialsSlider = dynamic(() => import("./testimonials-slider"), {
+  ssr: false,
+  loading: () => <div className="py-12 small:py-20" />,
+})
+const NewsletterSignup = dynamic(() => import("./newsletter-signup"), {
+  ssr: false,
+  loading: () => <div className="py-16 small:py-20" />,
+})
 
 function sectionShell(children: React.ReactNode, className?: string) {
   return (
@@ -232,6 +241,7 @@ function ShopByCategory({ categories }: { categories: any[] }) {
                   src={c.image}
                   alt={c.label}
                   fill
+                  loading="lazy"
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />
@@ -272,6 +282,7 @@ function ShopByCategory({ categories }: { categories: any[] }) {
                   src={c.image}
                   alt={c.label}
                   fill
+                  loading="lazy"
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
@@ -338,6 +349,7 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
                 src={p1Image}
                 alt={p1?.title || "Featured product"}
                 fill
+                loading="lazy"
                 className="object-contain"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
@@ -368,6 +380,7 @@ function PromoBanners({ products }: { products: HttpTypes.StoreProduct[] }) {
                 src={p2Image}
                 alt={p2?.title || "Featured product"}
                 fill
+                loading="lazy"
                 className="object-contain"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />

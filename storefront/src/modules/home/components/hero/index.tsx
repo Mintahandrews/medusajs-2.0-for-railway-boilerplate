@@ -1,3 +1,4 @@
+import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ArrowRight, Paintbrush, Smartphone, Headphones, BatteryCharging, Shield } from "lucide-react"
 
@@ -13,9 +14,17 @@ const Hero = () => {
     <section className="w-full bg-white">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8 small:py-10">
         <div
-          className="relative overflow-hidden rounded-[28px] bg-cover bg-center px-6 py-12 small:px-12 small:py-0 small:h-[560px] flex items-center"
-          style={{ backgroundImage: "url('/hero.svg')" }}
+          className="relative overflow-hidden rounded-[28px] px-6 py-12 small:px-12 small:py-0 small:h-[560px] flex items-center"
         >
+          {/* Hero background — using next/image for optimization & LCP */}
+          <Image
+            src="/hero.svg"
+            alt="Letscase Hero Background"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
           {/* Dark gradient for text contrast */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20 small:from-black/75 small:via-black/40 small:to-transparent" />
 

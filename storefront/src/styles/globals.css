@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Inter font is loaded via next/font in layout.tsx — no @import needed */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
@@ -62,6 +62,27 @@
   100% {
     transform: translateX(-50%);
   }
+}
+
+/* WhatsApp widget bounce animation */
+@keyframes wa-bounce {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-8px); }
+  40% { transform: translateY(0); }
+  60% { transform: translateY(-4px); }
+  80% { transform: translateY(0); }
+}
+.animate-bounce-once {
+  animation: wa-bounce 1.5s ease-in-out 1s 1;
+}
+
+/* Cookie consent slide-up animation */
+@keyframes cookie-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-cookie-slide-up {
+  animation: cookie-slide-up 0.4s ease-out forwards;
 }
 
 @layer utilities {

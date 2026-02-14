@@ -224,15 +224,25 @@ export function CustomizerProvider({
           top: deviceConfig.canvasHeight / 2,
           originX: "center",
           originY: "center",
-          // Ensure all resize handles are enabled
+          // Explicit control config — do not rely on prototype alone
           hasControls: true,
           hasBorders: true,
           lockUniScaling: false,
+          selectable: true,
+          cornerSize: 16,
+          touchCornerSize: 48,
+          cornerColor: '#ffffff',
+          cornerStrokeColor: '#1a1a2e',
+          cornerStyle: 'circle' as const,
+          transparentCorners: false,
+          borderColor: '#1a1a2e',
+          padding: 4,
         })
 
         canvas.add(img)
+        img.setCoords()  // recalculate control hit areas
         canvas.setActiveObject(img)
-        canvas.renderAll()
+        canvas.requestRenderAll()
         pushHistory()
       }
       reader.readAsDataURL(file)
@@ -257,10 +267,19 @@ export function CustomizerProvider({
         top: canvas.height! / 2,
         originX: "center",
         originY: "center",
-        // Ensure all resize handles are enabled for text
+        // Explicit control config — do not rely on prototype alone
         hasControls: true,
         hasBorders: true,
         lockUniScaling: false,
+        selectable: true,
+        cornerSize: 16,
+        touchCornerSize: 48,
+        cornerColor: '#ffffff',
+        cornerStrokeColor: '#1a1a2e',
+        cornerStyle: 'circle' as const,
+        transparentCorners: false,
+        borderColor: '#1a1a2e',
+        padding: 4,
       })
 
       canvas.add(t)
@@ -268,10 +287,10 @@ export function CustomizerProvider({
       // Force Fabric to measure the text box, then re-center precisely.
       t.initDimensions()
       canvas.centerObject(t)
-      t.setCoords()
+      t.setCoords()  // recalculate control hit areas
 
       canvas.setActiveObject(t)
-      canvas.renderAll()
+      canvas.requestRenderAll()
       pushHistory()
     },
     [state.fontFamily, state.fontSize, state.textColor, pushHistory]

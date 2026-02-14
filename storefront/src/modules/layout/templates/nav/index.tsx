@@ -13,11 +13,11 @@ import DesktopNav from "./desktop-nav"
 import DesktopSearch from "./desktop-search"
 
 export default async function Nav() {
-  const regions = await listRegions()
-    .then((regions: StoreRegion[]) => regions)
-    .catch(() => [] as StoreRegion[])
-
-  const [categories, collectionsResult] = await Promise.all([
+  // Fetch all nav data in parallel for faster load
+  const [regions, categories, collectionsResult] = await Promise.all([
+    listRegions()
+      .then((regions: StoreRegion[]) => regions)
+      .catch(() => [] as StoreRegion[]),
     listCategories().catch(() => [] as any[]),
     getCollectionsList(0, 100).catch(() => ({ collections: [], count: 0 })),
   ])

@@ -17,13 +17,20 @@ export default async function ProductPreview({
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
 }) {
-  const [pricedProduct] = await getProductsById({
-    ids: [product.id!],
-    regionId: region.id,
-  })
+  // Use product directly if it already has calculated_price (pre-fetched),
+  // otherwise fall back to individual fetch (backward compat)
+  const hasPrice = product.variants?.some(
+    (v: any) => v.calculated_price !== undefined
+  )
 
-  if (!pricedProduct) {
-    return null
+  let pricedProduct = product
+  if (!hasPrice) {
+    const [fetched] = await getProductsById({
+      ids: [product.id!],
+      regionId: region.id,
+    })
+    if (!fetched) return null
+    pricedProduct = fetched
   }
 
   const { cheapestPrice } = getProductPrice({
@@ -50,6 +57,7 @@ export default async function ProductPreview({
             images={product.images}
             size="full"
             isFeatured={isFeatured}
+            alt={product.title}
           />
         </div>
         <div className="flex txt-compact-medium mt-4 justify-between">

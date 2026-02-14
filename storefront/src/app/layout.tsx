@@ -1,8 +1,16 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
+import { Inter } from "next/font/google"
 import ScrollToTop from "@modules/common/components/scroll-to-top"
 import WebsiteJsonLd from "@modules/seo/components/website-jsonld"
 import "styles/globals.css"
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-inter",
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -72,11 +80,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-mode="light">
+    <html lang="en" data-mode="light" className={inter.variable}>
       <head>
         <WebsiteJsonLd />
+        {/* Preconnect to Medusa backend for faster API calls */}
+        {process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL && (
+          <link rel="preconnect" href={process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL} />
+        )}
       </head>
-      <body>
+      <body className={inter.className}>
         <ScrollToTop />
         <main id="top" className="relative">{props.children}</main>
       </body>

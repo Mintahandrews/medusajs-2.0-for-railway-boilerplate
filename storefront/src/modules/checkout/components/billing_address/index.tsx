@@ -92,7 +92,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           data-testid="billing-company-input"
         />
         <Input
-          label="Postal code"
+          label="GPS Address"
           name="billing_address.postal_code"
           autoComplete="postal-code"
           value={formData["billing_address.postal_code"]}
