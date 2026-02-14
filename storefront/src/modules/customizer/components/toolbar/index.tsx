@@ -8,7 +8,6 @@ import {
   Palette,
   Shield,
   Smartphone,
-  ShoppingCart,
   Undo2,
   Redo2,
   Trash2,
@@ -18,11 +17,8 @@ import { useCustomizer, type ActiveTool } from "../../context"
 import UploadPanel from "./upload-panel"
 import TextPanel from "./text-panel"
 import BackgroundPanel from "./background-panel"
-import AddToCartPanel from "./add-to-cart-panel"
 import PreviewPanel from "./preview-panel"
 import CaseTypePanel from "./case-type-panel"
-import { HttpTypes } from "@medusajs/types"
-
 const TOOLS: { id: ActiveTool; label: string; icon: React.ReactNode }[] = [
   { id: "select", label: "Select", icon: <MousePointer2 className="w-5 h-5" /> },
   { id: "upload", label: "Uploads", icon: <Upload className="w-5 h-5" /> },
@@ -30,15 +26,9 @@ const TOOLS: { id: ActiveTool; label: string; icon: React.ReactNode }[] = [
   { id: "background", label: "Color", icon: <Palette className="w-5 h-5" /> },
   { id: "case-type", label: "Case", icon: <Shield className="w-5 h-5" /> },
   { id: "preview", label: "Preview", icon: <Smartphone className="w-5 h-5" /> },
-  { id: "cart", label: "Cart", icon: <ShoppingCart className="w-5 h-5" /> },
 ]
 
-interface ToolbarProps {
-  product?: HttpTypes.StoreProduct | null
-  region?: HttpTypes.StoreRegion | null
-}
-
-export default function Toolbar({ product, region }: ToolbarProps) {
+export default function Toolbar() {
   const {
     state,
     dispatch,
@@ -102,24 +92,7 @@ export default function Toolbar({ product, region }: ToolbarProps) {
             <p>Use the tools above to add images, text, or change the background.</p>
           </div>
         )}
-        {state.activeTool === "cart" && product && region && (
-          <AddToCartPanel product={product} region={region} />
-        )}
-        {state.activeTool === "cart" && (!product || !region) && (
-          <div className="p-4 flex flex-col gap-3">
-            <p className="text-sm text-gray-500">
-              No matching product found for this device. You can still design
-              and download your case, or browse the store to find the right product.
-            </p>
-            <a
-              href={`/${typeof window !== "undefined" ? window.location.pathname.split("/")[1] : "us"}/store`}
-              className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                         bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
-            >
-              Browse Store
-            </a>
-          </div>
-        )}
+
       </div>
 
       {/* Bottom actions */}

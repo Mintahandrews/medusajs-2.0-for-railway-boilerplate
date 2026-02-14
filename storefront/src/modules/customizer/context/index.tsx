@@ -14,7 +14,7 @@ import type { DeviceConfig } from "@lib/device-assets"
 /*  Types                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export type ActiveTool = "select" | "text" | "upload" | "background" | "case-type" | "preview" | "cart"
+export type ActiveTool = "select" | "text" | "upload" | "background" | "case-type" | "preview"
 
 export type CaseType = "slim" | "tough" | "clear" | "magsafe"
 

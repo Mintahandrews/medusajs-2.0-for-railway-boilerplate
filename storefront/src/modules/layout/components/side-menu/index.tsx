@@ -52,12 +52,8 @@ const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "Home", href: "/", testId: "home-link" },
   { name: "Design Your Case", href: "/customizer", testId: "customizer-link" },
   { name: "Deals", href: "/deals", testId: "deals-link" },
-  { name: "About Us", href: "/about-us", testId: "about-us-link" },
   { name: "Account", href: "/account", testId: "account-link" },
-  { name: "Wishlist", href: "/account/wishlist", testId: "wishlist-link" },
-  { name: "Visit Our Store", href: "/visit-our-store", testId: "visit-store-link" },
   { name: "Contact", href: "/contact", testId: "contact-link" },
-  { name: "FAQ", href: "/faq", testId: "faq-link" },
   { name: "Order Tracking", href: "/order-tracking", testId: "order-tracking-link" },
 ]
 

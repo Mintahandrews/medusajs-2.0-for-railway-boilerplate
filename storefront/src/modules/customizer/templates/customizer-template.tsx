@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useCallback } from "react"
-import { ChevronUp, ChevronDown, Upload, Type, Palette, Shield, Smartphone, ShoppingCart } from "lucide-react"
+import { ChevronUp, ChevronDown, Upload, Type, Palette, Shield, Smartphone } from "lucide-react"
 import { CustomizerProvider, useCustomizer, type ActiveTool } from "../context"
 import FabricCanvas from "../components/fabric-canvas"
 import Toolbar from "../components/toolbar"
@@ -58,7 +58,7 @@ function CustomizerLayout({
 
         {/* ---- Desktop sidebar ---- */}
         <aside className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200">
-          <Toolbar product={product} region={region} />
+          <Toolbar />
         </aside>
 
         {/* ---- Canvas area ---- */}
@@ -106,7 +106,7 @@ function CustomizerLayout({
 
           {/* Toolbar content — scrollable when expanded */}
           <div className={`flex-1 overflow-y-auto overflow-x-hidden ${mobileExpanded ? "" : "hidden"}`}>
-            <Toolbar product={product} region={region} />
+            <Toolbar />
           </div>
 
           {/* Collapsed quick-access tabs — show tool icons when collapsed */}
@@ -144,8 +144,7 @@ const QUICK_TOOLS: { label: string; icon: any; tool: ActiveTool; highlight?: boo
   { label: "Text", icon: Type, tool: "text" },
   { label: "Color", icon: Palette, tool: "background" },
   { label: "Case", icon: Shield, tool: "case-type" },
-  { label: "Cart", icon: ShoppingCart, tool: "cart", highlight: true },
-  { label: "Preview", icon: Smartphone, tool: "preview" },
+  { label: "Preview", icon: Smartphone, tool: "preview", highlight: true },
 ]
 
 function MobileQuickBar({ onExpand }: { onExpand: (tool: ActiveTool) => void }) {
