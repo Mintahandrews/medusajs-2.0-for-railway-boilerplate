@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { MapPin, Clock, Phone } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
@@ -50,9 +51,7 @@ export default function VisitOurStorePage() {
         {/* Address */}
         <section className="rounded-[16px] border border-grey-20 bg-white p-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-brand text-lg" aria-hidden="true">
-              📍
-            </span>
+            <MapPin className="text-brand w-5 h-5" aria-hidden="true" />
             <h2 className="text-[17px] font-semibold text-grey-90">Address</h2>
           </div>
           <p className="text-[14px] leading-[1.7] text-grey-60">
@@ -67,9 +66,7 @@ export default function VisitOurStorePage() {
         {/* Opening Hours */}
         <section className="rounded-[16px] border border-grey-20 bg-white p-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-brand text-lg" aria-hidden="true">
-              🕗
-            </span>
+            <Clock className="text-brand w-5 h-5" aria-hidden="true" />
             <h2 className="text-[17px] font-semibold text-grey-90">
               Opening Hours
             </h2>
@@ -85,9 +82,7 @@ export default function VisitOurStorePage() {
         {/* Contact */}
         <section className="rounded-[16px] border border-grey-20 bg-white p-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-brand text-lg" aria-hidden="true">
-              📞
-            </span>
+            <Phone className="text-brand w-5 h-5" aria-hidden="true" />
             <h2 className="text-[17px] font-semibold text-grey-90">Contact</h2>
           </div>
           <p className="text-[14px] leading-[1.7] text-grey-60">

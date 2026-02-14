@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Cookie } from "lucide-react"
 
 const COOKIE_CONSENT_KEY = "letscase_cookie_consent"
 const COOKIE_PREFERENCES_KEY = "letscase_cookie_preferences"
@@ -77,7 +78,7 @@ export default function CookieConsent() {
             {/* Content */}
             <div className="p-6">
               <h3 className="text-[16px] font-bold text-gray-900 flex items-center gap-2">
-                <span className="text-lg">🍪</span> Cookie Preferences
+                <Cookie className="w-5 h-5 text-yellow-500" aria-hidden="true" /> Cookie Preferences
               </h3>
               <p className="text-[14px] text-gray-600 mt-2 leading-relaxed">
                 We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 

@@ -5,6 +5,7 @@ import introJs from "intro.js"
 import { Tour } from "intro.js/src/packages/tour/tour"
 import type { TooltipPosition } from "intro.js/src/packages/tooltip"
 import "intro.js/introjs.css"
+import { Palette, Smartphone, Hammer, UploadCloud, Pencil, Shield, Eye, Zap, Download, ShoppingCart, Rocket, Lightbulb } from "lucide-react"
 
 const STORAGE_KEY = "letscase_customizer_onboarded"
 
@@ -102,7 +103,7 @@ function getDesktopSteps(): StepDef[] {
     {
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">🎨</div>
+          <Palette class="lc-step-icon" />
           <h3>Welcome to the Case Designer!</h3>
           <p>Create a one-of-a-kind phone case in just a few steps. Let us show you around.</p>
         </div>`,
@@ -112,10 +113,10 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='canvas-area']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">📱</div>
+          <Smartphone class="lc-step-icon" />
           <h3>Your Design Canvas</h3>
           <p>This is where your case comes to life. Drag, resize, and rotate images and text directly on the canvas.</p>
-          <div class="lc-tip">💡 Scroll to zoom in and out on the canvas.</div>
+          <div class="lc-tip"><Lightbulb class="inline w-4 h-4 mr-1 align-text-bottom" /> Scroll to zoom in and out on the canvas.</div>
         </div>`,
       position: "left",
     },
@@ -124,7 +125,7 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='toolbar-tabs']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">🛠️</div>
+          <Hammer class="lc-step-icon" />
           <h3>Your Design Tools</h3>
           <p>All your creative tools live here. Switch between them to build your design layer by layer.</p>
         </div>`,
@@ -135,10 +136,10 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='tool-upload']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">📤</div>
+          <UploadCloud class="lc-step-icon" />
           <h3>Upload Images</h3>
           <p>Add your own photos, artwork, or logos. Drag them on the canvas to position perfectly.</p>
-          <div class="lc-tip">💡 Use high-res images (1000×1000px+) for the sharpest print.</div>
+          <div class="lc-tip"><Lightbulb class="inline w-4 h-4 mr-1 align-text-bottom" /> Use high-res images (1000×1000px+) for the sharpest print.</div>
         </div>`,
       position: "right",
     },
@@ -147,10 +148,10 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='tool-text']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">✏️</div>
+          <Pencil class="lc-step-icon" />
           <h3>Add Text</h3>
           <p>Type names, quotes, or anything you like. Choose fonts, sizes, and colors to match your style.</p>
-          <div class="lc-tip">💡 Tap any text on the canvas to edit it afterwards.</div>
+          <div class="lc-tip"><Lightbulb class="inline w-4 h-4 mr-1 align-text-bottom" /> Tap any text on the canvas to edit it afterwards.</div>
         </div>`,
       position: "right",
     },
@@ -159,10 +160,10 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='tool-background']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">🎨</div>
+          <Palette class="lc-step-icon" />
           <h3>Background Color</h3>
           <p>Set a background color for your case. Pick a preset or enter a custom hex code.</p>
-          <div class="lc-tip">💡 Lighter backgrounds make images &amp; text pop!</div>
+          <div class="lc-tip"><Lightbulb class="inline w-4 h-4 mr-1 align-text-bottom" /> Lighter backgrounds make images &amp; text pop!</div>
         </div>`,
       position: "right",
     },
@@ -171,7 +172,7 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='tool-case-type']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">🛡️</div>
+          <Shield class="lc-step-icon" />
           <h3>Choose Your Case</h3>
           <p>Select protection level — Slim, Tough, Clear, or MagSafe. Each has different pricing based on materials.</p>
         </div>`,
@@ -182,7 +183,7 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='tool-preview']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">👁️</div>
+          <Eye class="lc-step-icon" />
           <h3>Preview Design</h3>
           <p>See a realistic preview of your finished case before ordering.</p>
         </div>`,
@@ -193,7 +194,7 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='actions-bar']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">⚡</div>
+          <Zap class="lc-step-icon" />
           <h3>Quick Actions</h3>
           <p>Undo, Redo, and Delete give you full control. Made a mistake? Just undo it!</p>
         </div>`,
@@ -204,7 +205,7 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='download-btn']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">⬇️</div>
+          <Download class="lc-step-icon" />
           <h3>Download Preview</h3>
           <p>Save a copy of your design as an image. Great for sharing or keeping a record!</p>
         </div>`,
@@ -215,10 +216,10 @@ function getDesktopSteps(): StepDef[] {
       element: "[data-tour='floating-cart']",
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">🛒</div>
+          <ShoppingCart class="lc-step-icon" />
           <h3>Add to Cart</h3>
           <p>When you're happy with your creation, hit the cart button to add your custom case to your order.</p>
-          <div class="lc-tip">💡 Your design is saved with the order so we print it exactly as you created it.</div>
+          <div class="lc-tip"><Lightbulb class="inline w-4 h-4 mr-1 align-text-bottom" /> Your design is saved with the order so we print it exactly as you created it.</div>
         </div>`,
       position: "left",
     },
@@ -226,7 +227,7 @@ function getDesktopSteps(): StepDef[] {
     {
       intro: `
         <div class="lc-step">
-          <div class="lc-step-icon">🚀</div>
+          <Rocket class="lc-step-icon" />
           <h3>You're All Set!</h3>
           <p>Start designing your dream case. Have fun and let your creativity flow!</p>
         </div>`,
