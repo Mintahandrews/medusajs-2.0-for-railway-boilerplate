@@ -1,39 +1,12 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
-import { useEffect } from "react"
-
-const PRIMARY_LOGO_SRC = "/static/logo.png"
-const FALLBACK_LOGO_SRC = "/logo.png"
 
 /**
  * Widget injected above the login form.
  * Replaces the default Medusa avatar-box with the Letscase logo.
  *
- * The default AvatarBox is hidden via DOM detection to avoid icon overlap.
+ * The default AvatarBox is hidden via CSS injected in admin-global.css.
  */
 const LoginLogoWidget = () => {
-  useEffect(() => {
-    const hideDefaultLoginLogo = () => {
-      const heading = Array.from(
-        document.querySelectorAll<HTMLElement>("h1, h2, h3, p, span")
-      ).find((node) => node.textContent?.trim().includes("Welcome to Medusa"))
-
-      const avatarCandidate = heading?.parentElement?.previousElementSibling as
-        | HTMLElement
-        | null
-
-      if (avatarCandidate?.querySelector("svg")) {
-        avatarCandidate.style.display = "none"
-      }
-    }
-
-    hideDefaultLoginLogo()
-
-    const observer = new MutationObserver(() => hideDefaultLoginLogo())
-    observer.observe(document.body, { childList: true, subtree: true })
-
-    return () => observer.disconnect()
-  }, [])
-
   return (
     <div
       style={{
@@ -45,12 +18,8 @@ const LoginLogoWidget = () => {
       }}
     >
       <img
-        src={PRIMARY_LOGO_SRC}
+        src="/logo.png"
         alt="Letscase"
-        onError={(event) => {
-          event.currentTarget.onerror = null
-          event.currentTarget.src = FALLBACK_LOGO_SRC
-        }}
         style={{
           width: 56,
           height: 56,
