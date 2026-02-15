@@ -275,16 +275,20 @@ const SideMenu = ({
                                                   onClick={() => close()}
                                                 >
                                                   {item.name}
-                                                <LocalizedClientLink
-                                                    key={item.href}
-                                                    href={item.href}
-                                                    className="shrink-0 rounded-full border border-grey-20 px-3 py-1 text-[13px] text-grey-90 bg-white"
-                                                    onClick={() => close()}
-                                                  >
-                                                    {item.name}
-                                                  </LocalizedClientLink>
-                                        ? SHOP_LINKS.map((item) => (
-                                          <LocalizedClientLink
+                                                </LocalizedClientLink>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        </>
+                                      ) : null}
+
+                                      {SHOP_LINKS.length ? (
+                                        <>
+                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-grey-50">
+                                            Shop essentials
+                                          </div>
+                                          {SHOP_LINKS.map((item) => (
+                                            <LocalizedClientLink
                                               key={item.name}
                                               href={item.href}
                                               className="py-1 hover:text-grey-90"
@@ -292,8 +296,9 @@ const SideMenu = ({
                                             >
                                               {item.name}
                                             </LocalizedClientLink>
-                                        ))
-                                        : null}
+                                          ))}
+                                        </>
+                                      ) : null}
                                     </div>
                                   </Disclosure.Panel>
                                 </div>
