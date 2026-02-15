@@ -181,6 +181,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "i.pravatar.cc",
       },
+      {
+        protocol: "https",
+        hostname: "*.railway.app",
+      },
+      {
+        protocol: "https",
+        hostname: "*.up.railway.app",
+      },
       ...(addDynamicDomain(process.env.NEXT_PUBLIC_MINIO_ENDPOINT)
         ? [addDynamicDomain(process.env.NEXT_PUBLIC_MINIO_ENDPOINT)]
         : []),
