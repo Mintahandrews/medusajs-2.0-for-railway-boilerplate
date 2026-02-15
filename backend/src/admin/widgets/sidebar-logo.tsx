@@ -50,13 +50,13 @@ const SidebarLogoWidget = () => {
         // Must be a small squared element with 1-2 char fallback (store initials)
         if (!isSmallAvatar || text.length > 2 || text.length === 0) return
 
-        // Must be near the top of the sidebar (store header area)
-        const trigger = el.closest("button, [data-state]")
+        // Must be inside a clickable trigger (store header dropdown)
+        const trigger = el.closest("button, [data-state], [role='menuitem'], [data-radix-collection-item]")
         if (!trigger) return
 
-        // Verify this is inside the first section of the sidebar
-        const nav = el.closest("nav")
-        if (!nav) return
+        // Must be near the top of the sidebar (not a user avatar at the bottom)
+        const rect = el.getBoundingClientRect()
+        if (rect.top > 120) return
 
         // Replace avatar content with logo image
         avatar.setAttribute("data-lc-replaced", "true")

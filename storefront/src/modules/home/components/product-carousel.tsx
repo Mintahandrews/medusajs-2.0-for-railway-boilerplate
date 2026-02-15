@@ -48,6 +48,7 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
 
   const rafRef = useRef<number | null>(null)
   const isVisible = useRef(true)
+  const scrollAccum = useRef(0)
 
   // Pause rAF when carousel scrolls out of viewport
   useEffect(() => {
@@ -66,7 +67,12 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     if (!el) return
 
     if (isVisible.current) {
-      el.scrollLeft += AUTO_SCROLL_SPEED
+      scrollAccum.current += AUTO_SCROLL_SPEED
+      const px = Math.floor(scrollAccum.current)
+      if (px >= 1) {
+        el.scrollLeft += px
+        scrollAccum.current -= px
+      }
 
       // If we've scrolled past the first set, jump back seamlessly
       const halfWidth = el.scrollWidth / 2

@@ -76,6 +76,7 @@ export default function TestimonialsSlider() {
 
   /* -- auto-scroll with rAF (matches product carousel) -- */
   const isVisible = useRef(true)
+  const scrollAccum = useRef(0)
 
   // Pause rAF when slider scrolls out of viewport
   useEffect(() => {
@@ -94,7 +95,12 @@ export default function TestimonialsSlider() {
     if (!el) return
 
     if (isVisible.current) {
-      el.scrollLeft += AUTO_SCROLL_SPEED
+      scrollAccum.current += AUTO_SCROLL_SPEED
+      const px = Math.floor(scrollAccum.current)
+      if (px >= 1) {
+        el.scrollLeft += px
+        scrollAccum.current -= px
+      }
 
       // seamless loop: once past the duplicated set, jump back
       const half = el.scrollWidth / 2
