@@ -13,20 +13,40 @@ const safeUrlToRemotePattern = (value) => {
       return null
     }
 
-    return {
+    const pattern = {
       protocol: url.protocol.replace(":", ""),
       hostname: url.hostname,
     }
+
+    if (url.port) {
+      pattern.port = url.port
+    }
+
+    return pattern
   } catch {
-    const hostname = String(value).replace(/^https?:\/\//, "").split("/")[0].split(":")[0]
-    if (!hostname) {
+    let rest = String(value).replace(/^https?:\/\//, "").split("/")[0]
+    if (!rest) {
       return null
     }
 
-    return {
-      protocol: "https",
+    let hostname = rest
+    let port
+    if (rest.includes(":")) {
+      const parts = rest.split(":")
+      hostname = parts[0]
+      port = parts[1]
+    }
+
+    const pattern = {
+      protocol: String(value).startsWith("http://") ? "http" : "https",
       hostname,
     }
+
+    if (port) {
+      pattern.port = port
+    }
+
+    return pattern
   }
 }
 
