@@ -1,12 +1,48 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 const WHATSAPP_NUMBER = "233540451001"
 const WHATSAPP_MESSAGE = "Hi Letscase! I have a question about your products."
 
+type FloatingPosition = "bottom-right" | "bottom-left" | "top-right" | "top-left"
+
+const POSITION_CLASSES: Record<FloatingPosition, string> = {
+  "bottom-right": "bottom-6 right-6",
+  "bottom-left": "bottom-6 left-6",
+  "top-right": "top-6 right-6",
+  "top-left": "top-6 left-6",
+}
+
+const POSITION_PRIORITY: FloatingPosition[] = [
+  "bottom-right",
+  "bottom-left",
+  "top-right",
+  "top-left",
+]
+
+const isElementVisible = (node: HTMLElement) => {
+  const style = window.getComputedStyle(node)
+  if (style.visibility === "hidden" || style.display === "none" || Number(style.opacity) === 0) {
+    return false
+  }
+  const rect = node.getBoundingClientRect()
+  return rect.width > 0 && rect.height > 0
+}
+
+const parsePositions = (value?: string | null): FloatingPosition[] => {
+  if (!value) return []
+  return value
+    .split(",")
+    .map((token) => token.trim())
+    .filter((token): token is FloatingPosition => (POSITION_PRIORITY as string[]).includes(token))
+}
+
 export default function WhatsAppWidget() {
   const pathname = usePathname()
+  const [position, setPosition] = useState<FloatingPosition>("bottom-right")
+  const rafRef = useRef<number | null>(null)
 
   // Hide on checkout, customizer, account, admin, and cart pages
   const excludedPaths = [
@@ -26,13 +62,73 @@ export default function WhatsAppWidget() {
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
+  const evaluatePosition = useCallback(() => {
+    if (typeof window === "undefined") return
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+    }
+
+    rafRef.current = window.requestAnimationFrame(() => {
+      const blockers = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-whatsapp-obstruction]")
+      )
+
+      const occupied = new Set<FloatingPosition>()
+
+      blockers.forEach((node) => {
+        if (!isElementVisible(node)) return
+        parsePositions(node.dataset.whatsappObstruction).forEach((pos) => {
+          occupied.add(pos)
+        })
+      })
+
+      const nextPosition = POSITION_PRIORITY.find((candidate) => !occupied.has(candidate))
+        || "bottom-right"
+
+      setPosition((prev) => (prev === nextPosition ? prev : nextPosition))
+    })
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    evaluatePosition()
+
+    const handleResize = () => evaluatePosition()
+    window.addEventListener("resize", handleResize)
+
+    const observer = new MutationObserver(() => evaluatePosition())
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    })
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      observer.disconnect()
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
+    }
+  }, [evaluatePosition, pathname])
+
+  const tooltipOnLeftSide = position.includes("left")
+  const tooltipBaseClass = tooltipOnLeftSide
+    ? "left-[calc(100%+12px)]"
+    : "right-[calc(100%+12px)]"
+  const tooltipArrowClass = tooltipOnLeftSide
+    ? "left-[-4px] border-r-grey-90"
+    : "right-[-4px] border-l-grey-90"
+
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"
-      className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform duration-300 hover:scale-110 hover:shadow-xl animate-bounce-once group"
+      className={`fixed ${POSITION_CLASSES[position]} z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform duration-300 hover:scale-110 hover:shadow-xl animate-bounce-once group`}
     >
       <svg
         viewBox="0 0 32 32"
@@ -44,9 +140,13 @@ export default function WhatsAppWidget() {
       </svg>
 
       {/* Tooltip */}
-      <span className="pointer-events-none absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-grey-90 px-3 py-1.5 text-[12px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
+      <span
+        className={`pointer-events-none absolute ${tooltipBaseClass} top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-grey-90 px-3 py-1.5 text-[12px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100`}
+      >
         Chat with us
-        <span className="absolute right-[-4px] top-1/2 -translate-y-1/2 border-4 border-transparent border-l-grey-90" />
+        <span
+          className={`absolute ${tooltipArrowClass} top-1/2 -translate-y-1/2 border-4 border-transparent`}
+        />
       </span>
     </a>
   )
