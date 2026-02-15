@@ -98,6 +98,14 @@ const nextConfig = {
         hostname: "localhost",
       },
       {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      {
+        protocol: "http",
+        hostname: "0.0.0.0",
+      },
+      {
         protocol: "https",
         hostname: "letscasegh.com",
       },

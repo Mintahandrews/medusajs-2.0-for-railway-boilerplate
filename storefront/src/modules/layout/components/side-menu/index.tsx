@@ -184,10 +184,9 @@ const SideMenu = ({
                                 ? `/${countryCode}/results/${encodeURIComponent(q)}`
                                 : `/results/${encodeURIComponent(q)}`
 
-                              // Navigate first, then close menu after a tick
-                              // so the route change isn't interrupted by scroll-lock cleanup
+                              // Close overlay immediately then navigate
+                              close()
                               router.push(target)
-                              setTimeout(() => close(), 100)
                             }}
                           >
                             <label className="sr-only" htmlFor="drawer-search">
@@ -249,7 +248,7 @@ const SideMenu = ({
                                                 key={item.href}
                                                 href={item.href}
                                                 className="flex items-center gap-2 py-1 hover:text-grey-90"
-                                                onClick={() => setTimeout(() => close(), 50)}
+                                                onClick={() => close()}
                                               >
                                                 <span className="shrink-0 text-grey-50">
                                                   <Icon size={16} />
@@ -273,26 +272,26 @@ const SideMenu = ({
                                                   key={item.href}
                                                   href={item.href}
                                                   className="shrink-0 rounded-full border border-grey-20 px-3 py-1 text-[13px] text-grey-90 bg-white"
-                                                  onClick={() => setTimeout(() => close(), 50)}
+                                                  onClick={() => close()}
                                                 >
                                                   {item.name}
-                                                </LocalizedClientLink>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        </>
-                                      ) : null}
-
-                                      {!shopCategoryLinks.length && !shopCollectionLinks.length
+                                                <LocalizedClientLink
+                                                    key={item.href}
+                                                    href={item.href}
+                                                    className="shrink-0 rounded-full border border-grey-20 px-3 py-1 text-[13px] text-grey-90 bg-white"
+                                                    onClick={() => close()}
+                                                  >
+                                                    {item.name}
+                                                  </LocalizedClientLink>
                                         ? SHOP_LINKS.map((item) => (
                                           <LocalizedClientLink
-                                            key={item.name}
-                                            href={item.href}
-                                            className="py-1 hover:text-grey-90"
-                                            onClick={() => setTimeout(() => close(), 50)}
-                                          >
-                                            {item.name}
-                                          </LocalizedClientLink>
+                                              key={item.name}
+                                              href={item.href}
+                                              className="py-1 hover:text-grey-90"
+                                              onClick={() => close()}
+                                            >
+                                              {item.name}
+                                            </LocalizedClientLink>
                                         ))
                                         : null}
                                     </div>
@@ -323,7 +322,7 @@ const SideMenu = ({
                                           key={item.href}
                                           href={item.href}
                                           className="py-1 hover:text-grey-90"
-                                          onClick={() => setTimeout(() => close(), 50)}
+                                                onClick={() => close()}
                                         >
                                           {item.name}
                                         </LocalizedClientLink>
@@ -345,7 +344,7 @@ const SideMenu = ({
                                   <LocalizedClientLink
                                     href={item.href}
                                     className="block py-1 text-[14px] font-medium text-grey-90 hover:text-brand"
-                                    onClick={() => setTimeout(() => close(), 50)}
+                                    onClick={() => close()}
                                     data-testid={item.testId}
                                   >
                                     {item.name}
