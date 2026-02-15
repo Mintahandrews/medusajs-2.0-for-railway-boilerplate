@@ -59,9 +59,38 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </div>
 
         <div className="grid grid-cols-1 medium:grid-cols-2 gap-6 medium:gap-8 items-start">
-          <div className="rounded-lg overflow-hidden">
-            <ImageGallery images={product?.images || []} />
-          </div>
+          <div className="relative rounded-lg overflow-hidden">
+              <ImageGallery images={product?.images || []} />
+              {/* Stock badge top-right */}
+              {(() => {
+                const thresholdRaw =
+                  // @ts-ignore
+                  product?.metadata?.low_stock_threshold ?? (product as any)?.low_stock_threshold
+                const threshold = Number(thresholdRaw ?? 5)
+
+                const managedVariants = (product.variants || []).filter((v) => v?.manage_inventory)
+                if (managedVariants.length === 0) return null
+                const stocks = managedVariants.map((v) => v.inventory_quantity ?? 0)
+                const allZero = stocks.every((s) => (s ?? 0) <= 0)
+                if (allZero) {
+                  return (
+                    <div className="absolute top-3 right-3 z-20">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-bold bg-red-600 text-white shadow">Out of stock</span>
+                    </div>
+                  )
+                }
+                const minStock = Math.min(...stocks.filter((s) => s > 0))
+                if (minStock <= threshold) {
+                  return (
+                    <div className="absolute top-3 right-3 z-20">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-bold bg-amber-600 text-white shadow">Only {minStock} left</span>
+                    </div>
+                  )
+                }
+
+                return null
+              })()}
+            </div>
 
           <div className="flex flex-col gap-y-6">
             <ProductInfo product={product} />

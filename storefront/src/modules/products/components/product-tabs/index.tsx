@@ -44,19 +44,6 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
   const rows: Array<{ label: string; value: string }> = [
     { label: "Material", value: product.material ? String(product.material) : "-" },
-    {
-      label: "Country of origin",
-      value: product.origin_country ? String(product.origin_country) : "-",
-    },
-    { label: "Type", value: product.type ? String(product.type.value) : "-" },
-    { label: "Weight", value: product.weight ? `${product.weight} g` : "-" },
-    {
-      label: "Dimensions",
-      value:
-        product.length && product.width && product.height
-          ? `${product.length}L x ${product.width}W x ${product.height}H`
-          : "-",
-    },
   ]
 
   return (

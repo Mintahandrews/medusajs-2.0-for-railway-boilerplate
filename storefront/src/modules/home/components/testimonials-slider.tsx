@@ -242,7 +242,7 @@ export default function TestimonialsSlider() {
               trust and rely on us
             </p>
             <a
-              href="https://g.page/r/CYX94oQecG8MEAE/review"
+              href="https://www.google.com/maps/place/LetsCase+Gh/@5.6235554,-0.2346238,17z/data=!4m8!3m7!1s0xfdf9906b301a3a7:0xc6f701e84e2fd85!8m2!3d5.6235554!4d-0.2346238!9m1!1b1!16s%2Fg%2F11whjlm38v?entry=ttu&g_ep=EgoyMDI2MDIxMS4wIKXMDSoASAFQAw%3D%3D"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 py-1.5 small:px-4 small:py-2 rounded-full bg-white border border-grey-20 text-[12px] small:text-[13px] font-medium text-grey-90 hover:border-brand hover:text-brand transition-colors"

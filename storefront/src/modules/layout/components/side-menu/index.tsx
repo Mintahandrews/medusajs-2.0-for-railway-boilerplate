@@ -93,7 +93,8 @@ const SideMenu = ({
   }, [categoryLinks])
 
   const shopCollectionLinks = useMemo(() => {
-    return collectionLinks.length ? collectionLinks.slice(0, 4) : []
+    // Show more collections in the mobile menu and allow horizontal scrolling
+    return collectionLinks.length ? collectionLinks.slice(0, 12) : []
   }, [collectionLinks])
 
   const trendingLinks = useMemo(() => {
@@ -265,16 +266,20 @@ const SideMenu = ({
                                           <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-grey-50">
                                             Collections
                                           </div>
-                                          {shopCollectionLinks.map((item) => (
-                                            <LocalizedClientLink
-                                              key={item.href}
-                                              href={item.href}
-                                              className="py-1 hover:text-grey-90"
-                                              onClick={() => setTimeout(() => close(), 50)}
-                                            >
-                                              {item.name}
-                                            </LocalizedClientLink>
-                                          ))}
+                                          <div className="mt-2 -mx-5 px-5">
+                                            <div className="flex gap-3 overflow-x-auto py-2">
+                                              {shopCollectionLinks.map((item) => (
+                                                <LocalizedClientLink
+                                                  key={item.href}
+                                                  href={item.href}
+                                                  className="shrink-0 rounded-full border border-grey-20 px-3 py-1 text-[13px] text-grey-90 bg-white"
+                                                  onClick={() => setTimeout(() => close(), 50)}
+                                                >
+                                                  {item.name}
+                                                </LocalizedClientLink>
+                                              ))}
+                                            </div>
+                                          </div>
                                         </>
                                       ) : null}
 

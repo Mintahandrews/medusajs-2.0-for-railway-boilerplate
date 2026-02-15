@@ -14,15 +14,8 @@ import {
 
 import ProductCarousel from "./product-carousel"
 
-// Lazy-load below-fold sections to reduce initial JS bundle
-const TestimonialsSlider = dynamic(() => import("./testimonials-slider"), {
-  ssr: false,
-  loading: () => <div className="py-12 small:py-20" />,
-})
-const NewsletterSignup = dynamic(() => import("./newsletter-signup"), {
-  ssr: false,
-  loading: () => <div className="py-16 small:py-20" />,
-})
+import TestimonialsSlider from "./testimonials-slider-client"
+import NewsletterSignup from "./newsletter-signup-client"
 
 function sectionShell(children: React.ReactNode, className?: string) {
   return (

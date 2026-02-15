@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import WishlistButton from "@modules/common/components/wishlist-button"
@@ -168,8 +169,30 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
   // Duplicate items for seamless loop
   const loopItems = [...displayItems, ...displayItems]
 
+  const handleScrollBy = (distance: number) => {
+    const el = scrollRef.current
+    if (!el) return
+    pauseAutoScroll()
+    el.scrollBy({ left: distance, behavior: "smooth" })
+  }
+
   return (
     <div className="relative">
+      {/* Prev / Next buttons */}
+      <button
+        aria-label="Previous"
+        onClick={() => handleScrollBy(-((scrollRef.current?.clientWidth ?? 600) * 0.6))}
+        className="hidden small:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
+      >
+        <ChevronLeft size={18} />
+      </button>
+      <button
+        aria-label="Next"
+        onClick={() => handleScrollBy((scrollRef.current?.clientWidth ?? 600) * 0.6)}
+        className="hidden small:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
+      >
+        <ChevronRight size={18} />
+      </button>
       <div
         ref={scrollRef}
         className="flex gap-4 pb-2 overflow-x-auto scrollbar-hide"
