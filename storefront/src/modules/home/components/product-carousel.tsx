@@ -21,7 +21,7 @@ type CarouselItem =
     price: string
   }
 
-const AUTO_SCROLL_SPEED = 0.5 // pixels per frame (~30px/s)
+const AUTO_SCROLL_SPEED = 0.18 // pixels per frame (~11px/s)
 
 export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -182,14 +182,14 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
       <button
         aria-label="Previous"
         onClick={() => handleScrollBy(-((scrollRef.current?.clientWidth ?? 600) * 0.6))}
-        className="hidden small:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
+        className="flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
       >
         <ChevronLeft size={18} />
       </button>
       <button
         aria-label="Next"
         onClick={() => handleScrollBy((scrollRef.current?.clientWidth ?? 600) * 0.6)}
-        className="hidden small:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
+        className="flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
       >
         <ChevronRight size={18} />
       </button>

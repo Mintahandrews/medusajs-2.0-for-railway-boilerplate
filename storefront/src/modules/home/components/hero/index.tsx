@@ -1,15 +1,41 @@
 import Image from "next/image"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { ArrowRight, Paintbrush, Smartphone, Headphones, BatteryCharging, Shield } from "lucide-react"
+import { HttpTypes } from "@medusajs/types"
+import { getCategoryIcon } from "@lib/util/category-icon"
 
-const QUICK_CATEGORIES = [
+type QuickCategory = {
+  label: string
+  href: string
+  icon: React.ComponentType<{ size?: number; className?: string }>
+}
+
+const FALLBACK_QUICK_CATEGORIES: QuickCategory[] = [
   { label: "Phone Cases", icon: Smartphone, href: "/categories/phone-cases" },
   { label: "Chargers", icon: BatteryCharging, href: "/categories/chargers" },
   { label: "Audio", icon: Headphones, href: "/categories/audio" },
   { label: "Screen Guards", icon: Shield, href: "/categories/screen-guards" },
 ]
 
-const Hero = () => {
+type HeroProps = {
+  categories?: HttpTypes.StoreProductCategory[]
+}
+
+const Hero = ({ categories = [] }: HeroProps) => {
+  const dynamicQuickCategories: QuickCategory[] = (categories || [])
+    .filter((category) => !category?.parent_category_id && !category?.parent_category)
+    .filter((category) => category?.handle && category?.name)
+    .slice(0, 4)
+    .map((category) => ({
+      label: category.name as string,
+      href: `/categories/${category.handle}`,
+      icon: getCategoryIcon(category.name as string),
+    }))
+
+  const quickCategories = dynamicQuickCategories.length
+    ? dynamicQuickCategories
+    : FALLBACK_QUICK_CATEGORIES
+
   return (
     <section className="w-full bg-white">
       <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8 small:py-10">
@@ -59,22 +85,25 @@ const Hero = () => {
                   className="inline-flex items-center gap-2 px-7 h-[48px] rounded-full bg-emerald-500 text-white text-[15px] font-semibold transition duration-300 hover:bg-emerald-600 hover:scale-[1.02] shadow-lg"
                 >
                   <Paintbrush size={16} />
-                  <span>Design Your Case</span>
+                  <span>Customise your case</span>
                 </LocalizedClientLink>
               </div>
 
               {/* Quick category pills */}
               <div className="mt-8 hidden small:flex items-center gap-3">
-                {QUICK_CATEGORIES.map((cat) => (
-                  <LocalizedClientLink
-                    key={cat.label}
-                    href={cat.href}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm px-3.5 py-2 text-[12px] font-medium text-white/80 hover:border-white/50 hover:text-white transition"
-                  >
-                    <cat.icon size={13} />
-                    <span>{cat.label}</span>
-                  </LocalizedClientLink>
-                ))}
+                {quickCategories.map((cat) => {
+                  const Icon = cat.icon
+                  return (
+                    <LocalizedClientLink
+                      key={`${cat.href}-${cat.label}`}
+                      href={cat.href}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm px-3.5 py-2 text-[12px] font-medium text-white/80 hover:border-white/50 hover:text-white transition"
+                    >
+                      <Icon size={13} />
+                      <span>{cat.label}</span>
+                    </LocalizedClientLink>
+                  )
+                })}
               </div>
             </div>
 

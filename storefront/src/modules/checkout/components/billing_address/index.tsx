@@ -92,6 +92,15 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           data-testid="billing-company-input"
         />
         <Input
+          label="Email (optional)"
+          name="billing_address.email"
+          type="email"
+          autoComplete="email"
+          value={formData["billing_address.email"]}
+          onChange={handleChange}
+          data-testid="billing-email-input"
+        />
+        <Input
           label="GPS Address"
           name="billing_address.postal_code"
           autoComplete="postal-code"
@@ -133,6 +142,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           autoComplete="tel"
           value={formData["billing_address.phone"]}
           onChange={handleChange}
+          required
           data-testid="billing-phone-input"
         />
       </div>

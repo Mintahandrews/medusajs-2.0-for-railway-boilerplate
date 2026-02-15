@@ -19,10 +19,10 @@ type Testimonial = {
 }
 
 /**
- * px per rAF frame at ~60 fps -> ~30 px/s.
- * Matches the best-seller product carousel speed.
+ * px per rAF frame at ~60 fps -> ~15 px/s for a calmer glide.
+ * Matches the tuned best-seller product carousel speed.
  */
-const AUTO_SCROLL_SPEED = 0.5
+const AUTO_SCROLL_SPEED = 0.25
 /** ms before auto-scroll resumes after user interaction */
 const RESUME_DELAY = 4000
 

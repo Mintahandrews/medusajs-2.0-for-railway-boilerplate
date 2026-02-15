@@ -35,7 +35,7 @@ export default async function Home({
 
   return (
     <>
-      <Hero />
+      <Hero categories={categories} />
       <LetscaseHome
         products={products}
         categories={categories}

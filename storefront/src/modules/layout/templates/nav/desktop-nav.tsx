@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { usePathname, useSearchParams } from "next/navigation"
-import { Suspense, useState, useRef } from "react"
+import { Suspense, useState, useRef, useEffect } from "react"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -59,6 +59,12 @@ function DesktopNavContent(props: {
     if (ref.current) window.clearTimeout(ref.current)
     ref.current = window.setTimeout(() => setter(false), 160)
   }
+
+  // Close any open hover menu when navigation completes
+  useEffect(() => {
+    setOpenShop(false)
+    setOpenTrending(false)
+  }, [normalized, onSale])
 
   return (
     <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
