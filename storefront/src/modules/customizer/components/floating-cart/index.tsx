@@ -150,106 +150,19 @@ export default function FloatingCart({ product, region }: Props) {
 
   return (
     <>
-      {/* ---- Desktop: FAB button + expandable panel (right side) ---- */}
-      <div ref={panelRef} className="hidden lg:block fixed right-4 bottom-6 z-50" data-tour="floating-cart">
-        {/* Expanded panel */}
-        {open && (
-          <div className="mb-3 w-[280px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-              <span className="text-sm font-semibold text-gray-900">Add to Cart</span>
-              <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-gray-100">
-                <X size={16} className="text-gray-400" />
-              </button>
-            </div>
+      {/* ---- Desktop: show the same bottom Add‑to‑Cart bar (was a FAB) ---- */}
 
-            <div className="p-4 flex flex-col gap-3">
-              {/* Price + case type */}
-              <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{CASE_TYPE_LABEL[state.caseType]} Case</span>
-                  <span className="text-[10px] text-gray-400">{deviceConfig.name}</span>
-                </div>
-                <span className="text-lg font-bold text-gray-900">{priceStr ?? "—"}</span>
-              </div>
+      {/* NOTE: kept the single bottom-bar implementation and surface it on all sizes so the Add-to-Cart is always visible */}
 
-              {/* Add to cart button */}
-              <button
-                onClick={handleAddToCart}
-                disabled={isAdding || !variant?.id}
-                className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm
-                  font-semibold transition-all ${
-                    added
-                      ? "bg-green-600 text-white"
-                      : "bg-brand text-white hover:bg-brand-dark"
-                  } disabled:opacity-40 disabled:cursor-not-allowed`}
-              >
-                {isAdding ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span className="text-xs">{uploadStatus || "Processing…"}</span>
-                  </>
-                ) : added ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Added!
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-4 h-4" />
-                    Add to Cart
-                  </>
-                )}
-              </button>
-
-              {error && (
-                <p className="text-[11px] text-red-600 bg-red-50 rounded-lg px-2 py-1.5">{error}</p>
-              )}
-
-              {added && (
-                <button
-                  onClick={() => router.push(`/${countryCode}/cart`)}
-                  className="text-xs text-center text-brand underline underline-offset-4 hover:text-brand-dark"
-                >
-                  View Cart →
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* FAB button */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className={`h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
-            open
-              ? "bg-brand-dark text-white scale-90"
-              : "bg-brand text-white hover:scale-105 hover:shadow-xl"
-          }`}
-          aria-label="Add to cart"
-        >
-          {added ? (
-            <Check size={22} className="text-green-400" />
-          ) : (
-            <ShoppingCart size={22} />
-          )}
-          {priceStr && !open && (
-            <span className="absolute -top-1 -left-1 bg-brand text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-              {priceStr}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* ---- Mobile: Full-width bottom bar — sits below content, not overlapping ---- */}
-      <div className="lg:hidden bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]" data-tour="floating-cart-mobile">
-        <div className="px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div className="fixed left-1/2 transform -translate-x-1/2 bottom-6 z-50 w-[min(980px,calc(100%-2rem))] bg-white border border-gray-200 shadow-lg rounded-2xl" data-tour="floating-cart-mobile">
+        <div className="px-4 py-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           {/* Compact: info + button in one row */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div className="flex flex-col min-w-0 shrink">
-              <span className="text-[11px] text-gray-500 truncate">
+              <span className="text-[12px] text-gray-500 truncate">
                 {CASE_TYPE_LABEL[state.caseType]} Case · {deviceConfig.name}
               </span>
-              <span className="text-base font-bold text-gray-900 leading-tight">
+              <span className="text-lg font-bold text-gray-900 leading-tight">
                 {priceStr ?? "—"}
               </span>
             </div>
@@ -282,19 +195,20 @@ export default function FloatingCart({ product, region }: Props) {
                 </>
               )}
             </button>
+
+            {/* Quick cart link */}
+            <button
+              onClick={() => router.push(`/${countryCode}/cart`)}
+              className="ml-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-brand bg-white border border-gray-100 hover:bg-gray-50"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span className="hidden sm:inline">View Cart</span>
+              <span className="sm:hidden">Cart</span>
+            </button>
           </div>
 
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1.5 mt-1.5">{error}</p>
-          )}
-
-          {added && (
-            <button
-              onClick={() => router.push(`/${countryCode}/cart`)}
-              className="w-full text-xs text-center text-brand underline underline-offset-4 hover:text-brand-dark mt-1.5 py-0.5"
-            >
-              View Cart →
-            </button>
+            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1.5 mt-3">{error}</p>
           )}
         </div>
       </div>

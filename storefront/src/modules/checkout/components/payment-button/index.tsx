@@ -5,11 +5,12 @@ import { OnApproveActions, OnApproveData } from "@paypal/paypal-js"
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState } from "react"
+import { useParams } from "next/navigation"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPaypal, isPaystack, isStripe } from "@lib/constants"
+import { isManual, isPaypal, isPaystack, isStripe, PAYSTACK_PUBLIC_KEY } from "@lib/constants"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -283,12 +284,62 @@ const PaystackPaymentButton = ({
     (s) => s.status === "pending"
   )
 
+  const params = useParams()
+  const countryCode = (params.countryCode as string) || window.location.pathname.split("/")[1] || ""
+
+  const loadScript = (src: string) =>
+    new Promise<void>((resolve, reject) => {
+      if (typeof window === "undefined") return reject()
+      if ((window as any).PaystackPop) return resolve()
+      const s = document.createElement("script")
+      s.src = src
+      s.async = true
+      s.onload = () => resolve()
+      s.onerror = () => reject()
+      document.body.appendChild(s)
+    })
+
   const handlePayment = async () => {
     setErrorMessage(null)
     setSubmitting(true)
 
     const url = session?.data?.authorization_url as string | undefined
+    const reference = session?.data?.reference as string | undefined
 
+    // If a public key is available, open Paystack inline modal (keeps user on-site).
+    if (PAYSTACK_PUBLIC_KEY && reference) {
+      try {
+        await loadScript("https://js.paystack.co/v1/inline.js")
+        const paystack = (window as any).PaystackPop
+        if (!paystack) throw new Error("Paystack script failed to load")
+
+        const handler = paystack.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: cart.email,
+          amount: session?.data?.amount ?? undefined, // amount is smallest unit (kobo)
+          currency: (session?.data?.currency ?? "").toUpperCase(),
+          ref: reference,
+          callback: function (res: any) {
+            // Redirect to existing verify route which will complete the order
+            window.location.href = `${window.location.origin}/${countryCode}/checkout/paystack/verify?reference=${res.reference}`
+          },
+          onClose: function () {
+            setSubmitting(false)
+          },
+        })
+
+        // open the inline iframe/modal
+        if (handler && typeof handler.openIframe === "function") {
+          handler.openIframe()
+          return
+        }
+      } catch (err: any) {
+        // fallback to redirect if inline fails
+        console.warn("Paystack inline failed, falling back to redirect:", err)
+      }
+    }
+
+    // Fallback: redirect to Paystack host (existing behavior)
     if (!url) {
       setErrorMessage("Missing Paystack authorization URL. Please reselect Paystack.")
       setSubmitting(false)

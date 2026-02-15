@@ -53,8 +53,8 @@ function CustomizerLayout({
 
   return (
     <>
-      {/* Mobile: subtract 64px header + compact cart bar; desktop: just header */}
-      <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px-68px)] lg:h-[calc(100dvh-64px)] bg-gray-100 overflow-hidden">
+      {/* Reserve space for header + sticky Add-to-Cart bar on all viewports */}
+      <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px-68px)] lg:h-[calc(100dvh-64px-68px)] bg-gray-100 overflow-hidden">
 
         {/* ---- Desktop sidebar ---- */}
         <aside data-tour="desktop-sidebar" className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200">

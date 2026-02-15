@@ -52,6 +52,9 @@ export const isPaystack = (providerId?: string) => {
   return providerId?.startsWith("pp_paystack")
 }
 
+// Optional: public Paystack key for inline modal (if set, checkout will open Paystack inline)
+export const PAYSTACK_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ?? ""
+
 // Add currencies that don't need to be divided by 100
 export const noDivisionCurrencies = [
   "krw",
