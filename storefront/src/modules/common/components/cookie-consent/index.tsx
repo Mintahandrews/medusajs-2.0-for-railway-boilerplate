@@ -91,25 +91,25 @@ export default function CookieConsent() {
             </div>
 
             {/* Buttons */}
-            <div className="border-t border-gray-200 px-6 py-4 flex items-center gap-3 bg-gray-50">
+            <div className="border-t border-gray-200 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-gray-50">
               <button
                 type="button"
                 onClick={handleAccept}
-                className="flex-1 h-10 px-6 rounded-lg bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition-colors"
+                className="w-full sm:flex-1 h-12 sm:h-10 px-6 rounded-lg bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition-colors"
               >
                 Accept All
               </button>
               <button
                 type="button"
                 onClick={handleDecline}
-                className="flex-1 h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
+                className="w-full sm:flex-1 h-12 sm:h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
               >
                 Reject All
               </button>
               <button
                 type="button"
                 onClick={() => setShowPreferences(true)}
-                className="h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
+                className="w-full sm:w-auto h-12 sm:h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
               >
                 Customize
               </button>
@@ -197,18 +197,18 @@ export default function CookieConsent() {
             </div>
 
             {/* Preferences Buttons */}
-            <div className="border-t border-gray-200 px-6 py-4 flex items-center gap-3 bg-gray-50">
+            <div className="border-t border-gray-200 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-gray-50">
               <button
                 type="button"
                 onClick={() => setShowPreferences(false)}
-                className="h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
+                className="w-full sm:w-auto h-12 sm:h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
               >
                 Back
               </button>
               <button
                 type="button"
                 onClick={handleSavePreferences}
-                className="flex-1 h-10 px-6 rounded-lg bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition-colors"
+                className="w-full sm:flex-1 h-12 sm:h-10 px-6 rounded-lg bg-brand text-white text-[14px] font-semibold hover:bg-brand-dark transition-colors"
               >
                 Save Preferences
               </button>
