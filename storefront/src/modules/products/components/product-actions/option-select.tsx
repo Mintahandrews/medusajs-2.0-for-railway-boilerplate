@@ -19,6 +19,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   title,
   "data-testid": dataTestId,
   disabled,
+  variants,
 }) => {
   const filteredOptions = option.values?.map((v) => v.value)
 
