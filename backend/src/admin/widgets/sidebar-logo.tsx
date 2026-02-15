@@ -2,137 +2,90 @@ import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useEffect, useRef } from "react"
 import { LETSCASE_LOGO_DATA_URL } from "./logo-data"
 
-const LOGO_URL = LETSCASE_LOGO_DATA_URL
-const STYLE_ID = "letscase-sidebar-logo"
+const STYLE_ID = "letscase-sidebar-branding"
+const OBSERVER_FLAG = "__letscase_sidebar_observer"
 
 /**
- * Invisible widget that replaces the Medusa sidebar logo and branding
- * with the Letscase logo. Uses both CSS injection and DOM manipulation
- * for maximum reliability across Medusa admin versions.
+ * Invisible widget that replaces the store Avatar in the sidebar header
+ * with the Letscase logo. Also installs a global MutationObserver so
+ * the replacement persists across SPA navigation.
  *
- * Injected into several high-traffic zones so the style is applied on
- * whichever page the admin visits first.
+ * The sidebar store header is a DropdownMenu.Trigger containing:
+ *   <span> (Avatar — squared, xsmall, with store-initial fallback)
+ *   <Text>  (store name)
+ *   <EllipsisHorizontal />
+ *
+ * We find the Avatar <span> inside the sidebar and replace it with our logo.
  */
-
-const BRANDING_CSS = `
-/* ── Replace sidebar Medusa icon with Letscase logo ── */
-:root { --letscase-logo: url("${LOGO_URL}"); }
-
-/* Hide sidebar logo SVGs */
-aside nav > div:first-child a[href="/app"] svg,
-aside nav > div:first-child > a svg,
-aside header a[href="/app"] svg,
-[class*="SquareTwoStack"],
-span:has(> svg.text-ui-contrast-fg-secondary) > svg,
-aside svg[class*="contrast-fg"] {
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  position: absolute !important;
-}
-
-/* Sidebar logo link layout */
-aside nav > div:first-child a[href="/app"],
-aside nav > div:first-child > a:first-child,
-aside header a[href="/app"] {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Inject logo via ::before */
-aside nav > div:first-child a[href="/app"]::before,
-aside nav > div:first-child > a:first-child::before,
-aside header a[href="/app"]::before {
-  content: "";
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  background: var(--letscase-logo) center / contain no-repeat;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-
-/* Fallback: :has() approach for SquareTwoStack SVG */
-span:has(> svg.text-ui-contrast-fg-secondary) {
-  position: relative;
-}
-span:has(> svg.text-ui-contrast-fg-secondary)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--letscase-logo) center / contain no-repeat;
-  border-radius: 6px;
-}
-`
-
 const SidebarLogoWidget = () => {
-  const hasRun = useRef(false)
+  const throttle = useRef(false)
 
   useEffect(() => {
-    // Inject CSS once
-    if (!document.getElementById(STYLE_ID)) {
-      const style = document.createElement("style")
-      style.id = STYLE_ID
-      style.textContent = BRANDING_CSS
-      document.head.appendChild(style)
-    }
+    // Guard: only install once globally
+    if ((window as any)[OBSERVER_FLAG]) return
+    ;(window as any)[OBSERVER_FLAG] = true
 
-    // DOM manipulation fallback — replace sidebar logo via direct DOM access
-    const replaceSidebarLogo = () => {
-      // Find sidebar logo link (typically the first link in <aside>)
+    const replaceSidebarAvatar = () => {
+      // The sidebar is inside an <aside> element
       const sidebar = document.querySelector("aside")
       if (!sidebar) return
 
-      // Look for SVG icons in the sidebar header area
-      const svgs = sidebar.querySelectorAll("svg")
-      svgs.forEach((svg) => {
-        const parent = svg.parentElement
-        if (!parent) return
+      // Find all Avatar spans in the sidebar (squared avatars with fallback text)
+      // The store avatar is typically the first Avatar in the sidebar
+      const avatars = sidebar.querySelectorAll('span[class*="rounded"]')
+      avatars.forEach((avatar) => {
+        // Skip if already replaced
+        if (avatar.getAttribute("data-lc-replaced")) return
 
-        // Check if this is a top-level sidebar icon (logo area)
-        const link = parent.closest("a")
-        if (link && (link.getAttribute("href") === "/app" || link.closest("nav > div:first-child"))) {
-          // Check if we already replaced this
-          if (parent.querySelector(".letscase-sidebar-img")) return
+        // The store Avatar is squared (rounded-md or similar), has a single-char fallback text
+        // It's inside a button or trigger element at the top of the sidebar
+        const el = avatar as HTMLElement
+        const text = el.textContent?.trim() || ""
+        const isSmallAvatar =
+          el.offsetWidth > 0 &&
+          el.offsetWidth <= 40 &&
+          el.offsetHeight > 0 &&
+          el.offsetHeight <= 40
 
-          svg.style.display = "none"
-          const img = document.createElement("img")
-          img.src = LOGO_URL
-          img.alt = "Letscase"
-          img.className = "letscase-sidebar-img"
-          img.style.cssText = "width:28px;height:28px;border-radius:6px;object-fit:contain;"
-          parent.insertBefore(img, svg)
-        }
+        // Must be a small squared element with 1-2 char fallback (store initials)
+        if (!isSmallAvatar || text.length > 2 || text.length === 0) return
+
+        // Must be near the top of the sidebar (store header area)
+        const trigger = el.closest("button, [data-state]")
+        if (!trigger) return
+
+        // Verify this is inside the first section of the sidebar
+        const nav = el.closest("nav")
+        if (!nav) return
+
+        // Replace avatar content with logo image
+        avatar.setAttribute("data-lc-replaced", "true")
+        el.style.cssText += "display:flex;align-items:center;justify-content:center;overflow:hidden;"
+        el.innerHTML = ""
+        const img = document.createElement("img")
+        img.src = LETSCASE_LOGO_DATA_URL
+        img.alt = "Letscase"
+        img.style.cssText = "width:100%;height:100%;object-fit:contain;border-radius:inherit;"
+        el.appendChild(img)
       })
     }
 
-    replaceSidebarLogo()
-    const t1 = setTimeout(replaceSidebarLogo, 500)
-    const t2 = setTimeout(replaceSidebarLogo, 1500)
+    replaceSidebarAvatar()
+    setTimeout(replaceSidebarAvatar, 300)
+    setTimeout(replaceSidebarAvatar, 1000)
 
-    // Observe for SPA navigation — sidebar may re-render
+    // Persistent observer for SPA navigation
     const observer = new MutationObserver(() => {
-      if (!hasRun.current) {
-        hasRun.current = true
+      if (!throttle.current) {
+        throttle.current = true
         requestAnimationFrame(() => {
-          replaceSidebarLogo()
-          hasRun.current = false
+          replaceSidebarAvatar()
+          throttle.current = false
         })
       }
     })
 
-    const aside = document.querySelector("aside")
-    if (aside) {
-      observer.observe(aside, { childList: true, subtree: true })
-    }
-
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      observer.disconnect()
-    }
+    observer.observe(document.body, { childList: true, subtree: true })
   }, [])
 
   return null

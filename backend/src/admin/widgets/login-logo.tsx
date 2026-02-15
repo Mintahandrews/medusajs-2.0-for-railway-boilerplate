@@ -2,41 +2,54 @@ import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useEffect } from "react"
 import { LETSCASE_LOGO_DATA_URL } from "./logo-data"
 
+const OBSERVER_FLAG = "__letscase_logo_observer"
+
 /**
  * Widget injected into "login.before" zone.
- * Renders nothing visible — uses useEffect to:
- *   1. Replace the default Medusa AvatarBox SVG with our logo (same position)
- *   2. Replace "Welcome to Medusa" text with "Welcome to Letscase"
+ * Renders nothing visible — installs a persistent MutationObserver on
+ * document.body that replaces ALL Medusa logo SVGs across every admin page
+ * (login, invite, reset-password) with the Letscase logo.
  *
- * The AvatarBox is an IconAvatar containing an SVG with viewBox="0 0 400 400".
- * We locate it by that SVG and swap it for an <img>.
+ * Targeted SVGs:
+ *   - AvatarBox:  viewBox="0 0 400 400"  (login + invite pages)
+ *   - LogoBox:    viewBox="0 0 36 38"    (reset-password page)
+ *
+ * The observer persists across SPA navigation so pages without widget
+ * zones (invite, reset-password) are still branded.
  */
 const LoginLogoWidget = () => {
   useEffect(() => {
-    const replaceAll = () => {
-      // 1. Find the Medusa AvatarBox SVG (viewBox="0 0 400 400") and replace it
-      const svgs = document.querySelectorAll('svg[viewBox="0 0 400 400"]')
-      svgs.forEach((svg) => {
-        // Only replace if not already done
-        if (svg.getAttribute("data-replaced")) return
+    // Guard: only install once globally
+    if ((window as any)[OBSERVER_FLAG]) return
+    ;(window as any)[OBSERVER_FLAG] = true
 
-        const parent = svg.parentElement
-        if (!parent) return
+    const replaceMedusaLogos = () => {
+      // Target both AvatarBox (400×400) and LogoBox (36×38) SVGs
+      const selectors = [
+        'svg[viewBox="0 0 400 400"]',
+        'svg[viewBox="0 0 36 38"]',
+      ]
 
-        // Create our logo image to replace the SVG
-        const img = document.createElement("img")
-        img.src = LETSCASE_LOGO_DATA_URL
-        img.alt = "Letscase"
-        img.style.cssText =
-          "width:100%;height:100%;object-fit:contain;border-radius:10px;"
+      selectors.forEach((sel) => {
+        document.querySelectorAll(sel).forEach((svg) => {
+          if (svg.getAttribute("data-lc-replaced")) return
 
-        // Mark and hide original SVG, insert our image
-        svg.setAttribute("data-replaced", "true")
-        ;(svg as HTMLElement).style.display = "none"
-        parent.insertBefore(img, svg)
+          const parent = svg.parentElement
+          if (!parent) return
+
+          const img = document.createElement("img")
+          img.src = LETSCASE_LOGO_DATA_URL
+          img.alt = "Letscase"
+          img.style.cssText =
+            "width:100%;height:100%;object-fit:contain;border-radius:10px;"
+
+          svg.setAttribute("data-lc-replaced", "true")
+          ;(svg as HTMLElement).style.display = "none"
+          parent.insertBefore(img, svg)
+        })
       })
 
-      // 2. Replace "Welcome to Medusa" text nodes with "Welcome to Letscase"
+      // Replace "Welcome to Medusa" → "Welcome to Letscase"
       const walker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT,
@@ -53,19 +66,25 @@ const LoginLogoWidget = () => {
       }
     }
 
-    replaceAll()
-    const t1 = setTimeout(replaceAll, 150)
-    const t2 = setTimeout(replaceAll, 500)
-    const t3 = setTimeout(replaceAll, 1200)
+    // Run immediately + delayed for initial render
+    replaceMedusaLogos()
+    setTimeout(replaceMedusaLogos, 200)
+    setTimeout(replaceMedusaLogos, 800)
 
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
-    }
+    // Install persistent MutationObserver to catch SPA navigation
+    // (reset-password, invite pages render after route change)
+    const observer = new MutationObserver(() => {
+      replaceMedusaLogos()
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+
+    // Never disconnect — observer must persist across the entire SPA lifecycle
   }, [])
 
-  // Render nothing — all work is done via DOM manipulation
   return null
 }
 
