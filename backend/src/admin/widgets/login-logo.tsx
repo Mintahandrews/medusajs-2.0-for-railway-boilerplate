@@ -1,5 +1,6 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useEffect } from "react"
+import { LETSCASE_LOGO_DATA_URL } from "./logo-data"
 
 const STYLE_ID = "letscase-login-branding"
 
@@ -16,8 +17,13 @@ const LoginLogoWidget = () => {
       style.id = STYLE_ID
       style.textContent = `
         /* Hide the default Medusa AvatarBox icon on login */
-        [class*="AvatarBox"],
-        form > div:first-child > div:first-child > span:first-child {
+        [class*="AvatarBox"] {
+          display: none !important;
+        }
+        /* Hide the default Medusa round icon above the form */
+        form div:first-child span[class*="Avatar"],
+        form div:first-child div[class*="avatar"],
+        form div:first-child > div:first-child > span:first-child:has(svg) {
           display: none !important;
         }
       `
@@ -26,24 +32,29 @@ const LoginLogoWidget = () => {
 
     // Replace "Welcome to Medusa" text with "Welcome to Letscase"
     const replaceWelcomeText = () => {
-      document.querySelectorAll("h1, h2, h3, p, span").forEach((el) => {
-        if (el.textContent?.includes("Welcome to Medusa")) {
-          el.textContent = el.textContent.replace("Welcome to Medusa", "Welcome to Letscase")
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        null
+      )
+      let node: Text | null
+      while ((node = walker.nextNode() as Text | null)) {
+        if (node.nodeValue?.includes("Welcome to Medusa")) {
+          node.nodeValue = node.nodeValue.replace("Welcome to Medusa", "Welcome to Letscase")
         }
-        if (el.textContent?.includes("Medusa") && el.closest("form")) {
-          el.textContent = el.textContent.replace("Medusa", "Letscase")
-        }
-      })
+      }
     }
 
     replaceWelcomeText()
-    // Run again after a short delay in case the DOM renders late
-    const timer = setTimeout(replaceWelcomeText, 300)
-    const timer2 = setTimeout(replaceWelcomeText, 800)
+    // Run again after delays in case the DOM renders late
+    const t1 = setTimeout(replaceWelcomeText, 200)
+    const t2 = setTimeout(replaceWelcomeText, 600)
+    const t3 = setTimeout(replaceWelcomeText, 1200)
 
     return () => {
-      clearTimeout(timer)
-      clearTimeout(timer2)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
     }
   }, [])
 
@@ -57,7 +68,7 @@ const LoginLogoWidget = () => {
       }}
     >
       <img
-        src="/static/logo.png"
+        src={LETSCASE_LOGO_DATA_URL}
         alt="Letscase"
         style={{
           width: 64,

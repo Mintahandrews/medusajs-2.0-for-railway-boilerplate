@@ -1,7 +1,8 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk"
 import { useEffect, useRef } from "react"
+import { LETSCASE_LOGO_DATA_URL } from "./logo-data"
 
-const LOGO_URL = "/static/logo.png"
+const LOGO_URL = LETSCASE_LOGO_DATA_URL
 const STYLE_ID = "letscase-sidebar-logo"
 
 /**
@@ -15,8 +16,9 @@ const STYLE_ID = "letscase-sidebar-logo"
 
 const BRANDING_CSS = `
 /* ── Replace sidebar Medusa icon with Letscase logo ── */
+:root { --letscase-logo: url("${LOGO_URL}"); }
 
-/* Target the sidebar logo SVG icon and replace with our logo */
+/* Hide sidebar logo SVGs */
 aside nav > div:first-child a[href="/app"] svg,
 aside nav > div:first-child > a svg,
 aside header a[href="/app"] svg,
@@ -29,6 +31,7 @@ aside svg[class*="contrast-fg"] {
   position: absolute !important;
 }
 
+/* Sidebar logo link layout */
 aside nav > div:first-child a[href="/app"],
 aside nav > div:first-child > a:first-child,
 aside header a[href="/app"] {
@@ -38,6 +41,7 @@ aside header a[href="/app"] {
   gap: 8px;
 }
 
+/* Inject logo via ::before */
 aside nav > div:first-child a[href="/app"]::before,
 aside nav > div:first-child > a:first-child::before,
 aside header a[href="/app"]::before {
@@ -45,24 +49,12 @@ aside header a[href="/app"]::before {
   display: inline-block;
   width: 28px;
   height: 28px;
-  background: url("${LOGO_URL}") center / contain no-repeat;
+  background: var(--letscase-logo) center / contain no-repeat;
   border-radius: 6px;
   flex-shrink: 0;
 }
 
-/* Also replace any "Medusa" text in the sidebar header area */
-aside nav > div:first-child a[href="/app"] span:has(> svg) {
-  position: relative;
-}
-aside nav > div:first-child a[href="/app"] span:has(> svg)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("${LOGO_URL}") center / contain no-repeat;
-  border-radius: 6px;
-}
-
-/* Fallback: generic :has() approach for SquareTwoStack SVG */
+/* Fallback: :has() approach for SquareTwoStack SVG */
 span:has(> svg.text-ui-contrast-fg-secondary) {
   position: relative;
 }
@@ -70,11 +62,9 @@ span:has(> svg.text-ui-contrast-fg-secondary)::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: url("${LOGO_URL}") center / contain no-repeat;
+  background: var(--letscase-logo) center / contain no-repeat;
   border-radius: 6px;
 }
-
-/* Global: replace any remaining "Medusa" heading in dashboard chrome */
 `
 
 const SidebarLogoWidget = () => {
