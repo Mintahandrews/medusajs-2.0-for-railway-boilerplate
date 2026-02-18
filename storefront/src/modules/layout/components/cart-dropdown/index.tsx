@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@medusajs/ui"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
@@ -210,14 +209,13 @@ const CartDropdown = ({
                     })}
                   </span>
                 </div>
-                <LocalizedClientLink href="/cart" passHref onClick={close}>
-                  <Button
-                    className="w-full"
-                    size="large"
-                    data-testid="go-to-cart-button"
-                  >
-                    View Cart &amp; Checkout
-                  </Button>
+                <LocalizedClientLink
+                  href="/cart"
+                  onClick={close}
+                  className="flex w-full items-center justify-center rounded-lg bg-ui-bg-interactive text-ui-fg-on-color h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-interactive-hover transition-colors"
+                  data-testid="go-to-cart-button"
+                >
+                  View Cart &amp; Checkout
                 </LocalizedClientLink>
               </div>
             </>
@@ -227,8 +225,12 @@ const CartDropdown = ({
                 <ShoppingBag size={28} className="text-grey-40" />
               </div>
               <p className="text-[15px] text-grey-50">Your cart is empty</p>
-              <LocalizedClientLink href="/store" onClick={close}>
-                <Button>Explore Products</Button>
+              <LocalizedClientLink
+                href="/store"
+                onClick={close}
+                className="flex items-center justify-center rounded-lg bg-ui-bg-interactive text-ui-fg-on-color h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-interactive-hover transition-colors"
+              >
+                Explore Products
               </LocalizedClientLink>
             </div>
           )}

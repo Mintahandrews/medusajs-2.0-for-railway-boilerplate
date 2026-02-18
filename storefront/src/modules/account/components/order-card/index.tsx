@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@medusajs/ui"
 import { useMemo } from "react"
 
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -76,10 +75,12 @@ const OrderCard = ({ order }: OrderCardProps) => {
         )}
       </div>
       <div className="flex justify-end">
-        <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
-          <Button data-testid="order-details-link" variant="secondary">
-            See details
-          </Button>
+        <LocalizedClientLink
+          href={`/account/orders/details/${order.id}`}
+          data-testid="order-details-link"
+          className="inline-flex items-center justify-center rounded-lg border border-ui-border-base bg-ui-bg-base text-ui-fg-base h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-base-hover transition-colors"
+        >
+          See details
         </LocalizedClientLink>
       </div>
     </div>
