@@ -61,6 +61,7 @@ const Item = ({ item, type = "full" }: ItemProps) => {
         >
           {isCustomized && meta?.preview_image ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-ui-bg-subtle border border-ui-border-base">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={meta.preview_image}
                 alt="Custom design"

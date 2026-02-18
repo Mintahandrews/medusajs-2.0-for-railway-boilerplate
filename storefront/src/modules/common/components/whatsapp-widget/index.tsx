@@ -22,6 +22,18 @@ const POSITION_PRIORITY: FloatingPosition[] = [
   "top-left",
 ]
 
+const EXCLUDED_PATHS = [
+  "/checkout",
+  "/customizer",
+  "/account",
+  "/admin",
+  "/cart",
+  "/order",
+  "/reset-password",
+  "/login",
+  "/register",
+]
+
 const isElementVisible = (node: HTMLElement) => {
   const style = window.getComputedStyle(node)
   if (style.visibility === "hidden" || style.display === "none" || Number(style.opacity) === 0) {
@@ -44,23 +56,7 @@ export default function WhatsAppWidget() {
   const [position, setPosition] = useState<FloatingPosition>("bottom-right")
   const rafRef = useRef<number | null>(null)
 
-  // Hide on checkout, customizer, account, admin, and cart pages
-  const excludedPaths = [
-    "/checkout",
-    "/customizer", 
-    "/account",
-    "/admin",
-    "/cart",
-    "/order",
-    "/reset-password",
-    "/login",
-    "/register"
-  ]
-  
-  const shouldHide = excludedPaths.some(path => pathname?.includes(path))
-  if (shouldHide) return null
-
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
+  const shouldHide = EXCLUDED_PATHS.some(path => pathname?.includes(path))
 
   const evaluatePosition = useCallback(() => {
     if (typeof window === "undefined") return
@@ -113,6 +109,10 @@ export default function WhatsAppWidget() {
       }
     }
   }, [evaluatePosition, pathname])
+
+  if (shouldHide) return null
+
+  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
   const tooltipOnLeftSide = position.includes("left")
   const tooltipBaseClass = tooltipOnLeftSide

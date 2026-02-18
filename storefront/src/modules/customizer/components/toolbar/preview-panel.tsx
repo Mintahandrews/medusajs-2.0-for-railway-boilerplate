@@ -267,7 +267,7 @@ export default function PreviewPanel() {
       ctx.restore()
     }
     img.src = designUrl
-  }, [mode, designUrl, angleIdx, bgIdx, deviceConfig, state])
+  }, [mode, designUrl, angleIdx, bgIdx, deviceConfig, state.caseType, state.backgroundColor])
 
   /* ---- Download ---- */
   const handleDownload = useCallback(() => {
@@ -367,6 +367,7 @@ export default function PreviewPanel() {
                 backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0px",
               } : undefined}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={aiImageUrl} alt="AI Preview" className="w-full h-auto block" />
               <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full">
                 {AI_SCENES[sceneIdx].scene === "transparent" ? "Transparent PNG" : "AI Generated"}
@@ -444,8 +445,8 @@ export default function PreviewPanel() {
                 onClick={() => {
                   if (canvasRef.current) {
                     setFullscreenUrl(canvasRef.current.toDataURL("image/png", 1))
+                    setFullscreen(true)
                   }
-                  setFullscreen(true)
                 }}
               >
                 <canvas ref={canvasRef} className="w-full h-auto" style={{ display: "block" }} />
@@ -485,6 +486,7 @@ export default function PreviewPanel() {
           >
             <X size={20} />
           </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={fullscreenUrl}
             alt="Preview"
