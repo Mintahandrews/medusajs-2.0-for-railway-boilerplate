@@ -73,52 +73,54 @@ export default async function ProductPreview({
     )
 
   return (
-    <CardWrapper>
-      <div
-        data-testid="product-wrapper"
-        className={clx({ "opacity-60": isOutOfStock })}
-      >
-        <div className="relative">
-          <div className="absolute right-3 top-3 z-10 flex flex-col gap-2 items-end">
-            {isLowStock && minPositiveStock !== null && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 shadow-sm">
-                <AlertTriangle size={12} />
-                Only {minPositiveStock} left
-              </span>
-            )}
-            <WishlistButton
-              item={{
-                id: product.id!,
-                handle: product.handle!,
-                title: product.title,
-                image: product.thumbnail || product.images?.[0]?.url || null,
-                price: cheapestPrice?.calculated_price || undefined,
-              }}
-            />
-          </div>
-          <Thumbnail
-            thumbnail={product.thumbnail}
-            images={product.images}
-            size="full"
-            isFeatured={isFeatured}
-            alt={product.title}
-          />
-          {isOutOfStock && (
-            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white text-xs font-semibold gap-1">
-              <Ban size={18} />
-              <span>Out of stock</span>
-            </div>
-          )}
-        </div>
-        <div className="flex txt-compact-medium mt-4 justify-between">
-          <Text className="text-ui-fg-subtle" data-testid="product-title">
-            {product.title}
-          </Text>
-          <div className="flex items-center gap-x-2">
-            {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
-          </div>
-        </div>
+    <div className="relative">
+      <div className="absolute right-3 top-3 z-10 flex flex-col gap-2 items-end">
+        {isLowStock && minPositiveStock !== null && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 shadow-sm">
+            <AlertTriangle size={12} />
+            Only {minPositiveStock} left
+          </span>
+        )}
+        <WishlistButton
+          item={{
+            id: product.id!,
+            handle: product.handle!,
+            title: product.title,
+            image: product.thumbnail || product.images?.[0]?.url || null,
+            price: cheapestPrice?.calculated_price || undefined,
+          }}
+        />
       </div>
-    </CardWrapper>
+      <CardWrapper>
+        <div
+          data-testid="product-wrapper"
+          className={clx({ "opacity-60": isOutOfStock })}
+        >
+          <div className="relative">
+            <Thumbnail
+              thumbnail={product.thumbnail}
+              images={product.images}
+              size="full"
+              isFeatured={isFeatured}
+              alt={product.title}
+            />
+            {isOutOfStock && (
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white text-xs font-semibold gap-1">
+                <Ban size={18} />
+                <span>Out of stock</span>
+              </div>
+            )}
+          </div>
+          <div className="flex txt-compact-medium mt-4 justify-between">
+            <Text className="text-ui-fg-subtle" data-testid="product-title">
+              {product.title}
+            </Text>
+            <div className="flex items-center gap-x-2">
+              {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
+            </div>
+          </div>
+        </div>
+      </CardWrapper>
+    </div>
   )
 }

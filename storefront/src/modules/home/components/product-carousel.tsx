@@ -215,50 +215,54 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
         onTouchStart={handleTouchStart}
       >
         {loopItems.map((item, idx) => (
-          <LocalizedClientLink
+          <div
             key={`${item.id}-${idx}`}
-            href={item.href}
-            draggable={false}
-            onClick={(e?: React.MouseEvent<HTMLAnchorElement>) => {
-              // Prevent navigation when finishing a drag
-              if (isDragging) e?.preventDefault()
-            }}
-            className="group shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block select-none"
+            className="group relative shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 select-none"
           >
-            <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
-              <div className="absolute right-3 top-3 z-10">
-                <WishlistButton
-                  item={{
-                    id: item.id,
-                    handle: item.href.replace("/products/", ""),
-                    title: item.title,
-                    image: item.image,
-                    price: item.price,
-                  }}
-                />
-              </div>
-              <div className="relative aspect-square w-full">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  sizes="280px"
-                  loading="lazy"
-                  className="object-contain scale-[1.12] pointer-events-none"
-                  draggable={false}
-                />
-              </div>
+            <div className="absolute right-7 top-7 z-10">
+              <WishlistButton
+                item={{
+                  id: item.id,
+                  handle: item.href.replace("/products/", ""),
+                  title: item.title,
+                  image: item.image,
+                  price: item.price,
+                }}
+              />
             </div>
+            <LocalizedClientLink
+              href={item.href}
+              draggable={false}
+              onClick={(e?: React.MouseEvent<HTMLAnchorElement>) => {
+                // Prevent navigation when finishing a drag
+                if (isDragging) e?.preventDefault()
+              }}
+              className="block"
+            >
+              <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
+                <div className="relative aspect-square w-full">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="280px"
+                    loading="lazy"
+                    className="object-contain scale-[1.12] pointer-events-none"
+                    draggable={false}
+                  />
+                </div>
+              </div>
 
-            <div className="flex flex-col gap-1">
-              <div className="text-[15px] font-medium text-grey-90 line-clamp-2 min-h-[46px]">
-                {item.title}
+              <div className="flex flex-col gap-1">
+                <div className="text-[15px] font-medium text-grey-90 line-clamp-2 min-h-[46px]">
+                  {item.title}
+                </div>
+                <div className="text-[18px] font-semibold text-grey-90">
+                  {item.price}
+                </div>
               </div>
-              <div className="text-[18px] font-semibold text-grey-90">
-                {item.price}
-              </div>
-            </div>
-          </LocalizedClientLink>
+            </LocalizedClientLink>
+          </div>
         ))}
       </div>
     </div>
