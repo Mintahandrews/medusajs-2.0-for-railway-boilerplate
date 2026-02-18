@@ -58,7 +58,6 @@ export default function WhatsAppWidget() {
   ]
   
   const shouldHide = excludedPaths.some(path => pathname?.includes(path))
-  if (shouldHide) return null
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
@@ -91,7 +90,7 @@ export default function WhatsAppWidget() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || shouldHide) return
 
     evaluatePosition()
 
@@ -112,7 +111,9 @@ export default function WhatsAppWidget() {
         cancelAnimationFrame(rafRef.current)
       }
     }
-  }, [evaluatePosition, pathname])
+  }, [evaluatePosition, pathname, shouldHide])
+
+  if (shouldHide) return null
 
   const tooltipOnLeftSide = position.includes("left")
   const tooltipBaseClass = tooltipOnLeftSide
