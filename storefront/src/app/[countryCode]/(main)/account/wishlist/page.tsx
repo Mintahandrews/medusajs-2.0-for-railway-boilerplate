@@ -86,12 +86,12 @@ export default function WishlistPage() {
             const href = `/${countryCode}/products/${item.handle}`
 
             return (
-              <Link
+              <div
                 key={item.id}
-                href={href}
-                className="group flex items-center justify-between gap-4 rounded-lg border border-ui-border-base bg-ui-bg-base p-4 hover:border-ui-border-interactive"
+                className="group relative flex items-center justify-between gap-4 rounded-lg border border-ui-border-base bg-ui-bg-base p-4 hover:border-ui-border-interactive"
               >
-                <div className="min-w-0">
+                <Link href={href} className="min-w-0 absolute inset-0" aria-label={item.title} />
+                <div className="min-w-0 relative pointer-events-none">
                   <p className="truncate text-sm font-medium text-ui-fg-base">
                     {item.title}
                   </p>
@@ -100,13 +100,13 @@ export default function WishlistPage() {
                   ) : null}
                 </div>
 
-                <div className="shrink-0">
+                <div className="shrink-0 relative z-10">
                   <WishlistButton
                     item={item}
                     className="h-9 w-9 rounded-full border border-ui-border-base bg-ui-bg-base hover:border-ui-border-interactive"
                   />
                 </div>
-              </Link>
+              </div>
             )
           })}
         </div>

@@ -87,7 +87,7 @@ export default function WhatsAppWidget() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || shouldHide) return
 
     evaluatePosition()
 
@@ -108,7 +108,7 @@ export default function WhatsAppWidget() {
         cancelAnimationFrame(rafRef.current)
       }
     }
-  }, [evaluatePosition, pathname])
+  }, [evaluatePosition, pathname, shouldHide])
 
   if (shouldHide) return null
 

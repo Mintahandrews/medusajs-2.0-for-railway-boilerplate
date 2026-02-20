@@ -83,6 +83,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                       >
                         <LocalizedClientLink
                           href={`/account/orders/details/${order.id}`}
+                          data-testid="open-order-button"
                         >
                           <Container className="bg-gray-50 flex justify-between items-center p-4">
                             <div className="grid grid-cols-3 grid-rows-2 text-small-regular gap-x-4 flex-1">
@@ -109,15 +110,12 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                                 })}
                               </span>
                             </div>
-                            <button
+                            <span
                               className="flex items-center justify-between"
-                              data-testid="open-order-button"
+                              aria-hidden="true"
                             >
-                              <span className="sr-only">
-                                Go to order #{order.display_id}
-                              </span>
                               <ChevronDown className="-rotate-90" />
-                            </button>
+                            </span>
                           </Container>
                         </LocalizedClientLink>
                       </li>

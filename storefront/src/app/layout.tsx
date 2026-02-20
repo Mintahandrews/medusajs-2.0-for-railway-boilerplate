@@ -80,7 +80,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-mode="light" className={inter.variable}>
+    <html lang="en" data-mode="light" className={inter.variable} suppressHydrationWarning>
       <head>
         <WebsiteJsonLd />
         {/* Preconnect to Medusa backend for faster API calls */}
@@ -88,7 +88,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <link rel="preconnect" href={process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL} />
         )}
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <ScrollToTop />
         <main id="top" className="relative">{props.children}</main>
       </body>

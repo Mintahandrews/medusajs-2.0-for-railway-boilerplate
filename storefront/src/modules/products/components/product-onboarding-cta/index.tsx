@@ -1,4 +1,4 @@
-import { Button, Container, Text } from "@medusajs/ui"
+import { Container, Text } from "@medusajs/ui"
 import { getMedusaAdminURL } from "@lib/util/env"
 import { cookies } from "next/headers"
 import { CheckCircle } from "lucide-react"
@@ -20,8 +20,11 @@ const ProductOnboardingCta = async () => {
         <Text className="text-ui-fg-subtle text-small-regular">
           You can now continue setting up your store in the admin.
         </Text>
-        <a href={getMedusaAdminURL()}>
-          <Button className="w-full">Continue setup in admin</Button>
+        <a
+          href={getMedusaAdminURL()}
+          className="flex w-full items-center justify-center rounded-lg bg-ui-bg-interactive text-ui-fg-on-color h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-interactive-hover transition-colors"
+        >
+          Continue setup in admin
         </a>
       </div>
     </Container>
