@@ -21,15 +21,31 @@ type CarouselItem =
     price: string
   }
 
-const AUTO_SCROLL_SPEED = 0.18 // pixels per frame (~11px/s)
+/** Pixels-per-second for the continuous auto-glide */
+const AUTO_SPEED = 30
+/** Duration (ms) for arrow-button animated scroll */
+const ARROW_DURATION = 500
+/** Idle time (ms) before auto-scroll resumes after interaction */
+const RESUME_DELAY = 3000
 
 export default function ProductCarousel({ items, autoScroll = true }: { items: CarouselItem[]; autoScroll?: boolean }) {
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [isUserInteracting, setIsUserInteracting] = useState(false)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const dragStartX = useRef(0)
-  const dragScrollLeft = useRef(0)
-  const interactionTimeout = useRef<NodeJS.Timeout | null>(null)
+  const dragStartPos = useRef(0)
+  const interactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Animation state (refs to avoid re-renders in rAF loop)
+  const pos = useRef(0)
+  const raf = useRef<number | null>(null)
+  const lastT = useRef<number | null>(null)
+  const visible = useRef(true)
+  const paused = useRef(false)
+  const half = useRef(0)
+
+  // Arrow animation
+  const arrowAnim = useRef<{ from: number; to: number; start: number } | null>(null)
 
   const normalized = useMemo(() => {
     return items.map((item, idx) => {
@@ -46,91 +62,103 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
 
   const displayItems = normalized.slice(0, 8)
 
-  const rafRef = useRef<number | null>(null)
-  const isVisible = useRef(true)
-  const scrollAccum = useRef(0)
+  // Duplicate items for seamless loop
+  const loopItems = useMemo(() => [...displayItems, ...displayItems], [displayItems])
+
+  // Measure track half-width for seamless loop reset
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current) half.current = trackRef.current.scrollWidth / 2
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [loopItems.length])
 
   // Pause rAF when carousel scrolls out of viewport
   useEffect(() => {
-    const el = scrollRef.current
+    const el = viewportRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { isVisible.current = entry.isIntersecting },
+      ([entry]) => { visible.current = entry.isIntersecting },
       { threshold: 0 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  const step = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-
-    if (isVisible.current) {
-      scrollAccum.current += AUTO_SCROLL_SPEED
-      const px = Math.floor(scrollAccum.current)
-      if (px >= 1) {
-        el.scrollLeft += px
-        scrollAccum.current -= px
-      }
-
-      // If we've scrolled past the first set, jump back seamlessly
-      const halfWidth = el.scrollWidth / 2
-      if (el.scrollLeft >= halfWidth) {
-        el.scrollLeft -= halfWidth
-      }
+  // Apply GPU-accelerated transform (sub-pixel smooth)
+  const apply = useCallback(() => {
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${-pos.current}px,0,0)`
     }
-
-    rafRef.current = requestAnimationFrame(step)
   }, [])
 
-  useEffect(() => {
-    if (!autoScroll) return
+  // Ease-out cubic for arrow animations
+  const ease = (t: number) => 1 - Math.pow(1 - t, 3)
 
-    const start = () => {
-      if (rafRef.current) return
-      rafRef.current = requestAnimationFrame(step)
+  // Seamless loop wrap
+  const wrap = useCallback(() => {
+    const h = half.current
+    if (h > 0) {
+      if (pos.current >= h) pos.current -= h
+      else if (pos.current < 0) pos.current += h
     }
-    const stop = () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = null
+  }, [])
+
+  // Core animation frame — runs continuously
+  const tick = useCallback(
+    (now: number) => {
+      if (lastT.current === null) lastT.current = now
+      const dt = Math.min((now - lastT.current) / 1000, 0.1)
+      lastT.current = now
+
+      // Arrow animation takes priority
+      if (arrowAnim.current) {
+        const a = arrowAnim.current
+        const p = Math.min((now - a.start) / ARROW_DURATION, 1)
+        pos.current = a.from + (a.to - a.from) * ease(p)
+        if (p >= 1) arrowAnim.current = null
       }
-    }
+      // Auto-scroll when visible and not paused
+      else if (visible.current && !paused.current && autoScroll) {
+        pos.current += AUTO_SPEED * dt
+      }
 
-    if (isUserInteracting) {
-      stop()
-    } else {
-      start()
-    }
+      wrap()
+      apply()
+      raf.current = requestAnimationFrame(tick)
+    },
+    [autoScroll, apply, wrap]
+  )
 
-    return stop
-  }, [autoScroll, isUserInteracting, step])
+  // Start / cleanup rAF
+  useEffect(() => {
+    raf.current = requestAnimationFrame(tick)
+    return () => { if (raf.current) cancelAnimationFrame(raf.current) }
+  }, [tick])
 
   // Clean up interaction timeout on unmount
   useEffect(() => {
     return () => {
-      if (interactionTimeout.current) clearTimeout(interactionTimeout.current)
+      if (interactionTimer.current) clearTimeout(interactionTimer.current)
     }
   }, [])
 
-  // --- Pause auto-scroll on any user interaction, resume after 3s idle ---
+  // --- Pause auto-scroll on any user interaction, resume after idle ---
   const pauseAutoScroll = useCallback(() => {
-    setIsUserInteracting(true)
-    if (interactionTimeout.current) clearTimeout(interactionTimeout.current)
-    interactionTimeout.current = setTimeout(() => {
-      setIsUserInteracting(false)
-    }, 3000)
+    paused.current = true
+    arrowAnim.current = null
+    if (interactionTimer.current) clearTimeout(interactionTimer.current)
+    interactionTimer.current = setTimeout(() => { paused.current = false }, RESUME_DELAY)
   }, [])
 
   // --- Mouse drag to scroll ---
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      const el = scrollRef.current
-      if (!el) return
       setIsDragging(true)
-      dragStartX.current = e.pageX - el.offsetLeft
-      dragScrollLeft.current = el.scrollLeft
+      dragStartX.current = e.clientX
+      dragStartPos.current = pos.current
       pauseAutoScroll()
     },
     [pauseAutoScroll]
@@ -140,11 +168,7 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     (e: React.MouseEvent) => {
       if (!isDragging) return
       e.preventDefault()
-      const el = scrollRef.current
-      if (!el) return
-      const x = e.pageX - el.offsetLeft
-      const walk = (x - dragStartX.current) * 1.2
-      el.scrollLeft = dragScrollLeft.current - walk
+      pos.current = dragStartPos.current - (e.clientX - dragStartX.current)
     },
     [isDragging]
   )
@@ -156,12 +180,10 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
   // --- Touch / wheel scrolling also pauses auto-scroll ---
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      const el = scrollRef.current
-      if (!el) return
       // Convert vertical wheel to horizontal scroll
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault()
-        el.scrollLeft += e.deltaY
+        pos.current += e.deltaY
       }
       pauseAutoScroll()
     },
@@ -172,40 +194,43 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
     pauseAutoScroll()
   }, [pauseAutoScroll])
 
-  // Duplicate items for seamless loop
-  const loopItems = [...displayItems, ...displayItems]
+  // --- Arrow buttons ---
+  const scrollByPx = useCallback(
+    (px: number) => {
+      pauseAutoScroll()
+      arrowAnim.current = {
+        from: pos.current,
+        to: pos.current + px,
+        start: performance.now(),
+      }
+    },
+    [pauseAutoScroll]
+  )
 
-  const handleScrollBy = (distance: number) => {
-    const el = scrollRef.current
-    if (!el) return
-    pauseAutoScroll()
-    el.scrollBy({ left: distance, behavior: "smooth" })
-  }
+  const viewW = () => viewportRef.current?.clientWidth ?? 600
 
   return (
     <div className="relative">
       {/* Prev / Next buttons */}
       <button
         aria-label="Previous"
-        onClick={() => handleScrollBy(-((scrollRef.current?.clientWidth ?? 600) * 0.6))}
+        onClick={() => scrollByPx(-(viewW() * 0.6))}
         className="flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
       >
         <ChevronLeft size={18} />
       </button>
       <button
         aria-label="Next"
-        onClick={() => handleScrollBy((scrollRef.current?.clientWidth ?? 600) * 0.6)}
+        onClick={() => scrollByPx(viewW() * 0.6)}
         className="flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
       >
         <ChevronRight size={18} />
       </button>
       <div
-        ref={scrollRef}
-        className="flex gap-4 pb-2 overflow-x-auto scrollbar-hide"
+        ref={viewportRef}
+        className="overflow-hidden"
         style={{
           cursor: isDragging ? "grabbing" : "grab",
-          scrollBehavior: "auto",
-          WebkitOverflowScrolling: "touch",
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -214,52 +239,58 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
         onWheel={handleWheel}
         onTouchStart={handleTouchStart}
       >
-        {loopItems.map((item, idx) => (
-          <LocalizedClientLink
-            key={`${item.id}-${idx}`}
-            href={item.href}
-            draggable={false}
-            onClick={(e?: React.MouseEvent<HTMLAnchorElement>) => {
-              // Prevent navigation when finishing a drag
-              if (isDragging) e?.preventDefault()
-            }}
-            className="group shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block select-none"
-          >
-            <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
-              <div className="absolute right-3 top-3 z-10">
-                <WishlistButton
-                  item={{
-                    id: item.id,
-                    handle: item.href.replace("/products/", ""),
-                    title: item.title,
-                    image: item.image,
-                    price: item.price,
-                  }}
-                />
+        <div
+          ref={trackRef}
+          className="flex gap-4 pb-2"
+          style={{ willChange: "transform" }}
+        >
+          {loopItems.map((item, idx) => (
+            <LocalizedClientLink
+              key={`${item.id}-${idx}`}
+              href={item.href}
+              draggable={false}
+              onClick={(e?: React.MouseEvent<HTMLAnchorElement>) => {
+                // Prevent navigation when finishing a drag
+                if (isDragging) e?.preventDefault()
+              }}
+              className="group shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 block select-none"
+            >
+              <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
+                <div className="absolute right-3 top-3 z-10">
+                  <WishlistButton
+                    item={{
+                      id: item.id,
+                      handle: item.href.replace("/products/", ""),
+                      title: item.title,
+                      image: item.image,
+                      price: item.price,
+                    }}
+                  />
+                </div>
+                <div className="relative aspect-square w-full">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="280px"
+                    loading="lazy"
+                    className="object-contain scale-[1.12] pointer-events-none"
+                    draggable={false}
+                  />
+                </div>
               </div>
-              <div className="relative aspect-square w-full">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  sizes="280px"
-                  loading="lazy"
-                  className="object-contain scale-[1.12] pointer-events-none"
-                  draggable={false}
-                />
-              </div>
-            </div>
 
-            <div className="flex flex-col gap-1">
-              <div className="text-[15px] font-medium text-grey-90 line-clamp-2 min-h-[46px]">
-                {item.title}
+              <div className="flex flex-col gap-1">
+                <div className="text-[15px] font-medium text-grey-90 line-clamp-2 min-h-[46px]">
+                  {item.title}
+                </div>
+                <div className="text-[18px] font-semibold text-grey-90">
+                  {item.price}
+                </div>
               </div>
-              <div className="text-[18px] font-semibold text-grey-90">
-                {item.price}
-              </div>
-            </div>
-          </LocalizedClientLink>
-        ))}
+            </LocalizedClientLink>
+          ))}
+        </div>
       </div>
     </div>
   )

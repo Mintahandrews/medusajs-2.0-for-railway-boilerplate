@@ -18,12 +18,11 @@ type Testimonial = {
   verified?: boolean
 }
 
-/**
- * px per rAF frame at ~60 fps -> ~15 px/s for a calmer glide.
- * Matches the tuned best-seller product carousel speed.
- */
-const AUTO_SCROLL_SPEED = 0.25
-/** ms before auto-scroll resumes after user interaction */
+/** Pixels-per-second for the continuous auto-glide */
+const AUTO_SPEED = 25
+/** Duration (ms) for arrow / dot animated scroll */
+const ARROW_DURATION = 500
+/** Idle time (ms) before auto-scroll resumes after interaction */
 const RESUME_DELAY = 4000
 
 export default function TestimonialsSlider() {
@@ -54,111 +53,135 @@ export default function TestimonialsSlider() {
     []
   )
 
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const rafRef = useRef<number | null>(null)
-  const [isUserInteracting, setIsUserInteracting] = useState(false)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const dragStartX = useRef(0)
-  const dragScrollLeft = useRef(0)
-  const interactionTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dragStartPos = useRef(0)
+  const interactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Animation state (refs to avoid re-renders in rAF loop)
+  const pos = useRef(0)
+  const raf = useRef<number | null>(null)
+  const lastT = useRef<number | null>(null)
+  const visible = useRef(true)
+  const paused = useRef(false)
+  const half = useRef(0)
+
+  // Arrow / dot animation
+  const arrowAnim = useRef<{ from: number; to: number; start: number } | null>(null)
 
   /* -- active dot tracking -- */
   const [activeIdx, setActiveIdx] = useState(0)
 
-  const updateActiveCard = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const card = el.firstElementChild as HTMLElement | null
-    const cardWidth = card ? card.offsetWidth + 20 : 340
-    const idx = Math.round(el.scrollLeft / cardWidth)
-    setActiveIdx(idx % items.length)
-  }, [items.length])
+  // Duplicate items for seamless infinite auto-scroll
+  const loopItems = useMemo(() => [...items, ...items], [items])
 
-  /* -- auto-scroll with rAF (matches product carousel) -- */
-  const isVisible = useRef(true)
-  const scrollAccum = useRef(0)
+  // Measure track half-width for seamless loop reset
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current) half.current = trackRef.current.scrollWidth / 2
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [loopItems.length])
 
   // Pause rAF when slider scrolls out of viewport
   useEffect(() => {
-    const el = scrollRef.current
+    const el = viewportRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { isVisible.current = entry.isIntersecting },
+      ([entry]) => { visible.current = entry.isIntersecting },
       { threshold: 0 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  const step = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-
-    if (isVisible.current) {
-      scrollAccum.current += AUTO_SCROLL_SPEED
-      const px = Math.floor(scrollAccum.current)
-      if (px >= 1) {
-        el.scrollLeft += px
-        scrollAccum.current -= px
-      }
-
-      // seamless loop: once past the duplicated set, jump back
-      const half = el.scrollWidth / 2
-      if (el.scrollLeft >= half) {
-        el.scrollLeft -= half
-      }
-
-      updateActiveCard()
+  // Apply GPU-accelerated transform (sub-pixel smooth)
+  const apply = useCallback(() => {
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${-pos.current}px,0,0)`
     }
+  }, [])
 
-    rafRef.current = requestAnimationFrame(step)
-  }, [updateActiveCard])
+  // Ease-out cubic for arrow / dot animations
+  const ease = (t: number) => 1 - Math.pow(1 - t, 3)
 
+  // Seamless loop wrap
+  const wrap = useCallback(() => {
+    const h = half.current
+    if (h > 0) {
+      if (pos.current >= h) pos.current -= h
+      else if (pos.current < 0) pos.current += h
+    }
+  }, [])
+
+  // Update active dot based on current position
+  const updateActiveDot = useCallback(() => {
+    if (!trackRef.current) return
+    const card = trackRef.current.firstElementChild as HTMLElement | null
+    const gap = 24 // gap-6 = 24px on desktop
+    const cardW = card ? card.offsetWidth + gap : 444
+    const idx = Math.round(pos.current / cardW) % items.length
+    setActiveIdx(Math.abs(idx) % items.length)
+  }, [items.length])
+
+  // Core animation frame — runs continuously
+  const tick = useCallback(
+    (now: number) => {
+      if (lastT.current === null) lastT.current = now
+      const dt = Math.min((now - lastT.current) / 1000, 0.1)
+      lastT.current = now
+
+      // Arrow / dot animation takes priority
+      if (arrowAnim.current) {
+        const a = arrowAnim.current
+        const p = Math.min((now - a.start) / ARROW_DURATION, 1)
+        pos.current = a.from + (a.to - a.from) * ease(p)
+        if (p >= 1) arrowAnim.current = null
+      }
+      // Auto-scroll when visible and not paused
+      else if (visible.current && !paused.current) {
+        pos.current += AUTO_SPEED * dt
+      }
+
+      wrap()
+      apply()
+      updateActiveDot()
+      raf.current = requestAnimationFrame(tick)
+    },
+    [apply, wrap, updateActiveDot]
+  )
+
+  // Start / cleanup rAF
   useEffect(() => {
-    const start = () => {
-      if (rafRef.current) return
-      rafRef.current = requestAnimationFrame(step)
-    }
-    const stop = () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = null
-      }
-    }
-
-    if (isUserInteracting) {
-      stop()
-    } else {
-      start()
-    }
-
-    return stop
-  }, [isUserInteracting, step])
+    raf.current = requestAnimationFrame(tick)
+    return () => { if (raf.current) cancelAnimationFrame(raf.current) }
+  }, [tick])
 
   // Clean up interaction timeout on unmount
   useEffect(() => {
     return () => {
-      if (interactionTimeout.current) clearTimeout(interactionTimeout.current)
+      if (interactionTimer.current) clearTimeout(interactionTimer.current)
     }
   }, [])
 
   /* -- pause / resume helpers -- */
   const pauseAutoScroll = useCallback(() => {
-    setIsUserInteracting(true)
-    if (interactionTimeout.current) clearTimeout(interactionTimeout.current)
-    interactionTimeout.current = setTimeout(() => {
-      setIsUserInteracting(false)
-    }, RESUME_DELAY)
+    paused.current = true
+    arrowAnim.current = null
+    if (interactionTimer.current) clearTimeout(interactionTimer.current)
+    interactionTimer.current = setTimeout(() => { paused.current = false }, RESUME_DELAY)
   }, [])
 
-  /* -- mouse drag to scroll (matches product carousel) -- */
+  /* -- mouse drag to scroll -- */
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      const el = scrollRef.current
-      if (!el) return
       setIsDragging(true)
-      dragStartX.current = e.pageX - el.offsetLeft
-      dragScrollLeft.current = el.scrollLeft
+      dragStartX.current = e.clientX
+      dragStartPos.current = pos.current
       pauseAutoScroll()
     },
     [pauseAutoScroll]
@@ -168,11 +191,7 @@ export default function TestimonialsSlider() {
     (e: React.MouseEvent) => {
       if (!isDragging) return
       e.preventDefault()
-      const el = scrollRef.current
-      if (!el) return
-      const x = e.pageX - el.offsetLeft
-      const walk = (x - dragStartX.current) * 1.2
-      el.scrollLeft = dragScrollLeft.current - walk
+      pos.current = dragStartPos.current - (e.clientX - dragStartX.current)
     },
     [isDragging]
   )
@@ -181,14 +200,12 @@ export default function TestimonialsSlider() {
     setIsDragging(false)
   }, [])
 
-  /* -- wheel to horizontal scroll (matches product carousel) -- */
+  /* -- wheel to horizontal scroll -- */
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
-      const el = scrollRef.current
-      if (!el) return
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault()
-        el.scrollLeft += e.deltaY
+        pos.current += e.deltaY
       }
       pauseAutoScroll()
     },
@@ -200,14 +217,18 @@ export default function TestimonialsSlider() {
   }, [pauseAutoScroll])
 
   /* -- arrow navigation -- */
-  const scrollBy = useCallback(
+  const scrollByCard = useCallback(
     (dir: 1 | -1) => {
-      const el = scrollRef.current
-      if (!el) return
-      const card = el.firstElementChild as HTMLElement | null
-      const cardWidth = card ? card.offsetWidth + 20 : 340
+      if (!trackRef.current) return
+      const card = trackRef.current.firstElementChild as HTMLElement | null
+      const gap = 24
+      const cardW = card ? card.offsetWidth + gap : 444
       pauseAutoScroll()
-      el.scrollBy({ left: dir * cardWidth, behavior: "smooth" })
+      arrowAnim.current = {
+        from: pos.current,
+        to: pos.current + dir * cardW,
+        start: performance.now(),
+      }
     },
     [pauseAutoScroll]
   )
@@ -215,18 +236,19 @@ export default function TestimonialsSlider() {
   /* -- dot navigation -- */
   const scrollToCard = useCallback(
     (idx: number) => {
-      const el = scrollRef.current
-      if (!el) return
-      const card = el.firstElementChild as HTMLElement | null
-      const cardWidth = card ? card.offsetWidth + 20 : 340
+      if (!trackRef.current) return
+      const card = trackRef.current.firstElementChild as HTMLElement | null
+      const gap = 24
+      const cardW = card ? card.offsetWidth + gap : 444
       pauseAutoScroll()
-      el.scrollTo({ left: idx * cardWidth, behavior: "smooth" })
+      arrowAnim.current = {
+        from: pos.current,
+        to: idx * cardW,
+        start: performance.now(),
+      }
     },
     [pauseAutoScroll]
   )
-
-  // Duplicate items for seamless infinite auto-scroll
-  const loopItems = [...items, ...items]
 
   return (
     <section className="py-12 small:py-20 border-t border-grey-20">
@@ -290,7 +312,7 @@ export default function TestimonialsSlider() {
           <button
             type="button"
             aria-label="Previous review"
-            onClick={() => scrollBy(-1)}
+            onClick={() => scrollByCard(-1)}
             className="hidden small:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white border border-grey-20 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:border-brand hover:text-brand"
           >
             <ChevronLeft size={20} />
@@ -298,19 +320,17 @@ export default function TestimonialsSlider() {
           <button
             type="button"
             aria-label="Next review"
-            onClick={() => scrollBy(1)}
+            onClick={() => scrollByCard(1)}
             className="hidden small:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white border border-grey-20 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:border-brand hover:text-brand"
           >
             <ChevronRight size={20} />
           </button>
 
           <div
-            ref={scrollRef}
-            className="flex gap-4 small:gap-6 overflow-x-auto no-scrollbar"
+            ref={viewportRef}
+            className="overflow-hidden"
             style={{
               cursor: isDragging ? "grabbing" : "grab",
-              scrollBehavior: "auto",
-              WebkitOverflowScrolling: "touch",
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -318,16 +338,21 @@ export default function TestimonialsSlider() {
             onMouseLeave={handleMouseUpOrLeave}
             onWheel={handleWheel}
             onTouchStart={handleTouchStart}
-            onScroll={updateActiveCard}
           >
-            {loopItems.map((item, idx) => (
-              <div
-                key={idx}
-                className="w-[85vw] max-w-[340px] small:w-[420px] small:max-w-none shrink-0 select-none"
-              >
-                <TestimonialCard item={item} />
-              </div>
-            ))}
+            <div
+              ref={trackRef}
+              className="flex gap-4 small:gap-6"
+              style={{ willChange: "transform" }}
+            >
+              {loopItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="w-[85vw] max-w-[340px] small:w-[420px] small:max-w-none shrink-0 select-none"
+                >
+                  <TestimonialCard item={item} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
