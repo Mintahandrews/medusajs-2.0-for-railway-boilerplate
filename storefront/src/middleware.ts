@@ -180,6 +180,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp)).*)",
-  ], // prevents redirecting on static files and Next internals
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)).*)",
+  ], // prevents redirecting on static files, Next internals, sitemap.xml and robots.txt
 }
