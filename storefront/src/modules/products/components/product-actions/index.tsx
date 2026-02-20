@@ -17,6 +17,7 @@ import { addToCart } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { isCustomizableCase } from "@lib/device-assets"
+import { trackAddToCart } from "@lib/posthog/events"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -126,6 +127,13 @@ export default function ProductActions({
       countryCode,
     })
 
+    trackAddToCart({
+      variant_id: selectedVariant.id,
+      product_id: product.id,
+      title: product.title ?? "",
+      quantity: 1,
+    })
+
     setIsAdding(false)
   }
 
@@ -155,7 +163,7 @@ export default function ProductActions({
                       title={option.title ?? ""}
                       data-testid="product-options"
                       disabled={!!disabled || isAdding}
-                      variants={product.variants}
+                      variants={product.variants ?? undefined}
                     />
                   </div>
                 )

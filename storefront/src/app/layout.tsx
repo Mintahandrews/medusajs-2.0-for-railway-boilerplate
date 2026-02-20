@@ -3,6 +3,8 @@ import { Metadata } from "next"
 import { Inter } from "next/font/google"
 import ScrollToTop from "@modules/common/components/scroll-to-top"
 import WebsiteJsonLd from "@modules/seo/components/website-jsonld"
+import PostHogProvider from "@lib/posthog/provider"
+import PostHogPageView from "@lib/posthog/pageview"
 import "styles/globals.css"
 
 const inter = Inter({
@@ -89,8 +91,11 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         )}
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <ScrollToTop />
-        <main id="top" className="relative">{props.children}</main>
+        <PostHogProvider>
+          <PostHogPageView />
+          <ScrollToTop />
+          <main id="top" className="relative">{props.children}</main>
+        </PostHogProvider>
       </body>
     </html>
   )

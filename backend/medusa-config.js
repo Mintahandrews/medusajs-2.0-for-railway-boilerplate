@@ -26,6 +26,8 @@ import {
   MEILISEARCH_ADMIN_KEY,
   ARONIUM_POS_ENABLED,
   ARONIUM_POS_API_KEY,
+  POSTHOG_EVENTS_API_KEY,
+  POSTHOG_HOST,
 } from 'lib/constants';
 loadEnv(process.env.NODE_ENV, process.cwd());
 
@@ -150,6 +152,22 @@ const medusaConfig = {
       options: {
         enabled: ARONIUM_POS_ENABLED,
         apiKey: ARONIUM_POS_API_KEY,
+      },
+    }] : []),
+    ...(POSTHOG_EVENTS_API_KEY ? [{
+      key: Modules.ANALYTICS,
+      resolve: '@medusajs/medusa/analytics',
+      options: {
+        providers: [
+          {
+            resolve: '@medusajs/analytics-posthog',
+            id: 'posthog',
+            options: {
+              posthogEventsKey: POSTHOG_EVENTS_API_KEY,
+              posthogHost: POSTHOG_HOST,
+            },
+          },
+        ],
       },
     }] : []),
   ],

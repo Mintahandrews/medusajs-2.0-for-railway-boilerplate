@@ -2,7 +2,8 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/framework'
 import { EmailTemplates } from '../modules/email-notifications/templates'
-import { STOREFRONT_URL, SUPPORT_EMAIL } from '../lib/constants'
+import { STOREFRONT_URL, SUPPORT_EMAIL, POSTHOG_EVENTS_API_KEY } from '../lib/constants'
+import { trackOrderPlacedWorkflow } from '../workflows/track-order-placed'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -60,6 +61,17 @@ export default async function orderPlacedHandler({
     }
   } catch (error) {
     console.error('Error sending order confirmation notification:', error)
+  }
+
+  // Track order in PostHog analytics (if configured)
+  if (POSTHOG_EVENTS_API_KEY) {
+    try {
+      await trackOrderPlacedWorkflow(container).run({
+        input: { order_id: data.id },
+      })
+    } catch (error) {
+      console.error('Error tracking order in PostHog:', error)
+    }
   }
 }
 

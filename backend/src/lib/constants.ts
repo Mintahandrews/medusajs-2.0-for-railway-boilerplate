@@ -124,3 +124,11 @@ export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
  */
 export const ARONIUM_POS_ENABLED = process.env.ARONIUM_POS_ENABLED === 'true'
 export const ARONIUM_POS_API_KEY = process.env.ARONIUM_POS_API_KEY
+
+/**
+ * (optional) PostHog analytics configuration
+ * POSTHOG_EVENTS_API_KEY: your PostHog project API key
+ * POSTHOG_HOST: PostHog API host (defaults to https://us.i.posthog.com)
+ */
+export const POSTHOG_EVENTS_API_KEY = process.env.POSTHOG_EVENTS_API_KEY
+export const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'

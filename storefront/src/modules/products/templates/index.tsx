@@ -16,6 +16,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import FastDelivery from "@modules/common/icons/fast-delivery"
 import Refresh from "@modules/common/icons/refresh"
 import ShieldCheck from "@modules/common/icons/shield-check"
+import TrackProductView from "@lib/posthog/track-product-view"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -34,6 +35,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <TrackProductView
+        product={{
+          id: product.id!,
+          title: product.title ?? "",
+          handle: product.handle,
+          thumbnail: product.thumbnail,
+          collection: product.collection ? { title: product.collection.title ?? "" } : null,
+        }}
+      />
       <RecentlyViewedTracker
         productId={product.id!}
         handle={product.handle!}
