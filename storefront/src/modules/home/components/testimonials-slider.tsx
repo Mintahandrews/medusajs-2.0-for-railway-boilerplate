@@ -308,22 +308,22 @@ export default function TestimonialsSlider() {
 
         {/* -- Cards slider -- */}
         <div className="relative group">
-          {/* Left / Right arrows visible on desktop hover */}
+          {/* Prev / Next buttons */}
           <button
             type="button"
             aria-label="Previous review"
             onClick={() => scrollByCard(-1)}
-            className="hidden small:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white border border-grey-20 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:border-brand hover:text-brand"
+            className="flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
           <button
             type="button"
             aria-label="Next review"
             onClick={() => scrollByCard(1)}
-            className="hidden small:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-white border border-grey-20 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:border-brand hover:text-brand"
+            className="flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white shadow-md text-grey-90 hover:bg-grey-50"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
 
           <div
