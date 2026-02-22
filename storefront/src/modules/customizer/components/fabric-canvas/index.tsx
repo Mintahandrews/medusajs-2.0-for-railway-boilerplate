@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
+import { ZoomIn, ZoomOut, RotateCw, RotateCcw, Trash2, Move } from "lucide-react"
 import { useCustomizer, type CaseType } from "../../context"
 import type { DeviceConfig } from "@lib/device-assets"
 
@@ -1034,6 +1035,44 @@ export default function FabricCanvas() {
   } = useCustomizer()
 
   const [displayScale, setDisplayScale] = useState(1)
+  const [hasSelection, setHasSelection] = useState(false)
+
+  /* ---- Mobile floating controls for selected objects -------------------- */
+  const scaleActiveObject = useCallback((factor: number) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const obj = canvas.getActiveObject()
+    if (!obj) return
+    const cur = obj.scaleX ?? 1
+    const next = Math.max(0.05, Math.min(10, cur * factor))
+    obj.set({ scaleX: next, scaleY: next })
+    obj.setCoords()
+    canvas.requestRenderAll()
+    pushHistory()
+  }, [canvasRef, pushHistory])
+
+  const rotateActiveObject = useCallback((degrees: number) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const obj = canvas.getActiveObject()
+    if (!obj) return
+    obj.set({ angle: (obj.angle ?? 0) + degrees })
+    obj.setCoords()
+    canvas.requestRenderAll()
+    pushHistory()
+  }, [canvasRef, pushHistory])
+
+  const deleteActiveObject = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const objects = canvas.getActiveObjects()
+    if (objects?.length) {
+      objects.forEach((obj: any) => canvas.remove(obj))
+      canvas.discardActiveObject()
+      canvas.requestRenderAll()
+      pushHistory()
+    }
+  }, [canvasRef, pushHistory])
 
   /* ---- Keyboard shortcuts ---------------------------------------------- */
   const handleKeyDown = useCallback(
@@ -1168,7 +1207,9 @@ export default function FabricCanvas() {
       })
 
       // When user selects an object, refresh its controls (guards against stale coords)
+      // Also track selection state for floating mobile controls
       fabricCanvas.on('selection:created', () => {
+        setHasSelection(true)
         const active = fabricCanvas.getActiveObject()
         if (active) {
           active.setCoords()
@@ -1176,24 +1217,36 @@ export default function FabricCanvas() {
         }
       })
       fabricCanvas.on('selection:updated', () => {
+        setHasSelection(true)
         const active = fabricCanvas.getActiveObject()
         if (active) {
           active.setCoords()
           fabricCanvas.requestRenderAll()
         }
       })
+      fabricCanvas.on('selection:cleared', () => {
+        setHasSelection(false)
+      })
 
       // Ensure Fabric's upper canvas (interaction layer) blocks browser gestures
+      // The wrapper MUST have a higher z-index than all decorative overlays
+      // (CameraOverlay z-10, CaseSurfaceOverlay z-[15], CaseTypeOverlay z-20)
+      // so touch events reach Fabric's interaction layer on mobile.
       const upperEl = fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl?.querySelector('canvas.upper-canvas')
       if (upperEl) {
         upperEl.style.touchAction = 'none'
         upperEl.style.position = 'absolute'
-        upperEl.style.zIndex = '2'
+        upperEl.style.zIndex = '50'
+      }
+      // Also set touch-action on the lower canvas
+      const lowerEl = fabricCanvas.lowerCanvasEl || fabricCanvas.wrapperEl?.querySelector('canvas.lower-canvas')
+      if (lowerEl) {
+        lowerEl.style.touchAction = 'none'
       }
       if (fabricCanvas.wrapperEl) {
         fabricCanvas.wrapperEl.style.touchAction = 'none'
         fabricCanvas.wrapperEl.style.position = 'relative'
-        fabricCanvas.wrapperEl.style.zIndex = '1'
+        fabricCanvas.wrapperEl.style.zIndex = '30'
       }
 
       // Improve touch responsiveness: larger find tolerance
@@ -1204,30 +1257,75 @@ export default function FabricCanvas() {
       /* 4. Pinch-to-scale gesture for objects ------------------------------- */
       let lastPinchDist = 0
       let pinchStartScale = 1
+      let pinchStartAngle = 0
+      let pinchStartObjAngle = 0
 
       const getDistance = (t1: Touch, t2: Touch) =>
         Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY)
 
+      const getAngle = (t1: Touch, t2: Touch) =>
+        Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * (180 / Math.PI)
+
+      // Try to find an object under the midpoint of two touches
+      const findObjectAtMidpoint = (t1: Touch, t2: Touch) => {
+        const rect = (fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl)?.getBoundingClientRect()
+        if (!rect) return null
+        const mx = ((t1.clientX + t2.clientX) / 2 - rect.left) / (rect.width / fabricCanvas.width)
+        const my = ((t1.clientY + t2.clientY) / 2 - rect.top) / (rect.height / fabricCanvas.height)
+        const objects = fabricCanvas.getObjects()
+        for (let i = objects.length - 1; i >= 0; i--) {
+          if (objects[i].containsPoint?.({ x: mx, y: my })) return objects[i]
+        }
+        return null
+      }
+
       const handleTouchStart = (e: TouchEvent) => {
+        if (e.touches.length === 1) {
+          // Single touch — prevent page scroll so drag-to-move works
+          e.preventDefault()
+        }
         if (e.touches.length === 2) {
-          const active = fabricCanvas.getActiveObject?.()
+          e.preventDefault()
+          // Auto-select object under pinch midpoint if nothing selected
+          let active = fabricCanvas.getActiveObject?.()
+          if (!active) {
+            const obj = findObjectAtMidpoint(e.touches[0], e.touches[1])
+            if (obj) {
+              fabricCanvas.setActiveObject(obj)
+              fabricCanvas.requestRenderAll()
+              active = obj
+            }
+          }
           if (active) {
             lastPinchDist = getDistance(e.touches[0], e.touches[1])
             pinchStartScale = active.scaleX ?? 1
-            e.preventDefault()
+            pinchStartAngle = getAngle(e.touches[0], e.touches[1])
+            pinchStartObjAngle = active.angle ?? 0
           }
         }
       }
 
       const handleTouchMove = (e: TouchEvent) => {
+        if (e.touches.length === 1) {
+          // Prevent page scroll during single-finger object drag
+          e.preventDefault()
+        }
         if (e.touches.length === 2 && lastPinchDist > 0) {
           const active = fabricCanvas.getActiveObject?.()
           if (active) {
             const newDist = getDistance(e.touches[0], e.touches[1])
             const ratio = newDist / lastPinchDist
             const newScale = Math.max(0.1, Math.min(10, pinchStartScale * ratio))
-            active.set({ scaleX: newScale, scaleY: newScale })
-            fabricCanvas.renderAll()
+            // Rotate based on finger angle change
+            const newAngle = getAngle(e.touches[0], e.touches[1])
+            const angleDelta = newAngle - pinchStartAngle
+            active.set({
+              scaleX: newScale,
+              scaleY: newScale,
+              angle: pinchStartObjAngle + angleDelta,
+            })
+            active.setCoords()
+            fabricCanvas.requestRenderAll()
             e.preventDefault()
           }
         }
@@ -1236,15 +1334,24 @@ export default function FabricCanvas() {
       const handleTouchEnd = (e: TouchEvent) => {
         if (e.touches.length < 2 && lastPinchDist > 0) {
           lastPinchDist = 0
+          const active = fabricCanvas.getActiveObject?.()
+          if (active) active.setCoords()
           pushHistory()
         }
       }
 
+      // Attach to BOTH upper canvas and wrapper for maximum coverage
       const canvasEl = fabricCanvas.upperCanvasEl || fabricCanvas.wrapperEl
       if (canvasEl) {
         canvasEl.addEventListener('touchstart', handleTouchStart, { passive: false })
         canvasEl.addEventListener('touchmove', handleTouchMove, { passive: false })
         canvasEl.addEventListener('touchend', handleTouchEnd, { passive: false })
+      }
+      // Also attach to wrapper if different from canvasEl
+      if (fabricCanvas.wrapperEl && fabricCanvas.wrapperEl !== canvasEl) {
+        fabricCanvas.wrapperEl.addEventListener('touchstart', handleTouchStart, { passive: false })
+        fabricCanvas.wrapperEl.addEventListener('touchmove', handleTouchMove, { passive: false })
+        fabricCanvas.wrapperEl.addEventListener('touchend', handleTouchEnd, { passive: false })
       }
 
       /* 5. Canvas events → history ----------------------------------------- */
@@ -1457,22 +1564,23 @@ export default function FabricCanvas() {
 
           {/* Canvas container — the back panel surface, inset by edgeW */}
           <div
-            className="absolute overflow-hidden"
+            className="overflow-hidden"
             style={{
+              position: "absolute",
               left: edgeW,
               top: edgeW,
               width: w,
               height: h,
               borderRadius: sr,
               touchAction: "none",
-              position: "relative",
             }}
           >
             {/* Fabric wraps this <canvas> in its own div. z-index ensures the
-                interactive upper-canvas sits above the decorative overlays below. */}
+                interactive upper-canvas sits above the decorative overlays below.
+                The wrapper gets z-30 and upper canvas gets z-50 in the init() effect. */}
             <canvas
               ref={canvasElRef}
-              style={{ touchAction: "none", position: "relative", zIndex: 5 }}
+              style={{ touchAction: "none", position: "relative", zIndex: 25 }}
             />
 
             {/* Device-specific camera module overlay */}
@@ -1491,6 +1599,61 @@ export default function FabricCanvas() {
           )}
         </div>
       </div>
+
+      {/* ---- Floating mobile touch controls ---- */}
+      {/* Visible on mobile/tablet when an object is selected. Provides
+          scale +/-, rotate, and delete buttons since touch control handles
+          can be hard to grab on small screens. */}
+      {hasSelection && (
+        <div className="flex lg:hidden items-center gap-1.5 mt-2 px-2 py-1.5 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200">
+          <button
+            type="button"
+            aria-label="Zoom out"
+            onClick={() => scaleActiveObject(0.85)}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 active:bg-gray-200 text-gray-700"
+          >
+            <ZoomOut size={16} />
+          </button>
+          <button
+            type="button"
+            aria-label="Zoom in"
+            onClick={() => scaleActiveObject(1.2)}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 active:bg-gray-200 text-gray-700"
+          >
+            <ZoomIn size={16} />
+          </button>
+          <div className="w-px h-5 bg-gray-200" />
+          <button
+            type="button"
+            aria-label="Rotate left"
+            onClick={() => rotateActiveObject(-15)}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 active:bg-gray-200 text-gray-700"
+          >
+            <RotateCcw size={16} />
+          </button>
+          <button
+            type="button"
+            aria-label="Rotate right"
+            onClick={() => rotateActiveObject(15)}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 active:bg-gray-200 text-gray-700"
+          >
+            <RotateCw size={16} />
+          </button>
+          <div className="w-px h-5 bg-gray-200" />
+          <button
+            type="button"
+            aria-label="Delete selected"
+            onClick={deleteActiveObject}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-red-50 active:bg-red-100 text-red-600"
+          >
+            <Trash2 size={16} />
+          </button>
+          <div className="w-px h-5 bg-gray-200" />
+          <span className="text-[10px] text-gray-400 px-1 leading-tight text-center">
+            <Move size={10} className="inline mr-0.5" />drag to move
+          </span>
+        </div>
+      )}
     </div>
   )
 }
