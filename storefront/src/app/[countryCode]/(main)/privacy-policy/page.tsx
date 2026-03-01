@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
           ))}
         </div>
         <p className="mt-4 text-[12px] text-grey-50">
-          Last updated: February 13, 2026
+          Last updated: March 1, 2026
         </p>
       </div>
 

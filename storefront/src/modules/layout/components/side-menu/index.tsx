@@ -59,9 +59,10 @@ const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
 
 const SHOP_LINKS: Array<{ name: string; href: string }> = [
   { name: "All Products", href: "/store" },
-  { name: "Accessories", href: "/store" },
+  { name: "Cases", href: "/store" },
+  { name: "Screen Protectors", href: "/store" },
+  { name: "Earphones/Buds", href: "/store" },
   { name: "Chargers", href: "/store" },
-  { name: "Earbuds", href: "/store" },
 ]
 
 const TRENDING_LINKS: Array<{ name: string; href: string }> = [

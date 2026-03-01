@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   MapPin,
   Search,
+  Store,
   Truck,
   X,
   ChevronRight,
@@ -23,6 +24,18 @@ import { HttpTypes } from "@medusajs/types"
 type ShippingProps = {
   cart: HttpTypes.StoreCart
   availableShippingMethods: HttpTypes.StoreCartShippingOption[] | null
+}
+
+/** Detect if a shipping option is an in-store pickup option */
+function isPickupOption(option: HttpTypes.StoreCartShippingOption): boolean {
+  const name = (option.name || "").toLowerCase()
+  return (
+    name.includes("pick up") ||
+    name.includes("pickup") ||
+    name.includes("collect") ||
+    name.includes("in-store") ||
+    name.includes("in store")
+  )
 }
 
 /** Safely format a shipping price – returns "Free" for 0 and "—" for null/undefined */
@@ -272,7 +285,11 @@ const Shipping: React.FC<ShippingProps> = ({
                             }
                           )}
                         >
-                          <Truck size={18} />
+                          {isPickupOption(option) ? (
+                            <Store size={18} />
+                          ) : (
+                            <Truck size={18} />
+                          )}
                         </div>
 
                         {/* Info */}
@@ -291,7 +308,9 @@ const Shipping: React.FC<ShippingProps> = ({
                             )}
                           </div>
                           <span className="text-xs text-ui-fg-muted">
-                            Standard delivery
+                            {isPickupOption(option)
+                              ? "In-store pickup"
+                              : "Standard delivery"}
                           </span>
                         </div>
 

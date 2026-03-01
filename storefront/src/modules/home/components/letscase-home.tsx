@@ -33,8 +33,8 @@ function TrustBadges() {
       icon: Shield,
     },
     {
-      title: "Delivery Across Ghana",
-      description: "Free shipping on orders over GH₵200",
+      title: "Delivery & Pickup",
+      description: "Fast delivery across Ghana or pick up in store",
       icon: Truck,
     },
     {
@@ -138,11 +138,36 @@ function getCategoryImage(label: string): string {
   return CATEGORY_IMAGES.default
 }
 
+const PREFERRED_CATEGORY_ORDER = [
+  "cases",
+  "screen protectors",
+  "earphones",
+  "earbuds",
+  "chargers",
+  "speakers",
+  "laptop bags",
+  "iphone",
+  "android",
+  "laptops",
+  "accessories",
+]
+
+function getPreferredIndex(name: string): number {
+  const lower = name.toLowerCase()
+  const idx = PREFERRED_CATEGORY_ORDER.findIndex(
+    (keyword) => lower.includes(keyword) || keyword.includes(lower)
+  )
+  return idx === -1 ? PREFERRED_CATEGORY_ORDER.length : idx
+}
+
 function ShopByCategory({ categories }: { categories: any[] }) {
   const topLevel = (categories || [])
     .filter((c) => !c?.parent_category_id && !c?.parent_category)
     .filter((c) => c?.handle && c?.name)
     .sort((a, b) => {
+      const ai = getPreferredIndex(String(a?.name || ""))
+      const bi = getPreferredIndex(String(b?.name || ""))
+      if (ai !== bi) return ai - bi
       const ar = typeof a?.rank === "number" ? a.rank : Number.MAX_SAFE_INTEGER
       const br = typeof b?.rank === "number" ? b.rank : Number.MAX_SAFE_INTEGER
       if (ar !== br) return ar - br
@@ -155,15 +180,16 @@ function ShopByCategory({ categories }: { categories: any[] }) {
     }))
 
   const fallback = [
-    { label: "iPhones", href: "/store", image: CATEGORY_IMAGES.iphone },
-    { label: "Android Phones", href: "/store", image: CATEGORY_IMAGES["android phones"] },
-    { label: "Earphones/Buds", href: "/store", image: CATEGORY_IMAGES.earphones },
-    { label: "Laptops", href: "/store", image: CATEGORY_IMAGES.laptops },
-    { label: "Speakers", href: "/store", image: CATEGORY_IMAGES.speakers },
-    { label: "Chargers", href: "/store", image: CATEGORY_IMAGES.chargers },
     { label: "Cases", href: "/store", image: CATEGORY_IMAGES.cases },
     { label: "Screen Protectors", href: "/store", image: CATEGORY_IMAGES["screen protectors"] },
+    { label: "Earphones/Buds", href: "/store", image: CATEGORY_IMAGES.earphones },
+    { label: "Chargers", href: "/store", image: CATEGORY_IMAGES.chargers },
+    { label: "Speakers", href: "/store", image: CATEGORY_IMAGES.speakers },
     { label: "Laptop Bags", href: "/store", image: CATEGORY_IMAGES["laptop bags"] },
+    { label: "iPhones", href: "/store", image: CATEGORY_IMAGES.iphone },
+    { label: "Android Phones", href: "/store", image: CATEGORY_IMAGES["android phones"] },
+    { label: "Laptops", href: "/store", image: CATEGORY_IMAGES.laptops },
+    { label: "Other Accessories", href: "/store", image: CATEGORY_IMAGES.accessories },
   ]
 
   const items = topLevel.length ? topLevel : fallback

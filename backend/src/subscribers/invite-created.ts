@@ -9,13 +9,15 @@ export default async function userInviteHandler({
     container,
   }: SubscriberArgs<any>) {
 
-  const notificationModuleService: INotificationModuleService = container.resolve(
-    Modules.NOTIFICATION,
-  )
-  const userModuleService: IUserModuleService = container.resolve(Modules.USER)
-  const invite = await userModuleService.retrieveInvite(data.id)
-
   try {
+    const notificationModuleService: INotificationModuleService = container.resolve(
+      Modules.NOTIFICATION,
+    )
+    const userModuleService: IUserModuleService = container.resolve(Modules.USER)
+    const invite = await userModuleService.retrieveInvite(data.id)
+
+    console.log(`[invite-created] Sending invite email to ${invite.email}...`)
+
     await notificationModuleService.createNotifications({
       to: invite.email,
       channel: 'email',
@@ -29,8 +31,10 @@ export default async function userInviteHandler({
         preview: 'Accept your admin invitation...'
       }
     })
+
+    console.log(`[invite-created] Successfully sent invite email to ${invite.email}`)
   } catch (error) {
-    console.error(error)
+    console.error(`[invite-created] Failed to send invite email for invite ${data.id}:`, error)
   }
 }
 

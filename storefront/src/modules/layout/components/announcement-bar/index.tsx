@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 
 const MESSAGES = [
-  "Free delivery on orders over GH\u20B5200",
+  "Order online, pick up in store \u2022 Fast & convenient",
   "Pay with MTN MoMo & Telecel Cash",
   "WhatsApp support: +233 540 451 001",
   "100% Authentic Products \u2022 Fast Delivery Across Ghana",

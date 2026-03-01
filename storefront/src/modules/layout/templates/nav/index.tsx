@@ -46,12 +46,16 @@ export default async function Nav() {
     }))
 
   const fallbackCategoryLinks = [
-    { name: "All Categories", href: "/store" },
-    { name: "Accessories", href: "/store" },
-    { name: "Chargers", href: "/store" },
-    { name: "Earbuds", href: "/store" },
     { name: "Cases", href: "/store" },
     { name: "Screen Protectors", href: "/store" },
+    { name: "Earphones/Buds", href: "/store" },
+    { name: "Chargers", href: "/store" },
+    { name: "Speakers", href: "/store" },
+    { name: "Laptop Bags", href: "/store" },
+    { name: "iPhones", href: "/store" },
+    { name: "Android", href: "/store" },
+    { name: "Laptops", href: "/store" },
+    { name: "Other Accessories", href: "/store" },
   ]
 
   const fallbackCollectionLinks = [

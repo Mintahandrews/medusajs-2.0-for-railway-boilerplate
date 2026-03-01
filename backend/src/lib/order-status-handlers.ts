@@ -28,45 +28,57 @@ async function sendOrderStatusEmail({ order, shippingAddress, template, subject,
 }
 
 export async function orderShippedHandler({ event: { data }, container }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
-  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
-  const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
-  const shippingAddress = (order as any).shipping_address
-  await sendOrderStatusEmail.call({ notificationModuleService }, {
-    order,
-    shippingAddress,
-    template: EmailTemplates.ORDER_SHIPPED,
-    subject: 'Your order has shipped! 🎉',
-    preview: 'Your order is on its way!'
-  })
+  try {
+    const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+    const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+    const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
+    const shippingAddress = (order as any).shipping_address
+    await sendOrderStatusEmail.call({ notificationModuleService }, {
+      order,
+      shippingAddress,
+      template: EmailTemplates.ORDER_SHIPPED,
+      subject: 'Your order has shipped! 🎉',
+      preview: 'Your order is on its way!'
+    })
+  } catch (error) {
+    console.error(`[order-shipped] Failed to send shipped email for order ${data.id}:`, error)
+  }
 }
 
 export async function orderDeliveredHandler({ event: { data }, container }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
-  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
-  const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
-  const shippingAddress = (order as any).shipping_address
-  await sendOrderStatusEmail.call({ notificationModuleService }, {
-    order,
-    shippingAddress,
-    template: EmailTemplates.ORDER_DELIVERED,
-    subject: 'Your order has been delivered!',
-    preview: 'Order delivered.'
-  })
+  try {
+    const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+    const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+    const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
+    const shippingAddress = (order as any).shipping_address
+    await sendOrderStatusEmail.call({ notificationModuleService }, {
+      order,
+      shippingAddress,
+      template: EmailTemplates.ORDER_DELIVERED,
+      subject: 'Your order has been delivered!',
+      preview: 'Order delivered.'
+    })
+  } catch (error) {
+    console.error(`[order-delivered] Failed to send delivered email for order ${data.id}:`, error)
+  }
 }
 
 export async function orderCancelledHandler({ event: { data }, container }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
-  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
-  const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
-  const shippingAddress = (order as any).shipping_address
-  await sendOrderStatusEmail.call({ notificationModuleService }, {
-    order,
-    shippingAddress,
-    template: EmailTemplates.ORDER_CANCELLED,
-    subject: 'Your order has been cancelled',
-    preview: 'Order cancelled.'
-  })
+  try {
+    const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+    const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+    const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
+    const shippingAddress = (order as any).shipping_address
+    await sendOrderStatusEmail.call({ notificationModuleService }, {
+      order,
+      shippingAddress,
+      template: EmailTemplates.ORDER_CANCELLED,
+      subject: 'Your order has been cancelled',
+      preview: 'Order cancelled.'
+    })
+  } catch (error) {
+    console.error(`[order-cancelled] Failed to send cancelled email for order ${data.id}:`, error)
+  }
 }
 
 export const configShipped: SubscriberConfig = { event: 'order.shipped' }

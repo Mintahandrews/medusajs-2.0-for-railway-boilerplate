@@ -9,13 +9,13 @@ export default async function orderPlacedHandler({
   event: { data },
   container,
 }: SubscriberArgs<any>) {
-  const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
-  const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
-  
-  const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
-  const shippingAddress = (order as any).shipping_address
-
   try {
+    const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
+    const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
+  
+    const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
+    const shippingAddress = (order as any).shipping_address
+
     // Send confirmation to customer
     await notificationModuleService.createNotifications({
       to: order.email,

@@ -1,4 +1,5 @@
 import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
+import { letscaseBrandingPlugin } from './vite-plugin-branding.js';
 import {
   ADMIN_CORS,
   AUTH_CORS,
@@ -53,6 +54,12 @@ const medusaConfig = {
   admin: {
     backendUrl: BACKEND_URL,
     disable: SHOULD_DISABLE_ADMIN,
+    vite: (config) => {
+      return {
+        ...config,
+        plugins: [...(config.plugins || []), letscaseBrandingPlugin()],
+      }
+    },
   },
   modules: [
     {

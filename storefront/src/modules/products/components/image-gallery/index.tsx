@@ -3,7 +3,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
 
 type ImageGalleryProps = {
@@ -20,9 +20,6 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [zoomActive, setZoomActive] = useState(false)
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 })
-  const mainRef = useRef<HTMLDivElement>(null)
 
   const selected = safeImages[Math.min(selectedIndex, safeImages.length - 1)]
 
@@ -33,14 +30,6 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   const goPrev = useCallback(() => {
     setSelectedIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length)
   }, [safeImages.length])
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!mainRef.current) return
-    const rect = mainRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-    setZoomPos({ x, y })
-  }
 
   useEffect(() => {
     if (!lightboxOpen) return
@@ -58,11 +47,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
       <div className="flex flex-col gap-4">
         {/* Main image with hover zoom */}
         <Container
-          ref={mainRef}
           className="relative aspect-square w-full overflow-hidden bg-ui-bg-subtle rounded-lg cursor-zoom-in group"
-          onMouseEnter={() => setZoomActive(true)}
-          onMouseLeave={() => setZoomActive(false)}
-          onMouseMove={handleMouseMove}
           onClick={() => setLightboxOpen(true)}
         >
           <Image
@@ -74,8 +59,6 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             sizes="(max-width: 576px) 92vw, (max-width: 1024px) 48vw, 640px"
             style={{
               objectFit: "contain",
-              transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-              transform: zoomActive ? "scale(1.8)" : "scale(1)",
             }}
           />
           <button
