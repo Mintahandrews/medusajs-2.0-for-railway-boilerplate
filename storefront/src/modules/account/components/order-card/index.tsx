@@ -6,9 +6,27 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { getStatusColors } from "@modules/order/components/order-status-stepper"
 
 type OrderCardProps = {
   order: HttpTypes.StoreOrder
+}
+
+function deriveCardStatus(order: HttpTypes.StoreOrder): string {
+  const status = (order as any).status
+  if (status) {
+    const formatted = status.split("_").join(" ")
+    return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
+  }
+  const fulfillments = (order as any).fulfillments
+  if (fulfillments?.length) {
+    const allDelivered = fulfillments.every((f: any) => f.delivered_at)
+    const allShipped = fulfillments.every((f: any) => f.shipped_at)
+    if (allDelivered) return "Delivered"
+    if (allShipped) return "Shipped"
+    return "Processing"
+  }
+  return "Pending"
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
@@ -26,8 +44,16 @@ const OrderCard = ({ order }: OrderCardProps) => {
 
   return (
     <div className="bg-white flex flex-col" data-testid="order-card">
-      <div className="uppercase text-large-semi mb-1">
-        #<span data-testid="order-display-id">{order.display_id}</span>
+      <div className="flex items-center gap-3 mb-1">
+        <div className="uppercase text-large-semi">
+          #<span data-testid="order-display-id">{order.display_id}</span>
+        </div>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${getStatusColors(deriveCardStatus(order))}`}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-current" />
+          {deriveCardStatus(order)}
+        </span>
       </div>
       <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ui-fg-base">
         <span className="pr-2" data-testid="order-created-at">

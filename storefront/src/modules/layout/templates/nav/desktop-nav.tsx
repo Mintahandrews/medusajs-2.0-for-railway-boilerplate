@@ -27,8 +27,8 @@ function stripCountryCode(pathname: string) {
 
 function navLinkClass(active: boolean) {
   return active
-      ? "pb-1 border-b-2 border-brand text-grey-90"
-    : "pb-1 border-b-2 border-transparent text-grey-90 hover:text-brand"
+      ? "pb-1 border-b-2 border-brand"
+    : "pb-1 border-b-2 border-transparent hover:text-brand"
 }
 
 function DesktopNavContent(props: {
@@ -67,7 +67,7 @@ function DesktopNavContent(props: {
   }, [normalized, onSale])
 
   return (
-    <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
+    <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90 group-data-[transparent=true]:text-white/90 transition-colors duration-300">
       <LocalizedClientLink href="/" className={navLinkClass(isHome)}>
         Home
       </LocalizedClientLink>
@@ -88,12 +88,12 @@ function DesktopNavContent(props: {
           onBlur={() => scheduleClose(setOpenShop, shopCloseTimeout)}
         >
           Shop
-          <span className={`text-grey-50 transition-transform duration-200 ${openShop ? 'text-brand rotate-180' : ''}`}>
+          <span className={`opacity-60 transition-transform duration-200 ${openShop ? 'text-brand opacity-100 rotate-180' : ''}`}>
             <ChevronDown size={16} />
           </span>
         </LocalizedClientLink>
 
-        <div className={`fixed left-0 right-0 top-[70px] z-50 ${openShop ? 'block' : 'hidden'}`} onMouseEnter={() => setOpenShop(true)} onMouseLeave={() => scheduleClose(setOpenShop, shopCloseTimeout)}>
+        <div className={`fixed left-0 right-0 top-[72px] z-50 ${openShop ? 'block' : 'hidden'}`} onMouseEnter={() => setOpenShop(true)} onMouseLeave={() => scheduleClose(setOpenShop, shopCloseTimeout)}>
           <div className="bg-white border-b border-grey-20 shadow-lg">
             <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8">
               <div className="grid grid-cols-5 gap-8">
@@ -210,12 +210,12 @@ function DesktopNavContent(props: {
           onBlur={() => scheduleClose(setOpenTrending, trendingCloseTimeout)}
         >
           Products
-          <span className={`text-grey-50 transition-transform duration-200 ${openTrending ? 'text-brand rotate-180' : ''}`}>
+          <span className={`opacity-60 transition-transform duration-200 ${openTrending ? 'text-brand opacity-100 rotate-180' : ''}`}>
             <ChevronDown size={16} />
           </span>
         </LocalizedClientLink>
 
-        <div className={`fixed left-0 right-0 top-[70px] z-50 ${openTrending ? 'block' : 'hidden'}`} onMouseEnter={() => setOpenTrending(true)} onMouseLeave={() => scheduleClose(setOpenTrending, trendingCloseTimeout)}>
+        <div className={`fixed left-0 right-0 top-[72px] z-50 ${openTrending ? 'block' : 'hidden'}`} onMouseEnter={() => setOpenTrending(true)} onMouseLeave={() => scheduleClose(setOpenTrending, trendingCloseTimeout)}>
           <div className="bg-white border-b border-grey-20 shadow-lg">
             <div className="mx-auto max-w-[1440px] px-5 small:px-10 py-8">
               <div className="grid grid-cols-5 gap-8">
@@ -323,7 +323,7 @@ export default function DesktopNav(props: {
   return (
     <Suspense
       fallback={
-        <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
+        <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90 group-data-[transparent=true]:text-white/90 transition-colors duration-300">
           <span className="pb-1 border-b-2 border-transparent">Home</span>
           <span className="pb-1 border-b-2 border-transparent">Shop</span>
           <span className="pb-1 border-b-2 border-transparent">Products</span>

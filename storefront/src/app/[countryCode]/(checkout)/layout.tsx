@@ -30,11 +30,11 @@ export default function CheckoutLayout({
             data-testid="store-link"
           >
             <Image
-              src="/logo.png"
+              src="/Lets Case Logo black.png"
               alt="Letscase"
-              width={160}
-              height={40}
-              className="h-7 w-auto"
+              width={280}
+              height={64}
+              className="h-12 w-auto"
               priority
             />
           </LocalizedClientLink>

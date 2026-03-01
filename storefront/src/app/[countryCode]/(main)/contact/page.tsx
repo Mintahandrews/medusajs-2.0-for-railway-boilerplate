@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { MessageCircle, Instagram, Clock, MapPin } from "lucide-react"
+import { MessageCircle, Instagram, Clock, MapPin, Mail } from "lucide-react"
 
 import ContactForm from "@modules/common/components/contact-form"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -147,6 +147,22 @@ export default function ContactPage() {
                 TikTok
               </div>
               <div className="text-[13px] text-grey-50">@letscase_gh</div>
+            </div>
+          </a>
+
+          {/* Email */}
+          <a
+            href="mailto:support@letscase.com"
+            className="flex items-center gap-3 rounded-xl border border-grey-20 bg-grey-5 px-4 py-3 hover:border-brand hover:bg-brand/5 transition group"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+              <Mail className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-[14px] font-semibold text-grey-90 group-hover:text-brand transition">
+                Email
+              </div>
+              <div className="text-[13px] text-grey-50">support@letscase.com</div>
             </div>
           </a>
         </div>

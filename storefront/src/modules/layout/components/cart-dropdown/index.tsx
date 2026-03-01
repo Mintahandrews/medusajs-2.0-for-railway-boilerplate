@@ -83,11 +83,11 @@ const CartDropdown = ({
           if (timerRef.current) clearTimeout(timerRef.current)
           drawerOpen ? close() : open()
         }}
-        className="relative inline-flex items-center justify-center text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110 group"
+        className="relative inline-flex items-center justify-center hover:text-brand transition-transform duration-200 hover:scale-110 group/cart"
         data-testid="nav-cart-link"
         aria-label={`Cart (${totalItems})`}
       >
-        <ShoppingBag size={22} className="text-grey-90 group-hover:text-brand" />
+        <ShoppingBag size={22} className="group-hover/cart:text-brand" />
         {totalItems > 0 && (
           <span className="absolute -top-1 -right-2 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 font-semibold text-center">
             {totalItems}

@@ -13,7 +13,7 @@ export default function NewsletterSignup() {
 
   const disabled = useMemo(() => status === "loading", [status])
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
 
@@ -25,10 +25,30 @@ export default function NewsletterSignup() {
 
     setStatus("loading")
 
-    // UI-only template: simulate network request.
-    window.setTimeout(() => {
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: trimmed.split("@")[0],
+          email: trimmed,
+          subject: "Newsletter subscription",
+          message: `New newsletter subscription from ${trimmed}`,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        setError(data?.error || "Something went wrong. Please try again.")
+        setStatus("idle")
+        return
+      }
+
       setStatus("success")
-    }, 650)
+    } catch {
+      setError("Network error. Please check your connection and try again.")
+      setStatus("idle")
+    }
   }
 
   return (

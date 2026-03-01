@@ -10,7 +10,7 @@ export default function WebsiteJsonLd() {
       name: "Letscase",
       legalName: "Letscase Ghana",
       url: "https://letscasegh.com",
-      logo: `${baseUrl}/logo.png`,
+      logo: `${baseUrl}/Lets Case Logo black.png`,
       sameAs: [
         "https://www.instagram.com/letscasegh",
         "https://www.facebook.com/letscasegh",
@@ -30,7 +30,7 @@ export default function WebsiteJsonLd() {
       "@type": "LocalBusiness",
       "@id": "https://letscasegh.com/#store",
       name: "Letscase Ghana - Main Store",
-      image: `${baseUrl}/logo.png`,
+      image: `${baseUrl}/Lets Case Logo black.png`,
       url: "https://letscasegh.com",
       telephone: "+233-540-451-001",
       priceRange: "GH₵",
@@ -73,14 +73,10 @@ export default function WebsiteJsonLd() {
   ]
 
   return (
-    <>
-      {jsonLd.map((item, i) => (
-        <script
-          key={i}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
-        />
-      ))}
-    </>
+    <script
+      type="application/ld+json"
+      suppressHydrationWarning
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
   )
 }

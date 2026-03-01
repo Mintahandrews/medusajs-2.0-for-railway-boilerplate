@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { MapPin, Clock, Phone } from "lucide-react"
+import { MapPin, Clock, Phone, Navigation } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
@@ -120,7 +120,7 @@ export default function VisitOurStorePage() {
             rel="noopener noreferrer"
             className="inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-white text-[14px] font-semibold hover:bg-brand-dark transition gap-2"
           >
-            🧭 Get Directions
+            <Navigation size={16} /> Get Directions
           </a>
           <LocalizedClientLink
             href="/contact"

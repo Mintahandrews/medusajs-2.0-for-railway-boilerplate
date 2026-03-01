@@ -114,11 +114,11 @@ const SideMenu = ({
               <div className="relative flex h-full">
                 <Popover.Button
                   data-testid="nav-menu-button"
-                  className="relative h-full flex items-center text-grey-90 transition-all ease-out duration-200 focus:outline-none"
+                  className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none"
                   aria-label={open ? "Close menu" : "Open menu"}
                 >
                   <span className="sr-only">Menu</span>
-                  <Menu className="text-grey-90" />
+                  <Menu />
                 </Popover.Button>
               </div>
 
@@ -153,19 +153,19 @@ const SideMenu = ({
                     leaveFrom="translate-x-0"
                     leaveTo="-translate-x-full"
                   >
-                    <Popover.Panel className="absolute inset-0 w-screen bg-white">
+                    <Popover.Panel className="absolute inset-y-0 left-0 w-[85vw] max-w-[400px] bg-white/30 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border-r border-white/20">
                       <div
                         data-testid="nav-menu-popup"
                         className="flex h-full flex-col"
                       >
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-grey-20">
-                          <div className="text-[16px] font-semibold text-grey-90">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-white/20">
+                          <div className="text-[16px] font-semibold text-white drop-shadow-sm">
                             Menu
                           </div>
                           <button
                             data-testid="close-menu-button"
                             onClick={close}
-                            className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-grey-90 focus:outline-none"
+                            className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-white focus:outline-none"
                             aria-label="Close menu"
                             type="button"
                           >
@@ -193,8 +193,8 @@ const SideMenu = ({
                             <label className="sr-only" htmlFor="drawer-search">
                               Search products
                             </label>
-                            <div className="flex h-[48px] items-center gap-x-3 rounded-[16px] border border-grey-20 bg-white px-4">
-                              <Search className="text-grey-50" size={20} />
+                            <div className="flex h-[50px] items-center gap-x-3 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-5">
+                              <Search className="text-white/70 shrink-0" size={20} />
                               <input
                                 id="drawer-search"
                                 type="search"
@@ -203,42 +203,35 @@ const SideMenu = ({
                                 autoCorrect="off"
                                 autoCapitalize="off"
                                 spellCheck={false}
-                                placeholder="Search products..."
+                                placeholder="Search"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
-                                className="h-full w-full bg-transparent text-[14px] text-grey-90 placeholder:text-grey-40 focus:outline-none"
+                                className="h-full w-full bg-transparent text-[15px] text-white placeholder:text-white/50 focus:outline-none"
                               />
-                              <button
-                                type="submit"
-                                className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-brand text-white hover:bg-brand-dark transition"
-                                aria-label="Search"
-                              >
-                                <Search size={14} />
-                              </button>
                             </div>
                           </form>
 
                           <div className="space-y-3">
                             <Disclosure>
                               {({ open: disclosureOpen }) => (
-                                <div className="rounded-[16px] border border-grey-20">
+                                <div className="rounded-[16px] border border-white/20 bg-white/10">
                                   <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
-                                    <span className="text-[15px] font-semibold text-grey-90">
+                                    <span className="text-[15px] font-semibold text-white drop-shadow-sm">
                                       Shop
                                     </span>
                                     <ChevronRight
                                       size={20}
                                       className={clx(
-                                        "transition-transform duration-150 text-grey-50",
+                                        "transition-transform duration-150 text-white/60",
                                         disclosureOpen ? "rotate-90" : ""
                                       )}
                                     />
                                   </Disclosure.Button>
                                   <Disclosure.Panel className="px-5 pb-5">
-                                    <div className="flex flex-col gap-y-3 text-[13px] text-grey-50">
+                                    <div className="flex flex-col gap-y-3 text-[13px] text-white/70">
                                       {shopCategoryLinks.length ? (
                                         <>
-                                          <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-grey-50">
+                                          <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">
                                             Categories
                                           </div>
                                           {shopCategoryLinks.map((item) => {
@@ -248,10 +241,10 @@ const SideMenu = ({
                                               <LocalizedClientLink
                                                 key={item.href}
                                                 href={item.href}
-                                                className="flex items-center gap-2 py-1 hover:text-grey-90"
+                                                className="flex items-center gap-2 py-1 hover:text-white"
                                                 onClick={() => close()}
                                               >
-                                                <span className="shrink-0 text-grey-50">
+                                                <span className="shrink-0 text-white/60">
                                                   <Icon size={16} />
                                                 </span>
                                                 <span>{item.name}</span>
@@ -263,7 +256,7 @@ const SideMenu = ({
 
                                       {shopCollectionLinks.length ? (
                                         <>
-                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-grey-50">
+                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-white/50">
                                             Collections
                                           </div>
                                           <div className="mt-2 -mx-5 px-5">
@@ -272,7 +265,7 @@ const SideMenu = ({
                                                 <LocalizedClientLink
                                                   key={item.href}
                                                   href={item.href}
-                                                  className="shrink-0 rounded-full border border-grey-20 px-3 py-1 text-[13px] text-grey-90 bg-white"
+                                                  className="shrink-0 rounded-full border border-white/25 px-3 py-1 text-[13px] text-white bg-white/10"
                                                   onClick={() => close()}
                                                 >
                                                   {item.name}
@@ -285,14 +278,14 @@ const SideMenu = ({
 
                                       {SHOP_LINKS.length ? (
                                         <>
-                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-grey-50">
+                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-white/50">
                                             Shop essentials
                                           </div>
                                           {SHOP_LINKS.map((item) => (
                                             <LocalizedClientLink
                                               key={item.name}
                                               href={item.href}
-                                              className="py-1 hover:text-grey-90"
+                                              className="py-1 hover:text-white"
                                               onClick={() => close()}
                                             >
                                               {item.name}
@@ -308,27 +301,27 @@ const SideMenu = ({
 
                             <Disclosure>
                               {({ open: disclosureOpen }) => (
-                                <div className="rounded-[16px] border border-grey-20">
+                                <div className="rounded-[16px] border border-white/20 bg-white/10">
                                   <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
-                                    <span className="text-[15px] font-semibold text-grey-90">
+                                    <span className="text-[15px] font-semibold text-white drop-shadow-sm">
                                       Products
                                     </span>
                                     <ChevronRight
                                       size={20}
                                       className={clx(
-                                        "transition-transform duration-150 text-grey-50",
+                                        "transition-transform duration-150 text-white/60",
                                         disclosureOpen ? "rotate-90" : ""
                                       )}
                                     />
                                   </Disclosure.Button>
                                   <Disclosure.Panel className="px-5 pb-5">
-                                    <div className="flex flex-col gap-y-3 text-[13px] text-grey-50">
+                                    <div className="flex flex-col gap-y-3 text-[13px] text-white/70">
                                       {trendingLinks.map((item) => (
                                         <LocalizedClientLink
                                           key={item.href}
                                           href={item.href}
-                                          className="py-1 hover:text-grey-90"
-                                                onClick={() => close()}
+                                          className="py-1 hover:text-white"
+                                          onClick={() => close()}
                                         >
                                           {item.name}
                                         </LocalizedClientLink>
@@ -341,7 +334,7 @@ const SideMenu = ({
                           </div>
 
                           <div className="mt-8">
-                            <div className="text-[12px] font-semibold text-grey-50 uppercase tracking-wide">
+                            <div className="text-[12px] font-semibold text-white/50 uppercase tracking-wide">
                               Quick links
                             </div>
                             <ul className="mt-4 flex flex-col gap-y-3">
@@ -349,7 +342,7 @@ const SideMenu = ({
                                 <li key={item.name}>
                                   <LocalizedClientLink
                                     href={item.href}
-                                    className="block py-1 text-[14px] font-medium text-grey-90 hover:text-brand"
+                                    className="block py-1 text-[14px] font-medium text-white hover:text-white/70"
                                     onClick={() => close()}
                                     data-testid={item.testId}
                                   >
@@ -361,17 +354,8 @@ const SideMenu = ({
                           </div>
                         </div>
 
-                        <div className="border-t border-grey-20 px-6 py-5">
-                          <button
-                            type="button"
-                            className="w-full flex items-center justify-between"
-                            onClick={() =>
-                              toggleState.state
-                                ? toggleState.close()
-                                : toggleState.open()
-                            }
-                            aria-label="Change shipping country"
-                          >
+                        <div className="border-t border-white/20 px-6 py-5">
+                          <div className="w-full flex items-center justify-between">
                             {regions && (
                               <CountrySelect
                                 toggleState={toggleState}
@@ -381,13 +365,13 @@ const SideMenu = ({
                             <ChevronRight
                               size={20}
                               className={clx(
-                                "transition-transform duration-150 text-grey-50",
+                                "transition-transform duration-150 text-white/60",
                                 toggleState.state ? "rotate-90" : ""
                               )}
                             />
-                          </button>
+                          </div>
 
-                          <Text className="mt-5 flex justify-between txt-compact-small text-grey-50">
+                          <Text className="mt-5 flex justify-between txt-compact-small text-white/50">
                             © {new Date().getFullYear()} Letscase. All rights
                             reserved.
                           </Text>

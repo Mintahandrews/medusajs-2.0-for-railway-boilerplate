@@ -9,6 +9,7 @@ import { Search, Heart, User, ShoppingBag } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
+import TransparentNavWrapper from "@modules/layout/components/transparent-nav-wrapper"
 import DesktopNav from "./desktop-nav"
 import DesktopSearch from "./desktop-search"
 
@@ -130,11 +131,11 @@ export default async function Nav() {
   ]
 
   return (
-    <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative mx-auto border-b duration-200 bg-white border-ui-border-base h-[70px]">
+    <TransparentNavWrapper>
+      <header className="relative mx-auto h-[72px]">
         <nav className="flex items-center justify-between w-full h-full px-5 small:px-10">
           <div className="flex items-center gap-x-8 flex-1 basis-0">
-            <div className="small:hidden">
+            <div className="small:hidden group-data-[transparent=true]:text-white text-grey-90 transition-colors duration-300">
               <SideMenu
                 regions={regions}
                 initialCategories={shopCategories}
@@ -144,7 +145,7 @@ export default async function Nav() {
 
             <Suspense
               fallback={
-                <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90">
+                <div className="hidden small:flex items-center gap-x-8 text-[14px] font-medium text-grey-90 group-data-[transparent=true]:text-white/90 transition-colors duration-300">
                   <span className="pb-1 border-b-2 border-transparent hover:text-brand hover:border-brand transition-colors duration-200 cursor-pointer">Home</span>
                   <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Shop</span>
                   <span className="pb-1 border-b-2 border-transparent hover:text-brand transition-colors duration-200 cursor-pointer">Trending Gear</span>
@@ -164,22 +165,32 @@ export default async function Nav() {
 
           <div className="flex items-center justify-center">
             <LocalizedClientLink href="/" data-testid="nav-store-link">
+              {/* White logo — visible when header is transparent */}
               <Image
-                src="/logo.png"
+                src="/LetsCase Logo.png"
                 alt="Letscase"
-                width={180}
-                height={44}
-                className="h-7 w-auto small:h-8"
+                width={280}
+                height={64}
+                className="h-12 w-auto small:h-14 hidden group-data-[transparent=true]:block transition-opacity duration-300"
+                priority
+              />
+              {/* Black logo — visible when header is solid */}
+              <Image
+                src="/Lets Case Logo black.png"
+                alt="Letscase"
+                width={280}
+                height={64}
+                className="h-12 w-auto small:h-14 block group-data-[transparent=true]:hidden transition-opacity duration-300"
                 priority
               />
             </LocalizedClientLink>
           </div>
 
-          <div className="flex items-center gap-x-4 small:gap-x-6 h-full flex-1 basis-0 justify-end">
+          <div className="flex items-center gap-x-4 small:gap-x-6 h-full flex-1 basis-0 justify-end group-data-[transparent=true]:text-white text-grey-90 transition-colors duration-300">
             <LocalizedClientLink
               href="/search"
               scroll={false}
-              className="small:hidden text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
+              className="small:hidden hover:text-brand transition-transform duration-200 hover:scale-110"
               aria-label="Search"
               data-testid="nav-search-link"
             >
@@ -190,7 +201,7 @@ export default async function Nav() {
 
             <LocalizedClientLink
               href="/account/wishlist"
-              className="hidden small:inline-flex text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
+              className="hidden small:inline-flex hover:text-brand transition-transform duration-200 hover:scale-110"
               aria-label="Wishlist"
             >
               <Heart size={22} />
@@ -198,7 +209,7 @@ export default async function Nav() {
 
             <LocalizedClientLink
               href="/account"
-              className="text-grey-90 hover:text-brand transition-transform duration-200 hover:scale-110"
+              className="hover:text-brand transition-transform duration-200 hover:scale-110"
               data-testid="nav-account-link"
               aria-label="Account"
             >
@@ -222,6 +233,6 @@ export default async function Nav() {
           </div>
         </nav>
       </header>
-    </div>
+    </TransparentNavWrapper>
   )
 }

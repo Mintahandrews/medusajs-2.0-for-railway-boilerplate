@@ -12,12 +12,12 @@ export default async function Footer() {
           <div>
             <LocalizedClientLink href="/" className="inline-block">
               <Image
-                src="/logo.png"
+                src="/Lets Case Logo black.png"
                 alt="Letscase"
-                width={160}
-                height={40}
+                width={280}
+                height={64}
                 loading="lazy"
-                className="h-7 w-auto"
+                className="h-12 w-auto"
               />
             </LocalizedClientLink>
             <p className="mt-4 text-[14px] text-grey-50 leading-[1.6] max-w-[280px]">
@@ -134,6 +134,22 @@ export default async function Footer() {
                   </LocalizedClientLink>
                 </li>
               ))}
+              <li>
+                <a
+                  href="mailto:support@letscase.com"
+                  className="hover:text-brand transition"
+                >
+                  support@letscase.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="tel:+233540451001"
+                  className="hover:text-brand transition"
+                >
+                  +233 54 045 1001
+                </a>
+              </li>
             </ul>
           </div>
         </div>

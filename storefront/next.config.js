@@ -87,7 +87,6 @@ const nextConfig = {
       "lucide-react",
       "@medusajs/ui",
       "lodash",
-      "@headlessui/react",
     ],
   },
   async headers() {

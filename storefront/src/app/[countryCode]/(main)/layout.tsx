@@ -13,7 +13,10 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   return (
     <>
       <Nav />
-      {props.children}
+      {/* pt-[72px] offsets the fixed nav; the homepage hero uses -mt-[72px] to slide under it */}
+      <main className="pt-[72px]">
+        {props.children}
+      </main>
       <Footer />
       <WhatsAppWidget />
       <CookieConsent />
