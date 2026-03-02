@@ -18,7 +18,7 @@ export default function CustomizerError({
     <div className="flex items-center justify-center min-h-[60vh] px-4">
       <div className="text-center max-w-md">
         <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-grey-50 mb-6">
           The customizer couldn&apos;t load. This is usually temporary — please
           try again.
         </p>
@@ -31,7 +31,7 @@ export default function CustomizerError({
           </button>
           <LocalizedClientLink
             href="/store"
-            className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className="px-5 py-2.5 border border-grey-30 rounded-lg hover:bg-grey-5 transition-colors font-medium"
           >
             Browse store
           </LocalizedClientLink>

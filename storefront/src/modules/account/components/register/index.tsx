@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useFormState } from "react-dom"
+import { useActionState, useState } from "react"
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react"
 
 import Input from "@modules/common/components/input"
@@ -17,7 +16,7 @@ type Props = {
 }
 
 const Register = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useFormState(signup, null)
+  const [message, formAction] = useActionState(signup, null)
   const [showAddress, setShowAddress] = useState(false)
   const [addressFields, setAddressFields] = useState({
     address_1: "",
@@ -73,15 +72,14 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="last-name-input"
           />
           <Input
-            label="Email"
+            label="Email (optional if phone provided)"
             name="email"
-            required
             type="email"
             autoComplete="email"
             data-testid="email-input"
           />
           <Input
-            label="Phone"
+            label="Phone Number (optional if email provided)"
             name="phone"
             type="tel"
             autoComplete="tel"

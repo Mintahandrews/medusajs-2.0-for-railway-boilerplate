@@ -22,8 +22,19 @@ module.exports = {
       },
       colors: {
         brand: {
+          50:  "#f0faf9",
+          100: "#d6f1ef",
+          200: "#aee3df",
+          300: "#7ecfc9",
+          400: "#5DABA6",
           DEFAULT: "#5DABA6",
+          500: "#4a9994",
+          600: "#3D8B87",
           dark: "#3D8B87",
+          700: "#336f6c",
+          800: "#2a5856",
+          900: "#234847",
+          950: "#162e2d",
         },
         grey: {
           0: "#FFFFFF",
@@ -37,6 +48,19 @@ module.exports = {
           70: "#374151",
           80: "#1F2937",
           90: "#111827",
+        },
+        gray: {
+          50:  "#F9FAFB",
+          100: "#F3F4F6",
+          200: "#E5E7EB",
+          300: "#D1D5DB",
+          400: "#9CA3AF",
+          500: "#6B7280",
+          600: "#4B5563",
+          700: "#374151",
+          800: "#1F2937",
+          900: "#111827",
+          950: "#030712",
         },
       },
       borderRadius: {
@@ -61,6 +85,10 @@ module.exports = {
       },
       fontSize: {
         "3xl": "2rem",
+        "display-sm": ["30px", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "display":    ["36px", { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "display-lg": ["48px", { lineHeight: "1.1",  letterSpacing: "-0.02em", fontWeight: "700" }],
+        "display-xl": ["56px", { lineHeight: "1.08", letterSpacing: "-0.02em", fontWeight: "700" }],
       },
       fontFamily: {
         sans: [
@@ -73,6 +101,10 @@ module.exports = {
           "Ubuntu",
           "sans-serif",
         ],
+      },
+      letterSpacing: {
+        tightest: "-0.02em",
+        tighter:  "-0.01em",
       },
       keyframes: {
         ring: {

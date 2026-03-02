@@ -60,7 +60,7 @@ export default function ContactForm() {
         <h3 className="text-[16px] font-semibold text-grey-90">Message sent!</h3>
         <p className="mt-2 text-[14px] text-grey-60 leading-[1.6] max-w-md">
           Thank you for reaching out. We&rsquo;ll get back to you within 24 hours
-          by email, or faster on WhatsApp.
+          by email or SMS, or faster on WhatsApp.
         </p>
         <button
           type="button"
@@ -93,7 +93,7 @@ export default function ContactForm() {
 
         <div>
           <label className="text-[13px] font-semibold text-grey-90" htmlFor="email">
-            Email
+            Email {values.phone ? "(optional)" : ""}
           </label>
           <input
             id="email"
@@ -103,13 +103,12 @@ export default function ContactForm() {
             className="mt-2 h-11 w-full rounded-full border border-grey-20 bg-white px-4 text-[14px] text-grey-90 placeholder:text-grey-40 focus:outline-none focus:ring-2 focus:ring-brand/30"
             placeholder="you@example.com"
             autoComplete="email"
-            required
           />
         </div>
 
         <div>
           <label className="text-[13px] font-semibold text-grey-90" htmlFor="phone">
-            Phone (optional)
+            Phone {values.email ? "(optional)" : ""}
           </label>
           <input
             id="phone"

@@ -57,8 +57,8 @@ function PaystackVerifyContent() {
       <div className="content-container py-10">
         <h1 className="text-2xl font-semibold text-red-600">Payment Verification Failed</h1>
         <p className="mt-2 text-ui-fg-subtle">{errorMessage}</p>
-        {reference && <p className="mt-2 text-sm text-gray-500">Reference: {reference}</p>}
-        <Link href={`/${countryCode}/checkout`} className="text-blue-600 underline mt-4 block">
+        {reference && <p className="mt-2 text-sm text-grey-50">Reference: {reference}</p>}
+        <Link href={`/${countryCode}/checkout`} className="text-brand underline mt-4 block">
           Return to Checkout
         </Link>
       </div>
@@ -67,7 +67,7 @@ function PaystackVerifyContent() {
 
   return (
     <div className="content-container py-10 flex flex-col items-center">
-      <h1 className="text-xl font-semibold text-green-600">Payment Successful!</h1>
+      <h1 className="text-xl font-semibold text-brand-600">Payment Successful!</h1>
       <p className="mt-2 text-ui-fg-subtle">Redirecting to your order confirmation...</p>
     </div>
   )

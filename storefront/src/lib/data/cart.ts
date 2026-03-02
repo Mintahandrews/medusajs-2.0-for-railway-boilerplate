@@ -8,6 +8,8 @@ import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
+import { sendOrderConfirmationSMS } from "@lib/sms"
+import { getRegion } from "./regions"
 
 /** Server-side backend URL with HTTPS upgrade for production (matches SDK config). */
 function getServerBackendUrl(): string {
@@ -21,7 +23,6 @@ function getServerBackendUrl(): string {
   }
   return raw
 }
-import { getRegion } from "./regions"
 
 export async function retrieveCart() {
   const cartId = await getCartId()
@@ -346,44 +347,51 @@ export async function enrichLineItems(
     | null,
   regionId: string
 ) {
-  if (!lineItems) return []
+  if (!lineItems?.length) return []
 
-  // Prepare query parameters
-  const queryParams = {
-    ids: lineItems.map((lineItem) => lineItem.product_id!),
-    regionId: regionId,
-  }
-
-  // Fetch products by their IDs
-  const products = await getProductsById(queryParams)
-  // If there are no line items or products, return an empty array
-  if (!lineItems?.length || !products) {
-    return []
-  }
-
-  // Enrich line items with product and variant information
-  const enrichedItems = lineItems.map((item) => {
-    const product = products.find((p: any) => p.id === item.product_id)
-    const variant = product?.variants?.find(
-      (v: any) => v.id === item.variant_id
-    )
-
-    // If product or variant is not found, return the original item
-    if (!product || !variant) {
-      return item
+  try {
+    // Prepare query parameters
+    const queryParams = {
+      ids: lineItems.map((lineItem) => lineItem.product_id!).filter(Boolean),
+      regionId: regionId,
     }
 
-    // If product and variant are found, enrich the item
-    return {
-      ...item,
-      variant: {
-        ...variant,
-        product: omit(product, "variants"),
-      },
-    }
-  }) as HttpTypes.StoreCartLineItem[]
+    if (!queryParams.ids.length) return lineItems as HttpTypes.StoreCartLineItem[]
 
-  return enrichedItems
+    // Fetch products by their IDs
+    const products = await getProductsById(queryParams)
+    // If there are no products, return the original items
+    if (!products?.length) {
+      return lineItems as HttpTypes.StoreCartLineItem[]
+    }
+
+    // Enrich line items with product and variant information
+    const enrichedItems = lineItems.map((item) => {
+      const product = products.find((p: any) => p.id === item.product_id)
+      const variant = product?.variants?.find(
+        (v: any) => v.id === item.variant_id
+      )
+
+      // If product or variant is not found, return the original item
+      if (!product || !variant) {
+        return item
+      }
+
+      // If product and variant are found, enrich the item
+      return {
+        ...item,
+        variant: {
+          ...variant,
+          product: omit(product, "variants"),
+        },
+      }
+    }) as HttpTypes.StoreCartLineItem[]
+
+    return enrichedItems
+  } catch (error) {
+    console.error("[enrichLineItems] Failed to enrich items:", error)
+    return lineItems as HttpTypes.StoreCartLineItem[]
+  }
 }
 
 export async function setShippingMethod({
@@ -565,6 +573,21 @@ export async function placeOrder() {
       cartRes.order.shipping_address?.country_code?.toLowerCase()
     await removeCartId()
     revalidateTag("order")
+
+    // ── SMS order confirmation (fire-and-forget) ──
+    const orderPhone =
+      cartRes.order.shipping_address?.phone ||
+      cartRes.order.customer?.phone
+    if (orderPhone) {
+      const displayId = cartRes.order.display_id || cartRes.order.id
+      const total = cartRes.order.total
+        ? `${cartRes.order.currency_code?.toUpperCase() || "GHS"} ${(Number(cartRes.order.total) / 100).toFixed(2)}`
+        : undefined
+      sendOrderConfirmationSMS(orderPhone, String(displayId), total).catch(
+        (err) => console.warn("[placeOrder] Order SMS failed:", err)
+      )
+    }
+
     redirect(`/${countryCode}/order/confirmed/${cartRes?.order.id}`)
   }
 

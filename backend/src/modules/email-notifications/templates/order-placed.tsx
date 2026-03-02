@@ -85,95 +85,88 @@ export const OrderPlacedTemplate: React.FC<OrderPlacedTemplateProps> & {
   return (
     <Base preview={preview}>
       <Section>
-        <Text style={{ fontSize: '22px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 24px', color: '#008080' }}>
-          Order Confirmation
+        <Text style={{ fontSize: '24px', fontWeight: 700, textAlign: 'center', margin: '0 0 8px', color: '#1a1a1a' }}>
+          Order Confirmed
         </Text>
-        <Text style={{ margin: '0 0 15px', fontSize: '15px', color: '#222' }}>
-          Hi {shippingAddress.first_name} {shippingAddress.last_name},
+        <Text style={{ fontSize: '14px', textAlign: 'center', margin: '0 0 28px', color: '#71717a' }}>
+          Thank you for shopping with Lets Case!
         </Text>
-        <Text style={{ margin: '0 0 24px', color: '#222' }}>
-          Thank you for your order! Below are your order details:
+
+        <Text style={{ margin: '0 0 16px', fontSize: '15px', color: '#27272a' }}>
+          Hi {shippingAddress.first_name},
         </Text>
-        <Section style={{ background: '#f6f8fa', borderRadius: 8, padding: 16, margin: '0 0 24px' }}>
-          <Text style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 8px', color: '#008080' }}>
+        <Text style={{ margin: '0 0 24px', fontSize: '14px', color: '#3f3f46', lineHeight: '1.6' }}>
+          We have received your order and it is being processed. Here are your order details:
+        </Text>
+
+        {/* Order summary card */}
+        <Section style={{ background: '#f4f4f5', borderRadius: 12, padding: '20px', margin: '0 0 24px' }}>
+          <Text style={{ fontSize: '11px', fontWeight: 600, margin: '0 0 12px', color: '#a1a1aa', letterSpacing: '1px', textTransform: 'uppercase' }}>
             Order Summary
           </Text>
-          <Text style={{ margin: '0 0 4px', color: '#222' }}>
-            <strong>Order ID:</strong> {order.display_id}
+          <Text style={{ margin: '0 0 6px', fontSize: '14px', color: '#27272a' }}>
+            <strong>Order:</strong> #{order.display_id}
           </Text>
-          <Text style={{ margin: '0 0 4px', color: '#222' }}>
-            <strong>Date:</strong> {new Date(order.created_at).toLocaleDateString()}
+          <Text style={{ margin: '0 0 6px', fontSize: '14px', color: '#27272a' }}>
+            <strong>Date:</strong> {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
           </Text>
-          <Text style={{ margin: '0 0 4px', color: '#222' }}>
+          <Text style={{ margin: '0', fontSize: '16px', fontWeight: 700, color: '#1a1a1a' }}>
             <strong>Total:</strong> {formatMoney(order.summary.raw_current_order_total.value, currencyCode)}
           </Text>
         </Section>
+
         {orderUrl && (
-          <Section style={{ textAlign: 'center', margin: '10px 0 30px' }}>
+          <Section style={{ textAlign: 'center', margin: '0 0 28px' }}>
             <Button
               href={orderUrl}
-              className="bg-[#008080] rounded text-white text-[15px] font-semibold no-underline px-7 py-3 shadow-sm border-0 cursor-pointer"
+              style={{ background: '#1a1a1a', borderRadius: '8px', color: '#ffffff', fontSize: '14px', fontWeight: 600, textDecoration: 'none', padding: '12px 28px', display: 'inline-block' }}
             >
-              View your order
+              View Your Order
             </Button>
           </Section>
         )}
 
-        <Hr style={{ margin: '20px 0' }} />
+        <Hr style={{ borderColor: '#e4e4e7', margin: '24px 0' }} />
 
-        <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 10px' }}>
+        {/* Shipping address */}
+        <Text style={{ fontSize: '11px', fontWeight: 600, margin: '0 0 8px', color: '#a1a1aa', letterSpacing: '1px', textTransform: 'uppercase' }}>
           Shipping Address
         </Text>
-        <Text style={{ margin: '0 0 5px' }}>
+        <Text style={{ margin: '0 0 4px', fontSize: '14px', color: '#3f3f46' }}>
+          {shippingAddress.first_name} {shippingAddress.last_name}
+        </Text>
+        <Text style={{ margin: '0 0 4px', fontSize: '14px', color: '#3f3f46' }}>
           {shippingAddress.address_1}
         </Text>
-        <Text style={{ margin: '0 0 5px' }}>
-          {shippingAddress.city}, {shippingAddress.province} {shippingAddress.postal_code}
+        <Text style={{ margin: '0 0 4px', fontSize: '14px', color: '#3f3f46' }}>
+          {shippingAddress.city}{shippingAddress.province ? `, ${shippingAddress.province}` : ''} {shippingAddress.postal_code}
         </Text>
-        <Text style={{ margin: '0 0 20px' }}>
+        <Text style={{ margin: '0 0 24px', fontSize: '14px', color: '#3f3f46' }}>
           {(shippingAddress.country_code ?? '').toUpperCase()}
         </Text>
 
-        <Hr style={{ margin: '20px 0' }} />
+        <Hr style={{ borderColor: '#e4e4e7', margin: '0 0 24px' }} />
 
-        <Text style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 15px' }}>
-          Order Items
+        {/* Order items */}
+        <Text style={{ fontSize: '11px', fontWeight: 600, margin: '0 0 12px', color: '#a1a1aa', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          Items Ordered
         </Text>
 
-        <div style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          border: '1px solid #ddd',
-          margin: '10px 0'
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            backgroundColor: '#f2f2f2',
-            padding: '8px',
-            borderBottom: '1px solid #ddd'
-          }}>
-            <Text style={{ fontWeight: 'bold' }}>Item</Text>
-            <Text style={{ fontWeight: 'bold' }}>Quantity</Text>
-            <Text style={{ fontWeight: 'bold' }}>Price</Text>
-          </div>
-          {order.items.map((item) => (
-            <div key={item.id} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '8px',
-              borderBottom: '1px solid #ddd'
-            }}>
-              <Text>{item.title} - {item.product_title}</Text>
-              <Text>{item.quantity}</Text>
-              <Text>{formatMoney(item.unit_price, currencyCode)}</Text>
-            </div>
-          ))}
-        </div>
+        {order.items.map((item) => (
+          <Section key={item.id} style={{ borderBottom: '1px solid #f4f4f5', padding: '10px 0' }}>
+            <Text style={{ margin: '0 0 2px', fontSize: '14px', fontWeight: 600, color: '#27272a' }}>
+              {item.product_title}
+            </Text>
+            <Text style={{ margin: '0', fontSize: '13px', color: '#71717a' }}>
+              {item.title} &middot; Qty: {item.quantity} &middot; {formatMoney(item.unit_price, currencyCode)}
+            </Text>
+          </Section>
+        ))}
 
         {supportEmail && (
-          <Text style={{ margin: '30px 0 0', fontSize: '12px', color: '#666666' }}>
-            Need help? Reply to this email or contact us at {supportEmail}.
+          <Text style={{ margin: '28px 0 0', fontSize: '13px', color: '#a1a1aa', lineHeight: '1.5' }}>
+            Questions about your order? Reply to this email or contact us at{' '}
+            <span style={{ color: '#008080' }}>{supportEmail}</span>.
           </Text>
         )}
       </Section>

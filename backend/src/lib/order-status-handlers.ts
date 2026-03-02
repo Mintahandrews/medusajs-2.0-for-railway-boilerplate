@@ -37,7 +37,7 @@ export async function orderShippedHandler({ event: { data }, container }: Subscr
       order,
       shippingAddress,
       template: EmailTemplates.ORDER_SHIPPED,
-      subject: 'Your order has shipped! 🎉',
+      subject: 'Your Letscase order has shipped!',
       preview: 'Your order is on its way!'
     })
   } catch (error) {

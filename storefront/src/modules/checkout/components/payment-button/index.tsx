@@ -266,6 +266,8 @@ const PayPalPaymentButton = ({
       </>
     )
   }
+
+  return null
 }
 
 const PaystackPaymentButton = ({
@@ -317,7 +319,7 @@ const PaystackPaymentButton = ({
           key: PAYSTACK_PUBLIC_KEY,
           email: cart.email,
           amount: session?.data?.amount ?? undefined, // amount is smallest unit (kobo)
-          currency: (session?.data?.currency ?? "").toUpperCase(),
+          currency: (String(session?.data?.currency ?? "")).toUpperCase(),
           ref: reference,
           callback: function (res: any) {
             // Redirect to existing verify route which will complete the order

@@ -1,5 +1,4 @@
 import { HttpTypes } from "@medusajs/types"
-import { notFound } from "next/navigation"
 import { NextRequest, NextResponse } from "next/server"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
@@ -42,7 +41,8 @@ async function getRegionMap() {
     }
 
     if (!regions?.length) {
-      notFound()
+      console.error("Middleware: No regions returned from Medusa backend")
+      return regionMapCache.regionMap
     }
 
     // Create a map of country codes to regions.

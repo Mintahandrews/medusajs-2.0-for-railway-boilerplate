@@ -57,12 +57,12 @@ const Hero = ({ categories = [] }: HeroProps) => {
             <span className="inline-block mb-4 rounded-full bg-white/15 backdrop-blur-sm px-4 py-1.5 text-[12px] font-semibold text-white uppercase tracking-wider border border-white/20">
               Ghana&apos;s #1 Tech Accessories
             </span>
-            <h1 className="text-[36px] small:text-[56px] leading-[1.08] font-bold tracking-[-0.02em] text-white drop-shadow-lg">
+            <h1 className="text-display small:text-display-xl text-white drop-shadow-lg">
               Premium Cases &amp;
               <br />
               Accessories for
               <br />
-              <span className="text-emerald-400">Every Device</span>
+              <span className="text-brand-300">Every Device</span>
             </h1>
             <p className="mt-5 text-[15px] small:text-[17px] text-white/85 leading-[1.7] max-w-[480px]">
               100% authentic products with fast delivery across Ghana.
@@ -73,14 +73,14 @@ const Hero = ({ categories = [] }: HeroProps) => {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <LocalizedClientLink
                 href="/store"
-                className="inline-flex items-center gap-2 px-8 h-[52px] rounded-full bg-white text-gray-900 text-[15px] font-semibold transition duration-300 hover:bg-gray-100 hover:scale-[1.02] shadow-xl"
+                className="inline-flex items-center gap-2 px-8 h-[52px] rounded-full bg-white text-grey-90 text-[15px] font-semibold transition duration-300 hover:bg-grey-10 hover:scale-[1.02] shadow-xl"
               >
                 <span>Shop Now</span>
                 <ArrowRight size={16} />
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/customizer"
-                className="inline-flex items-center gap-2 px-8 h-[52px] rounded-full bg-emerald-500 text-white text-[15px] font-semibold transition duration-300 hover:bg-emerald-600 hover:scale-[1.02] shadow-xl"
+                className="inline-flex items-center gap-2 px-8 h-[52px] rounded-full bg-brand text-white text-[15px] font-semibold transition duration-300 hover:bg-brand-600 hover:scale-[1.02] shadow-xl"
               >
                 <Paintbrush size={16} />
                 <span>Customise your case</span>

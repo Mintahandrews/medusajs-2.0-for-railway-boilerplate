@@ -37,56 +37,56 @@ export const ContactFormEmail: React.FC<ContactFormData> = ({
   return (
     <Base preview={`New contact form message from ${name}`}>
       <Section>
-        <Text className="text-[22px] font-bold text-[#1a1a1a] leading-[1.3] mt-0 mb-1">
+        <Text style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 8px', color: '#1a1a1a', textAlign: 'center' }}>
           New Contact Form Submission
         </Text>
-        <Text className="text-[14px] text-[#666] mt-0 mb-4">
-          A customer reached out via the contact form on the website.
+        <Text style={{ fontSize: '14px', color: '#71717a', margin: '0 0 24px', textAlign: 'center' }}>
+          A customer reached out via the website.
         </Text>
 
-        <Hr className="border-[#eaeaea] my-4" />
+        <Hr style={{ borderColor: '#e4e4e7', margin: '0 0 20px' }} />
 
-        <Text className="text-[13px] text-[#999] mt-0 mb-[2px] uppercase tracking-wider font-semibold">
+        <Text style={{ fontSize: '11px', color: '#a1a1aa', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
           From
         </Text>
-        <Text className="text-[15px] text-[#1a1a1a] mt-0 mb-3">
+        <Text style={{ fontSize: '15px', color: '#1a1a1a', margin: '0 0 16px' }}>
           {name} &lt;{email}&gt;
         </Text>
 
         {phone && (
           <>
-            <Text className="text-[13px] text-[#999] mt-0 mb-[2px] uppercase tracking-wider font-semibold">
+            <Text style={{ fontSize: '11px', color: '#a1a1aa', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
               Phone
             </Text>
-            <Text className="text-[15px] text-[#1a1a1a] mt-0 mb-3">
+            <Text style={{ fontSize: '15px', color: '#1a1a1a', margin: '0 0 16px' }}>
               {phone}
             </Text>
           </>
         )}
 
-        <Text className="text-[13px] text-[#999] mt-0 mb-[2px] uppercase tracking-wider font-semibold">
+        <Text style={{ fontSize: '11px', color: '#a1a1aa', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
           Subject
         </Text>
-        <Text className="text-[15px] text-[#1a1a1a] mt-0 mb-3">
+        <Text style={{ fontSize: '15px', color: '#1a1a1a', margin: '0 0 16px' }}>
           {subject || "General"}
         </Text>
 
-        <Hr className="border-[#eaeaea] my-4" />
+        <Hr style={{ borderColor: '#e4e4e7', margin: '4px 0 20px' }} />
 
-        <Text className="text-[13px] text-[#999] mt-0 mb-[2px] uppercase tracking-wider font-semibold">
+        <Text style={{ fontSize: '11px', color: '#a1a1aa', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
           Message
         </Text>
-        <Text className="text-[15px] text-[#1a1a1a] mt-0 mb-4 whitespace-pre-wrap leading-[1.6]">
+        <Text style={{ fontSize: '15px', color: '#1a1a1a', margin: '0 0 20px', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
           {message}
         </Text>
 
-        <Hr className="border-[#eaeaea] my-4" />
+        <Hr style={{ borderColor: '#e4e4e7', margin: '0 0 16px' }} />
 
-        <Text className="text-[12px] text-[#999] mt-0 mb-0">
+        <Text style={{ fontSize: '12px', color: '#a1a1aa', margin: '0' }}>
           Reply directly to this email to respond to the customer.
         </Text>
         {timestamp && (
-          <Text className="text-[11px] text-[#bbb] mt-1 mb-0">
+          <Text style={{ fontSize: '11px', color: '#d4d4d8', margin: '4px 0 0' }}>
             Submitted at {timestamp}
           </Text>
         )}

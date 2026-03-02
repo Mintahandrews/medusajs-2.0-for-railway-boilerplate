@@ -52,7 +52,7 @@ function PhoneIcon({ handle }: { handle: string }) {
   // Common phone body
   const body = (
     <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={r}
-      className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+      className="fill-gray-50 stroke-gray-300 group-hover:fill-brand-50 group-hover:stroke-brand"
       strokeWidth="1.5" />
   )
 
@@ -64,11 +64,11 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={px} y={py} width={pw} height={ph} rx={pr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={px + pw / 2} cy={py + ph * 0.32} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={px + pw / 2} cy={py + ph * 0.68} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
       </svg>
     )
   }
@@ -80,17 +80,17 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
         <circle cx={mx + ms * 0.28} cy={my + ms * 0.70} r="1.2"
-          className="fill-gray-400 group-hover:fill-emerald-400" />
+          className="fill-gray-400 group-hover:fill-brand-400" />
       </svg>
     )
   }
@@ -102,13 +102,13 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -122,17 +122,17 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="4.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
         <circle cx={mx + ms * 0.28} cy={my + ms * 0.70} r="1.2"
-          className="fill-gray-400 group-hover:fill-emerald-400" />
+          className="fill-gray-400 group-hover:fill-brand-400" />
       </svg>
     )
   }
@@ -144,11 +144,11 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.33} cy={my + ms * 0.33} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.67} cy={my + ms * 0.67} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.67} cy={my + ms * 0.33} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -162,11 +162,11 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.33} cy={my + ms * 0.33} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.67} cy={my + ms * 0.67} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.67} cy={my + ms * 0.33} r="1.5"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -186,14 +186,14 @@ function PhoneIcon({ handle }: { handle: string }) {
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={10}
-          className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+          className="fill-gray-50 stroke-gray-300 group-hover:fill-brand-50 group-hover:stroke-brand"
           strokeWidth="1.5" />
         {sizes.map((l, i) => (
           <g key={i}>
             <circle cx={lx} cy={l.cy} r={l.outerR}
-              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
+              className="fill-gray-200 stroke-gray-400 group-hover:fill-brand-100 group-hover:stroke-brand" strokeWidth="1" />
             <circle cx={lx} cy={l.cy} r={l.innerR}
-              className="fill-gray-500 group-hover:fill-emerald-600" />
+              className="fill-gray-500 group-hover:fill-brand-600" />
           </g>
         ))}
         <circle cx={lx} cy={42} r="1.5"
@@ -215,14 +215,14 @@ function PhoneIcon({ handle }: { handle: string }) {
     return (
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         <rect x="1.5" y="1.5" width={w - 3} height={h - 3} rx={6}
-          className="fill-gray-50 stroke-gray-300 group-hover:fill-emerald-50 group-hover:stroke-emerald-500"
+          className="fill-gray-50 stroke-gray-300 group-hover:fill-brand-50 group-hover:stroke-brand"
           strokeWidth="1.5" />
         {sizes.map((l, i) => (
           <g key={i}>
             <circle cx={lx} cy={l.cy} r={l.outerR}
-              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
+              className="fill-gray-200 stroke-gray-400 group-hover:fill-brand-100 group-hover:stroke-brand" strokeWidth="1" />
             <circle cx={lx} cy={l.cy} r={l.innerR}
-              className="fill-gray-500 group-hover:fill-emerald-600" />
+              className="fill-gray-500 group-hover:fill-brand-600" />
           </g>
         ))}
         <circle cx={lx} cy={39} r="1.5"
@@ -241,9 +241,9 @@ function PhoneIcon({ handle }: { handle: string }) {
         {[0, 1, 2].map(i => (
           <g key={i}>
             <circle cx={lx} cy={startY + i * gap} r="5"
-              className="fill-gray-200 stroke-gray-400 group-hover:fill-emerald-100 group-hover:stroke-emerald-500" strokeWidth="1" />
+              className="fill-gray-200 stroke-gray-400 group-hover:fill-brand-100 group-hover:stroke-brand" strokeWidth="1" />
             <circle cx={lx} cy={startY + i * gap} r="3"
-              className="fill-gray-500 group-hover:fill-emerald-600" />
+              className="fill-gray-500 group-hover:fill-brand-600" />
           </g>
         ))}
         {/* Flash */}
@@ -263,13 +263,13 @@ function PhoneIcon({ handle }: { handle: string }) {
         {body}
         {/* Full-width bar that curves into phone edges */}
         <path d={`M1.5 ${barY + r} V${barY} h${w - 3} v${barH} H1.5 V${barY + barH - r}`}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx="14" cy={barY + barH / 2} r="5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx="27" cy={barY + barH / 2} r="5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         {isPro && <circle cx="39" cy={barY + barH / 2} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />}
+          className="fill-gray-500 group-hover:fill-brand-600" />}
         <circle cx={isPro ? 49 : 39} cy={barY + barH / 2} r="1.8"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -286,13 +286,13 @@ function PhoneIcon({ handle }: { handle: string }) {
         {body}
         {/* Floating pill that doesn't touch edges */}
         <rect x={barX} y={barY} width={barW} height={barH} rx={barR}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={barX + 11} cy={barY + barH / 2} r="5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={barX + 25} cy={barY + barH / 2} r="5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         {isPro && <circle cx={barX + 37} cy={barY + barH / 2} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />}
+          className="fill-gray-500 group-hover:fill-brand-600" />}
         <circle cx={barX + (isPro ? 45 : 37)} cy={barY + barH / 2} r="1.8"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -306,13 +306,13 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <circle cx={cx} cy={cy} r={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={cx} cy={cy - 6} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={cx - 5} cy={cy + 5} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={cx + 5} cy={cy + 5} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={cx} cy={cy + 12} r="1.3"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -326,11 +326,11 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <circle cx={cx} cy={cy} r={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={cx} cy={cy - 4.5} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={cx} cy={cy + 4.5} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={cx} cy={cy + 11} r="1.3"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -344,13 +344,13 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.3"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -364,13 +364,13 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.30} cy={my + ms * 0.30} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.70} cy={my + ms * 0.30} r="3.5"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.50} cy={my + ms * 0.70} r="3"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.72} cy={my + ms * 0.70} r="1.3"
           className="fill-amber-300 group-hover:fill-amber-400" />
       </svg>
@@ -384,14 +384,14 @@ function PhoneIcon({ handle }: { handle: string }) {
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
         {body}
         <rect x={mx} y={my} width={ms} height={ms} rx={mr}
-          className="fill-gray-300 group-hover:fill-emerald-200" />
+          className="fill-gray-300 group-hover:fill-brand-200" />
         <circle cx={mx + ms * 0.40} cy={my + ms * 0.35} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         <circle cx={mx + ms * 0.40} cy={my + ms * 0.65} r="4"
-          className="fill-gray-500 group-hover:fill-emerald-600" />
+          className="fill-gray-500 group-hover:fill-brand-600" />
         {/* Glyph LED accent strip */}
         <rect x={mx + ms * 0.72} y={my + ms * 0.35} width="3" height="7" rx="1.5"
-          className="fill-emerald-400 group-hover:fill-emerald-500" />
+          className="fill-brand-400 group-hover:fill-brand" />
       </svg>
     )
   }
@@ -408,9 +408,9 @@ export default async function CustomizerLandingPage() {
   const groups = getDeviceGroups()
 
   return (
-    <div className="bg-gray-50 min-h-[calc(100vh-64px)]">
+    <div className="bg-grey-5 min-h-[calc(100vh-64px)]">
       {/* Hero banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-emerald-900">
+      <section className="relative overflow-hidden bg-gradient-to-br from-grey-90 via-grey-80 to-brand-900">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
@@ -418,16 +418,16 @@ export default async function CustomizerLandingPage() {
           }} />
         </div>
         <div className="relative mx-auto max-w-[1200px] px-6 py-16 small:py-24 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-4 py-1.5 mb-6">
-            <Paintbrush size={14} className="text-emerald-400" />
-            <span className="text-[12px] font-semibold text-emerald-400 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-full bg-brand/20 border border-brand/30 px-4 py-1.5 mb-6">
+            <Paintbrush size={14} className="text-brand-300" />
+            <span className="text-[12px] font-semibold text-brand-300 uppercase tracking-wider">
               Case Customizer
             </span>
           </div>
           <h1 className="text-[36px] small:text-[56px] font-bold text-white leading-[1.1] tracking-tight">
             Design Your Dream
             <br />
-            <span className="text-emerald-400">Phone Case</span>
+            <span className="text-brand-300">Phone Case</span>
           </h1>
           <p className="mt-5 text-[16px] small:text-[18px] text-white/70 max-w-[600px] mx-auto leading-relaxed">
             Choose your device below, then unleash your creativity. Upload photos,
@@ -441,8 +441,8 @@ export default async function CustomizerLandingPage() {
       <section className="mx-auto max-w-[1200px] px-6 py-12 small:py-16">
         {groups.map((group) => (
           <div key={group.brand} className="mb-12 last:mb-0">
-            <h2 className="text-[22px] font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Smartphone size={20} className="text-emerald-600" />
+            <h2 className="text-[22px] font-bold text-grey-90 mb-6 flex items-center gap-2">
+              <Smartphone size={20} className="text-brand-600" />
               {group.brand}
             </h2>
             <div className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-3 small:gap-4">
@@ -450,16 +450,16 @@ export default async function CustomizerLandingPage() {
                 <LocalizedClientLink
                   key={device.handle}
                   href={`/customizer/${device.handle}`}
-                  className="group relative flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-white p-5 small:p-6 transition-all duration-200 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-0.5"
+                  className="group relative flex flex-col items-center gap-3 rounded-2xl border border-grey-20 bg-white p-5 small:p-6 transition-all duration-200 hover:border-brand-400 hover:shadow-lg hover:shadow-brand-100 hover:-translate-y-0.5"
                 >
                   <PhoneIcon handle={device.handle} />
                   <div className="text-center">
-                    <div className="text-[13px] small:text-[14px] font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                    <div className="text-[13px] small:text-[14px] font-semibold text-grey-90 group-hover:text-brand-700 transition-colors">
                       {device.name}
                     </div>
                   </div>
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowRight size={14} className="text-emerald-500" />
+                    <ArrowRight size={14} className="text-brand" />
                   </div>
                 </LocalizedClientLink>
               ))}
@@ -469,15 +469,15 @@ export default async function CustomizerLandingPage() {
       </section>
 
       {/* Features section */}
-      <section className="border-t border-gray-200 bg-white">
+      <section className="border-t border-grey-20 bg-white">
         <div className="mx-auto max-w-[1200px] px-6 py-12 small:py-16">
           <div className="grid grid-cols-1 small:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="mx-auto w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-4">
-                <Paintbrush size={22} className="text-emerald-600" />
+              <div className="mx-auto w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mb-4">
+                <Paintbrush size={22} className="text-brand-600" />
               </div>
-              <h3 className="text-[16px] font-semibold text-gray-900 mb-2">Full Creative Control</h3>
-              <p className="text-[14px] text-gray-500 leading-relaxed">
+              <h3 className="text-[16px] font-semibold text-grey-90 mb-2">Full Creative Control</h3>
+              <p className="text-[14px] text-grey-50 leading-relaxed">
                 Upload photos, add text, draw, change backgrounds — make it truly yours.
               </p>
             </div>
@@ -485,8 +485,8 @@ export default async function CustomizerLandingPage() {
               <div className="mx-auto w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
                 <Smartphone size={22} className="text-blue-600" />
               </div>
-              <h3 className="text-[16px] font-semibold text-gray-900 mb-2">AI Device Preview</h3>
-              <p className="text-[14px] text-gray-500 leading-relaxed">
+              <h3 className="text-[16px] font-semibold text-grey-90 mb-2">AI Device Preview</h3>
+              <p className="text-[14px] text-grey-50 leading-relaxed">
                 See your design on a realistic 3D device mockup before you order.
               </p>
             </div>
@@ -494,8 +494,8 @@ export default async function CustomizerLandingPage() {
               <div className="mx-auto w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4">
                 <ArrowRight size={22} className="text-purple-600" />
               </div>
-              <h3 className="text-[16px] font-semibold text-gray-900 mb-2">35+ Devices Supported</h3>
-              <p className="text-[14px] text-gray-500 leading-relaxed">
+              <h3 className="text-[16px] font-semibold text-grey-90 mb-2">35+ Devices Supported</h3>
+              <p className="text-[14px] text-grey-50 leading-relaxed">
                 iPhone 11–16, Samsung Galaxy S23–S25, Google Pixel 8–9 and more.
               </p>
             </div>

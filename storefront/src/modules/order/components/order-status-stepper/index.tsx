@@ -72,10 +72,10 @@ const OrderStatusStepper: React.FC<OrderStatusStepperProps> = ({
       {/* Stepper */}
       <div className="relative flex items-center justify-between">
         {/* Connecting line (background) */}
-        <div className="absolute top-5 left-5 right-5 h-[2px] bg-gray-200" />
+        <div className="absolute top-5 left-5 right-5 h-[2px] bg-grey-20" />
         {/* Connecting line (progress) */}
         <div
-          className="absolute top-5 left-5 h-[2px] bg-green-500 transition-all duration-500"
+          className="absolute top-5 left-5 h-[2px] bg-brand transition-all duration-500"
           style={{
             width: `calc(${(currentStep / (STEPS.length - 1)) * 100}% - 40px)`,
             maxWidth: "calc(100% - 40px)",
@@ -92,16 +92,16 @@ const OrderStatusStepper: React.FC<OrderStatusStepperProps> = ({
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 ${
                   isCompleted
-                    ? "border-green-500 bg-green-500 text-white"
-                    : "border-gray-200 bg-white text-gray-400"
-                } ${isCurrent ? "ring-4 ring-green-100" : ""}`}
+                    ? "border-brand bg-brand text-white"
+                    : "border-grey-20 bg-white text-grey-40"
+                } ${isCurrent ? "ring-4 ring-brand-100" : ""}`}
               >
                 {step.icon}
               </div>
               {/* Label */}
               <span
                 className={`mt-2 text-[12px] font-medium text-center max-w-[80px] leading-tight ${
-                  isCompleted ? "text-green-600" : "text-gray-400"
+                  isCompleted ? "text-brand-600" : "text-grey-40"
                 }`}
               >
                 {step.label}
@@ -135,7 +135,7 @@ function StatusBadge({ label, value }: { label: string; value: string }) {
 function getStatusColors(status: string): string {
   const s = status.toLowerCase()
   if (s.includes("deliver") || s.includes("complet") || s.includes("paid") || s.includes("captured"))
-    return "bg-green-50 text-green-700"
+    return "bg-brand-50 text-brand-700"
   if (s.includes("ship") || s.includes("transit"))
     return "bg-blue-50 text-blue-700"
   if (s.includes("process") || s.includes("packing") || s.includes("fulfil"))
@@ -143,8 +143,8 @@ function getStatusColors(status: string): string {
   if (s.includes("cancel") || s.includes("refund") || s.includes("fail"))
     return "bg-red-50 text-red-700"
   if (s.includes("await") || s.includes("pending"))
-    return "bg-gray-100 text-gray-600"
-  return "bg-gray-100 text-gray-600"
+    return "bg-grey-10 text-grey-60"
+  return "bg-grey-10 text-grey-60"
 }
 
 export default OrderStatusStepper

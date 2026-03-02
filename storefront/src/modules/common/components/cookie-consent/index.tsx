@@ -72,15 +72,15 @@ export default function CookieConsent() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[60] max-w-4xl mx-auto pointer-events-none">
-      <div className="pointer-events-auto bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden animate-cookie-slide-up">
+      <div className="pointer-events-auto bg-white rounded-xl shadow-2xl border border-grey-20 overflow-hidden animate-cookie-slide-up">
         {!showPreferences ? (
           <>
             {/* Content */}
             <div className="p-6">
-              <h3 className="text-[16px] font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-[16px] font-bold text-grey-90 flex items-center gap-2">
                 <Cookie className="w-5 h-5 text-yellow-500" aria-hidden="true" /> Cookie Preferences
               </h3>
-              <p className="text-[14px] text-gray-600 mt-2 leading-relaxed">
+              <p className="text-[14px] text-grey-50 mt-2 leading-relaxed">
                 We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 
                 By clicking &ldquo;Accept All&rdquo;, you consent to our use of cookies.
                 <br />
@@ -91,7 +91,7 @@ export default function CookieConsent() {
             </div>
 
             {/* Buttons */}
-            <div className="border-t border-gray-200 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-gray-50">
+            <div className="border-t border-grey-20 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-grey-5">
               <button
                 type="button"
                 onClick={handleAccept}
@@ -102,14 +102,14 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={handleDecline}
-                className="w-full sm:flex-1 h-12 sm:h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
+                className="w-full sm:flex-1 h-12 sm:h-10 px-6 rounded-lg border border-grey-30 text-grey-60 text-[14px] font-semibold hover:bg-grey-10 transition-colors"
               >
                 Reject All
               </button>
               <button
                 type="button"
                 onClick={() => setShowPreferences(true)}
-                className="w-full sm:w-auto h-12 sm:h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
+                className="w-full sm:w-auto h-12 sm:h-10 px-6 rounded-lg border border-grey-30 text-grey-60 text-[14px] font-semibold hover:bg-grey-10 transition-colors"
               >
                 Customize
               </button>
@@ -119,14 +119,14 @@ export default function CookieConsent() {
           <>
             {/* Preferences Panel */}
             <div className="p-6">
-              <h3 className="text-[16px] font-bold text-gray-900 mb-4">Customize Cookie Preferences</h3>
+              <h3 className="text-[16px] font-bold text-grey-90 mb-4">Customize Cookie Preferences</h3>
               
               <div className="space-y-4">
                 {/* Necessary Cookies */}
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-grey-5 rounded-lg">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 text-sm">Necessary Cookies</h4>
-                    <p className="text-xs text-gray-600 mt-1">Required for the website to function properly</p>
+                    <h4 className="font-semibold text-grey-90 text-sm">Necessary Cookies</h4>
+                    <p className="text-xs text-grey-50 mt-1">Required for the website to function properly</p>
                   </div>
                   <div className="relative">
                     <input
@@ -135,21 +135,21 @@ export default function CookieConsent() {
                       disabled
                       className="sr-only"
                     />
-                    <div className="w-12 h-6 bg-gray-300 rounded-full opacity-50"></div>
+                    <div className="w-12 h-6 bg-grey-30 rounded-full opacity-50"></div>
                     <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow"></div>
                   </div>
                 </div>
 
                 {/* Analytics Cookies */}
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-grey-5 rounded-lg">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 text-sm">Analytics Cookies</h4>
-                    <p className="text-xs text-gray-600 mt-1">Help us understand how visitors interact with our website</p>
+                    <h4 className="font-semibold text-grey-90 text-sm">Analytics Cookies</h4>
+                    <p className="text-xs text-grey-50 mt-1">Help us understand how visitors interact with our website</p>
                   </div>
                   <button
                     onClick={() => togglePreference("analytics")}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.analytics ? "bg-brand" : "bg-gray-300"
+                      preferences.analytics ? "bg-brand" : "bg-grey-30"
                     }`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -159,15 +159,15 @@ export default function CookieConsent() {
                 </div>
 
                 {/* Marketing Cookies */}
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-grey-5 rounded-lg">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 text-sm">Marketing Cookies</h4>
-                    <p className="text-xs text-gray-600 mt-1">Used to deliver personalized advertisements</p>
+                    <h4 className="font-semibold text-grey-90 text-sm">Marketing Cookies</h4>
+                    <p className="text-xs text-grey-50 mt-1">Used to deliver personalized advertisements</p>
                   </div>
                   <button
                     onClick={() => togglePreference("marketing")}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.marketing ? "bg-brand" : "bg-gray-300"
+                      preferences.marketing ? "bg-brand" : "bg-grey-30"
                     }`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -177,15 +177,15 @@ export default function CookieConsent() {
                 </div>
 
                 {/* Functional Cookies */}
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-grey-5 rounded-lg">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 text-sm">Functional Cookies</h4>
-                    <p className="text-xs text-gray-600 mt-1">Enable enhanced functionality and personalization</p>
+                    <h4 className="font-semibold text-grey-90 text-sm">Functional Cookies</h4>
+                    <p className="text-xs text-grey-50 mt-1">Enable enhanced functionality and personalization</p>
                   </div>
                   <button
                     onClick={() => togglePreference("functional")}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      preferences.functional ? "bg-brand" : "bg-gray-300"
+                      preferences.functional ? "bg-brand" : "bg-grey-30"
                     }`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -197,11 +197,11 @@ export default function CookieConsent() {
             </div>
 
             {/* Preferences Buttons */}
-            <div className="border-t border-gray-200 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-gray-50">
+            <div className="border-t border-grey-20 px-4 py-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-3 bg-grey-5">
               <button
                 type="button"
                 onClick={() => setShowPreferences(false)}
-                className="w-full sm:w-auto h-12 sm:h-10 px-6 rounded-lg border border-gray-300 text-gray-700 text-[14px] font-semibold hover:bg-gray-100 transition-colors"
+                className="w-full sm:w-auto h-12 sm:h-10 px-6 rounded-lg border border-grey-30 text-grey-60 text-[14px] font-semibold hover:bg-grey-10 transition-colors"
               >
                 Back
               </button>

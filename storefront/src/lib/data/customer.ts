@@ -7,6 +7,11 @@ import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { cache } from "react"
 import { getAuthHeaders, removeAuthToken, setAuthToken } from "./cookies"
+import {
+  isPhoneNumber,
+  phoneToSyntheticEmail,
+  sendWelcomeSMS,
+} from "@lib/sms"
 
 export const getCustomer = cache(async function () {
   try {
@@ -33,11 +38,24 @@ export const updateCustomer = cache(async function (
 
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
+  const rawEmail = ((formData.get("email") as string) || "").trim()
+  const rawPhone = ((formData.get("phone") as string) || "").trim()
+  const firstName = ((formData.get("first_name") as string) || "").trim()
+  const lastName = ((formData.get("last_name") as string) || "").trim()
+
+  // Require at least one of email or phone
+  if (!rawEmail && !rawPhone) {
+    return "Please provide either an email address or phone number."
+  }
+
+  // If only phone provided, generate a synthetic email for Medusa auth
+  const authEmail = rawEmail || phoneToSyntheticEmail(rawPhone)
+
   const customerForm = {
-    email: formData.get("email") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    phone: formData.get("phone") as string,
+    email: authEmail,
+    first_name: firstName,
+    last_name: lastName,
+    phone: rawPhone,
   }
 
   // Optional shipping address fields from registration
@@ -47,7 +65,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
-      email: customerForm.email,
+      email: authEmail,
       password: password,
     })
 
@@ -64,7 +82,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
     )
 
     const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: customerForm.email,
+      email: authEmail,
       password,
     })
 
@@ -73,6 +91,13 @@ export async function signup(_currentState: unknown, formData: FormData) {
     }
 
     await setAuthToken(loginToken)
+
+    // Send welcome SMS if phone number was provided
+    if (rawPhone) {
+      sendWelcomeSMS(rawPhone, firstName || "there").catch((err) =>
+        console.warn("[signup] Welcome SMS failed:", err)
+      )
+    }
 
     // Save shipping address if provided during registration
     if (addressLine1 && city && countryCode) {
@@ -101,19 +126,28 @@ export async function signup(_currentState: unknown, formData: FormData) {
     }
 
     revalidateTag("customer")
-    return createdCustomer
+    return null
   } catch (error: any) {
     return error.toString()
   }
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
-  const email = formData.get("email") as string
+  const identifier = ((formData.get("identifier") as string) || "").trim()
   const password = formData.get("password") as string
+
+  if (!identifier) {
+    return "Please enter your email or phone number."
+  }
+
+  // Detect if user entered a phone number or email
+  const authEmail = isPhoneNumber(identifier)
+    ? phoneToSyntheticEmail(identifier)
+    : identifier
 
   try {
     await sdk.auth
-      .login("customer", "emailpass", { email, password })
+      .login("customer", "emailpass", { email: authEmail, password })
       .then(async (token) => {
         if (typeof token !== "string") {
           throw new Error("Unexpected auth response")
