@@ -1,9 +1,10 @@
 "use client"
 
-import { Disclosure, Popover, Transition } from "@headlessui/react"
+import { Disclosure } from "@headlessui/react"
 import { Text, clx, useToggleState } from "@medusajs/ui"
-import { Fragment, useEffect, useMemo, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { createPortal } from "react-dom"
+import { useParams, usePathname, useRouter } from "next/navigation"
 import { Menu, X, Search, ChevronRight } from "lucide-react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -104,286 +105,283 @@ const SideMenu = ({
 
   const iconForCategory = (name: string) => getCategoryIcon(name)
 
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  const open = () => setDrawerOpen(true)
+  const close = () => setDrawerOpen(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Close drawer on route change
+  const pathname = usePathname()
+  useEffect(() => {
+    close()
+  }, [pathname])
+
   return (
     <div className="h-full">
       <div className="flex items-center h-full">
-        <Popover className="h-full flex">
-          {({ open, close }) => (
+        <div className="relative flex h-full">
+          <button
+            data-testid="nav-menu-button"
+            className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none"
+            aria-label={drawerOpen ? "Close menu" : "Open menu"}
+            onClick={open}
+            type="button"
+          >
+            <span className="sr-only">Menu</span>
+            <Menu />
+          </button>
+        </div>
+
+        <ScrollLock active={drawerOpen} />
+
+        {/* Portal the backdrop + drawer to <body> so they escape the navbar's z-50 stacking context */}
+        {mounted &&
+          createPortal(
             <>
-              <ScrollLock active={open} />
-              <div className="relative flex h-full">
-                <Popover.Button
-                  data-testid="nav-menu-button"
-                  className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none"
-                  aria-label={open ? "Close menu" : "Open menu"}
-                >
-                  <span className="sr-only">Menu</span>
-                  <Menu />
-                </Popover.Button>
-              </div>
+              {/* Backdrop */}
+              <div
+                className={`fixed inset-0 z-[70] bg-black/50 transition-opacity duration-300 ${
+                  drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+                }`}
+                onClick={close}
+                aria-hidden="true"
+              />
 
-              <Transition
-                show={open}
-                as={Fragment}
+              {/* Slide-out drawer */}
+              <div
+                className={`fixed top-0 left-0 z-[80] h-full w-[85vw] max-w-[400px] bg-white/30 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border-r border-white/20 transform transition-transform duration-300 ease-out ${
+                  drawerOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
+                data-testid="nav-menu-popup"
               >
-                <div className="fixed inset-0 z-[80]">
-                  <Transition.Child
-                    as={Fragment}
-                    enter="transition ease-out duration-200"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="transition ease-in duration-150"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                  >
+                <div className="flex h-full flex-col">
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-white/20">
+                    <div className="text-[16px] font-semibold text-white drop-shadow-sm">
+                      Menu
+                    </div>
                     <button
-                      type="button"
-                      aria-label="Close menu overlay"
-                      className="absolute inset-0 bg-black/50"
+                      data-testid="close-menu-button"
                       onClick={close}
-                    />
-                  </Transition.Child>
+                      className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-white focus:outline-none"
+                      aria-label="Close menu"
+                      type="button"
+                    >
+                      <X />
+                    </button>
+                  </div>
 
-                  <Transition.Child
-                    as={Fragment}
-                    enter="transition ease-out duration-250"
-                    enterFrom="-translate-x-full"
-                    enterTo="translate-x-0"
-                    leave="transition ease-in duration-200"
-                    leaveFrom="translate-x-0"
-                    leaveTo="-translate-x-full"
-                  >
-                    <Popover.Panel className="absolute inset-y-0 left-0 w-[85vw] max-w-[400px] bg-white/30 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border-r border-white/20">
-                      <div
-                        data-testid="nav-menu-popup"
-                        className="flex h-full flex-col"
-                      >
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-white/20">
-                          <div className="text-[16px] font-semibold text-white drop-shadow-sm">
-                            Menu
-                          </div>
-                          <button
-                            data-testid="close-menu-button"
-                            onClick={close}
-                            className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-white focus:outline-none"
-                            aria-label="Close menu"
-                            type="button"
-                          >
-                            <X />
-                          </button>
-                        </div>
+                  <div className="flex-1 overflow-y-auto px-6 py-6">
+                    <form
+                      className="mb-5"
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        const q = searchValue.trim()
+                        if (!q) return
 
-                        <div className="flex-1 overflow-y-auto px-6 py-6">
-                          <form
-                            className="mb-5"
-                            onSubmit={(e) => {
-                              e.preventDefault()
-                              const q = searchValue.trim()
-                              if (!q) return
+                        const target = countryCode
+                          ? `/${countryCode}/results/${encodeURIComponent(q)}`
+                          : `/results/${encodeURIComponent(q)}`
 
-                              const target = countryCode
-                                ? `/${countryCode}/results/${encodeURIComponent(q)}`
-                                : `/results/${encodeURIComponent(q)}`
+                        close()
+                        router.push(target)
+                      }}
+                    >
+                      <label className="sr-only" htmlFor="drawer-search">
+                        Search products
+                      </label>
+                      <div className="flex h-[50px] items-center gap-x-3 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-5">
+                        <Search className="text-white/70 shrink-0" size={20} />
+                        <input
+                          id="drawer-search"
+                          type="search"
+                          inputMode="search"
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck={false}
+                          placeholder="Search"
+                          value={searchValue}
+                          onChange={(e) => setSearchValue(e.target.value)}
+                          className="h-full w-full bg-transparent text-[15px] text-white placeholder:text-white/50 focus:outline-none"
+                        />
+                      </div>
+                    </form>
 
-                              // Close overlay immediately then navigate
-                              close()
-                              router.push(target)
-                            }}
-                          >
-                            <label className="sr-only" htmlFor="drawer-search">
-                              Search products
-                            </label>
-                            <div className="flex h-[50px] items-center gap-x-3 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-5">
-                              <Search className="text-white/70 shrink-0" size={20} />
-                              <input
-                                id="drawer-search"
-                                type="search"
-                                inputMode="search"
-                                autoComplete="off"
-                                autoCorrect="off"
-                                autoCapitalize="off"
-                                spellCheck={false}
-                                placeholder="Search"
-                                value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
-                                className="h-full w-full bg-transparent text-[15px] text-white placeholder:text-white/50 focus:outline-none"
+                    <div className="space-y-3">
+                      <Disclosure>
+                        {({ open: disclosureOpen }) => (
+                          <div className="rounded-[16px] border border-white/20 bg-white/10">
+                            <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
+                              <span className="text-[15px] font-semibold text-white drop-shadow-sm">
+                                Shop
+                              </span>
+                              <ChevronRight
+                                size={20}
+                                className={clx(
+                                  "transition-transform duration-150 text-white/60",
+                                  disclosureOpen ? "rotate-90" : ""
+                                )}
                               />
-                            </div>
-                          </form>
-
-                          <div className="space-y-3">
-                            <Disclosure>
-                              {({ open: disclosureOpen }) => (
-                                <div className="rounded-[16px] border border-white/20 bg-white/10">
-                                  <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
-                                    <span className="text-[15px] font-semibold text-white drop-shadow-sm">
-                                      Shop
-                                    </span>
-                                    <ChevronRight
-                                      size={20}
-                                      className={clx(
-                                        "transition-transform duration-150 text-white/60",
-                                        disclosureOpen ? "rotate-90" : ""
-                                      )}
-                                    />
-                                  </Disclosure.Button>
-                                  <Disclosure.Panel className="px-5 pb-5">
-                                    <div className="flex flex-col gap-y-3 text-[13px] text-white/70">
-                                      {shopCategoryLinks.length ? (
-                                        <>
-                                          <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">
-                                            Categories
-                                          </div>
-                                          {shopCategoryLinks.map((item) => {
-                                            const Icon = iconForCategory(item.name)
-
-                                            return (
-                                              <LocalizedClientLink
-                                                key={item.href}
-                                                href={item.href}
-                                                className="flex items-center gap-2 py-1 hover:text-white"
-                                                onClick={() => close()}
-                                              >
-                                                <span className="shrink-0 text-white/60">
-                                                  <Icon size={16} />
-                                                </span>
-                                                <span>{item.name}</span>
-                                              </LocalizedClientLink>
-                                            )
-                                          })}
-                                        </>
-                                      ) : null}
-
-                                      {shopCollectionLinks.length ? (
-                                        <>
-                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-white/50">
-                                            Collections
-                                          </div>
-                                          <div className="mt-2 -mx-5 px-5">
-                                            <div className="flex gap-3 overflow-x-auto py-2">
-                                              {shopCollectionLinks.map((item) => (
-                                                <LocalizedClientLink
-                                                  key={item.href}
-                                                  href={item.href}
-                                                  className="shrink-0 rounded-full border border-white/25 px-3 py-1 text-[13px] text-white bg-white/10"
-                                                  onClick={() => close()}
-                                                >
-                                                  {item.name}
-                                                </LocalizedClientLink>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        </>
-                                      ) : null}
-
-                                      {SHOP_LINKS.length ? (
-                                        <>
-                                          <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-white/50">
-                                            Shop essentials
-                                          </div>
-                                          {SHOP_LINKS.map((item) => (
-                                            <LocalizedClientLink
-                                              key={item.name}
-                                              href={item.href}
-                                              className="py-1 hover:text-white"
-                                              onClick={() => close()}
-                                            >
-                                              {item.name}
-                                            </LocalizedClientLink>
-                                          ))}
-                                        </>
-                                      ) : null}
+                            </Disclosure.Button>
+                            <Disclosure.Panel className="px-5 pb-5">
+                              <div className="flex flex-col gap-y-3 text-[13px] text-white/70">
+                                {shopCategoryLinks.length ? (
+                                  <>
+                                    <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">
+                                      Categories
                                     </div>
-                                  </Disclosure.Panel>
-                                </div>
-                              )}
-                            </Disclosure>
+                                    {shopCategoryLinks.map((item) => {
+                                      const Icon = iconForCategory(item.name)
 
-                            <Disclosure>
-                              {({ open: disclosureOpen }) => (
-                                <div className="rounded-[16px] border border-white/20 bg-white/10">
-                                  <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
-                                    <span className="text-[15px] font-semibold text-white drop-shadow-sm">
-                                      Products
-                                    </span>
-                                    <ChevronRight
-                                      size={20}
-                                      className={clx(
-                                        "transition-transform duration-150 text-white/60",
-                                        disclosureOpen ? "rotate-90" : ""
-                                      )}
-                                    />
-                                  </Disclosure.Button>
-                                  <Disclosure.Panel className="px-5 pb-5">
-                                    <div className="flex flex-col gap-y-3 text-[13px] text-white/70">
-                                      {trendingLinks.map((item) => (
+                                      return (
                                         <LocalizedClientLink
                                           key={item.href}
                                           href={item.href}
-                                          className="py-1 hover:text-white"
-                                          onClick={() => close()}
+                                          className="flex items-center gap-2 py-1 hover:text-white"
+                                          onClick={close}
                                         >
-                                          {item.name}
+                                          <span className="shrink-0 text-white/60">
+                                            <Icon size={16} />
+                                          </span>
+                                          <span>{item.name}</span>
                                         </LocalizedClientLink>
-                                      ))}
-                                    </div>
-                                  </Disclosure.Panel>
-                                </div>
-                              )}
-                            </Disclosure>
-                          </div>
+                                      )
+                                    })}
+                                  </>
+                                ) : null}
 
-                          <div className="mt-8">
-                            <div className="text-[12px] font-semibold text-white/50 uppercase tracking-wide">
-                              Quick links
-                            </div>
-                            <ul className="mt-4 flex flex-col gap-y-3">
-                              {PRIMARY_LINKS.map((item) => (
-                                <li key={item.name}>
+                                {shopCollectionLinks.length ? (
+                                  <>
+                                    <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-white/50">
+                                      Collections
+                                    </div>
+                                    <div className="mt-2 -mx-5 px-5">
+                                      <div className="flex gap-3 overflow-x-auto py-2">
+                                        {shopCollectionLinks.map((item) => (
+                                          <LocalizedClientLink
+                                            key={item.href}
+                                            href={item.href}
+                                            className="shrink-0 rounded-full border border-white/25 px-3 py-1 text-[13px] text-white bg-white/10"
+                                            onClick={close}
+                                          >
+                                            {item.name}
+                                          </LocalizedClientLink>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : null}
+
+                                {SHOP_LINKS.length ? (
+                                  <>
+                                    <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-white/50">
+                                      Shop essentials
+                                    </div>
+                                    {SHOP_LINKS.map((item) => (
+                                      <LocalizedClientLink
+                                        key={item.name}
+                                        href={item.href}
+                                        className="py-1 hover:text-white"
+                                        onClick={close}
+                                      >
+                                        {item.name}
+                                      </LocalizedClientLink>
+                                    ))}
+                                  </>
+                                ) : null}
+                              </div>
+                            </Disclosure.Panel>
+                          </div>
+                        )}
+                      </Disclosure>
+
+                      <Disclosure>
+                        {({ open: disclosureOpen }) => (
+                          <div className="rounded-[16px] border border-white/20 bg-white/10">
+                            <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
+                              <span className="text-[15px] font-semibold text-white drop-shadow-sm">
+                                Products
+                              </span>
+                              <ChevronRight
+                                size={20}
+                                className={clx(
+                                  "transition-transform duration-150 text-white/60",
+                                  disclosureOpen ? "rotate-90" : ""
+                                )}
+                              />
+                            </Disclosure.Button>
+                            <Disclosure.Panel className="px-5 pb-5">
+                              <div className="flex flex-col gap-y-3 text-[13px] text-white/70">
+                                {trendingLinks.map((item) => (
                                   <LocalizedClientLink
+                                    key={item.href}
                                     href={item.href}
-                                    className="block py-1 text-[14px] font-medium text-white hover:text-white/70"
-                                    onClick={() => close()}
-                                    data-testid={item.testId}
+                                    className="py-1 hover:text-white"
+                                    onClick={close}
                                   >
                                     {item.name}
                                   </LocalizedClientLink>
-                                </li>
-                              ))}
-                            </ul>
+                                ))}
+                              </div>
+                            </Disclosure.Panel>
                           </div>
-                        </div>
+                        )}
+                      </Disclosure>
+                    </div>
 
-                        <div className="border-t border-white/20 px-6 py-5">
-                          <div className="w-full flex items-center justify-between">
-                            {regions && (
-                              <CountrySelect
-                                toggleState={toggleState}
-                                regions={regions}
-                              />
-                            )}
-                            <ChevronRight
-                              size={20}
-                              className={clx(
-                                "transition-transform duration-150 text-white/60",
-                                toggleState.state ? "rotate-90" : ""
-                              )}
-                            />
-                          </div>
-
-                          <Text className="mt-5 flex justify-between txt-compact-small text-white/50">
-                            © {new Date().getFullYear()} Letscase. All rights
-                            reserved.
-                          </Text>
-                        </div>
+                    <div className="mt-8">
+                      <div className="text-[12px] font-semibold text-white/50 uppercase tracking-wide">
+                        Quick links
                       </div>
-                    </Popover.Panel>
-                  </Transition.Child>
+                      <ul className="mt-4 flex flex-col gap-y-3">
+                        {PRIMARY_LINKS.map((item) => (
+                          <li key={item.name}>
+                            <LocalizedClientLink
+                              href={item.href}
+                              className="block py-1 text-[14px] font-medium text-white hover:text-white/70"
+                              onClick={close}
+                              data-testid={item.testId}
+                            >
+                              {item.name}
+                            </LocalizedClientLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-white/20 px-6 py-5">
+                    <div className="w-full flex items-center justify-between">
+                      {regions && (
+                        <CountrySelect
+                          toggleState={toggleState}
+                          regions={regions}
+                        />
+                      )}
+                      <ChevronRight
+                        size={20}
+                        className={clx(
+                          "transition-transform duration-150 text-white/60",
+                          toggleState.state ? "rotate-90" : ""
+                        )}
+                      />
+                    </div>
+
+                    <Text className="mt-5 flex justify-between txt-compact-small text-white/50">
+                      © {new Date().getFullYear()} Letscase. All rights
+                      reserved.
+                    </Text>
+                  </div>
                 </div>
-              </Transition>
-            </>
+              </div>
+            </>,
+            document.body
           )}
-        </Popover>
       </div>
     </div>
   )
