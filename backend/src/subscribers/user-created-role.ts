@@ -27,7 +27,8 @@ export default async function userCreatedRoleHandler({
     if (!pending) {
       console.log(`[user-created-role] No pending role for ${email}, defaulting to cashier`)
       // Set default role for any new admin user without a pending assignment
-      await userModuleService.updateUsers(data.id, {
+      await (userModuleService.updateUsers as any)({
+        id: data.id,
         metadata: {
           ...(user.metadata || {}),
           pos_role: "cashier",
@@ -45,7 +46,8 @@ export default async function userCreatedRoleHandler({
       newMetadata.pos_pin = pending.pos_pin
     }
 
-    await userModuleService.updateUsers(data.id, {
+    await (userModuleService.updateUsers as any)({
+      id: data.id,
       metadata: newMetadata,
     })
 
