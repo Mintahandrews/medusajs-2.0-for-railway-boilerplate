@@ -3,7 +3,6 @@ import { useEffect } from "react"
 import { LETSCASE_LOGO_DATA_URL } from "./logo-data"
 
 const OBSERVER_FLAG = "__letscase_logo_observer"
-const STYLE_ID = "letscase-auth-fixes"
 
 /**
  * Widget injected into "login.before" zone.
@@ -23,42 +22,6 @@ const LoginLogoWidget = () => {
     // Guard: only install once globally
     if ((window as any)[OBSERVER_FLAG]) return
     ;(window as any)[OBSERVER_FLAG] = true
-
-    // ── Auth page CSS fixes: icon spacing in input fields ────────
-    if (!document.getElementById(STYLE_ID)) {
-      const style = document.createElement("style")
-      style.id = STYLE_ID
-      style.textContent = `
-        /* Fix icon + input field spacing on auth pages */
-        form [class*="relative"] > svg,
-        form [class*="relative"] > span > svg {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          pointer-events: none;
-          z-index: 1;
-        }
-        form [class*="relative"] > input {
-          padding-left: 40px !important;
-        }
-        /* Ensure input containers have relative positioning */
-        form [class*="relative"] {
-          position: relative;
-        }
-        /* Fix vertical spacing between form fields */
-        form > div + div,
-        form > fieldset + div,
-        form > div + fieldset {
-          margin-top: 16px;
-        }
-        /* Fix invite page form spacing */
-        [role="dialog"] form > div + div {
-          margin-top: 12px;
-        }
-      `
-      document.head.appendChild(style)
-    }
 
     const replaceMedusaLogos = () => {
       // Target both AvatarBox (400×400) and LogoBox (36×38) SVGs
