@@ -3,8 +3,32 @@
  * Communicates with the Medusa backend via Admin REST APIs.
  */
 
-const BACKEND_URL =
+function normalizeBackendUrl(raw: string): string {
+  const trimmed = (raw || "").trim().replace(/\/+$/, "")
+  if (!trimmed) return "http://localhost:9000"
+
+  try {
+    const url = new URL(trimmed)
+    // Guard against misconfiguration where the admin domain was appended
+    // as a path segment, e.g. https://<railway-app>.app/admin.letscasegh.com
+    if (url.pathname.startsWith("/admin.")) {
+      url.pathname = ""
+    }
+    return url.toString().replace(/\/+$/, "")
+  } catch {
+    // If it's not a valid URL, fall back to the raw value (best effort)
+    return trimmed
+  }
+}
+
+const BACKEND_URL = normalizeBackendUrl(
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+)
+
+function buildUrl(path: string): string {
+  const p = path.startsWith("/") ? path : `/${path}`
+  return `${BACKEND_URL}${p}`
+}
 
 type RequestOptions = {
   method?: string
@@ -27,7 +51,7 @@ async function medusaRequest<T = unknown>(
   const token = await getToken()
   const { method = "GET", body, headers = {}, next } = options
 
-  const res = await fetch(`${BACKEND_URL}${path}`, {
+  const res = await fetch(buildUrl(path), {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -53,7 +77,7 @@ export async function adminLogin(
   password: string
 ): Promise<{ token: string }> {
   // Medusa v2 admin auth: POST /auth/user/emailpass
-  const res = await fetch(`${BACKEND_URL}/auth/user/emailpass`, {
+  const res = await fetch(buildUrl("/auth/user/emailpass"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
