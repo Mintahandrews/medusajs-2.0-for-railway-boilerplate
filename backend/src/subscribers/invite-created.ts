@@ -3,6 +3,7 @@ import { Modules } from '@medusajs/framework/utils'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/framework'
 import { BACKEND_URL, SUPPORT_EMAIL } from '../lib/constants'
 import { EmailTemplates } from '../modules/email-notifications/templates'
+import { pendingRoleAssignments } from '../api/admin/pos/invite/route'
 
 export default async function userInviteHandler({
     event: { data },
@@ -16,7 +17,14 @@ export default async function userInviteHandler({
     const userModuleService: IUserModuleService = container.resolve(Modules.USER)
     const invite = await userModuleService.retrieveInvite(data.id)
 
-    console.log(`[invite-created] Sending invite email to ${invite.email}...`)
+    // Check if there's a pending role assignment for this invite
+    const pending = pendingRoleAssignments.get(invite.email.toLowerCase().trim())
+    const posRole = pending?.pos_role || null
+    const roleLabel = posRole
+      ? { admin: 'Admin', manager: 'Manager', cashier: 'Cashier' }[posRole] || posRole
+      : null
+
+    console.log(`[invite-created] Sending invite email to ${invite.email}${posRole ? ` (role: ${posRole})` : ''}...`)
 
     await notificationModuleService.createNotifications({
       to: invite.email,
@@ -25,10 +33,15 @@ export default async function userInviteHandler({
       data: {
         emailOptions: {
           replyTo: SUPPORT_EMAIL,
-          subject: "You're invited to Letscase Admin"
+          subject: roleLabel
+            ? `You're invited to Letscase Admin as ${roleLabel}`
+            : "You're invited to Letscase Admin"
         },
         inviteLink: `${BACKEND_URL}/app/invite?token=${invite.token}`,
-        preview: 'Accept your admin invitation...'
+        preview: roleLabel
+          ? `Accept your invitation and join as ${roleLabel}...`
+          : 'Accept your admin invitation...',
+        posRole: posRole || undefined,
       }
     })
 

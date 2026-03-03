@@ -19,6 +19,10 @@ export interface InviteUserEmailProps {
    * in mail providers like Gmail
    */
   preview?: string
+  /**
+   * The POS role assigned to this user (admin, manager, cashier)
+   */
+  posRole?: string
 }
 
 /**
@@ -42,10 +46,18 @@ const btnStyle = {
 /**
  * The InviteUserEmail template component built with react-email
  */
+const roleLabelMap: Record<string, string> = {
+  admin: 'Admin',
+  manager: 'Manager',
+  cashier: 'Cashier',
+}
+
 export const InviteUserEmail = ({
   inviteLink,
   preview = `You've been invited to Lets Case Admin`,
+  posRole,
 }: InviteUserEmailProps) => {
+  const roleLabel = posRole ? roleLabelMap[posRole] || posRole : null
   return (
     <Base preview={preview}>
       <Section>
@@ -53,11 +65,16 @@ export const InviteUserEmail = ({
           Admin Invitation
         </Text>
         <Text style={{ fontSize: '14px', textAlign: 'center', margin: '0 0 28px', color: '#71717a' }}>
-          You&apos;ve been invited to join the team
+          You&apos;ve been invited to join the team{roleLabel ? ` as ${roleLabel}` : ''}
         </Text>
         <Text style={{ margin: '0 0 24px', fontSize: '14px', color: '#3f3f46', lineHeight: '1.6' }}>
-          You have been invited to be an administrator on <strong>Lets Case</strong>. Click the button below to accept and set up your account.
+          You have been invited to be {roleLabel ? `a <strong>${roleLabel}</strong>` : 'an administrator'} on <strong>Lets Case</strong>. Click the button below to accept and set up your account.
         </Text>
+        {roleLabel && (
+          <Text style={{ margin: '0 0 24px', fontSize: '13px', color: '#71717a', lineHeight: '1.6', background: '#f4f4f5', borderRadius: '8px', padding: '12px 16px' }}>
+            Your assigned role: <strong style={{ color: '#1a1a1a' }}>{roleLabel}</strong>. This role determines your access level in both the POS system and the admin dashboard.
+          </Text>
+        )}
         <Section style={{ textAlign: 'center', margin: '0 0 28px' }}>
           <Button href={inviteLink} style={btnStyle}>
             Accept Invitation
@@ -83,7 +100,8 @@ export const InviteUserEmail = ({
 }
 
 InviteUserEmail.PreviewProps = {
-  inviteLink: 'https://admin.letscasegh.com/app/invite?token=abc123'
+  inviteLink: 'https://admin.letscasegh.com/app/invite?token=abc123',
+  posRole: 'manager',
 } as InviteUserEmailProps
 
 export default InviteUserEmail
