@@ -83,7 +83,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pos-input w-full h-12 pl-11"
+                className="pos-input w-full h-12 pl-12"
                 placeholder="admin@letscase.com"
                 required
                 autoFocus
@@ -101,7 +101,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pos-input w-full h-12 pl-11"
+                className="pos-input w-full h-12 pl-12"
                 placeholder="Enter password"
                 required
               />
