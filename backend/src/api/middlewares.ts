@@ -99,6 +99,17 @@ async function posRbacGuard(
 
     const role: PosRole = user?.metadata?.pos_role || "cashier"
 
+    // Allow managers to resend invites (common admin UI action)
+    // Endpoint shape: POST /admin/invites/:id/resend
+    if (
+      role === "manager" &&
+      req.method === "POST" &&
+      req.path.startsWith("/admin/invites") &&
+      req.path.endsWith("/resend")
+    ) {
+      return next()
+    }
+
     // Admin gets full access
     if (role === "admin") {
       return next()

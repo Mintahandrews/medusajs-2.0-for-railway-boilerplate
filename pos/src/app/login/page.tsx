@@ -78,12 +78,12 @@ export default function LoginPage() {
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-pos-muted" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pos-input w-full pl-10"
+                className="pos-input w-full h-12 pl-11"
                 placeholder="admin@letscase.com"
                 required
                 autoFocus
@@ -96,12 +96,12 @@ export default function LoginPage() {
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
+              <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-pos-muted" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pos-input w-full pl-10"
+                className="pos-input w-full h-12 pl-11"
                 placeholder="Enter password"
                 required
               />
