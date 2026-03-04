@@ -65,7 +65,7 @@
     @apply bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand;
   }
   .pos-input-lg {
-    @apply bg-pos-card/70 border border-white/10 rounded-xl px-4 h-12 text-base text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-150;
+    @apply bg-pos-card/70 border border-white/10 rounded-xl pr-4 pl-12 h-12 text-base text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-150;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
   }
   .auth-gradient {
