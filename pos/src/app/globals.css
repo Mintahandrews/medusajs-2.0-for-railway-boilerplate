@@ -68,6 +68,16 @@
     @apply bg-pos-card/70 border border-white/10 rounded-xl px-4 h-12 text-base text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-150;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
   }
+  .auth-gradient {
+    background-color: #041a1a;
+    background-image:
+      radial-gradient(circle at top left, rgba(19, 129, 129, 0.45), transparent 55%),
+      radial-gradient(circle at 80% 20%, rgba(7, 89, 133, 0.35), transparent 45%),
+      linear-gradient(145deg, rgba(4, 46, 46, 0.9), rgba(3, 18, 22, 0.9));
+  }
+  .auth-card {
+    @apply bg-white/5 border border-white/10 rounded-2xl backdrop-blur-2xl shadow-2xl shadow-black/40;
+  }
   .pos-btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand/50 disabled:opacity-50 disabled:pointer-events-none;
   }
