@@ -95,19 +95,19 @@ export function getRoleLabel(role: POSRole): string {
 
 export function getRoleColor(role: POSRole): string {
   switch (role) {
-    case "admin": return "text-red-400"
-    case "manager": return "text-amber-400"
-    case "cashier": return "text-teal-400"
+    case "admin": return "text-red-600 dark:text-red-400"
+    case "manager": return "text-amber-600 dark:text-amber-400"
+    case "cashier": return "text-teal-600 dark:text-teal-400"
     default: return "text-pos-muted"
   }
 }
 
 export function getRoleBadgeClasses(role: POSRole): string {
   switch (role) {
-    case "admin": return "bg-red-500/10 text-red-400 border-red-500/30"
-    case "manager": return "bg-amber-500/10 text-amber-400 border-amber-500/30"
-    case "cashier": return "bg-teal-500/10 text-teal-400 border-teal-500/30"
-    default: return "bg-white/5 text-pos-muted border-pos-border"
+    case "admin": return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30"
+    case "manager": return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+    case "cashier": return "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/30"
+    default: return "bg-pos-surface text-pos-muted border-pos-border"
   }
 }
 

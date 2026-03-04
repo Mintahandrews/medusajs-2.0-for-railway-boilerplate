@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/utils"
 import { usePOSStore } from "@/lib/store"
 import { hasPermission } from "@/lib/rbac"
 import { format } from "date-fns"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function TransactionsPage() {
   const router = useRouter()
@@ -81,14 +82,15 @@ export default function TransactionsPage() {
   return (
     <div className="min-h-screen bg-pos-bg">
       {/* Header */}
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4">
+      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/")} className="pos-btn-ghost">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-lg font-bold text-white">Transaction History</h1>
+          <h1 className="text-lg font-bold text-pos-fg">Transaction History</h1>
           <span className="text-xs text-pos-muted">({displayed.length} orders)</span>
         </div>
+        <ThemeToggle />
       </header>
 
       <div className="max-w-4xl mx-auto p-4 space-y-4">
@@ -106,17 +108,17 @@ export default function TransactionsPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-pos-fg"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
-          <div className="flex bg-pos-card rounded-lg p-0.5 border border-pos-border">
+          <div className="flex bg-pos-card rounded-lg p-0.5 border border-pos-border overflow-x-auto scrollbar-none">
             <button
               onClick={() => setMethodFilter("all")}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                methodFilter === "all" ? "bg-brand text-white" : "text-pos-muted hover:text-white"
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                methodFilter === "all" ? "bg-brand text-white" : "text-pos-muted hover:text-pos-fg"
               }`}
             >
               All
@@ -125,8 +127,8 @@ export default function TransactionsPage() {
               <button
                 key={m}
                 onClick={() => setMethodFilter(m)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors capitalize ${
-                  methodFilter === m ? "bg-brand text-white" : "text-pos-muted hover:text-white"
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors capitalize whitespace-nowrap ${
+                  methodFilter === m ? "bg-brand text-white" : "text-pos-muted hover:text-pos-fg"
                 }`}
               >
                 {m.replace(/_/g, " ")}
@@ -151,7 +153,7 @@ export default function TransactionsPage() {
               <button
                 key={order.id}
                 onClick={() => setSelectedOrder(selectedOrder?.id === order.id ? null : order)}
-                className="w-full pos-card p-3 hover:bg-white/5 transition-colors text-left"
+                className="w-full pos-card p-3 hover-subtle transition-colors text-left"
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -159,7 +161,7 @@ export default function TransactionsPage() {
                       <DollarSign className="w-4 h-4 text-brand" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-sm font-medium text-pos-fg">
                         #{order.display_id || order.id?.slice(-6)}
                       </p>
                       <p className="text-xs text-pos-muted flex items-center gap-2">
@@ -173,7 +175,7 @@ export default function TransactionsPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-sm font-bold text-pos-fg">
                         {formatCurrency(order.total || 0, currency)}
                       </p>
                       <p className="text-[10px] text-pos-muted capitalize">
@@ -189,25 +191,25 @@ export default function TransactionsPage() {
                 {/* Expanded details */}
                 {selectedOrder?.id === order.id && (
                   <div className="mt-3 pt-3 border-t border-pos-border space-y-2" onClick={(e) => e.stopPropagation()}>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       <div>
                         <span className="text-pos-muted">Customer:</span>{" "}
-                        <span className="text-white">{order.email || "Walk-in"}</span>
+                        <span className="text-pos-fg">{order.email || "Walk-in"}</span>
                       </div>
                       <div>
                         <span className="text-pos-muted">Status:</span>{" "}
-                        <span className="text-emerald-400 capitalize">{order.status || "completed"}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 capitalize">{order.status || "completed"}</span>
                       </div>
                       {order.metadata?.payment_method && (
                         <div>
                           <span className="text-pos-muted">Payment:</span>{" "}
-                          <span className="text-white capitalize">{order.metadata.payment_method.replace(/_/g, " ")}</span>
+                          <span className="text-pos-fg capitalize">{order.metadata.payment_method.replace(/_/g, " ")}</span>
                         </div>
                       )}
                       {order.metadata?.paystack_reference && (
                         <div>
                           <span className="text-pos-muted">Ref:</span>{" "}
-                          <span className="text-white font-mono text-[10px]">{order.metadata.paystack_reference}</span>
+                          <span className="text-pos-fg font-mono text-[10px]">{order.metadata.paystack_reference}</span>
                         </div>
                       )}
                     </div>
@@ -216,7 +218,7 @@ export default function TransactionsPage() {
                         <p className="text-xs text-pos-muted font-semibold">Items:</p>
                         {order.items.map((item: any, idx: number) => (
                           <div key={idx} className="flex justify-between text-xs">
-                            <span className="text-white">
+                            <span className="text-pos-fg">
                               {item.title} × {item.quantity}
                             </span>
                             <span className="text-pos-muted">
@@ -228,7 +230,7 @@ export default function TransactionsPage() {
                     )}
                     {(order.refunds?.length || 0) > 0 && (
                       <div className="bg-red-500/10 rounded-lg p-2">
-                        <p className="text-xs text-red-400 font-semibold">
+                        <p className="text-xs text-red-600 dark:text-red-400 font-semibold">
                           Refunds: {formatCurrency(
                             order.refunds.reduce((s: number, r: any) => s + (r.amount || 0), 0),
                             currency

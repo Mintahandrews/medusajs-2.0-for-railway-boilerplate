@@ -17,6 +17,7 @@ import {
   type POSRole, type POSPermission,
 } from "@/lib/rbac"
 import toast from "react-hot-toast"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface StaffMember {
   id: string
@@ -207,21 +208,24 @@ export default function StaffPage() {
   return (
     <div className="min-h-screen bg-pos-bg">
       {/* Header */}
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4">
+      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/")} className="pos-btn-ghost">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <UserCog className="w-5 h-5 text-brand" />
-          <h1 className="text-lg font-bold text-white">Staff Management</h1>
+          <h1 className="text-lg font-bold text-pos-fg">Staff Management</h1>
           <span className="text-xs text-pos-muted">({staff.length} members)</span>
         </div>
-        <button
-          onClick={() => setShowInvite(!showInvite)}
-          className="pos-btn-primary text-xs"
-        >
-          <Plus className="w-4 h-4" /> Invite Staff
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
+            onClick={() => setShowInvite(!showInvite)}
+            className="pos-btn-primary text-xs"
+          >
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Invite Staff</span><span className="sm:hidden">Invite</span>
+          </button>
+        </div>
       </header>
 
       <div className="max-w-3xl mx-auto p-4 space-y-4">
@@ -229,10 +233,10 @@ export default function StaffPage() {
         {showInvite && (
           <div className="pos-card p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-pos-fg flex items-center gap-2">
                 <Send className="w-4 h-4 text-brand" /> Invite New Staff
               </h3>
-              <button onClick={() => setShowInvite(false)} className="text-pos-muted hover:text-white">
+              <button onClick={() => setShowInvite(false)} className="text-pos-muted hover:text-pos-fg">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -260,11 +264,11 @@ export default function StaffPage() {
                       className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-all ${
                         inviteRole === role
                           ? role === "admin"
-                            ? "bg-red-500/15 text-red-400 border-red-500/40"
+                            ? "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/40"
                             : role === "manager"
-                              ? "bg-amber-500/15 text-amber-400 border-amber-500/40"
-                              : "bg-teal-500/15 text-teal-400 border-teal-500/40"
-                          : "bg-pos-card text-pos-muted border-pos-border hover:bg-white/5"
+                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40"
+                              : "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/40"
+                          : "bg-pos-card text-pos-muted border-pos-border hover-subtle"
                       }`}
                     >
                       {getRoleLabel(role)}
@@ -314,7 +318,7 @@ export default function StaffPage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-pos-fg"
             >
               <X className="w-4 h-4" />
             </button>
@@ -340,40 +344,40 @@ export default function StaffPage() {
               return (
                 <div key={member.id} className="pos-card overflow-hidden">
                   {/* Main row */}
-                  <div className="p-4 flex items-center gap-4">
+                  <div className="p-4 flex items-center gap-3 sm:gap-4">
                     {/* Avatar */}
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold shrink-0 ${
+                    <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-base sm:text-lg font-bold shrink-0 ${
                       member.role === "admin"
-                        ? "bg-red-500/10 text-red-400"
+                        ? "bg-red-500/10 text-red-600 dark:text-red-400"
                         : member.role === "manager"
-                          ? "bg-amber-500/10 text-amber-400"
-                          : "bg-teal-500/10 text-teal-400"
+                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          : "bg-teal-500/10 text-teal-600 dark:text-teal-400"
                     }`}>
                       {member.name.charAt(0).toUpperCase()}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-white truncate">{member.name}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-pos-fg truncate">{member.name}</p>
                         {isSelf && (
                           <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded-full font-medium">
                             You
                           </span>
                         )}
+                        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${getRoleBadgeClasses(member.role)}`}>
+                          {getRoleLabel(member.role)}
+                        </span>
                       </div>
-                      <p className="text-xs text-pos-muted flex items-center gap-1">
-                        <Mail className="w-3 h-3" /> {member.email}
+                      <p className="text-xs text-pos-muted flex items-center gap-1 truncate">
+                        <Mail className="w-3 h-3 shrink-0" /> {member.email}
                       </p>
                     </div>
 
-                    {/* Role badge + actions */}
+                    {/* Actions */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${getRoleBadgeClasses(member.role)}`}>
-                        {getRoleLabel(member.role)}
-                      </span>
                       {member.pin && (
-                        <span className="text-[10px] text-pos-muted flex items-center gap-0.5">
+                        <span className="text-[10px] text-pos-muted flex items-center gap-0.5 hidden sm:flex">
                           <Key className="w-3 h-3" /> PIN
                         </span>
                       )}
@@ -390,9 +394,9 @@ export default function StaffPage() {
 
                   {/* Edit panel */}
                   {isEditing && (
-                    <div className="border-t border-pos-border bg-white/[0.02] p-4 space-y-4">
+                    <div className="border-t border-pos-border bg-pos-bg-subtle p-4 space-y-4">
                       {isSelf && (
-                        <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 rounded-lg p-2.5">
+                        <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-lg p-2.5">
                           <AlertTriangle className="w-4 h-4 shrink-0" />
                           <span>You cannot change your own role. You can update your PIN.</span>
                         </div>
@@ -412,11 +416,11 @@ export default function StaffPage() {
                               className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-all ${
                                 editRole === role
                                   ? role === "admin"
-                                    ? "bg-red-500/15 text-red-400 border-red-500/40"
+                                    ? "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/40"
                                     : role === "manager"
-                                      ? "bg-amber-500/15 text-amber-400 border-amber-500/40"
-                                      : "bg-teal-500/15 text-teal-400 border-teal-500/40"
-                                  : "bg-pos-card text-pos-muted border-pos-border hover:bg-white/5"
+                                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40"
+                                      : "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/40"
+                                  : "bg-pos-card text-pos-muted border-pos-border hover-subtle"
                               } ${isSelf ? "opacity-50 cursor-not-allowed" : ""}`}
                             >
                               {getRoleLabel(role)}
@@ -433,17 +437,17 @@ export default function StaffPage() {
                           <ChevronDown className={`w-3 h-3 transition-transform ${viewPermsRole === editRole ? "rotate-180" : ""}`} />
                         </button>
                         {viewPermsRole === editRole && (
-                          <div className="mt-2 bg-pos-bg rounded-lg p-3 grid grid-cols-2 gap-1">
+                          <div className="mt-2 bg-pos-bg rounded-lg p-3 grid grid-cols-1 sm:grid-cols-2 gap-1">
                             {(Object.keys(PERMISSION_LABELS) as POSPermission[]).map((perm) => {
                               const has = getPermissions(editRole).includes(perm)
                               return (
                                 <div key={perm} className="flex items-center gap-1.5 text-[11px]">
                                   {has ? (
-                                    <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                                    <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                   ) : (
-                                    <X className="w-3 h-3 text-red-400/50 shrink-0" />
+                                    <X className="w-3 h-3 text-red-600 dark:text-red-400 opacity-50 shrink-0" />
                                   )}
-                                  <span className={has ? "text-white" : "text-pos-muted/50"}>
+                                  <span className={has ? "text-pos-fg" : "text-pos-muted opacity-50"}>
                                     {PERMISSION_LABELS[perm]}
                                   </span>
                                 </div>
@@ -456,7 +460,7 @@ export default function StaffPage() {
                       {/* PIN input */}
                       <div>
                         <label className="text-xs text-pos-muted font-medium mb-1.5 block">
-                          Quick Login PIN <span className="text-pos-muted/50">(optional, 4-6 digits)</span>
+                          Quick Login PIN <span className="text-pos-muted opacity-50">(optional, 4-6 digits)</span>
                         </label>
                         <div className="relative max-w-[200px]">
                           <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
@@ -474,13 +478,13 @@ export default function StaffPage() {
                           <button
                             type="button"
                             onClick={() => setShowPin(!showPin)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-white"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-pos-fg"
                           >
                             {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
                         {editPin && (editPin.length < 4) && (
-                          <p className="text-[11px] text-amber-400 mt-1">PIN must be at least 4 digits</p>
+                          <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1">PIN must be at least 4 digits</p>
                         )}
                       </div>
 
@@ -517,7 +521,7 @@ export default function StaffPage() {
         {/* Role Legend */}
         <div className="pos-card p-4">
           <h3 className="text-xs font-semibold text-pos-muted uppercase tracking-wider mb-3">Role Overview</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {ALL_ROLES.map((role) => {
               const perms = getPermissions(role)
               return (

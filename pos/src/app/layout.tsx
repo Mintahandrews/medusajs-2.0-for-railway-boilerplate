@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Toaster } from "react-hot-toast"
+import { ThemeInitializer } from "@/components/theme-initializer"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -13,16 +14,44 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = JSON.parse(localStorage.getItem('letscase-pos-theme') || '{}');
+                  var theme = (stored.state && stored.state.theme) || 'dark';
+                  document.documentElement.className = theme;
+                } catch(e) {
+                  document.documentElement.className = 'dark';
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-screen antialiased font-sans">
-        {children}
+        <ThemeInitializer />
+        <div className="teal-accent-top">
+          {children}
+        </div>
         <Toaster
-          position="top-right"
+          position="top-center"
           toastOptions={{
             style: {
-              background: "#132626",
-              color: "#e0f2f1",
-              border: "1px solid #1e3a3a",
+              background: "var(--pos-toast-bg)",
+              color: "var(--pos-toast-fg)",
+              border: "1px solid var(--pos-toast-border)",
+              fontSize: "13px",
+            },
+            success: {
+              iconTheme: { primary: "#14b8a6", secondary: "var(--pos-toast-fg)" },
             },
           }}
         />

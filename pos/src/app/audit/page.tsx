@@ -11,6 +11,7 @@ import { hasPermission } from "@/lib/rbac"
 import { useAuditStore, getActionLabel, getActionColor, type AuditAction } from "@/lib/audit"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const ACTION_FILTERS: { label: string; value: AuditAction | "all" }[] = [
   { label: "All", value: "all" },
@@ -53,6 +54,7 @@ export default function AuditPage() {
       if (actionFilter === "discount_item" && entry.action !== "discount_item" && entry.action !== "discount_cart") return false
       if (actionFilter === "drawer_open" && entry.action !== "drawer_open" && entry.action !== "drawer_cash_in" && entry.action !== "drawer_cash_out") return false
       if (actionFilter === "shift_open" && entry.action !== "shift_open" && entry.action !== "shift_close") return false
+      if (actionFilter === "role_change" && entry.action !== "role_change") return false
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
@@ -68,26 +70,29 @@ export default function AuditPage() {
   return (
     <div className="min-h-screen bg-pos-bg">
       {/* Header */}
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4">
+      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/")} className="pos-btn-ghost">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <Shield className="w-5 h-5 text-brand" />
-          <h1 className="text-lg font-bold text-white">Audit Log</h1>
+          <h1 className="text-lg font-bold text-pos-fg">Audit Log</h1>
           <span className="text-xs text-pos-muted">({entries.length} entries)</span>
         </div>
-        <button
-          onClick={() => {
-            if (confirm("Clear all audit entries? This cannot be undone.")) {
-              audit.clearEntries()
-              toast.success("Audit log cleared")
-            }
-          }}
-          className="pos-btn-ghost text-xs text-red-400"
-        >
-          <Trash2 className="w-4 h-4" /> Clear
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
+            onClick={() => {
+              if (confirm("Clear all audit entries? This cannot be undone.")) {
+                audit.clearEntries()
+                toast.success("Audit log cleared")
+              }
+            }}
+            className="pos-btn-ghost text-xs text-red-600 dark:text-red-400"
+          >
+            <Trash2 className="w-4 h-4" /> Clear
+          </button>
+        </div>
       </header>
 
       <div className="max-w-4xl mx-auto p-4 space-y-4">
@@ -105,19 +110,19 @@ export default function AuditPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-pos-fg"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
-          <div className="flex bg-pos-card rounded-lg p-0.5 border border-pos-border overflow-x-auto">
+          <div className="flex bg-pos-card rounded-lg p-0.5 border border-pos-border overflow-x-auto scrollbar-none">
             {ACTION_FILTERS.map((f) => (
               <button
                 key={f.value}
                 onClick={() => setActionFilter(f.value)}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                  actionFilter === f.value ? "bg-brand text-white" : "text-pos-muted hover:text-white"
+                  actionFilter === f.value ? "bg-brand text-white" : "text-pos-muted hover:text-pos-fg"
                 }`}
               >
                 {f.label}
@@ -148,7 +153,7 @@ export default function AuditPage() {
                       {getActionLabel(entry.action)}
                     </span>
                     <span className="text-[10px] text-pos-muted">·</span>
-                    <span className="text-xs text-white font-medium">{entry.staffName}</span>
+                    <span className="text-xs text-pos-fg font-medium">{entry.staffName}</span>
                     <span className="text-[10px] text-pos-muted">({entry.staffRole})</span>
                   </div>
                   <p className="text-xs text-pos-muted mt-0.5 truncate">{entry.detail}</p>

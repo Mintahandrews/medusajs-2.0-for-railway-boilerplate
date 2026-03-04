@@ -13,6 +13,7 @@ import { getOrders } from "@/lib/medusa-client"
 import { formatCurrency } from "@/lib/utils"
 import { useReactToPrint } from "react-to-print"
 import { format } from "date-fns"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function ShiftReportPage() {
   const router = useRouter()
@@ -146,16 +147,19 @@ export default function ShiftReportPage() {
   return (
     <div className="min-h-screen bg-pos-bg">
       {/* Header */}
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4">
+      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/")} className="pos-btn-ghost">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-lg font-bold text-white">Shift Report (Z-Report)</h1>
+          <h1 className="text-lg font-bold text-pos-fg">Shift Report (Z-Report)</h1>
         </div>
-        <button onClick={() => handlePrint()} className="pos-btn-primary text-xs">
-          <Printer className="w-4 h-4" /> Print
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button onClick={() => handlePrint()} className="pos-btn-primary text-xs">
+            <Printer className="w-4 h-4" /> Print
+          </button>
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto p-4 space-y-4">
@@ -166,14 +170,14 @@ export default function ShiftReportPage() {
             <h2 className="text-sm font-semibold text-pos-muted mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4" /> Shift Info
             </h2>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-pos-muted text-xs">Staff</p>
-                <p className="text-white font-medium">{store.staffName || "—"}</p>
+                <p className="text-pos-fg font-medium">{store.staffName || "—"}</p>
               </div>
               <div>
                 <p className="text-pos-muted text-xs">Duration</p>
-                <p className="text-white font-medium">
+                <p className="text-pos-fg font-medium">
                   {store.shiftStart
                     ? `${shiftHours}h ${shiftMins}m`
                     : "No active shift"}
@@ -181,7 +185,7 @@ export default function ShiftReportPage() {
               </div>
               <div>
                 <p className="text-pos-muted text-xs">Shift Start</p>
-                <p className="text-white font-medium">
+                <p className="text-pos-fg font-medium">
                   {store.shiftStart
                     ? format(new Date(store.shiftStart), "MMM d, yyyy h:mm a")
                     : "—"}
@@ -189,7 +193,7 @@ export default function ShiftReportPage() {
               </div>
               <div>
                 <p className="text-pos-muted text-xs">Report Time</p>
-                <p className="text-white font-medium">
+                <p className="text-pos-fg font-medium">
                   {format(new Date(), "MMM d, yyyy h:mm a")}
                 </p>
               </div>
@@ -201,22 +205,22 @@ export default function ShiftReportPage() {
             <h2 className="text-sm font-semibold text-pos-muted mb-3 flex items-center gap-2">
               <TrendingUp className="w-4 h-4" /> Sales Summary
             </h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-pos-bg rounded-lg p-3 text-center">
                 <p className="text-2xl font-bold text-brand">{stats.orderCount}</p>
                 <p className="text-xs text-pos-muted">Transactions</p>
               </div>
               <div className="bg-pos-bg rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-emerald-400">{formatCurrency(stats.totalSales, currency)}</p>
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(stats.totalSales, currency)}</p>
                 <p className="text-xs text-pos-muted">Gross Sales</p>
               </div>
               <div className="bg-pos-bg rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-red-400">{formatCurrency(stats.totalRefunds, currency)}</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{formatCurrency(stats.totalRefunds, currency)}</p>
                 <p className="text-xs text-pos-muted">Refunds</p>
               </div>
             </div>
             <div className="mt-3 bg-pos-bg rounded-lg p-3 flex justify-between items-center">
-              <span className="text-sm font-medium text-white">Net Sales</span>
+              <span className="text-sm font-medium text-pos-fg">Net Sales</span>
               <span className="text-lg font-bold text-brand">{formatCurrency(stats.netSales, currency)}</span>
             </div>
           </div>
@@ -233,10 +237,10 @@ export default function ShiftReportPage() {
                 {Object.entries(stats.byMethod).map(([method, data]) => (
                   <div key={method} className="flex justify-between items-center bg-pos-bg rounded-lg p-3">
                     <div>
-                      <p className="text-sm font-medium text-white capitalize">{method.replace(/_/g, " ")}</p>
+                      <p className="text-sm font-medium text-pos-fg capitalize">{method.replace(/_/g, " ")}</p>
                       <p className="text-xs text-pos-muted">{data.count} sale{data.count !== 1 ? "s" : ""}</p>
                     </div>
-                    <p className="text-sm font-bold text-white">{formatCurrency(data.total, currency)}</p>
+                    <p className="text-sm font-bold text-pos-fg">{formatCurrency(data.total, currency)}</p>
                   </div>
                 ))}
               </div>
@@ -251,18 +255,18 @@ export default function ShiftReportPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-pos-muted">Cash In (Opening + Deposits)</span>
-                <span className="text-white">{formatCurrency(stats.cashIns, currency)}</span>
+                <span className="text-pos-fg">{formatCurrency(stats.cashIns, currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-pos-muted">Cash Sales</span>
-                <span className="text-emerald-400">+{formatCurrency(stats.cashSales, currency)}</span>
+                <span className="text-emerald-600 dark:text-emerald-400">+{formatCurrency(stats.cashSales, currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-pos-muted">Cash Out (Withdrawals + Refunds)</span>
-                <span className="text-red-400">-{formatCurrency(stats.cashOuts, currency)}</span>
+                <span className="text-red-600 dark:text-red-400">-{formatCurrency(stats.cashOuts, currency)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-pos-border font-bold">
-                <span className="text-white">Expected in Drawer</span>
+                <span className="text-pos-fg">Expected in Drawer</span>
                 <span className="text-brand">{formatCurrency(expectedCash, currency)}</span>
               </div>
             </div>
@@ -286,7 +290,7 @@ export default function ShiftReportPage() {
                       ? "bg-amber-500/10 border border-amber-500/30"
                       : "bg-red-500/10 border border-red-500/30"
                   }`}>
-                    <p className={`text-xs ${cashDiff === 0 ? "text-emerald-400" : cashDiff > 0 ? "text-amber-400" : "text-red-400"}`}>
+                    <p className={`text-xs ${cashDiff === 0 ? "text-emerald-600 dark:text-emerald-400" : cashDiff > 0 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
                       {cashDiff === 0
                         ? "Perfect balance!"
                         : cashDiff > 0
@@ -312,8 +316,8 @@ export default function ShiftReportPage() {
 
         {shiftClosed && (
           <div className="pos-card p-6 text-center">
-            <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-white mb-1">Shift Closed</h3>
+            <CheckCircle className="w-12 h-12 text-emerald-600 dark:text-emerald-400 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-pos-fg mb-1">Shift Closed</h3>
             <p className="text-sm text-pos-muted">
               Z-Report has been generated. You can print it using the button above.
             </p>

@@ -10,6 +10,7 @@ import { useAuditStore } from "@/lib/audit"
 import { extractRoleFromUser, extractPinFromUser, getRoleLabel, getRoleBadgeClasses } from "@/lib/rbac"
 import type { POSRole } from "@/lib/rbac"
 import toast from "react-hot-toast"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface StaffEntry {
   id: string
@@ -38,6 +39,7 @@ export default function PinLoginPage() {
       return
     }
     loadStaff()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadStaff = async () => {
@@ -71,6 +73,7 @@ export default function PinLoginPage() {
     if (selectedStaff?.pin && newPin.length === selectedStaff.pin.length) {
       verifyPin(newPin)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin, selectedStaff])
 
   const verifyPin = async (enteredPin: string) => {
@@ -112,6 +115,28 @@ export default function PinLoginPage() {
     setError("")
   }
 
+  // Physical keyboard support for PIN entry
+  useEffect(() => {
+    if (!selectedStaff) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (verifying) return
+      if (e.key >= "0" && e.key <= "9") {
+        e.preventDefault()
+        handlePinDigit(e.key)
+      } else if (e.key === "Backspace") {
+        e.preventDefault()
+        handleBackspace()
+      } else if (e.key === "Escape") {
+        e.preventDefault()
+        setSelectedStaff(null)
+        setPin("")
+        setError("")
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [selectedStaff, verifying, handlePinDigit])
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pos-bg">
@@ -124,11 +149,14 @@ export default function PinLoginPage() {
   if (!selectedStaff) {
     return (
       <div className="min-h-screen bg-pos-bg flex flex-col">
-        <header className="h-14 bg-pos-card border-b border-pos-border flex items-center px-4 gap-3">
-          <button onClick={() => router.push("/")} className="pos-btn-ghost">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <h1 className="text-lg font-bold text-white">Quick Staff Switch</h1>
+        <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.push("/")} className="pos-btn-ghost">
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <h1 className="text-lg font-bold text-pos-fg">Quick Staff Switch</h1>
+          </div>
+          <ThemeToggle />
         </header>
 
         <div className="flex-1 flex items-center justify-center p-4">
@@ -157,13 +185,13 @@ export default function PinLoginPage() {
                   <button
                     key={s.id}
                     onClick={() => setSelectedStaff(s)}
-                    className="w-full pos-card p-4 hover:bg-white/5 transition-colors flex items-center gap-3"
+                    className="w-full pos-card p-4 hover-subtle transition-colors flex items-center gap-3"
                   >
                     <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-lg">
                       {s.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-sm font-medium text-white">{s.name}</p>
+                      <p className="text-sm font-medium text-pos-fg">{s.name}</p>
                       <p className="text-xs text-pos-muted">{s.email}</p>
                     </div>
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getRoleBadgeClasses(s.role)}`}>
@@ -176,9 +204,9 @@ export default function PinLoginPage() {
 
             <button
               onClick={() => router.push("/login")}
-              className="w-full text-center text-sm text-pos-muted hover:text-white transition-colors py-2"
+              className="w-full text-center text-sm text-pos-muted hover:text-pos-fg transition-colors py-2"
             >
-              Use email &amp; password instead
+              Use email & password instead
             </button>
           </div>
         </div>
@@ -189,11 +217,14 @@ export default function PinLoginPage() {
   // PIN entry view
   return (
     <div className="min-h-screen bg-pos-bg flex flex-col">
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center px-4 gap-3">
-        <button onClick={() => { setSelectedStaff(null); setPin(""); setError("") }} className="pos-btn-ghost">
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <h1 className="text-lg font-bold text-white">Enter PIN</h1>
+      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <button onClick={() => { setSelectedStaff(null); setPin(""); setError("") }} className="pos-btn-ghost">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <h1 className="text-lg font-bold text-pos-fg">Enter PIN</h1>
+        </div>
+        <ThemeToggle />
       </header>
 
       <div className="flex-1 flex items-center justify-center p-4">
@@ -203,7 +234,7 @@ export default function PinLoginPage() {
             <div className="w-16 h-16 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-2xl mx-auto mb-3">
               {selectedStaff.name.charAt(0).toUpperCase()}
             </div>
-            <p className="text-white font-semibold">{selectedStaff.name}</p>
+            <p className="text-pos-fg font-semibold">{selectedStaff.name}</p>
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getRoleBadgeClasses(selectedStaff.role)}`}>
               {getRoleLabel(selectedStaff.role)}
             </span>
@@ -224,7 +255,7 @@ export default function PinLoginPage() {
           </div>
 
           {error && (
-            <p className="text-center text-red-400 text-sm">{error}</p>
+            <p className="text-center text-red-600 dark:text-red-400 text-sm">{error}</p>
           )}
 
           {verifying && (
@@ -240,7 +271,7 @@ export default function PinLoginPage() {
                 key={d}
                 onClick={() => handlePinDigit(d)}
                 disabled={verifying}
-                className="h-14 rounded-xl bg-pos-card border border-pos-border text-white text-xl font-semibold hover:bg-white/10 transition-colors active:scale-95"
+                className="h-14 rounded-xl bg-pos-card border border-pos-border text-pos-fg text-xl font-semibold hover-strong transition-colors active:scale-95"
               >
                 {d}
               </button>
@@ -248,21 +279,21 @@ export default function PinLoginPage() {
             <button
               onClick={handleClear}
               disabled={verifying}
-              className="h-14 rounded-xl bg-pos-card border border-pos-border text-pos-muted text-sm font-medium hover:bg-white/10 transition-colors"
+              className="h-14 rounded-xl bg-pos-card border border-pos-border text-pos-muted text-sm font-medium hover-strong transition-colors"
             >
               Clear
             </button>
             <button
               onClick={() => handlePinDigit("0")}
               disabled={verifying}
-              className="h-14 rounded-xl bg-pos-card border border-pos-border text-white text-xl font-semibold hover:bg-white/10 transition-colors active:scale-95"
+              className="h-14 rounded-xl bg-pos-card border border-pos-border text-pos-fg text-xl font-semibold hover-strong transition-colors active:scale-95"
             >
               0
             </button>
             <button
               onClick={handleBackspace}
               disabled={verifying}
-              className="h-14 rounded-xl bg-pos-card border border-pos-border text-pos-muted hover:bg-white/10 transition-colors flex items-center justify-center"
+              className="h-14 rounded-xl bg-pos-card border border-pos-border text-pos-muted hover-strong transition-colors flex items-center justify-center"
             >
               <Delete className="w-5 h-5" />
             </button>

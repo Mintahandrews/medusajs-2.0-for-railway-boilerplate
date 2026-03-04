@@ -8,15 +8,17 @@ import {
   Smartphone, Tag, MessageSquare, Pause, RotateCcw, Users,
   BarChart3, LogOut, ScanBarcode, Package, Shield, ClipboardList,
   X, Loader2, Receipt, Printer, Clock, UserCheck, UserCog,
+  RefreshCw, MoreHorizontal,
 } from "lucide-react"
 import toast from "react-hot-toast"
-import { usePOSStore, type POSCartItem } from "@/lib/store"
+import { usePOSStore, type POSCartItem, type POSState } from "@/lib/store"
 import { getProducts, getCategories, getProductByBarcode, createDraftOrder, markDraftOrderPaid, getRegions, getShippingOptions } from "@/lib/medusa-client"
 import { hasPermission, getRoleBadgeClasses, getRoleLabel } from "@/lib/rbac"
 import { useAuditStore } from "@/lib/audit"
 import { formatCurrency, playBeep } from "@/lib/utils"
 import ReceiptPrint, { type ReceiptData } from "@/components/receipt"
 import { useReactToPrint } from "react-to-print"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -40,13 +42,16 @@ interface Product {
 
 // ─── Main POS Page ───────────────────────────────────────────────────────────
 
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga",
+  "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf",
+])
+
 const toMinorUnits = (amount: number, currencyCode: string) => {
   if (!amount || !currencyCode) return amount
   const code = currencyCode.toLowerCase()
-  if (code === "ghs") {
-    return Math.round(amount * 100)
-  }
-  return amount
+  if (ZERO_DECIMAL_CURRENCIES.has(code)) return Math.round(amount)
+  return Math.round(amount * 100)
 }
 
 export default function POSTerminal() {
@@ -80,6 +85,9 @@ export default function POSTerminal() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+
+  // Mobile cart
+  const [showMobileCart, setShowMobileCart] = useState(false)
 
   // Modals
   const [showPayment, setShowPayment] = useState(false)
@@ -285,7 +293,7 @@ export default function POSTerminal() {
       // F8 = Clear cart
       if (e.key === "F8") {
         e.preventDefault()
-        if (store.items.length) {
+        if (store.items.length && confirm("Clear all items from cart?")) {
           store.clearCart()
           toast("Cart cleared", { icon: "🗑️" })
         }
@@ -328,100 +336,83 @@ export default function POSTerminal() {
   const total = store.getTotal()
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden bg-pos-bg">
       {/* Header */}
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 shrink-0">
+      <header className="pos-page-header">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Image src="/logo-white.png" alt="Letscase" width={32} height={32} className="w-8 h-8" />
-            <span className="text-white font-bold text-lg hidden sm:block">Letscase POS</span>
+            <Image src="/logo-white.png" alt="Letscase" width={28} height={28} className="w-7 h-7 dark:brightness-100 brightness-0" />
+            <span className="text-pos-fg font-semibold text-sm hidden sm:block">Letscase POS</span>
           </div>
+          <div className="hidden sm:block h-5 w-px bg-pos-border" />
+          <span className="hidden sm:flex items-center gap-1.5 text-xs text-pos-muted">
+            {store.staffName}
+            <span className={`pos-badge ${getRoleBadgeClasses(store.staffRole)}`}>
+              {getRoleLabel(store.staffRole)}
+            </span>
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Staff name + role badge */}
-          <span className="text-xs text-pos-muted font-medium hidden sm:block">
-            {store.staffName}
-          </span>
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getRoleBadgeClasses(store.staffRole)}`}>
-            {getRoleLabel(store.staffRole)}
-          </span>
-          {can("pos.customers") && (
-            <button
-              onClick={() => router.push("/customers")}
-              className="pos-btn-ghost text-xs"
-            >
-              <Users className="w-4 h-4" /> Customers
-            </button>
-          )}
-          {can("pos.refund") && (
-            <button
-              onClick={() => router.push("/refunds")}
-              className="pos-btn-ghost text-xs"
-            >
-              <RotateCcw className="w-4 h-4" /> Refunds
-            </button>
-          )}
-          {can("pos.transactions") && (
-            <button
-              onClick={() => router.push("/transactions")}
-              className="pos-btn-ghost text-xs"
-            >
-              <ClipboardList className="w-4 h-4" /> Sales
-            </button>
-          )}
-          {can("pos.reports") && (
-            <button
-              onClick={() => router.push("/reports")}
-              className="pos-btn-ghost text-xs"
-            >
-              <BarChart3 className="w-4 h-4" /> Reports
-            </button>
-          )}
-          {can("pos.shift_report") && (
-            <button
-              onClick={() => router.push("/shift-report")}
-              className="pos-btn-ghost text-xs"
-            >
-              <Clock className="w-4 h-4" /> Shift
-            </button>
-          )}
-          {can("pos.audit_log") && (
-            <button
-              onClick={() => router.push("/audit")}
-              className="pos-btn-ghost text-xs"
-            >
-              <Shield className="w-4 h-4" /> Audit
-            </button>
-          )}
-          {can("pos.manage_staff") && (
-            <button
-              onClick={() => router.push("/staff")}
-              className="pos-btn-ghost text-xs"
-            >
-              <UserCog className="w-4 h-4" /> Staff
-            </button>
-          )}
+        <div className="flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5">
+            {can("pos.customers") && (
+              <button onClick={() => router.push("/customers")} className="pos-btn-ghost text-xs px-2.5">
+                <Users className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Customers</span>
+              </button>
+            )}
+            {can("pos.refund") && (
+              <button onClick={() => router.push("/refunds")} className="pos-btn-ghost text-xs px-2.5">
+                <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Refunds</span>
+              </button>
+            )}
+            {can("pos.transactions") && (
+              <button onClick={() => router.push("/transactions")} className="pos-btn-ghost text-xs px-2.5">
+                <ClipboardList className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Sales</span>
+              </button>
+            )}
+            {can("pos.reports") && (
+              <button onClick={() => router.push("/reports")} className="pos-btn-ghost text-xs px-2.5">
+                <BarChart3 className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Reports</span>
+              </button>
+            )}
+            {can("pos.shift_report") && (
+              <button onClick={() => router.push("/shift-report")} className="pos-btn-ghost text-xs px-2.5">
+                <Clock className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {can("pos.audit_log") && (
+              <button onClick={() => router.push("/audit")} className="pos-btn-ghost text-xs px-2.5">
+                <Shield className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {can("pos.manage_staff") && (
+              <button onClick={() => router.push("/staff")} className="pos-btn-ghost text-xs px-2.5">
+                <UserCog className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </nav>
+          <div className="hidden lg:block h-5 w-px bg-pos-border mx-1" />
           <button
             onClick={() => {
               if (store.heldSales.length) setShowHeldSales(true)
               else toast("No held sales")
             }}
-            className="pos-btn-ghost text-xs relative"
+            className="pos-btn-ghost text-xs px-2 relative"
           >
-            <Pause className="w-4 h-4" /> Held
+            <Pause className="w-3.5 h-3.5" />
             {store.heldSales.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full text-[10px] text-white flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-orange-500 rounded-full text-[10px] text-white flex items-center justify-center font-semibold">
                 {store.heldSales.length}
               </span>
             )}
           </button>
+          <ThemeToggle />
           <button
             onClick={() => router.push("/pin-login")}
-            className="pos-btn-ghost text-xs"
+            className="pos-btn-ghost text-xs px-2 hidden sm:flex"
             title="Switch staff (PIN)"
           >
-            <UserCheck className="w-4 h-4" />
+            <UserCheck className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => {
@@ -435,9 +426,9 @@ export default function POSTerminal() {
               store.clearSession()
               router.push("/login")
             }}
-            className="pos-btn-ghost text-xs text-red-400"
+            className="pos-btn-ghost text-xs px-2 text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
@@ -447,14 +438,14 @@ export default function POSTerminal() {
         {/* Left: Products */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Search & Category Bar */}
-          <div className="p-3 border-b border-pos-border space-y-2">
+          <div className="p-3 border-b border-pos-border space-y-2 bg-pos-bg-subtle">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted pointer-events-none" />
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search products (F2) or scan barcode..."
+                  placeholder="Search products or scan barcode..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   className="pos-input w-full pl-10 pr-10"
@@ -462,7 +453,7 @@ export default function POSTerminal() {
                 {searchQuery && (
                   <button
                     onClick={() => { setSearchQuery(""); fetchProducts() }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-pos-muted hover:text-pos-fg"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -472,21 +463,41 @@ export default function POSTerminal() {
                 onClick={() => {
                   toast("Point your barcode scanner at a product", { icon: "📷" })
                 }}
-                className="pos-btn-secondary"
+                className="pos-btn-secondary px-3"
+                title="Scan barcode"
               >
                 <ScanBarcode className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => { fetchProducts(); toast("Products refreshed") }}
+                className="pos-btn-secondary px-3 hidden sm:flex"
+                title="Refresh products"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              {/* Mobile cart toggle */}
+              <button
+                onClick={() => setShowMobileCart(true)}
+                className="pos-btn-secondary px-3 lg:hidden relative"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                {store.getItemCount() > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+                    {store.getItemCount()}
+                  </span>
+                )}
               </button>
             </div>
 
             {/* Category Pills */}
             {categories.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 <button
                   onClick={() => setActiveCategory(null)}
-                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     !activeCategory
                       ? "bg-brand text-white"
-                      : "bg-pos-card text-pos-muted border border-pos-border hover:text-white"
+                      : "bg-pos-card text-pos-muted border border-pos-border hover:text-pos-fg"
                   }`}
                 >
                   All
@@ -495,10 +506,10 @@ export default function POSTerminal() {
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       activeCategory === cat.id
                         ? "bg-brand text-white"
-                        : "bg-pos-card text-pos-muted border border-pos-border hover:text-white"
+                        : "bg-pos-card text-pos-muted border border-pos-border hover:text-pos-fg"
                     }`}
                   >
                     {cat.name}
@@ -509,18 +520,19 @@ export default function POSTerminal() {
           </div>
 
           {/* Product Grid */}
-          <div className="flex-1 overflow-y-auto p-3">
+          <div className="flex-1 overflow-y-auto p-3 pb-20 md:pb-3">
             {loading ? (
               <div className="flex items-center justify-center h-48">
                 <Loader2 className="w-8 h-8 text-brand animate-spin" />
               </div>
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-pos-muted">
-                <Package className="w-12 h-12 mb-3 opacity-50" />
+                <Package className="w-12 h-12 mb-3 opacity-30" />
                 <p className="text-sm">No products found</p>
+                <p className="text-xs mt-1">Try a different search or category</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {products.map((product) => {
                   const variant = product.variants?.[0]
                   const price = variant?.prices?.find(
@@ -532,24 +544,29 @@ export default function POSTerminal() {
                       onClick={() => {
                         if (variant) addProductToCart(product, variant)
                       }}
-                      className="pos-card p-3 text-left hover:border-brand/50 transition-all group cursor-pointer active:scale-[0.97]"
+                      disabled={variant?.inventory_quantity != null && variant.inventory_quantity <= 0}
+                      className={`pos-card p-2.5 text-left transition-all group cursor-pointer active:scale-[0.97] ${
+                        variant?.inventory_quantity != null && variant.inventory_quantity <= 0
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:border-brand/40 hover:shadow-card-hover"
+                      }`}
                     >
-                      <div className="aspect-square rounded-lg bg-pos-bg mb-2 overflow-hidden flex items-center justify-center">
+                      <div className="aspect-square rounded-lg bg-pos-bg-subtle mb-2 overflow-hidden flex items-center justify-center">
                         {product.thumbnail ? (
                           <img
                             src={product.thumbnail}
                             alt={product.title}
-                            className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform"
+                            className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
                           />
                         ) : (
-                          <Package className="w-8 h-8 text-pos-muted" />
+                          <Package className="w-8 h-8 text-pos-muted opacity-40" />
                         )}
                       </div>
-                      <p className="text-xs font-medium text-white truncate">{product.title}</p>
+                      <p className="text-xs font-medium text-pos-fg truncate">{product.title}</p>
                       {variant && product.variants.length > 1 && (
                         <p className="text-[10px] text-pos-muted truncate">{variant.title}</p>
                       )}
-                      <p className="text-sm font-bold text-brand mt-1">
+                      <p className="text-sm font-semibold text-brand mt-1">
                         {price
                           ? formatCurrency(
                               toMinorUnits(price.amount, price.currency_code),
@@ -558,7 +575,7 @@ export default function POSTerminal() {
                           : "N/A"}
                       </p>
                       {variant?.inventory_quantity != null && variant.inventory_quantity <= 5 && (
-                        <p className="text-[10px] text-orange-400 mt-0.5">
+                        <p className="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">
                           {variant.inventory_quantity === 0 ? "Out of stock" : `${variant.inventory_quantity} left`}
                         </p>
                       )}
@@ -570,146 +587,59 @@ export default function POSTerminal() {
           </div>
         </div>
 
-        {/* Right: Cart Panel */}
-        <div className="w-[380px] lg:w-[420px] bg-pos-card border-l border-pos-border flex flex-col shrink-0">
-          {/* Cart Header */}
-          <div className="p-3 border-b border-pos-border flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-4 h-4 text-brand" />
-              <span className="text-sm font-semibold text-white">
-                Cart ({store.getItemCount()})
-              </span>
-            </div>
-            <div className="flex gap-1">
-              <button
-                onClick={() => {
-                  store.holdCurrentSale(store.staffName || "Staff")
-                  toast.success("Sale held (F9)")
-                }}
-                disabled={!store.items.length}
-                className="pos-btn-ghost text-xs"
-                title="Hold sale (F9)"
-              >
-                <Pause className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => {
-                  store.clearCart()
-                  toast("Cart cleared", { icon: "🗑️" })
-                }}
-                disabled={!store.items.length}
-                className="pos-btn-ghost text-xs text-red-400"
-                title="Clear cart (F8)"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto">
-            {store.items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-pos-muted">
-                <ShoppingCart className="w-10 h-10 mb-2 opacity-40" />
-                <p className="text-sm">Cart is empty</p>
-                <p className="text-xs mt-1">Scan or select products to add</p>
-              </div>
-            ) : (
-              <div className="p-2 space-y-1">
-                {store.items.map((item) => (
-                  <CartItemRow
-                    key={item.id}
-                    item={item}
-                    currency={currency}
-                    onUpdateQty={(qty) => store.updateQuantity(item.id, qty)}
-                    onRemove={() => store.removeItem(item.id)}
-                    onDiscount={() => {
-                      setDiscountTarget(item.id)
-                      setShowDiscount(true)
-                    }}
-                    onNote={() => {
-                      setNoteTarget(item.id)
-                      setShowNote(true)
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Cart Totals */}
-          <div className="border-t border-pos-border p-3 space-y-2">
-            <div className="flex justify-between text-sm text-pos-muted">
-              <span>Subtotal</span>
-              <span>{formatCurrency(subtotal, currency)}</span>
-            </div>
-            {itemDiscounts > 0 && (
-              <div className="flex justify-between text-sm text-orange-400">
-                <span>Item Discounts</span>
-                <span>-{formatCurrency(itemDiscounts, currency)}</span>
-              </div>
-            )}
-            {cartDiscountAmt > 0 && (
-              <div className="flex justify-between text-sm text-orange-400">
-                <span>
-                  Cart Discount
-                  {store.cartDiscount?.type === "percentage" && ` (${store.cartDiscount.value}%)`}
-                </span>
-                <span>-{formatCurrency(cartDiscountAmt, currency)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-lg font-bold text-white pt-1 border-t border-pos-border">
-              <span>TOTAL</span>
-              <span className="text-brand">{formatCurrency(total, currency)}</span>
-            </div>
-          </div>
-
-          {/* Cart Actions */}
-          <div className="p-3 border-t border-pos-border grid grid-cols-3 gap-2">
-            <button
-              onClick={() => {
-                if (!can("pos.discount.cart")) {
-                  toast.error("You don't have permission to apply cart discounts")
-                  return
-                }
-                setDiscountTarget(null)
-                setShowDiscount(true)
-              }}
-              disabled={!store.items.length}
-              className="pos-btn-secondary text-xs"
-            >
-              <Tag className="w-3.5 h-3.5" /> Discount
-            </button>
-            <button
-              onClick={() => {
-                setNoteTarget(null)
-                setShowNote(true)
-              }}
-              className="pos-btn-secondary text-xs"
-            >
-              <MessageSquare className="w-3.5 h-3.5" /> Note
-            </button>
-            <button
-              onClick={() => router.push("/customers")}
-              className="pos-btn-secondary text-xs"
-            >
-              <Users className="w-3.5 h-3.5" /> Customer
-            </button>
-          </div>
-
-          {/* Payment Buttons */}
-          <div className="p-3 border-t border-pos-border space-y-2">
-            <button
-              onClick={() => setShowPayment(true)}
-              disabled={!store.items.length}
-              className="pos-btn-success w-full h-12 text-base font-bold"
-            >
-              <DollarSign className="w-5 h-5" />
-              Pay {formatCurrency(total, currency)} (F4)
-            </button>
-          </div>
+        {/* Right: Cart Panel (desktop) */}
+        <div className="hidden lg:flex w-[380px] xl:w-[400px] bg-pos-card border-l border-pos-border flex-col shrink-0">
+          <CartPanel
+            store={store}
+            currency={currency}
+            subtotal={subtotal}
+            itemDiscounts={itemDiscounts}
+            cartDiscountAmt={cartDiscountAmt}
+            total={total}
+            can={can}
+            onPayment={() => setShowPayment(true)}
+            onDiscount={(id) => { setDiscountTarget(id); setShowDiscount(true) }}
+            onNote={(id) => { setNoteTarget(id); setShowNote(true) }}
+            onCustomer={() => router.push("/customers")}
+            audit={audit}
+          />
         </div>
       </div>
+
+      {/* Mobile Cart Drawer */}
+      {showMobileCart && (
+        <div className="cart-overlay lg:hidden" onClick={() => setShowMobileCart(false)} />
+      )}
+      <div className={`cart-drawer lg:hidden flex flex-col ${showMobileCart ? "cart-drawer-open" : "cart-drawer-closed"}`}>
+        <div className="p-3 border-b border-pos-border flex items-center justify-between shrink-0">
+          <span className="pos-page-title"><ShoppingCart className="w-4 h-4 text-brand" /> Cart ({store.getItemCount()})</span>
+          <button onClick={() => setShowMobileCart(false)} className="pos-btn-ghost text-xs px-2">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <CartPanel
+          store={store}
+          currency={currency}
+          subtotal={subtotal}
+          itemDiscounts={itemDiscounts}
+          cartDiscountAmt={cartDiscountAmt}
+          total={total}
+          can={can}
+          onPayment={() => { setShowMobileCart(false); setShowPayment(true) }}
+          onDiscount={(id) => { setShowMobileCart(false); setDiscountTarget(id); setShowDiscount(true) }}
+          onNote={(id) => { setShowMobileCart(false); setNoteTarget(id); setShowNote(true) }}
+          onCustomer={() => { setShowMobileCart(false); router.push("/customers") }}
+          audit={audit}
+        />
+      </div>
+
+      {/* Mobile Bottom Nav */}
+      <MobileBottomNav
+        can={can}
+        store={store}
+        router={router}
+        onOpenCart={() => setShowMobileCart(true)}
+      />
 
       {/* ── Modals ──────────────────────────────────────────────────────────── */}
 
@@ -776,10 +706,10 @@ export default function POSTerminal() {
       {/* Keyboard Shortcuts Help */}
       {showShortcuts && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowShortcuts(false)}>
-          <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-pos-border">
-              <h2 className="text-lg font-bold text-white">Keyboard Shortcuts</h2>
-              <button onClick={() => setShowShortcuts(false)} className="text-pos-muted hover:text-white">
+              <h2 className="text-lg font-bold text-pos-fg">Keyboard Shortcuts</h2>
+              <button onClick={() => setShowShortcuts(false)} className="text-pos-muted hover:text-pos-fg">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -798,7 +728,7 @@ export default function POSTerminal() {
               ].map(([key, desc]) => (
                 <div key={key} className="flex items-center justify-between">
                   <span className="text-pos-muted">{desc}</span>
-                  <kbd className="bg-pos-bg border border-pos-border rounded px-2 py-0.5 text-xs font-mono text-white">{key}</kbd>
+                  <kbd className="bg-pos-bg border border-pos-border rounded px-2 py-0.5 text-xs font-mono text-pos-fg">{key}</kbd>
                 </div>
               ))}
             </div>
@@ -839,15 +769,15 @@ function CartItemRow({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-white truncate">{item.title}</p>
+          <p className="text-xs font-medium text-pos-fg truncate">{item.title}</p>
           <p className="text-[10px] text-pos-muted">
             {formatCurrency(item.unit_price, currency)} each
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-xs font-bold text-white">{formatCurrency(lineTotal, currency)}</p>
+          <p className="text-xs font-bold text-pos-fg">{formatCurrency(lineTotal, currency)}</p>
           {item.discount_amount > 0 && (
-            <p className="text-[10px] text-orange-400">-{formatCurrency(item.discount_amount, currency)}</p>
+            <p className="text-[10px] text-orange-600 dark:text-orange-400">-{formatCurrency(item.discount_amount, currency)}</p>
           )}
         </div>
       </div>
@@ -856,36 +786,205 @@ function CartItemRow({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onUpdateQty(item.quantity - 1)}
-            className="w-7 h-7 rounded-md bg-pos-card border border-pos-border flex items-center justify-center text-white hover:bg-white/10"
+            className="qty-btn w-7 h-7 rounded-md bg-pos-card border border-pos-border flex items-center justify-center text-pos-fg"
           >
             <Minus className="w-3 h-3" />
           </button>
-          <span className="w-8 text-center text-sm font-semibold text-white">{item.quantity}</span>
+          <span className="w-8 text-center text-sm font-semibold text-pos-fg">{item.quantity}</span>
           <button
             onClick={() => onUpdateQty(item.quantity + 1)}
-            className="w-7 h-7 rounded-md bg-pos-card border border-pos-border flex items-center justify-center text-white hover:bg-white/10"
+            className="qty-btn w-7 h-7 rounded-md bg-pos-card border border-pos-border flex items-center justify-center text-pos-fg"
           >
             <Plus className="w-3 h-3" />
           </button>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={onDiscount} className="p-1.5 rounded text-pos-muted hover:text-orange-400" title="Discount">
+        <div className="flex gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+          <button onClick={onDiscount} className="p-1.5 rounded text-pos-muted hover:text-orange-600 dark:hover:text-orange-400" title="Discount">
             <Tag className="w-3 h-3" />
           </button>
-          <button onClick={onNote} className="p-1.5 rounded text-pos-muted hover:text-teal-400" title="Note">
+          <button onClick={onNote} className="p-1.5 rounded text-pos-muted hover:text-teal-600 dark:hover:text-teal-400" title="Note">
             <MessageSquare className="w-3 h-3" />
           </button>
-          <button onClick={onRemove} className="p-1.5 rounded text-pos-muted hover:text-red-400" title="Remove">
+          <button onClick={onRemove} className="p-1.5 rounded text-pos-muted hover:text-red-600 dark:hover:text-red-400" title="Remove">
             <Trash2 className="w-3 h-3" />
           </button>
         </div>
       </div>
       {item.note && (
-        <p className="mt-1.5 text-[10px] text-teal-400 bg-teal-500/10 rounded px-2 py-1">
+        <p className="mt-1.5 text-[10px] text-teal-600 dark:text-teal-400 bg-teal-500/10 rounded px-2 py-1">
           📝 {item.note}
         </p>
       )}
     </div>
+  )
+}
+
+// ─── Cart Panel (shared between desktop sidebar & mobile drawer) ────────────
+
+function CartPanel({
+  store,
+  currency,
+  subtotal,
+  itemDiscounts,
+  cartDiscountAmt,
+  total,
+  can,
+  onPayment,
+  onDiscount,
+  onNote,
+  onCustomer,
+  audit,
+}: {
+  store: POSState
+  currency: string
+  subtotal: number
+  itemDiscounts: number
+  cartDiscountAmt: number
+  total: number
+  can: (p: Parameters<typeof hasPermission>[1]) => boolean
+  onPayment: () => void
+  onDiscount: (id: string | null) => void
+  onNote: (id: string | null) => void
+  onCustomer: () => void
+  audit: any
+}) {
+  return (
+    <>
+      {/* Cart Header */}
+      <div className="p-3 border-b border-pos-border flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <ShoppingCart className="w-4 h-4 text-brand" />
+          <span className="text-sm font-semibold text-pos-fg">
+            Cart ({store.getItemCount()})
+          </span>
+        </div>
+        <div className="flex gap-1">
+          <button
+            onClick={() => {
+              store.holdCurrentSale(store.staffName || "Staff")
+              audit.addEntry({
+                action: "held_sale",
+                staffName: store.staffName,
+                staffRole: getRoleLabel(store.staffRole),
+                detail: `Held sale with ${store.items.length} item(s)`,
+              })
+              toast.success("Sale held")
+            }}
+            disabled={!store.items.length}
+            className="pos-btn-ghost text-xs px-2"
+            title="Hold sale (F9)"
+          >
+            <Pause className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => {
+              if (confirm("Clear all items from cart?")) {
+                store.clearCart()
+                toast("Cart cleared")
+              }
+            }}
+            disabled={!store.items.length}
+            className="pos-btn-ghost text-xs px-2 text-red-600 dark:text-red-400"
+            title="Clear cart (F8)"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Cart Items */}
+      <div className="flex-1 overflow-y-auto">
+        {store.items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-pos-muted py-12">
+            <ShoppingCart className="w-10 h-10 mb-2 opacity-30" />
+            <p className="text-sm">Cart is empty</p>
+            <p className="text-xs mt-1 text-pos-muted">Scan or select products to add</p>
+          </div>
+        ) : (
+          <div className="p-2 space-y-1">
+            {store.items.map((item) => (
+              <CartItemRow
+                key={item.id}
+                item={item}
+                currency={currency}
+                onUpdateQty={(qty) => store.updateQuantity(item.id, qty)}
+                onRemove={() => store.removeItem(item.id)}
+                onDiscount={() => onDiscount(item.id)}
+                onNote={() => onNote(item.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Cart Totals */}
+      <div className="border-t border-pos-border p-3 space-y-1.5 shrink-0">
+        <div className="flex justify-between text-sm text-pos-muted">
+          <span>Subtotal</span>
+          <span>{formatCurrency(subtotal, currency)}</span>
+        </div>
+        {itemDiscounts > 0 && (
+          <div className="flex justify-between text-sm text-orange-600 dark:text-orange-400">
+            <span>Item Discounts</span>
+            <span>-{formatCurrency(itemDiscounts, currency)}</span>
+          </div>
+        )}
+        {cartDiscountAmt > 0 && (
+          <div className="flex justify-between text-sm text-orange-600 dark:text-orange-400">
+            <span>
+              Cart Discount
+              {store.cartDiscount?.type === "percentage" && ` (${store.cartDiscount.value}%)`}
+            </span>
+            <span>-{formatCurrency(cartDiscountAmt, currency)}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-base font-bold text-pos-fg pt-1.5 border-t border-pos-border">
+          <span>Total</span>
+          <span className="text-brand">{formatCurrency(total, currency)}</span>
+        </div>
+      </div>
+
+      {/* Cart Actions */}
+      <div className="p-3 border-t border-pos-border grid grid-cols-3 gap-1.5 shrink-0">
+        <button
+          onClick={() => {
+            if (!can("pos.discount.cart")) {
+              toast.error("No permission for cart discounts")
+              return
+            }
+            onDiscount(null)
+          }}
+          disabled={!store.items.length}
+          className="pos-btn-secondary text-xs px-2"
+        >
+          <Tag className="w-3.5 h-3.5" /> Discount
+        </button>
+        <button
+          onClick={() => onNote(null)}
+          className="pos-btn-secondary text-xs px-2"
+        >
+          <MessageSquare className="w-3.5 h-3.5" /> Note
+        </button>
+        <button
+          onClick={onCustomer}
+          className="pos-btn-secondary text-xs px-2"
+        >
+          <Users className="w-3.5 h-3.5" /> Customer
+        </button>
+      </div>
+
+      {/* Payment Button */}
+      <div className="p-3 border-t border-pos-border shrink-0">
+        <button
+          onClick={onPayment}
+          disabled={!store.items.length}
+          className="pos-btn-success w-full h-12 text-base font-bold"
+        >
+          <DollarSign className="w-5 h-5" />
+          Pay {formatCurrency(total, currency)}
+        </button>
+      </div>
+    </>
   )
 }
 
@@ -1140,11 +1239,24 @@ function PaymentModal({
     onComplete("Telecel Agent", receipt)
   }
 
-  const handlePay = () => {
+  const handlePay = useCallback(() => {
     if (method === "cash") return handleCashPay()
     if (method === "momo") return handleMoMoPay()
     if (method === "telecel_agent") return handleAgentPay()
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [method, cashAmount, total, momoPhone, momoProvider, agentCode, agentPhone, agentTxnRef])
+
+  // Enter key to submit payment
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && canPay && !processing) {
+        e.preventDefault()
+        handlePay()
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [canPay, processing, handlePay])
 
   // Quick cash buttons
   const quickAmounts = [
@@ -1156,10 +1268,10 @@ function PaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={processing ? undefined : onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-pos-border sticky top-0 bg-pos-card z-10">
-          <h2 className="text-lg font-bold text-white">Payment</h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white" disabled={processing}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-pos-border sticky top-0 bg-pos-card z-10 rounded-t-2xl">
+          <h2 className="text-lg font-bold text-pos-fg">Payment</h2>
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg" disabled={processing}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1184,7 +1296,7 @@ function PaymentModal({
                 className={`p-2.5 rounded-xl border text-center transition-all ${
                   method === m.key
                     ? "border-brand bg-brand/10 text-brand"
-                    : "border-pos-border text-pos-muted hover:text-white"
+                    : "border-pos-border text-pos-muted hover:text-pos-fg"
                 }`}
               >
                 <div className="mx-auto mb-0.5 flex justify-center">{m.icon}</div>
@@ -1221,8 +1333,8 @@ function PaymentModal({
               </div>
               {cashAmount > 0 && cashAmount >= total && (
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-center">
-                  <p className="text-sm text-emerald-400">Change</p>
-                  <p className="text-2xl font-bold text-emerald-400">{formatCurrency(change, currency)}</p>
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400">Change</p>
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(change, currency)}</p>
                 </div>
               )}
             </div>
@@ -1235,15 +1347,15 @@ function PaymentModal({
                 <label className="block text-xs text-pos-muted mb-1.5">Network Provider</label>
                 <div className="grid grid-cols-3 gap-2">
                   {([
-                    { code: "mtn" as const, name: "MTN", bg: "bg-yellow-500/20 border-yellow-500/50 text-yellow-300" },
-                    { code: "vod" as const, name: "Telecel", bg: "bg-red-500/20 border-red-500/50 text-red-300" },
-                    { code: "atl" as const, name: "AirtelTigo", bg: "bg-pink-500/20 border-pink-500/50 text-pink-300" },
+                    { code: "mtn" as const, name: "MTN", bg: "bg-yellow-500/20 border-yellow-500/50 text-yellow-700 dark:text-yellow-300" },
+                    { code: "vod" as const, name: "Telecel", bg: "bg-red-500/20 border-red-500/50 text-red-700 dark:text-red-300" },
+                    { code: "atl" as const, name: "AirtelTigo", bg: "bg-pink-500/20 border-pink-500/50 text-pink-700 dark:text-pink-300" },
                   ]).map((p) => (
                     <button
                       key={p.code}
                       onClick={() => setMomoProvider(p.code)}
                       className={`p-2 rounded-lg border text-xs font-semibold transition-all ${
-                        momoProvider === p.code ? p.bg : "border-pos-border text-pos-muted hover:text-white"
+                        momoProvider === p.code ? p.bg : "border-pos-border text-pos-muted hover:text-pos-fg"
                       }`}
                     >
                       {p.name}
@@ -1256,15 +1368,16 @@ function PaymentModal({
                 <input
                   type="tel"
                   value={momoPhone}
-                  onChange={(e) => setMomoPhone(e.target.value)}
+                  onChange={(e) => setMomoPhone(e.target.value.replace(/[^0-9]/g, ""))}
                   className="pos-input w-full text-center text-lg font-bold h-12"
-                  placeholder="055 123 4567"
+                  placeholder="0551234567"
                   autoFocus
+                  maxLength={10}
                 />
               </div>
               <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-3 text-center">
-                <Smartphone className="w-6 h-6 text-teal-400 mx-auto mb-1" />
-                <p className="text-xs text-teal-400">
+                <Smartphone className="w-6 h-6 text-teal-600 dark:text-teal-400 mx-auto mb-1" />
+                <p className="text-xs text-teal-600 dark:text-teal-400">
                   Customer will receive a payment prompt on their phone via Paystack
                 </p>
               </div>
@@ -1275,8 +1388,8 @@ function PaymentModal({
           {method === "telecel_agent" && (
             <div className="space-y-3">
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                <p className="text-xs text-red-300 font-semibold mb-1">Telecel Agent Payment</p>
-                <p className="text-[10px] text-red-300/70">
+                <p className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">Telecel Agent Payment</p>
+                <p className="text-[10px] text-red-700/70 dark:text-red-300/70">
                   Record payment details from the Telecel agent transaction.
                   The agent dials *110# and processes the payment using their agent SIM.
                 </p>
@@ -1318,12 +1431,12 @@ function PaymentModal({
           {/* Status / Error */}
           {statusText && (
             <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-3 text-center">
-              <Loader2 className="w-5 h-5 text-teal-400 mx-auto mb-1 animate-spin" />
-              <p className="text-xs text-teal-400">{statusText}</p>
+              <Loader2 className="w-5 h-5 text-teal-600 dark:text-teal-400 mx-auto mb-1 animate-spin" />
+              <p className="text-xs text-teal-600 dark:text-teal-400">{statusText}</p>
             </div>
           )}
           {error && (
-            <p className="text-xs text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg p-2">{error}</p>
+            <p className="text-xs text-red-600 dark:text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg p-2">{error}</p>
           )}
 
           <button
@@ -1358,18 +1471,18 @@ function ReceiptModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border shrink-0">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-pos-fg flex items-center gap-2">
             <Receipt className="w-5 h-5 text-brand" />
             Receipt
           </h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white">
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto flex justify-center p-4 bg-gray-100">
+        <div className="flex-1 overflow-y-auto flex justify-center p-4 bg-pos-bg-subtle">
           <ReceiptPrint ref={receiptRef} data={data} />
         </div>
 
@@ -1404,6 +1517,10 @@ function DiscountModal({
   const apply = () => {
     const numVal = parseFloat(value)
     if (!numVal || numVal <= 0) return
+    if (type === "percentage" && numVal > 100) {
+      toast.error("Percentage cannot exceed 100%")
+      return
+    }
 
     if (targetItemId) {
       const fixedVal = type === "fixed" ? Math.round(numVal * 100) : numVal
@@ -1419,12 +1536,12 @@ function DiscountModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border">
-          <h2 className="text-lg font-bold text-white">
+          <h2 className="text-lg font-bold text-pos-fg">
             {targetItemId ? "Item Discount" : "Cart Discount"}
           </h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white">
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1451,6 +1568,7 @@ function DiscountModal({
             type="number"
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") apply() }}
             className="pos-input w-full text-xl text-center h-14 font-bold"
             placeholder={type === "percentage" ? "10" : "5.00"}
             autoFocus
@@ -1505,12 +1623,12 @@ function NoteModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border">
-          <h2 className="text-lg font-bold text-white">
+          <h2 className="text-lg font-bold text-pos-fg">
             {targetItemId ? "Item Note" : "Sale Note"}
           </h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white">
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1518,8 +1636,9 @@ function NoteModal({
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) save() }}
             className="pos-input w-full h-28 resize-none"
-            placeholder="Add a note..."
+            placeholder="Add a note... (Ctrl+Enter to save)"
             autoFocus
           />
           <button onClick={save} className="pos-btn-primary w-full h-11">
@@ -1538,10 +1657,10 @@ function HeldSalesModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-2xl max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border shrink-0">
-          <h2 className="text-lg font-bold text-white">Held Sales ({store.heldSales.length})</h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white">
+          <h2 className="text-lg font-bold text-pos-fg">Held Sales ({store.heldSales.length})</h2>
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1555,13 +1674,13 @@ function HeldSalesModal({ onClose }: { onClose: () => void }) {
               <div key={sale.id} className="bg-pos-bg rounded-lg p-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-pos-fg">
                       {sale.items.length} item{sale.items.length !== 1 ? "s" : ""}
                     </p>
                     <p className="text-xs text-pos-muted">
                       {new Date(sale.created_at).toLocaleTimeString()} · {sale.staff_name}
                     </p>
-                    {sale.note && <p className="text-xs text-teal-400 mt-1">📝 {sale.note}</p>}
+                    {sale.note && <p className="text-xs text-teal-600 dark:text-teal-400 mt-1">📝 {sale.note}</p>}
                   </div>
                   <p className="text-sm font-bold text-brand">
                     {formatCurrency(saleTotal, sale.items[0]?.currency_code || "GHS")}
@@ -1594,5 +1713,94 @@ function HeldSalesModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+  )
+}
+
+// ─── Mobile Bottom Nav ────────────────────────────────────────────────────────
+
+function MobileBottomNav({
+  can,
+  store,
+  router,
+  onOpenCart,
+}: {
+  can: (p: Parameters<typeof hasPermission>[1]) => boolean
+  store: POSState
+  router: any
+  onOpenCart: () => void
+}) {
+  const [showMore, setShowMore] = useState(false)
+
+  return (
+    <>
+      {/* More menu overlay */}
+      {showMore && (
+        <div className="fixed inset-0 z-20 md:hidden" onClick={() => setShowMore(false)}>
+          <div
+            className="absolute bottom-14 right-2 bg-pos-card border border-pos-border rounded-xl shadow-modal p-1.5 min-w-[160px] space-y-0.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {can("pos.shift_report") && (
+              <button onClick={() => { setShowMore(false); router.push("/shift-report") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+                <Clock className="w-4 h-4 text-pos-muted" /> Shift Report
+              </button>
+            )}
+            {can("pos.refund") && (
+              <button onClick={() => { setShowMore(false); router.push("/refunds") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+                <RotateCcw className="w-4 h-4 text-pos-muted" /> Refunds
+              </button>
+            )}
+            {can("pos.audit_log") && (
+              <button onClick={() => { setShowMore(false); router.push("/audit") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+                <Shield className="w-4 h-4 text-pos-muted" /> Audit Log
+              </button>
+            )}
+            {can("pos.manage_staff") && (
+              <button onClick={() => { setShowMore(false); router.push("/staff") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+                <UserCog className="w-4 h-4 text-pos-muted" /> Staff
+              </button>
+            )}
+            <button onClick={() => { setShowMore(false); router.push("/pin-login") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+              <UserCheck className="w-4 h-4 text-pos-muted" /> Switch Staff
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mobile-nav">
+        <button onClick={() => router.push("/")} className="mobile-nav-item mobile-nav-item-active">
+          <Package className="w-5 h-5" />
+          <span>Terminal</span>
+        </button>
+        {can("pos.customers") && (
+          <button onClick={() => router.push("/customers")} className="mobile-nav-item">
+            <Users className="w-5 h-5" />
+            <span>Customers</span>
+          </button>
+        )}
+        {can("pos.transactions") && (
+          <button onClick={() => router.push("/transactions")} className="mobile-nav-item">
+            <ClipboardList className="w-5 h-5" />
+            <span>Sales</span>
+          </button>
+        )}
+        <button
+          onClick={onOpenCart}
+          className="mobile-nav-item relative"
+        >
+          <ShoppingCart className="w-5 h-5" />
+          <span>Cart</span>
+          {store.getItemCount() > 0 && (
+            <span className="absolute top-0 right-1 w-4 h-4 bg-brand rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+              {store.getItemCount()}
+            </span>
+          )}
+        </button>
+        <button onClick={() => setShowMore(!showMore)} className="mobile-nav-item">
+          <MoreHorizontal className="w-5 h-5" />
+          <span>More</span>
+        </button>
+      </div>
+    </>
   )
 }

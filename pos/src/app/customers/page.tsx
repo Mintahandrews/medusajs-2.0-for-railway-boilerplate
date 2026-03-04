@@ -9,8 +9,9 @@ import {
 import toast from "react-hot-toast"
 import { searchCustomers, createCustomer } from "@/lib/medusa-client"
 import { usePOSStore } from "@/lib/store"
-import { hasPermission } from "@/lib/rbac"
+import { hasPermission, getRoleLabel } from "@/lib/rbac"
 import { useAuditStore } from "@/lib/audit"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function CustomersPage() {
   const router = useRouter()
@@ -68,14 +69,17 @@ export default function CustomersPage() {
           <button onClick={() => router.push("/")} className="pos-btn-ghost">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-lg font-bold text-white flex items-center gap-2">
+          <h1 className="text-lg font-bold text-pos-fg flex items-center gap-2">
             <Users className="w-5 h-5 text-brand" />
             Customers
           </h1>
         </div>
-        <button onClick={() => setShowCreate(true)} className="pos-btn-primary text-xs">
-          <UserPlus className="w-4 h-4" /> New Customer
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button onClick={() => setShowCreate(true)} className="pos-btn-primary text-xs">
+            <UserPlus className="w-4 h-4" /> <span className="hidden sm:inline">New Customer</span><span className="sm:hidden">New</span>
+          </button>
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto p-4 space-y-4">
@@ -84,7 +88,7 @@ export default function CustomersPage() {
           <div className="pos-card p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-pos-muted">Current customer</p>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-pos-fg">
                 {store.customer.first_name} {store.customer.last_name}
               </p>
               {store.customer.email && (
@@ -96,7 +100,7 @@ export default function CustomersPage() {
                 store.setCustomer(null)
                 toast("Customer removed from sale")
               }}
-              className="pos-btn-ghost text-xs text-red-400"
+              className="pos-btn-ghost text-xs text-red-600 dark:text-red-400"
             >
               <X className="w-4 h-4" /> Remove
             </button>
@@ -135,10 +139,10 @@ export default function CustomersPage() {
                     {(customer.last_name?.[0] || "").toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-pos-fg">
                       {customer.first_name} {customer.last_name}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-pos-muted mt-0.5">
+                    <div className="flex items-center gap-3 text-xs text-pos-muted mt-0.5 flex-wrap">
                       {customer.email && (
                         <span className="flex items-center gap-1">
                           <Mail className="w-3 h-3" /> {customer.email}
@@ -152,7 +156,7 @@ export default function CustomersPage() {
                     </div>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-pos-muted group-hover:text-white transition-colors" />
+                <ChevronRight className="w-4 h-4 text-pos-muted group-hover:text-pos-fg transition-colors" />
               </button>
             ))}
           </div>
@@ -193,6 +197,8 @@ function CreateCustomerModal({
   onClose: () => void
   onCreated: (customer: any) => void
 }) {
+  const store = usePOSStore()
+  const audit = useAuditStore()
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
@@ -218,6 +224,12 @@ function CreateCustomerModal({
         email: email.trim(),
         ...(phone.trim() ? { phone: phone.trim() } : {}),
       })
+      audit.addEntry({
+        action: "customer_create",
+        staffName: store.staffName,
+        staffRole: getRoleLabel(store.staffRole),
+        detail: `Created customer: ${firstName} ${lastName} (${email})`,
+      })
       toast.success("Customer created")
       onCreated(data.customer)
     } catch (err: any) {
@@ -229,10 +241,10 @@ function CreateCustomerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border">
-          <h2 className="text-lg font-bold text-white">New Customer</h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white">
+          <h2 className="text-lg font-bold text-pos-fg">New Customer</h2>
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
             <X className="w-5 h-5" />
           </button>
         </div>

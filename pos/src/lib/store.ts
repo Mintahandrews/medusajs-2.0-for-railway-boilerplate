@@ -161,6 +161,10 @@ export const usePOSStore = create<POSState>()(
           get().removeItem(id)
           return
         }
+        const item = get().items.find((i) => i.id === id)
+        if (item && item.inventory_quantity != null && quantity > item.inventory_quantity) {
+          return // Prevent exceeding available stock
+        }
         set({
           items: get().items.map((i) => {
             if (i.id !== id) return i
@@ -249,8 +253,7 @@ export const usePOSStore = create<POSState>()(
       },
 
       restoreHeldSale: (id) => {
-        const { heldSales } = get()
-        const sale = heldSales.find((s) => s.id === id)
+        const sale = get().heldSales.find((s) => s.id === id)
         if (!sale) return
 
         // Hold current cart first if it has items
@@ -259,11 +262,14 @@ export const usePOSStore = create<POSState>()(
           get().holdCurrentSale(get().staffName)
         }
 
+        // Read fresh heldSales AFTER holdCurrentSale to include the newly held sale
+        const freshHeldSales = get().heldSales
+
         set({
           items: sale.items,
           customer: sale.customer,
           cartNote: sale.note,
-          heldSales: heldSales.filter((s) => s.id !== id),
+          heldSales: freshHeldSales.filter((s) => s.id !== id),
         })
       },
 

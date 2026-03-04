@@ -10,7 +10,9 @@ import toast from "react-hot-toast"
 import { getOrder, getOrders, createRefund } from "@/lib/medusa-client"
 import { formatCurrency } from "@/lib/utils"
 import { usePOSStore } from "@/lib/store"
-import { hasPermission } from "@/lib/rbac"
+import { hasPermission, getRoleLabel } from "@/lib/rbac"
+import { useAuditStore } from "@/lib/audit"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function RefundsPage() {
   const router = useRouter()
@@ -84,22 +86,23 @@ export default function RefundsPage() {
 
   return (
     <div className="min-h-screen bg-pos-bg">
-      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center px-4 sticky top-0 z-10">
+      <header className="h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/")} className="pos-btn-ghost">
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <h1 className="text-lg font-bold text-white flex items-center gap-2">
+          <h1 className="text-lg font-bold text-pos-fg flex items-center gap-2">
             <RotateCcw className="w-5 h-5 text-brand" />
             Refunds & Returns
           </h1>
         </div>
+        <ThemeToggle />
       </header>
 
       <div className="max-w-3xl mx-auto p-4 space-y-4">
         {/* Order Lookup */}
         <div className="pos-card p-4">
-          <h3 className="text-sm font-semibold text-white mb-3">Look up Order</h3>
+          <h3 className="text-sm font-semibold text-pos-fg mb-3">Look up Order</h3>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
@@ -125,7 +128,7 @@ export default function RefundsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-pos-muted">Order</p>
-                <p className="text-lg font-bold text-white font-mono">
+                <p className="text-lg font-bold text-pos-fg font-mono">
                   #{order.display_id || order.id?.slice(0, 8)}
                 </p>
               </div>
@@ -147,11 +150,11 @@ export default function RefundsPage() {
                         <Package className="w-3.5 h-3.5 text-pos-muted" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-white">{item.title}</p>
+                        <p className="text-xs font-medium text-pos-fg">{item.title}</p>
                         <p className="text-[10px] text-pos-muted">Qty: {item.quantity}</p>
                       </div>
                     </div>
-                    <p className="text-xs font-semibold text-white">
+                    <p className="text-xs font-semibold text-pos-fg">
                       {formatCurrency(item.unit_price * item.quantity, currency)}
                     </p>
                   </div>
@@ -179,7 +182,7 @@ export default function RefundsPage() {
         {/* Recent Orders */}
         {!order && (
           <div className="pos-card p-4">
-            <h3 className="text-sm font-semibold text-white mb-3">Recent Orders</h3>
+            <h3 className="text-sm font-semibold text-pos-fg mb-3">Recent Orders</h3>
             {loading ? (
               <div className="flex items-center justify-center h-32">
                 <Loader2 className="w-6 h-6 text-brand animate-spin" />
@@ -192,17 +195,17 @@ export default function RefundsPage() {
                   <button
                     key={o.id}
                     onClick={() => selectOrder(o.id)}
-                    className="w-full flex items-center justify-between bg-pos-bg rounded-lg p-3 hover:bg-white/5 transition-colors text-left"
+                    className="w-full flex items-center justify-between bg-pos-bg rounded-lg p-3 hover-subtle transition-colors text-left"
                   >
                     <div>
-                      <p className="text-xs font-mono font-medium text-white">
+                      <p className="text-xs font-mono font-medium text-pos-fg">
                         #{o.display_id || o.id?.slice(0, 8)}
                       </p>
                       <p className="text-[10px] text-pos-muted">
                         {o.items?.length || 0} items · {new Date(o.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-white">
+                    <p className="text-sm font-semibold text-pos-fg">
                       {formatCurrency(o.total || 0, currency)}
                     </p>
                   </button>
@@ -242,6 +245,7 @@ function RefundModal({
   onRefunded: () => void
 }) {
   const store = usePOSStore()
+  const audit = useAuditStore()
   const [amount, setAmount] = useState("")
   const [reason, setReason] = useState("customer_request")
   const [note, setNote] = useState("")
@@ -275,6 +279,12 @@ function RefundModal({
         note: `Refund for order #${order.display_id || order.id?.slice(0, 8)}`,
         order_id: order.id,
       })
+      audit.addEntry({
+        action: "refund",
+        staffName: store.staffName,
+        staffRole: getRoleLabel(store.staffRole),
+        detail: `Refunded ${formatCurrency(refundAmount, currency)} for order #${order.display_id || order.id?.slice(0, 8)} — ${reason}`,
+      })
       onRefunded()
     } catch (err: any) {
       toast.error(err.message || "Failed to process refund")
@@ -285,10 +295,10 @@ function RefundModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border">
-          <h2 className="text-lg font-bold text-white">Process Refund</h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-white">
+          <h2 className="text-lg font-bold text-pos-fg">Process Refund</h2>
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -297,7 +307,7 @@ function RefundModal({
           <div className="bg-pos-bg rounded-lg p-3 flex items-center justify-between">
             <div>
               <p className="text-xs text-pos-muted">Order</p>
-              <p className="text-sm font-mono font-semibold text-white">
+              <p className="text-sm font-mono font-semibold text-pos-fg">
                 #{order.display_id || order.id?.slice(0, 8)}
               </p>
             </div>
@@ -315,6 +325,7 @@ function RefundModal({
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && refundAmount > 0) handleRefund() }}
               className="pos-input w-full text-xl text-center h-14 font-bold"
               placeholder="0.00"
               step="0.01"
@@ -355,12 +366,12 @@ function RefundModal({
 
           {refundAmount > 0 && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
               <div>
-                <p className="text-sm text-red-400 font-semibold">
+                <p className="text-sm text-red-600 dark:text-red-400 font-semibold">
                   Refund {formatCurrency(refundAmount, currency)}
                 </p>
-                <p className="text-xs text-red-400/70">This action cannot be undone</p>
+                <p className="text-xs text-red-600/70 dark:text-red-400/70">This action cannot be undone</p>
               </div>
             </div>
           )}

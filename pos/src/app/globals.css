@@ -3,27 +3,51 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 180 33% 8%;
-    --foreground: 180 20% 95%;
-    --card: 180 33% 11%;
-    --card-foreground: 180 20% 95%;
-    --popover: 180 33% 11%;
-    --popover-foreground: 180 20% 95%;
-    --primary: 174 84% 40%;
-    --primary-foreground: 180 33% 8%;
-    --secondary: 180 20% 14%;
-    --secondary-foreground: 180 20% 95%;
-    --muted: 180 20% 14%;
-    --muted-foreground: 180 15% 55%;
-    --accent: 180 20% 14%;
-    --accent-foreground: 180 20% 95%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 180 20% 95%;
-    --border: 180 20% 17%;
-    --input: 180 20% 17%;
-    --ring: 174 84% 40%;
+  /* ─── Dark theme (default) ─── */
+  :root,
+  .dark {
+    --pos-bg: #09090b;
+    --pos-bg-subtle: #111113;
+    --pos-card: #18181b;
+    --pos-border: #27272a;
+    --pos-border-strong: #3f3f46;
+    --pos-surface: #1c1c1f;
+    --pos-muted: #71717a;
+    --pos-muted-fg: #a1a1aa;
+    --pos-fg: #fafafa;
+    --pos-hover: rgba(255, 255, 255, 0.05);
+    --pos-hover-strong: rgba(255, 255, 255, 0.10);
+    --pos-overlay: rgba(0, 0, 0, 0.60);
+    --pos-scrollbar: #3f3f46;
+    --pos-scrollbar-hover: #52525b;
+    --pos-toast-bg: #18181b;
+    --pos-toast-fg: #fafafa;
+    --pos-toast-border: #27272a;
     --radius: 0.75rem;
+    color-scheme: dark;
+  }
+
+  /* ─── Light theme ─── */
+  .light {
+    --pos-bg: #f8f9fa;
+    --pos-bg-subtle: #f1f3f5;
+    --pos-card: #ffffff;
+    --pos-border: #e5e7eb;
+    --pos-border-strong: #d1d5db;
+    --pos-surface: #f3f4f6;
+    --pos-muted: #6b7280;
+    --pos-muted-fg: #4b5563;
+    --pos-fg: #111827;
+    --pos-hover: rgba(0, 0, 0, 0.04);
+    --pos-hover-strong: rgba(0, 0, 0, 0.08);
+    --pos-overlay: rgba(0, 0, 0, 0.40);
+    --pos-scrollbar: #d1d5db;
+    --pos-scrollbar-hover: #9ca3af;
+    --pos-toast-bg: #ffffff;
+    --pos-toast-fg: #111827;
+    --pos-toast-border: #e5e7eb;
+    --radius: 0.75rem;
+    color-scheme: light;
   }
 }
 
@@ -32,12 +56,14 @@
     border-color: theme('colors.pos.border');
   }
   body {
-    @apply bg-pos-bg text-white;
+    @apply bg-pos-bg text-pos-fg;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Custom scrollbar for dark theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -46,59 +72,175 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a5454;
+  background: var(--pos-scrollbar);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a7070;
+  background: var(--pos-scrollbar-hover);
 }
 
-/* POS-specific utilities */
+/* Utilities */
 @layer utilities {
   .pos-glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    backdrop-filter: blur(20px);
+    background: var(--pos-hover);
+    border: 1px solid var(--pos-border);
   }
   .pos-card {
-    @apply bg-pos-card rounded-xl border border-pos-border;
+    @apply bg-pos-card rounded-xl border border-pos-border shadow-card;
   }
   .pos-input {
-    @apply bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand;
+    @apply bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-pos-fg placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/60 transition-colors;
   }
   .pos-input-lg {
-    @apply bg-pos-card/70 border border-white/10 rounded-xl pr-4 pl-12 h-12 text-base text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-150;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
+    @apply bg-pos-card border border-pos-border rounded-xl pr-4 pl-12 h-12 text-base text-pos-fg placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/60 transition-all duration-150;
   }
   .auth-gradient {
-    background-color: #041a1a;
+    background-color: var(--pos-bg);
     background-image:
-      radial-gradient(circle at top left, rgba(19, 129, 129, 0.45), transparent 55%),
-      radial-gradient(circle at 80% 20%, rgba(7, 89, 133, 0.35), transparent 45%),
-      linear-gradient(145deg, rgba(4, 46, 46, 0.9), rgba(3, 18, 22, 0.9));
+      radial-gradient(ellipse at top left, rgba(20, 184, 166, 0.12), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(13, 148, 136, 0.06), transparent 50%);
   }
   .auth-card {
-    @apply bg-white/5 border border-white/10 rounded-2xl backdrop-blur-2xl shadow-2xl shadow-black/40;
+    @apply bg-pos-card border border-pos-border rounded-2xl shadow-modal;
   }
   .pos-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand/50 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:ring-offset-1 focus:ring-offset-pos-bg disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
   }
   .pos-btn-primary {
-    @apply pos-btn bg-brand text-white hover:bg-brand-700 active:scale-[0.98];
+    @apply pos-btn bg-brand text-white hover:bg-brand-600 active:scale-[0.98] shadow-sm;
   }
   .pos-btn-secondary {
-    @apply pos-btn bg-pos-card text-white border border-pos-border hover:bg-white/10 active:scale-[0.98];
+    @apply pos-btn bg-pos-surface text-pos-fg border border-pos-border active:scale-[0.98];
+    &:hover { background: var(--pos-hover-strong); }
   }
   .pos-btn-ghost {
-    @apply pos-btn text-pos-muted hover:text-white hover:bg-white/5;
+    @apply pos-btn text-pos-muted hover:text-pos-fg;
+    &:hover { background: var(--pos-hover); }
   }
   .pos-btn-danger {
-    @apply pos-btn bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30;
+    @apply pos-btn bg-red-500/10 text-red-600 border border-red-500/20 hover:bg-red-500/20;
+  }
+  .dark .pos-btn-danger {
+    @apply text-red-400;
   }
   .pos-btn-success {
-    @apply pos-btn bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98];
+    @apply pos-btn bg-brand text-white hover:bg-brand-600 active:scale-[0.98] shadow-sm;
+  }
+  .pos-badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border;
+  }
+  .pos-page-header {
+    @apply h-14 bg-pos-card border-b border-pos-border flex items-center justify-between px-4 sticky top-0 z-20 shrink-0;
+  }
+  .pos-page-title {
+    @apply text-sm font-semibold text-pos-fg flex items-center gap-2;
+  }
+  .pos-section-title {
+    @apply text-xs font-medium text-pos-muted uppercase tracking-wider;
+  }
+  .pos-table-header {
+    @apply text-xs font-medium text-pos-muted uppercase tracking-wider;
+  }
+  .pos-stat-card {
+    @apply pos-card p-4 flex items-center gap-3;
   }
 }
 
-/* Number pad button styling */
+/* Select dropdown dark theme */
+select.pos-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+select.pos-input option {
+  background-color: var(--pos-card);
+  color: var(--pos-fg);
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Theme-aware hover utilities */
+.hover-subtle {
+  &:hover { background: var(--pos-hover); }
+}
+.hover-strong {
+  &:hover { background: var(--pos-hover-strong); }
+}
+.qty-btn {
+  &:hover { background: var(--pos-hover-strong); }
+}
+
+/* Number pad button */
 .numpad-btn {
-  @apply flex items-center justify-center rounded-xl bg-pos-card border border-pos-border text-white text-xl font-semibold h-14 transition-all duration-100 hover:bg-white/10 active:scale-95 active:bg-white/15 select-none;
+  @apply flex items-center justify-center rounded-xl bg-pos-card border border-pos-border text-pos-fg text-xl font-semibold h-14 transition-all duration-100 active:scale-95 select-none;
+  &:hover { background: var(--pos-hover-strong); }
+  &:active { background: var(--pos-hover-strong); }
+}
+
+/* Teal accent line (decorative) */
+.teal-accent-top {
+  @apply relative;
+}
+.teal-accent-top::before {
+  content: '';
+  @apply absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand/80 via-brand/40 to-transparent;
+}
+
+/* Mobile cart drawer */
+@layer utilities {
+  .cart-drawer {
+    @apply fixed inset-y-0 right-0 z-40 w-full max-w-[400px] bg-pos-card border-l border-pos-border shadow-modal transform transition-transform duration-300 ease-out;
+  }
+  .cart-drawer-open {
+    @apply translate-x-0;
+  }
+  .cart-drawer-closed {
+    @apply translate-x-full;
+  }
+  .cart-overlay {
+    @apply fixed inset-0 z-30 backdrop-blur-sm transition-opacity duration-300;
+    background: var(--pos-overlay);
+  }
+}
+
+/* Print styles for shift report */
+@media print {
+  .pos-card {
+    background: white !important;
+    border-color: #e5e7eb !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  .text-pos-fg { color: black !important; }
+  .text-pos-muted { color: #6b7280 !important; }
+  .text-brand { color: #0d9488 !important; }
+  .text-emerald-400, .text-emerald-600 { color: #059669 !important; }
+  .text-red-400, .text-red-600 { color: #dc2626 !important; }
+  .bg-pos-bg { background: white !important; }
+  .bg-pos-card { background: white !important; }
+  .border-pos-border { border-color: #e5e7eb !important; }
+  header, .mobile-nav, .pos-btn-danger, .pos-btn-primary { display: none !important; }
+}
+
+/* Mobile bottom nav */
+@layer utilities {
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 z-20 bg-pos-card border-t border-pos-border px-2 py-1 flex items-center justify-around md:hidden;
+  }
+  .mobile-nav-item {
+    @apply flex flex-col items-center gap-0.5 px-2 py-1.5 text-pos-muted text-[10px] font-medium rounded-lg transition-colors;
+  }
+  .mobile-nav-item-active {
+    @apply text-brand;
+  }
 }

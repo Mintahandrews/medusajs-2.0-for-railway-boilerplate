@@ -113,12 +113,12 @@ export function getActionLabel(action: AuditAction): string {
 
 export function getActionColor(action: AuditAction): string {
   switch (action) {
-    case "sale_complete": return "text-emerald-400"
-    case "refund": case "sale_void": return "text-red-400"
-    case "discount_item": case "discount_cart": return "text-orange-400"
-    case "login": case "logout": case "pin_login": return "text-teal-400"
-    case "shift_open": case "shift_close": case "role_change": return "text-amber-400"
-    case "drawer_open": case "drawer_cash_in": case "drawer_cash_out": return "text-purple-400"
+    case "sale_complete": return "text-emerald-600 dark:text-emerald-400"
+    case "refund": case "sale_void": return "text-red-600 dark:text-red-400"
+    case "discount_item": case "discount_cart": return "text-orange-600 dark:text-orange-400"
+    case "login": case "logout": case "pin_login": return "text-teal-600 dark:text-teal-400"
+    case "shift_open": case "shift_close": case "role_change": return "text-amber-600 dark:text-amber-400"
+    case "drawer_open": case "drawer_cash_in": case "drawer_cash_out": return "text-purple-600 dark:text-purple-400"
     default: return "text-pos-muted"
   }
 }

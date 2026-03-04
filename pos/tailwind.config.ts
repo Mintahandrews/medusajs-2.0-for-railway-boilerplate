@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss"
 
 const config: Config = {
+  darkMode: "class",
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
@@ -19,17 +20,26 @@ const config: Config = {
           900: "#134e4a",
         },
         pos: {
-          bg: "#0c1a1a",
-          card: "#132626",
-          border: "#1e3a3a",
-          surface: "#132626",
-          muted: "#5f8a8a",
+          bg: "var(--pos-bg)",
+          "bg-subtle": "var(--pos-bg-subtle)",
+          card: "var(--pos-card)",
+          border: "var(--pos-border)",
+          "border-strong": "var(--pos-border-strong)",
+          surface: "var(--pos-surface)",
+          muted: "var(--pos-muted)",
+          "muted-fg": "var(--pos-muted-fg)",
           accent: "#14b8a6",
+          fg: "var(--pos-fg)",
         },
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
+      },
+      boxShadow: {
+        "card": "0 1px 2px 0 rgb(0 0 0 / 0.15), 0 1px 3px 0 rgb(0 0 0 / 0.1)",
+        "card-hover": "0 4px 12px 0 rgb(0 0 0 / 0.25)",
+        "modal": "0 16px 70px rgb(0 0 0 / 0.5)",
       },
     },
   },
