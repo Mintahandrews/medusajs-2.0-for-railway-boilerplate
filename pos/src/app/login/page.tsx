@@ -66,24 +66,24 @@ export default function LoginPage() {
           <p className="text-pos-muted mt-1">Sign in to start your shift</p>
         </div>
 
-        <form onSubmit={handleLogin} className="pos-card p-6 space-y-4">
+        <form onSubmit={handleLogin} className="pos-card p-8 space-y-6 shadow-2xl/20">
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">
               {error}
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-teal-200/70 mb-1.5">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold tracking-wide text-teal-100/80">
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pos-input w-full pl-10"
+                className="pos-input-lg w-full pl-12"
                 placeholder="admin@letscase.com"
                 required
                 autoFocus
@@ -91,17 +91,17 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-teal-200/70 mb-1.5">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold tracking-wide text-teal-100/80">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-pos-muted" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pos-input w-full pl-10"
+                className="pos-input-lg w-full pl-12"
                 placeholder="Enter password"
                 required
               />
@@ -111,7 +111,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="pos-btn-primary w-full h-12 text-base"
+            className="pos-btn-primary w-full h-12 text-base rounded-xl"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

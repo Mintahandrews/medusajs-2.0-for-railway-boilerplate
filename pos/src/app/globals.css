@@ -64,6 +64,10 @@
   .pos-input {
     @apply bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand;
   }
+  .pos-input-lg {
+    @apply bg-pos-card/70 border border-white/10 rounded-xl px-4 h-12 text-base text-white placeholder:text-pos-muted focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-150;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
+  }
   .pos-btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand/50 disabled:opacity-50 disabled:pointer-events-none;
   }
