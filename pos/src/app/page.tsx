@@ -40,6 +40,15 @@ interface Product {
 
 // ─── Main POS Page ───────────────────────────────────────────────────────────
 
+const toMinorUnits = (amount: number, currencyCode: string) => {
+  if (!amount || !currencyCode) return amount
+  const code = currencyCode.toLowerCase()
+  if (code === "ghs") {
+    return Math.round(amount * 100)
+  }
+  return amount
+}
+
 export default function POSTerminal() {
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -205,6 +214,8 @@ export default function POSTerminal() {
       return
     }
 
+    const normalizedAmount = toMinorUnits(price.amount, price.currency_code)
+
     store.addItem({
       id: `${variant.id}-${Date.now()}`,
       variant_id: variant.id,
@@ -213,7 +224,7 @@ export default function POSTerminal() {
       variant_title: variant.title || "Default",
       thumbnail: product.thumbnail,
       quantity: 1,
-      unit_price: price.amount,
+      unit_price: normalizedAmount,
       currency_code: price.currency_code,
       barcode: variant.barcode,
       sku: variant.sku,
@@ -539,7 +550,12 @@ export default function POSTerminal() {
                         <p className="text-[10px] text-pos-muted truncate">{variant.title}</p>
                       )}
                       <p className="text-sm font-bold text-brand mt-1">
-                        {price ? formatCurrency(price.amount, price.currency_code) : "N/A"}
+                        {price
+                          ? formatCurrency(
+                              toMinorUnits(price.amount, price.currency_code),
+                              price.currency_code
+                            )
+                          : "N/A"}
                       </p>
                       {variant?.inventory_quantity != null && variant.inventory_quantity <= 5 && (
                         <p className="text-[10px] text-orange-400 mt-0.5">
