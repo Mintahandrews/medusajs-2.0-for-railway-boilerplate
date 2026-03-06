@@ -17,7 +17,7 @@ export default function ProductJsonLd({ product, countryCode }: Props) {
 
   const amounts = prices
     .map((p: any) => p.calculated_amount ?? p.original_amount)
-    .filter((a): a is number => typeof a === "number" && a > 0)
+    .filter((a): a is number => typeof a === "number" && !isNaN(a) && isFinite(a) && a > 0)
 
   const currencyCode = (prices[0] as any)?.currency_code || "GHS"
   const lowPrice = amounts.length ? Math.min(...amounts) : undefined

@@ -8,7 +8,7 @@ import {
   Smartphone, Tag, MessageSquare, Pause, RotateCcw, Users,
   BarChart3, LogOut, ScanBarcode, Package, Shield, ClipboardList,
   X, Loader2, Receipt, Printer, Clock, UserCheck, UserCog,
-  RefreshCw, MoreHorizontal,
+  RefreshCw, MoreHorizontal, BookOpen,
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { usePOSStore, type POSCartItem, type POSState } from "@/lib/store"
@@ -1799,6 +1799,9 @@ function MobileBottomNav({
                 <UserCog className="w-4 h-4 text-pos-muted" /> Staff
               </button>
             )}
+            <button onClick={() => { setShowMore(false); router.push("/visual-novel") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+              <BookOpen className="w-4 h-4 text-pos-muted" /> Visual Novel
+            </button>
             <button onClick={() => { setShowMore(false); router.push("/pin-login") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
               <UserCheck className="w-4 h-4 text-pos-muted" /> Switch Staff
             </button>
