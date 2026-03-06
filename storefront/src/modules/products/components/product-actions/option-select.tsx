@@ -2,6 +2,8 @@ import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import React from "react"
 
+type VariantOption = { option?: { title?: string }; value?: string }
+
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
   current: string | undefined
@@ -32,7 +34,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
           let valueDisabled = false
           if (variants && variants.length) {
             const matching = variants.filter((varnt) =>
-              (varnt.options || []).some((ov: any) => ov.option?.title === option.title && ov.value === v)
+              (varnt.options || []).some((ov: VariantOption) => ov.option?.title === option.title && ov.value === v)
             )
 
             // If there are matching variants, check if any are purchasable

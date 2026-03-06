@@ -74,8 +74,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
               {/* Stock badge top-right */}
               {(() => {
                 const thresholdRaw =
-                  // @ts-ignore
-                  product?.metadata?.low_stock_threshold ?? (product as any)?.low_stock_threshold
+                  (product?.metadata as Record<string, unknown> | null)?.low_stock_threshold
                 const threshold = Number(thresholdRaw ?? 5)
 
                 const managedVariants = (product.variants || []).filter((v) => v?.manage_inventory)

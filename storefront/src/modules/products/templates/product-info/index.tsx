@@ -1,6 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
-import { useMemo } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 type ProductInfoProps = {
@@ -40,8 +39,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
          */}
         {(() => {
           const thresholdRaw =
-            // @ts-ignore - metadata may be typed as any
-            product?.metadata?.low_stock_threshold ?? (product as any)?.low_stock_threshold
+            (product?.metadata as Record<string, unknown> | null)?.low_stock_threshold
           const threshold = Number(thresholdRaw ?? 5)
 
           const managedVariants = (product.variants || []).filter((v) => v?.manage_inventory)
