@@ -51,18 +51,23 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const fallback = {
+    title: "Product",
+    description: "Premium phone cases and tech accessories at Letscase Ghana.",
+  }
+
   try {
     const { handle, countryCode } = await params
     const region = await getRegion(countryCode)
 
     if (!region) {
-      notFound()
+      return fallback
     }
 
     const product = await getProductByHandle(handle, region.id)
 
     if (!product) {
-      notFound()
+      return fallback
     }
 
     const baseUrl = getBaseURL()
@@ -95,10 +100,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     }
   } catch {
-    return {
-      title: "Product",
-      description: "Premium phone cases and tech accessories at Letscase Ghana.",
-    }
+    return fallback
   }
 }
 
