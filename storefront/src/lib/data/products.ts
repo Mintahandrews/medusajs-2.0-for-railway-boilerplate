@@ -24,6 +24,7 @@ export const getProductsById = cache(async function ({
       { next: { tags: ["products"] } }
     )
     .then(({ products }) => products)
+    .catch(() => [] as HttpTypes.StoreProduct[])
 })
 
 export const getProductByHandle = cache(async function (
@@ -41,6 +42,7 @@ export const getProductByHandle = cache(async function (
       { next: { tags: ["products"] } }
     )
     .then(({ products }) => products[0])
+    .catch(() => undefined)
 })
 
 export const searchProducts = cache(async function (
