@@ -5,7 +5,7 @@ import ScrollToTop from "@modules/common/components/scroll-to-top"
 import WebsiteJsonLd from "@modules/seo/components/website-jsonld"
 import PostHogProvider from "@lib/posthog/provider"
 import PostHogPageView from "@lib/posthog/pageview"
-import "styles/globals.css"
+import "../styles/globals.css"
 
 const inter = Inter({
   subsets: ["latin"],
