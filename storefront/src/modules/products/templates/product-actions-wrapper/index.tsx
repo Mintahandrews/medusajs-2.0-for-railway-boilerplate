@@ -12,10 +12,18 @@ export default async function ProductActionsWrapper({
   id: string
   region: HttpTypes.StoreRegion
 }) {
-  const [product] = await getProductsById({
-    ids: [id],
-    regionId: region.id,
-  })
+  let product: any = null
+
+  try {
+    const products = await getProductsById({
+      ids: [id],
+      regionId: region.id,
+    })
+    product = products?.[0] ?? null
+  } catch (e) {
+    console.error("[ProductActionsWrapper] Failed to fetch product:", id, e)
+    return null
+  }
 
   if (!product) {
     return null

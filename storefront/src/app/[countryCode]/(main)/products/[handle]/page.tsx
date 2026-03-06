@@ -104,13 +104,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { countryCode, handle } = await params
-  const region = await getRegion(countryCode)
+
+  let region: Awaited<ReturnType<typeof getRegion>> | null = null
+  let pricedProduct: Awaited<ReturnType<typeof getProductByHandle>> | null = null
+
+  try {
+    region = await getRegion(countryCode)
+  } catch (e) {
+    console.error("[ProductPage] Failed to fetch region:", e)
+  }
 
   if (!region) {
     notFound()
   }
 
-  const pricedProduct = await getProductByHandle(handle, region.id)
+  try {
+    pricedProduct = await getProductByHandle(handle, region.id)
+  } catch (e) {
+    console.error("[ProductPage] Failed to fetch product:", handle, e)
+  }
+
   if (!pricedProduct) {
     notFound()
   }

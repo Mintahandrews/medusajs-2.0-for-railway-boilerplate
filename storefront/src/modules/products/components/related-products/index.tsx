@@ -44,14 +44,20 @@ export default async function RelatedProducts({
   }
   queryParams.is_giftcard = false
 
-  const products = await getProductsList({
-    queryParams,
-    countryCode,
-  }).then(({ response }) => {
-    return response.products.filter(
+  let products: HttpTypes.StoreProduct[] = []
+
+  try {
+    const result = await getProductsList({
+      queryParams,
+      countryCode,
+    })
+    products = (result?.response?.products ?? []).filter(
       (responseProduct) => responseProduct.id !== product.id
     )
-  })
+  } catch (e) {
+    console.error("[RelatedProducts] Failed to fetch related products:", e)
+    return null
+  }
 
   if (!products.length) {
     return null

@@ -20,7 +20,7 @@ export const convertToLocale = ({
     normalizedCurrency === "GHS" && locale === "en-US" ? "en-GH" : locale
 
   return currency_code && !isEmpty(currency_code)
-    ? new Intl.NumberFormat(locale, {
+    ? new Intl.NumberFormat(effectiveLocale, {
         style: "currency",
         currency: currency_code,
         currencyDisplay: normalizedCurrency === "GHS" ? "narrowSymbol" : "symbol",
