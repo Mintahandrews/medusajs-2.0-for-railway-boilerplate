@@ -81,6 +81,8 @@ export default function POSTerminal() {
 
   // Product data
   const [products, setProducts] = useState<Product[]>([])
+  const [totalProductCount, setTotalProductCount] = useState(0)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -110,11 +112,12 @@ export default function POSTerminal() {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true)
-      const params: any = { limit: 100 }
+      const params: any = { limit: 200 }
       if (searchQuery) params.q = searchQuery
       if (activeCategory) params.category_id = [activeCategory]
       const data = await getProducts(params)
       setProducts(data.products || [])
+      setTotalProductCount(data.count || 0)
     } catch (err: any) {
       console.error("Failed to fetch products:", err)
       if (err.message?.includes("Unauthorized") || err.message?.includes("401")) {
@@ -128,11 +131,26 @@ export default function POSTerminal() {
     }
   }, [searchQuery, activeCategory, router])
 
+  const loadMoreProducts = async () => {
+    if (loadingMore) return
+    try {
+      setLoadingMore(true)
+      const params: any = { limit: 200, offset: products.length }
+      if (searchQuery) params.q = searchQuery
+      if (activeCategory) params.category_id = [activeCategory]
+      const data = await getProducts(params)
+      setProducts((prev) => [...prev, ...(data.products || [])])
+    } catch {
+      toast.error("Failed to load more products")
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   const fetchCategories = useCallback(async () => {
     try {
       const data = await getCategories()
       const cats = (data.product_categories || [])
-        .filter((c: any) => !c.parent_category_id)
         .map((c: any) => ({ id: c.id, name: c.name }))
       setCategories(cats)
     } catch {
@@ -215,7 +233,7 @@ export default function POSTerminal() {
     }
 
     const price = variant.prices?.find(
-      (p) => p.currency_code === currency.toLowerCase()
+      (p) => p.currency_code.toLowerCase() === currency.toLowerCase()
     )
     if (!price) {
       toast.error("No price found for this currency")
@@ -448,7 +466,7 @@ export default function POSTerminal() {
                   placeholder="Search products or scan barcode..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pos-input w-full pl-10 pr-10"
+                  className="pos-input-icon w-full pr-10"
                 />
                 {searchQuery && (
                   <button
@@ -532,21 +550,23 @@ export default function POSTerminal() {
                 <p className="text-xs mt-1">Try a different search or category</p>
               </div>
             ) : (
+              <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                {products.map((product) => {
-                  const variant = product.variants?.[0]
-                  const price = variant?.prices?.find(
-                    (p) => p.currency_code === currency.toLowerCase()
+                {products.flatMap((product) =>
+                  (product.variants || []).map((variant) => ({ product, variant }))
+                ).map(({ product, variant }) => {
+                  const price = variant.prices?.find(
+                    (p) => p.currency_code.toLowerCase() === currency.toLowerCase()
                   )
+                  const isOutOfStock = variant.inventory_quantity != null && variant.inventory_quantity <= 0
+                  const showVariantTitle = product.variants.length > 1
                   return (
                     <button
-                      key={product.id}
-                      onClick={() => {
-                        if (variant) addProductToCart(product, variant)
-                      }}
-                      disabled={variant?.inventory_quantity != null && variant.inventory_quantity <= 0}
+                      key={variant.id}
+                      onClick={() => addProductToCart(product, variant)}
+                      disabled={isOutOfStock}
                       className={`pos-card p-2.5 text-left transition-all group cursor-pointer active:scale-[0.97] ${
-                        variant?.inventory_quantity != null && variant.inventory_quantity <= 0
+                        isOutOfStock
                           ? "opacity-50 cursor-not-allowed"
                           : "hover:border-brand/40 hover:shadow-card-hover"
                       }`}
@@ -563,18 +583,20 @@ export default function POSTerminal() {
                         )}
                       </div>
                       <p className="text-xs font-medium text-pos-fg truncate">{product.title}</p>
-                      {variant && product.variants.length > 1 && (
-                        <p className="text-[10px] text-pos-muted truncate">{variant.title}</p>
+                      {showVariantTitle && (
+                        <p className="text-[10px] text-brand/70 truncate font-medium">{variant.title}</p>
                       )}
                       <p className="text-sm font-semibold text-brand mt-1">
-                        {price
+                        {price && price.amount > 0
                           ? formatCurrency(
                               toMinorUnits(price.amount, price.currency_code),
                               price.currency_code
                             )
-                          : "N/A"}
+                          : price
+                          ? "Free"
+                          : "—"}
                       </p>
-                      {variant?.inventory_quantity != null && variant.inventory_quantity <= 5 && (
+                      {variant.inventory_quantity != null && variant.inventory_quantity <= 5 && (
                         <p className="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">
                           {variant.inventory_quantity === 0 ? "Out of stock" : `${variant.inventory_quantity} left`}
                         </p>
@@ -583,6 +605,20 @@ export default function POSTerminal() {
                   )
                 })}
               </div>
+              {products.length < totalProductCount && (
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={loadMoreProducts}
+                    disabled={loadingMore}
+                    className="pos-btn-secondary text-xs px-6"
+                  >
+                    {loadingMore
+                      ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading...</>
+                      : `Load more (${totalProductCount - products.length} remaining)`}
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </div>
         </div>
@@ -1311,13 +1347,16 @@ function PaymentModal({
               <div>
                 <label className="block text-sm text-pos-muted mb-1">Cash Received</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={cashReceived}
-                  onChange={(e) => setCashReceived(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (v === "" || /^\d*\.?\d{0,2}$/.test(v)) setCashReceived(v)
+                  }}
                   className="pos-input w-full text-xl text-center h-14 font-bold"
                   placeholder="0.00"
                   autoFocus
-                  step="0.01"
                 />
               </div>
               <div className="flex gap-2 flex-wrap">

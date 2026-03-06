@@ -250,7 +250,7 @@ export default function StaffPage() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="staff@letscase.com"
-                    className="pos-input w-full pl-10"
+                    className="pos-input-icon w-full"
                   />
                 </div>
               </div>
@@ -313,7 +313,7 @@ export default function StaffPage() {
             placeholder="Search staff by name, email, or role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pos-input w-full pl-10"
+            className="pos-input-icon w-full"
           />
           {searchQuery && (
             <button
@@ -472,7 +472,7 @@ export default function StaffPage() {
                               setEditPin(v)
                             }}
                             placeholder="e.g. 1234"
-                            className="pos-input w-full pl-10 pr-10 font-mono tracking-widest"
+                            className="pos-input-icon w-full pr-10 font-mono tracking-widest"
                             maxLength={6}
                           />
                           <button

@@ -115,7 +115,7 @@ export default function CustomersPage() {
             placeholder="Search by name, email, or phone..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pos-input w-full pl-10"
+            className="pos-input-icon w-full"
             autoFocus
           />
         </div>

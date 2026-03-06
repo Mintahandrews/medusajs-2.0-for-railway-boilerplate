@@ -105,7 +105,7 @@ export default function AuditPage() {
               placeholder="Search by staff name or detail..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pos-input w-full pl-10"
+              className="pos-input-icon w-full"
             />
             {searchQuery && (
               <button

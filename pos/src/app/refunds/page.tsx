@@ -112,7 +112,7 @@ export default function RefundsPage() {
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && lookupOrder()}
-                className="pos-input w-full pl-10"
+                className="pos-input-icon w-full"
                 autoFocus
               />
             </div>

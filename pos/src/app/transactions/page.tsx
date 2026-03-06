@@ -103,7 +103,7 @@ export default function TransactionsPage() {
               placeholder="Search by order ID, email, or staff..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pos-input w-full pl-10"
+              className="pos-input-icon w-full"
             />
             {searchQuery && (
               <button
