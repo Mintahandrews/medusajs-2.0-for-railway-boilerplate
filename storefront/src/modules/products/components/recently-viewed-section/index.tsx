@@ -2,6 +2,7 @@
 
 import { useRecentlyViewed } from "@lib/hooks/use-recently-viewed"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Image from "next/image"
 import { Clock } from "lucide-react"
 
 type Props = {
@@ -29,13 +30,14 @@ export default function RecentlyViewedSection({ excludeProductId }: Props) {
             href={`/products/${item.handle}`}
             className="group"
           >
-            <div className="aspect-square overflow-hidden rounded-xl bg-grey-5 border border-grey-10">
+            <div className="aspect-square overflow-hidden rounded-xl bg-grey-5 border border-grey-10 relative">
               {item.thumbnail ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={item.thumbnail}
-                  alt={item.title}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  alt={item.title || "Recently viewed product"}
+                  fill
+                  sizes="(max-width: 512px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 16vw"
+                  className="object-cover transition-transform group-hover:scale-105"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-grey-30 text-[11px]">
@@ -52,3 +54,4 @@ export default function RecentlyViewedSection({ excludeProductId }: Props) {
     </div>
   )
 }
+

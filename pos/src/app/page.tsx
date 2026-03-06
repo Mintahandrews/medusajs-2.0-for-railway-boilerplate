@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import {
@@ -76,8 +76,11 @@ export default function POSTerminal() {
   }, [router])
 
   // RBAC helper
-  const can = (permission: Parameters<typeof hasPermission>[1]) =>
-    hasPermission(store.staffRole, permission)
+  const can = useCallback(
+    (permission: Parameters<typeof hasPermission>[1]) =>
+      hasPermission(store.staffRole, permission),
+    [store.staffRole]
+  )
 
   // Product data
   const [products, setProducts] = useState<Product[]>([])
@@ -571,12 +574,14 @@ export default function POSTerminal() {
                           : "hover:border-brand/40 hover:shadow-card-hover"
                       }`}
                     >
-                      <div className="aspect-square rounded-lg bg-pos-bg-subtle mb-2 overflow-hidden flex items-center justify-center">
+                      <div className="aspect-square rounded-lg bg-pos-bg-subtle mb-2 overflow-hidden flex items-center justify-center relative">
                         {product.thumbnail ? (
-                          <img
+                          <Image
                             src={product.thumbnail}
                             alt={product.title}
-                            className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
+                            fill
+                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                            className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
                           />
                         ) : (
                           <Package className="w-8 h-8 text-pos-muted opacity-40" />
@@ -797,9 +802,9 @@ function CartItemRow({
   return (
     <div className="bg-pos-bg rounded-lg p-2.5 group">
       <div className="flex gap-2">
-        <div className="w-10 h-10 rounded-md bg-pos-card flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="w-10 h-10 rounded-md bg-pos-card flex items-center justify-center shrink-0 overflow-hidden relative">
           {item.thumbnail ? (
-            <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
+            <Image src={item.thumbnail} alt="" fill sizes="40px" className="object-cover" />
           ) : (
             <Package className="w-4 h-4 text-pos-muted" />
           )}
@@ -1739,7 +1744,7 @@ function HeldSalesModal({ onClose }: { onClose: () => void }) {
                   <button
                     onClick={() => {
                       store.removeHeldSale(sale.id)
-                      if (store.heldSales.length <= 1) onClose()
+                      if (store.heldSales.length === 0) onClose()
                     }}
                     className="pos-btn-danger text-xs"
                   >
@@ -1824,6 +1829,12 @@ function MobileBottomNav({
           <button onClick={() => router.push("/transactions")} className="mobile-nav-item">
             <ClipboardList className="w-5 h-5" />
             <span>Sales</span>
+          </button>
+        )}
+        {can("pos.reports") && (
+          <button onClick={() => router.push("/reports")} className="mobile-nav-item">
+            <BarChart3 className="w-5 h-5" />
+            <span>Reports</span>
           </button>
         )}
         <button

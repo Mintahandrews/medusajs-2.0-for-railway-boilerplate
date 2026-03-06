@@ -222,7 +222,7 @@ const CartDropdown = ({
                         className="flex w-full items-center justify-center rounded-lg bg-ui-bg-interactive text-ui-fg-on-color h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-interactive-hover transition-colors"
                         data-testid="go-to-cart-button"
                       >
-                        View Cart &amp; Checkout
+                        View Cart & Checkout
                       </LocalizedClientLink>
                     </div>
                   </>
