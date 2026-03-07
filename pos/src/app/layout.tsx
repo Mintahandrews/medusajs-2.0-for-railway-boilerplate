@@ -4,6 +4,7 @@ import { ThemeInitializer } from "@/components/theme-initializer"
 import "./globals.css"
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pos.letscasegh.com"),
   title: "Letscase POS",
   description: "Point of Sale System for Letscase",
   icons: {
@@ -14,12 +15,15 @@ export const metadata: Metadata = {
     title: "Letscase POS",
     description: "Point of Sale System for Letscase",
     siteName: "Letscase POS",
+    url: "https://pos.letscasegh.com",
+    type: "website",
     images: [
       {
         url: "/logo.png",
         width: 512,
         height: 512,
         alt: "Letscase Logo",
+        type: "image/png",
       },
     ],
   },
@@ -27,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Letscase POS",
     description: "Point of Sale System for Letscase",
-    images: ["/logo.png"],
+    images: ["https://pos.letscasegh.com/logo.png"],
   },
 }
 
