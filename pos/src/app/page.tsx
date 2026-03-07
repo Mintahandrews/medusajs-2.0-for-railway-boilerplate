@@ -21,7 +21,13 @@ import ReceiptPrint, { type ReceiptData } from "@/components/receipt"
 import { useReactToPrint } from "react-to-print"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+import { usePaystack } from "@/hooks/usePaystack"
+
+declare global {
+  interface Window {
+    PaystackPop: any
+  }
+}
 
 interface ProductVariant {
   id: string
@@ -1243,6 +1249,9 @@ function PaymentModal({
   const [agentCode, setAgentCode] = useState("")
   const [agentPhone, setAgentPhone] = useState("")
   const [agentTxnRef, setAgentTxnRef] = useState("")
+  
+  // Make sure Paystack script is always loaded when Payment Modal is open
+  usePaystack()
 
   const cashAmount = parseFloat(cashReceived) || 0
   const change = Math.max(0, cashAmount - total)
@@ -1356,14 +1365,15 @@ function PaymentModal({
         throw new Error("Paystack Public Key missing. Add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local")
       }
 
-      const { default: PaystackPop } = await import("@paystack/inline-js")
-      const paystack = new PaystackPop()
+      if (typeof window === "undefined" || !window.PaystackPop) {
+        throw new Error("Paystack is still loading. Please try again in a moment.")
+      }
 
       const email = customer?.email || "pos@letscase.com"
       const reference = `pos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       const providerName = "Paystack"
 
-      paystack.newTransaction({
+      const handler = window.PaystackPop.setup({
         key: publicKey,
         email,
         amount: Math.round(total * 100), // Paystack inline expects minor units (pesewas)
@@ -1392,16 +1402,19 @@ function PaymentModal({
             setError(err.message || "Failed to sync order after payment")
           }
         },
-        onCancel: () => {
+        onClose: () => {
           setProcessing(false)
           setStatusText("")
-          toast.error("Payment cancelled by customer")
+          toast.error("Payment modal closed")
         },
       })
+      handler.openIframe()
     } catch (err: any) {
+      console.error("Paystack Checkout Error:", err)
       setProcessing(false)
       setStatusText("")
       setError(err.message || "Failed to load Paystack")
+      toast.error(err.message || "Failed to load Paystack")
     }
   }
 
