@@ -1135,7 +1135,7 @@ export default function FabricCanvas() {
       fabricCanvas = new fabric.Canvas(canvasElRef.current, {
         width: canvasWidth,
         height: canvasHeight,
-        backgroundColor: "#ffffff",
+        backgroundColor: "transparent",
         selection: true,
         preserveObjectStacking: true,
         allowTouchScrolling: false,
@@ -1573,6 +1573,7 @@ export default function FabricCanvas() {
               height: h,
               borderRadius: sr,
               touchAction: "none",
+              backgroundColor: bgColor,
             }}
           >
             {/* Fabric wraps this <canvas> in its own div. z-index ensures the
@@ -1583,14 +1584,17 @@ export default function FabricCanvas() {
               style={{ touchAction: "none", position: "relative", zIndex: 25 }}
             />
 
-            {/* Device-specific camera module overlay */}
-            <CameraOverlay config={deviceConfig} scale={s} />
+            {/* Elevate overlays above the transparent Fabric wrapper (z-30) */}
+            <div className="absolute inset-0 pointer-events-none z-40">
+              {/* Device-specific camera module overlay */}
+              <CameraOverlay config={deviceConfig} scale={s} />
 
-            {/* Case-type visual overlays (clear sheen, magsafe ring) */}
-            <CaseTypeOverlay caseType={caseType} w={w} h={h} r={sr} s={s} />
+              {/* Case-type visual overlays (clear sheen, magsafe ring) */}
+              <CaseTypeOverlay caseType={caseType} w={w} h={h} r={sr} s={s} />
 
-            {/* Material surface + lighting overlay */}
-            <CaseSurfaceOverlay r={sr} s={s} caseType={caseType} />
+              {/* Material surface + lighting overlay */}
+              <CaseSurfaceOverlay r={sr} s={s} caseType={caseType} />
+            </div>
           </div>
 
           {/* Tough case: corner bumper accents on the outer shell */}
