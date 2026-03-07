@@ -1382,7 +1382,7 @@ function PaymentModal({
             { display_name: "Staff", variable_name: "staff", value: staffName },
           ],
         },
-        onSuccess: async (transaction: any) => {
+        callback: async (transaction: any) => {
           setStatusText("Payment confirmed! Creating order...")
           try {
             await createOrder(`paystack`, {
