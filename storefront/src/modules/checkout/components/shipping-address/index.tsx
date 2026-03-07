@@ -208,8 +208,8 @@ const ShippingAddress = ({
         <Input
           label="Email (optional)"
           name="email"
-          type="email"
-          title="Enter a valid email address."
+          type="text"
+          title="Enter a valid email address if you wish to receive updates."
           autoComplete="email"
           value={formData.email}
           onChange={handleChange}

@@ -14,7 +14,7 @@ import PaymentContainer from "@modules/checkout/components/payment-container"
 import PaystackChannelPicker, {
   type PaystackChannel,
 } from "@modules/checkout/components/paystack-channel-picker"
-import { isPaystack, isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
+import { isManual, isPaystack, isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
 
@@ -253,7 +253,10 @@ const Payment = ({
                   }}
                 >
                   {availablePaymentMethods
-                    .filter((m) => !isPaystack(m.id ?? m.provider_id))
+                    .filter((m) => {
+                       const id = m.id ?? m.provider_id
+                       return !isPaystack(id) && !isManual(id)
+                    })
                     .sort((a, b) => {
                       const aId = a.id ?? a.provider_id
                       const bId = b.id ?? b.provider_id

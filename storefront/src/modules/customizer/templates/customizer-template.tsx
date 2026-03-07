@@ -57,8 +57,13 @@ function CustomizerLayout({
       <div className="flex flex-col lg:flex-row h-[calc(100dvh-64px-68px)] lg:h-[calc(100dvh-64px-68px)] bg-gray-100 overflow-hidden">
 
         {/* ---- Desktop sidebar ---- */}
-        <aside data-tour="desktop-sidebar" className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200">
+        <aside data-tour="desktop-sidebar" className="hidden lg:flex lg:flex-col lg:w-[340px] shrink-0 overflow-y-auto border-r border-gray-200 bg-white">
           <Toolbar />
+          {product && region && (
+            <div className="mt-auto">
+              <FloatingCart product={product} region={region} />
+            </div>
+          )}
         </aside>
 
         {/* ---- Canvas area ---- */}
@@ -112,14 +117,13 @@ function CustomizerLayout({
 
           {/* Collapsed quick-access tabs — show tool icons when collapsed */}
           {!mobileExpanded && <MobileQuickBar onExpand={openTool} />}
+          
+          {/* Mobile Cart Bar - Always docked to bottom of mobile tools */}
+          {product && region && (
+            <FloatingCart product={product} region={region} mobileExpanded={mobileExpanded} />
+          )}
         </div>
       </div>
-
-
-      {/* Floating Add to Cart widget — sticky bar on mobile, FAB on desktop */}
-      {product && region && (
-        <FloatingCart product={product} region={region} />
-      )}
 
       {/* First-time onboarding walkthrough */}
       <CustomizerOnboarding />

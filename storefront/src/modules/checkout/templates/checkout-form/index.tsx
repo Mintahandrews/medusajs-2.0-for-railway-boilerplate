@@ -4,7 +4,6 @@ import { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
 import Review from "@modules/checkout/components/review"
-import Shipping from "@modules/checkout/components/shipping"
 
 export default async function CheckoutForm({
   cart,
@@ -39,9 +38,7 @@ export default async function CheckoutForm({
           <Addresses cart={cart} customer={customer} />
         </div>
 
-        <div>
-          <Shipping cart={cart} availableShippingMethods={shippingMethods} />
-        </div>
+
 
         <div>
           <Payment cart={cart} availablePaymentMethods={paymentMethods} />

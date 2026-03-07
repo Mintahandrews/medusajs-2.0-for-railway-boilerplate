@@ -46,9 +46,10 @@ function downsizeToThumbnail(dataUrl: string, maxDim: number): Promise<string> {
 interface Props {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
+  mobileExpanded?: boolean
 }
 
-export default function FloatingCart({ product, region }: Props) {
+export default function FloatingCart({ product, region, mobileExpanded }: Props) {
   const { state, exportPrintFile, exportPreview, canvasRef, deviceConfig } = useCustomizer()
   const countryCode = useParams().countryCode as string
   const router = useRouter()
@@ -59,6 +60,9 @@ export default function FloatingCart({ product, region }: Props) {
   const [added, setAdded] = useState(false)
   const [uploadStatus, setUploadStatus] = useState("")
   const [error, setError] = useState("")
+  const [selectedVariantId, setSelectedVariantId] = useState<string>(
+    () => product.variants?.[0]?.id ?? ""
+  )
 
   // Close panel on outside click
   useEffect(() => {
@@ -71,7 +75,7 @@ export default function FloatingCart({ product, region }: Props) {
     return () => document.removeEventListener("mousedown", handleClick)
   }, [open])
 
-  const variant = product.variants?.[0]
+  const variant = product.variants?.find((v) => v.id === selectedVariantId) || product.variants?.[0]
   const cp = variant ? (variant as any).calculated_price : null
   const baseAmount = cp?.calculated_amount ?? cp?.amount ?? null
   const currencyCode = cp?.currency_code ?? region.currency_code
@@ -154,61 +158,79 @@ export default function FloatingCart({ product, region }: Props) {
 
       {/* NOTE: kept the single bottom-bar implementation and surface it on all sizes so the Add-to-Cart is always visible */}
 
-      <div className="fixed left-1/2 transform -translate-x-1/2 bottom-6 z-50 w-[min(980px,calc(100%-2rem))] bg-white border border-gray-200 shadow-lg rounded-2xl" data-tour="floating-cart-mobile">
-        <div className="px-4 py-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div 
+        className={`sticky bottom-0 left-0 right-0 z-50 w-full bg-white border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] transition-all duration-300 ${mobileExpanded ? "opacity-0 translate-y-32 pointer-events-none lg:opacity-100 lg:translate-y-0 lg:pointer-events-auto" : "opacity-100 translate-y-0 pointer-events-auto"}`}
+        data-tour="floating-cart-mobile"
+      >
+        <div className="p-3 sm:p-4">
           {/* Compact: info + button in one row */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex flex-col min-w-0 shrink">
-              <span className="text-[12px] text-gray-500 truncate">
-                {CASE_TYPE_LABEL[state.caseType]} Case · {deviceConfig.name}
-              </span>
-              <span className="text-lg font-bold text-gray-900 leading-tight">
+              <div className="text-[11px] sm:text-[12px] text-gray-500 truncate mb-0.5">
+                {product.variants && product.variants.length > 1 ? (
+                  <select
+                    value={selectedVariantId}
+                    onChange={(e) => setSelectedVariantId(e.target.value)}
+                    className="bg-transparent border-none text-gray-700 focus:ring-0 p-0 font-medium cursor-pointer max-w-[120px] sm:max-w-[160px]"
+                  >
+                    {product.variants.map((v) => (
+                      <option key={v.id} value={v.id}>{v.title}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span>{CASE_TYPE_LABEL[state.caseType]} Case · {deviceConfig.name}</span>
+                )}
+              </div>
+              <span className="text-base sm:text-lg font-bold text-gray-900 leading-none">
                 {priceStr ?? "—"}
               </span>
             </div>
 
-            {/* Add to Cart button */}
-            <button
-              onClick={handleAddToCart}
-              disabled={isAdding || !variant?.id}
-              className={`flex items-center justify-center gap-2 flex-1 py-3 rounded-xl text-sm
-                font-bold transition-all whitespace-nowrap ${
-                  added
-                    ? "bg-green-600 text-white"
-                    : "bg-brand text-white hover:bg-brand-dark active:scale-[0.98]"
-                } disabled:opacity-40 disabled:cursor-not-allowed`}
-            >
-              {isAdding ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span className="text-xs">{uploadStatus || "Processing…"}</span>
-                </>
-              ) : added ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  Added!
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to Cart — {priceStr || ""}
-                </>
-              )}
-            </button>
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleAddToCart}
+                disabled={isAdding || !variant?.id}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl text-[13px] sm:text-sm
+                  font-bold transition-all whitespace-nowrap ${
+                    added
+                      ? "bg-green-600 text-white"
+                      : "bg-brand text-white hover:bg-brand-dark active:scale-[0.98]"
+                  } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                {isAdding ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="hidden sm:inline">{uploadStatus || "Processing"}</span>
+                  </>
+                ) : added ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Added!</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-4 h-4" />
+                    <span>Add to Cart</span>
+                  </>
+                )}
+              </button>
 
-            {/* Quick cart link */}
-            <button
-              onClick={() => router.push(`/${countryCode}/cart`)}
-              className="ml-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-brand bg-white border border-gray-100 hover:bg-gray-50"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span className="hidden sm:inline">View Cart</span>
-              <span className="sm:hidden">Cart</span>
-            </button>
+              {/* Quick cart link */}
+              <button
+                onClick={() => router.push(`/${countryCode}/cart`)}
+                className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl text-brand bg-brand-50 hover:bg-brand-100 transition-colors shrink-0"
+                title="View Cart"
+              >
+                <ShoppingCart className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1.5 mt-3">{error}</p>
+            <div className="absolute -top-12 left-0 right-0 mx-auto w-max max-w-[calc(100%-2rem)] bg-red-600 text-white text-xs px-4 py-2 rounded-full shadow-lg text-center opacity-90 backdrop-blur-sm">
+              {error}
+            </div>
           )}
         </div>
       </div>

@@ -55,10 +55,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
           data-testid={dataTestId}
         />
       )
-    case isManual(paymentSession?.provider_id):
-      return (
-        <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
-      )
+
     case isPaypal(paymentSession?.provider_id):
       return (
         <PayPalPaymentButton
@@ -181,14 +178,14 @@ const StripePaymentButton = ({
 
   return (
     <>
-      <Button
+        <Button
         disabled={disabled || notReady}
         onClick={handlePayment}
         size="large"
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        Place order
+        Make payment
       </Button>
       <ErrorMessage
         error={errorMessage}
@@ -360,7 +357,7 @@ const PaystackPaymentButton = ({
         size="large"
         data-testid={dataTestId}
       >
-        Pay with Paystack
+        Make payment
       </Button>
       <ErrorMessage error={errorMessage} data-testid="paystack-payment-error-message" />
     </>

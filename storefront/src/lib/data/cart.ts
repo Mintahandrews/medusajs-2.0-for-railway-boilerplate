@@ -10,6 +10,7 @@ import { getAuthHeaders, getCartId, removeCartId, setCartId } from "./cookies"
 import { getProductsById } from "./products"
 import { sendOrderConfirmationSMS } from "@lib/sms"
 import { getRegion } from "./regions"
+import { listCartShippingMethods } from "./fulfillment"
 
 /** Server-side backend URL with HTTPS upgrade for production (matches SDK config). */
 function getServerBackendUrl(): string {
@@ -511,26 +512,51 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
+    const deliveryOption = formData.get("delivery_option")
+
+    let rawEmail = formData.get("email") as string | null
+    let phone = formData.get("shipping_address.phone") as string | null
+
+    let isPickup = deliveryOption === "pickup"
+    
+    // For Pickup: override fields with dummy Store location so Cart validates
+    let shippingAddress = isPickup
+      ? {
+          first_name: "Pickup",
+          last_name: "Customer",
+          address_1: "Letscase HQ",
+          address_2: "Santa Maria",
+          company: "",
+          postal_code: "00000",
+          city: "Accra",
+          country_code: formData.get("shipping_address.country_code") || "gh",
+          province: "Greater Accra Region",
+          phone: "0550723834",
+        }
+      : {
+          first_name: formData.get("shipping_address.first_name"),
+          last_name: formData.get("shipping_address.last_name"),
+          address_1: formData.get("shipping_address.address_1"),
+          address_2: "",
+          company: formData.get("shipping_address.company"),
+          postal_code: formData.get("shipping_address.postal_code"),
+          city: formData.get("shipping_address.city"),
+          country_code: formData.get("shipping_address.country_code"),
+          province: formData.get("shipping_address.province"),
+          phone: phone,
+        }
+
+    const email = rawEmail?.trim() || `${shippingAddress.phone?.toString().replace(/\D/g, "") || "guest"}@guest.local`
+
     const data = {
-      shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
-        address_1: formData.get("shipping_address.address_1"),
-        address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
-      },
-      email: formData.get("email"),
+      shipping_address: shippingAddress,
+      email,
     } as any
 
     const sameAsBilling = formData.get("same_as_billing")
-    if (sameAsBilling === "on") data.billing_address = data.shipping_address
-
-    if (sameAsBilling !== "on")
+    if (sameAsBilling === "on" || isPickup) {
+      data.billing_address = data.shipping_address
+    } else {
       data.billing_address = {
         first_name: formData.get("billing_address.first_name"),
         last_name: formData.get("billing_address.last_name"),
@@ -543,14 +569,36 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         province: formData.get("billing_address.province"),
         phone: formData.get("billing_address.phone"),
       }
+    }
+
     await updateCart(data)
+
+    // Auto-select shipping method
+    try {
+      const methods = await listCartShippingMethods(cartId)
+      if (methods && methods.length > 0) {
+        // Try to match the method name to the option (pickup vs delivery)
+        let selectedMethod = methods.find(m => 
+          isPickup 
+            ? (m.name?.toLowerCase().includes("pickup") || m.name?.toLowerCase().includes("store"))
+            : (!m.name?.toLowerCase().includes("pickup") && !m.name?.toLowerCase().includes("store"))
+        )
+        // Fallback to first available
+        if (!selectedMethod) {
+          selectedMethod = methods[0]
+        }
+        await sdk.store.cart.addShippingMethod(cartId, { option_id: selectedMethod.id }, {}, await getAuthHeaders())
+      }
+    } catch (e) {
+      console.warn("Could not auto-select shipping method", e)
+    }
+
   } catch (e: any) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  const countryCode = formData.get("shipping_address.country_code") || "gh"
+  redirect(`/${countryCode}/checkout?step=payment`)
 }
 
 export async function placeOrder() {

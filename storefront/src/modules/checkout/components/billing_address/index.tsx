@@ -94,7 +94,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         <Input
           label="Email (optional)"
           name="billing_address.email"
-          type="email"
+          type="text"
           autoComplete="email"
           value={formData["billing_address.email"]}
           onChange={handleChange}

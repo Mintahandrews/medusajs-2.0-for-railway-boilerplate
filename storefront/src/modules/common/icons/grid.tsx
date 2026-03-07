@@ -1,6 +1,6 @@
 import React from "react"
 
-import { IconProps } from "types/icon"
+import { IconProps } from "../../../types/icon"
 
 const Grid: React.FC<IconProps> = ({ size = 24, color = "currentColor" }) => {
   return (
