@@ -12,7 +12,7 @@
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type MoMoProvider = "mtn" | "vod" | "atl"
+export type MoMoProvider = "mtn" | "vod" | "tgo"
 
 export interface PaystackChargeRequest {
   email: string
@@ -71,13 +71,35 @@ function getAuthHeaders(): Record<string, string> {
   }
 }
 
+/**
+ * Format a Ghana phone number to international format for Paystack.
+ * Paystack requires the full international number (e.g. 233551234567).
+ * Handles: 0551234567 → 233551234567, +233551234567 → 233551234567
+ */
+export function formatGhanaPhone(phone: string): string {
+  const digits = phone.replace(/[^0-9]/g, "")
+  if (digits.startsWith("233") && digits.length === 12) return digits
+  if (digits.startsWith("0") && digits.length === 10) return `233${digits.slice(1)}`
+  if (digits.length === 9) return `233${digits}`
+  return digits // fallback — return as-is
+}
+
 export async function chargeMobileMoney(
   payload: PaystackChargeRequest
 ): Promise<PaystackChargeResponse> {
+  // Ensure phone is in international format for Paystack
+  const formattedPayload = {
+    ...payload,
+    mobile_money: {
+      ...payload.mobile_money,
+      phone: formatGhanaPhone(payload.mobile_money.phone),
+    },
+  }
+
   const res = await fetch("/api/paystack/charge", {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
+    body: JSON.stringify(formattedPayload),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: "Charge failed" }))
@@ -140,5 +162,5 @@ export async function pollTransactionStatus(
 export const MOMO_PROVIDERS: { code: MoMoProvider; name: string; color: string }[] = [
   { code: "mtn", name: "MTN MoMo", color: "#FFC107" },
   { code: "vod", name: "Telecel Cash", color: "#E60000" },
-  { code: "atl", name: "AirtelTigo Money", color: "#E40046" },
+  { code: "tgo", name: "AirtelTigo Money", color: "#E40046" },
 ]

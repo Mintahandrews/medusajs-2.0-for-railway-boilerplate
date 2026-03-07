@@ -40,20 +40,6 @@ interface Product {
   categories?: Array<{ name: string }> | null
 }
 
-// ─── Main POS Page ───────────────────────────────────────────────────────────
-
-const ZERO_DECIMAL_CURRENCIES = new Set([
-  "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga",
-  "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf",
-])
-
-const toMinorUnits = (amount: number, currencyCode: string) => {
-  if (!amount || !currencyCode) return amount
-  const code = currencyCode.toLowerCase()
-  if (ZERO_DECIMAL_CURRENCIES.has(code)) return Math.round(amount)
-  return Math.round(amount * 100)
-}
-
 export default function POSTerminal() {
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -243,7 +229,7 @@ export default function POSTerminal() {
       return
     }
 
-    const normalizedAmount = toMinorUnits(price.amount, price.currency_code)
+    const normalizedAmount = price.amount
 
     store.addItem({
       id: `${variant.id}-${Date.now()}`,
@@ -594,7 +580,7 @@ export default function POSTerminal() {
                       <p className="text-sm font-semibold text-brand mt-1">
                         {price && price.amount > 0
                           ? formatCurrency(
-                              toMinorUnits(price.amount, price.currency_code),
+                              price.amount,
                               price.currency_code
                             )
                           : price
@@ -1068,7 +1054,7 @@ function PaymentModal({
 
   // MoMo fields
   const [momoPhone, setMomoPhone] = useState("")
-  const [momoProvider, setMomoProvider] = useState<"mtn" | "vod" | "atl">("mtn")
+  const [momoProvider, setMomoProvider] = useState<"mtn" | "vod" | "tgo">("mtn")
 
   // Telecel Agent fields
   const [agentCode, setAgentCode] = useState("")
@@ -1393,7 +1379,7 @@ function PaymentModal({
                   {([
                     { code: "mtn" as const, name: "MTN", bg: "bg-yellow-500/20 border-yellow-500/50 text-yellow-700 dark:text-yellow-300" },
                     { code: "vod" as const, name: "Telecel", bg: "bg-red-500/20 border-red-500/50 text-red-700 dark:text-red-300" },
-                    { code: "atl" as const, name: "AirtelTigo", bg: "bg-pink-500/20 border-pink-500/50 text-pink-700 dark:text-pink-300" },
+                    { code: "tgo" as const, name: "AirtelTigo", bg: "bg-pink-500/20 border-pink-500/50 text-pink-700 dark:text-pink-300" },
                   ]).map((p) => (
                     <button
                       key={p.code}
@@ -1614,7 +1600,7 @@ function DiscountModal({
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") apply() }}
             className="pos-input w-full text-xl text-center h-14 font-bold"
-            placeholder={type === "percentage" ? "10" : "5.00"}
+            placeholder={type === "percentage" ? "10" : "5"}
             autoFocus
             step={type === "percentage" ? "1" : "0.01"}
           />

@@ -10,15 +10,8 @@ export function formatCurrency(amount: number, currency = "GHS"): string {
     style: "currency",
     currency: currency.toUpperCase(),
     minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount / 100)
-}
-
-export function formatCurrencyRaw(amount: number, currency = "GHS"): string {
-  return new Intl.NumberFormat("en-GH", {
-    style: "currency",
-    currency: currency.toUpperCase(),
-    minimumFractionDigits: 2,
-  }).format(amount)
 }
 
 export function generateReceiptNumber(): string {
