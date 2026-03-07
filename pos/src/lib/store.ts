@@ -64,6 +64,11 @@ export interface POSState {
   staffEmail: string
   shiftStart: string | null
 
+  // Settings
+  favorites: string[] // variant IDs
+  dailyTarget: number // in minor units (pesewas), 0 = disabled
+  taxRate: number // percentage, 0 = disabled
+
   // Actions — Cart
   addItem: (item: Omit<POSCartItem, "discount_amount" | "discount_type" | "discount_value" | "note">) => void
   removeItem: (id: string) => void
@@ -96,6 +101,12 @@ export interface POSState {
   startShift: () => void
   endShift: () => void
 
+  // Actions — Settings
+  toggleFavorite: (variantId: string) => void
+  isFavorite: (variantId: string) => boolean
+  setDailyTarget: (amount: number) => void
+  setTaxRate: (rate: number) => void
+
   // Computed
   getSubtotal: () => number
   getItemTotal: (item: POSCartItem) => number
@@ -121,6 +132,9 @@ export const usePOSStore = create<POSState>()(
       staffUserId: "",
       staffEmail: "",
       shiftStart: null,
+      favorites: [],
+      dailyTarget: 0,
+      taxRate: 0,
 
       // ─── Cart Actions ────────────────────────────────────────────────
 
@@ -325,6 +339,23 @@ export const usePOSStore = create<POSState>()(
 
       endShift: () => set({ shiftStart: null }),
 
+      // ─── Settings ──────────────────────────────────────────────────────
+
+      toggleFavorite: (variantId) => {
+        const { favorites } = get()
+        if (favorites.includes(variantId)) {
+          set({ favorites: favorites.filter((id) => id !== variantId) })
+        } else {
+          set({ favorites: [...favorites, variantId] })
+        }
+      },
+
+      isFavorite: (variantId) => get().favorites.includes(variantId),
+
+      setDailyTarget: (dailyTarget) => set({ dailyTarget }),
+
+      setTaxRate: (taxRate) => set({ taxRate }),
+
       // ─── Computed ─────────────────────────────────────────────────────
 
       getSubtotal: () => {
@@ -394,6 +425,9 @@ export const usePOSStore = create<POSState>()(
         staffUserId: state.staffUserId,
         staffEmail: state.staffEmail,
         shiftStart: state.shiftStart,
+        favorites: state.favorites,
+        dailyTarget: state.dailyTarget,
+        taxRate: state.taxRate,
       }),
     }
   )

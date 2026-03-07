@@ -8,7 +8,8 @@ import {
   Smartphone, Tag, MessageSquare, Pause, RotateCcw, Users,
   BarChart3, LogOut, ScanBarcode, Package, Shield, ClipboardList,
   X, Loader2, Receipt, Printer, Clock, UserCheck, UserCog,
-  RefreshCw, MoreHorizontal, BookOpen,
+  RefreshCw, MoreHorizontal, Star, Wifi, WifiOff, Settings, PlusCircle,
+  AlertTriangle, Split, Percent,
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { usePOSStore, type POSCartItem, type POSState } from "@/lib/store"
@@ -96,6 +97,29 @@ export default function POSTerminal() {
   // Currency
   const currency = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || "GHS"
 
+  // Online/Offline status
+  const [online, setOnline] = useState(true)
+  useEffect(() => {
+    setOnline(navigator.onLine)
+    const goOnline = () => setOnline(true)
+    const goOffline = () => { setOnline(false); toast("You are offline. Orders will be queued.", { icon: "📡" }) }
+    window.addEventListener("online", goOnline)
+    window.addEventListener("offline", goOffline)
+    return () => { window.removeEventListener("online", goOnline); window.removeEventListener("offline", goOffline) }
+  }, [])
+
+  // Custom Item modal
+  const [showCustomItem, setShowCustomItem] = useState(false)
+
+  // Favorites filter
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+
+  // Low-stock alert tracking
+  const lowStockAlerted = useRef(false)
+
+  // Settings modal
+  const [showSettings, setShowSettings] = useState(false)
+
   // ─── Fetch Products ────────────────────────────────────────────────────────
 
   const fetchProducts = useCallback(async () => {
@@ -107,6 +131,16 @@ export default function POSTerminal() {
       const data = await getProducts(params)
       setProducts(data.products || [])
       setTotalProductCount(data.count || 0)
+      // Low-stock alert (once per session)
+      if (!lowStockAlerted.current) {
+        const lowStock = (data.products || []).flatMap((p: any) =>
+          (p.variants || []).filter((v: any) => v.inventory_quantity != null && v.inventory_quantity > 0 && v.inventory_quantity <= 5)
+        )
+        if (lowStock.length > 0) {
+          lowStockAlerted.current = true
+          toast(`${lowStock.length} product(s) have low stock (≤5)`, { icon: "⚠️", duration: 5000 })
+        }
+      }
     } catch (err: any) {
       console.error("Failed to fetch products:", err)
       if (err.message?.includes("Unauthorized") || err.message?.includes("401")) {
@@ -328,6 +362,8 @@ export default function POSTerminal() {
         setShowNote(false)
         setShowHeldSales(false)
         setShowShortcuts(false)
+        setShowCustomItem(false)
+        setShowSettings(false)
         return
       }
     }
@@ -348,6 +384,12 @@ export default function POSTerminal() {
       <header className="pos-page-header">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
+            {/* Online/Offline indicator */}
+            {!online && (
+              <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-500/10 px-2 py-1 rounded-full" title="Offline — orders will be queued">
+                <WifiOff className="w-3 h-3" /> Offline
+              </span>
+            )}
             <Image src="/logo-white.png" alt="Letscase" width={28} height={28} className="w-7 h-7 dark:brightness-100 brightness-0" />
             <span className="text-pos-fg font-semibold text-sm hidden sm:block">Letscase POS</span>
           </div>
@@ -496,23 +538,35 @@ export default function POSTerminal() {
               </button>
             </div>
 
-            {/* Category Pills */}
+            {/* Category Pills + Favorites */}
             {categories.length > 0 && (
               <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 <button
-                  onClick={() => setActiveCategory(null)}
+                  onClick={() => { setActiveCategory(null); setShowFavoritesOnly(false) }}
                   className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    !activeCategory
+                    !activeCategory && !showFavoritesOnly
                       ? "bg-brand text-white"
                       : "bg-pos-card text-pos-muted border border-pos-border hover:text-pos-fg"
                   }`}
                 >
                   All
                 </button>
+                {store.favorites.length > 0 && (
+                  <button
+                    onClick={() => { setShowFavoritesOnly(!showFavoritesOnly); setActiveCategory(null) }}
+                    className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 ${
+                      showFavoritesOnly
+                        ? "bg-yellow-500 text-white"
+                        : "bg-pos-card text-pos-muted border border-pos-border hover:text-pos-fg"
+                    }`}
+                  >
+                    <Star className="w-3 h-3" /> Favorites
+                  </button>
+                )}
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
-                    onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
+                    onClick={() => { setActiveCategory(activeCategory === cat.id ? null : cat.id); setShowFavoritesOnly(false) }}
                     className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       activeCategory === cat.id
                         ? "bg-brand text-white"
@@ -540,25 +594,41 @@ export default function POSTerminal() {
               </div>
             ) : (
               <>
+              {/* Custom Item Button */}
+              <button
+                onClick={() => setShowCustomItem(true)}
+                className="pos-card p-2.5 text-center hover:border-brand/40 transition-all flex flex-col items-center justify-center gap-2 border-dashed border-2 border-pos-border"
+              >
+                <PlusCircle className="w-8 h-8 text-brand" />
+                <p className="text-xs font-medium text-brand">Custom Item</p>
+              </button>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                 {products.flatMap((product) =>
                   (product.variants || []).map((variant) => ({ product, variant }))
-                ).map(({ product, variant }) => {
+                )
+                .filter(({ variant }) => !showFavoritesOnly || store.favorites.includes(variant.id))
+                .map(({ product, variant }) => {
                   const price = variant.prices?.find(
                     (p) => p.currency_code.toLowerCase() === currency.toLowerCase()
                   )
                   const isOutOfStock = variant.inventory_quantity != null && variant.inventory_quantity <= 0
                   const showVariantTitle = product.variants.length > 1
                   return (
-                    <button
-                      key={variant.id}
-                      onClick={() => addProductToCart(product, variant)}
-                      disabled={isOutOfStock}
-                      className={`pos-card p-2.5 text-left transition-all group cursor-pointer active:scale-[0.97] ${
-                        isOutOfStock
-                          ? "opacity-50 cursor-not-allowed"
-                          : "hover:border-brand/40 hover:shadow-card-hover"
-                      }`}
+                      <div key={variant.id} className="pos-card p-2.5 text-left transition-all group relative">
+                      {/* Favorite star */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); store.toggleFavorite(variant.id) }}
+                        className={`absolute top-1.5 right-1.5 z-10 p-1 rounded-full transition-colors ${store.isFavorite(variant.id) ? "text-yellow-500" : "text-pos-muted/30 hover:text-yellow-400"}`}
+                        title="Toggle favorite"
+                      >
+                        <Star className={`w-3.5 h-3.5 ${store.isFavorite(variant.id) ? "fill-current" : ""}`} />
+                      </button>
+                      <button
+                        onClick={() => addProductToCart(product, variant)}
+                        disabled={isOutOfStock}
+                        className={`w-full text-left cursor-pointer active:scale-[0.97] ${
+                          isOutOfStock ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                     >
                       <div className="aspect-square rounded-lg bg-pos-bg-subtle mb-2 overflow-hidden flex items-center justify-center relative">
                         {product.thumbnail ? (
@@ -593,6 +663,7 @@ export default function POSTerminal() {
                         </p>
                       )}
                     </button>
+                    </div>
                   )
                 })}
               </div>
@@ -666,6 +737,7 @@ export default function POSTerminal() {
         store={store}
         router={router}
         onOpenCart={() => setShowMobileCart(true)}
+        onSettings={() => setShowSettings(true)}
       />
 
       {/* ── Modals ──────────────────────────────────────────────────────────── */}
@@ -758,6 +830,107 @@ export default function POSTerminal() {
                   <kbd className="bg-pos-bg border border-pos-border rounded px-2 py-0.5 text-xs font-mono text-pos-fg">{key}</kbd>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Item Modal */}
+      {showCustomItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowCustomItem(false)}>
+          <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-pos-border">
+              <h2 className="text-lg font-bold text-pos-fg">Custom Item</h2>
+              <button onClick={() => setShowCustomItem(false)} className="text-pos-muted hover:text-pos-fg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form
+              className="p-4 space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault()
+                const form = e.target as HTMLFormElement
+                const name = (form.elements.namedItem("customName") as HTMLInputElement).value.trim()
+                const priceStr = (form.elements.namedItem("customPrice") as HTMLInputElement).value
+                const price = Math.round(parseFloat(priceStr) * 100)
+                if (!name || isNaN(price) || price <= 0) {
+                  toast.error("Enter a valid name and price"); return
+                }
+                store.addItem({
+                  id: `custom-${Date.now()}`,
+                  variant_id: `custom-${Date.now()}`,
+                  product_id: `custom-${Date.now()}`,
+                  title: name,
+                  variant_title: "Custom",
+                  thumbnail: null,
+                  quantity: 1,
+                  unit_price: price,
+                  currency_code: currency,
+                  barcode: null,
+                  sku: null,
+                  inventory_quantity: null,
+                })
+                toast.success(`Added "${name}"`)
+                setShowCustomItem(false)
+              }}
+            >
+              <div>
+                <label className="text-xs font-medium text-pos-muted block mb-1">Item Name</label>
+                <input name="customName" placeholder="e.g. Gift Wrapping" className="w-full bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-pos-fg" autoFocus />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-pos-muted block mb-1">Price ({currency})</label>
+                <input name="customPrice" type="number" step="0.01" min="0.01" placeholder="0.00" className="w-full bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-pos-fg" />
+              </div>
+              <button type="submit" className="pos-btn-success w-full">
+                <Plus className="w-4 h-4" /> Add to Cart
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowSettings(false)}>
+          <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-pos-border">
+              <h2 className="text-lg font-bold text-pos-fg">POS Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="text-pos-muted hover:text-pos-fg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-xs font-medium text-pos-muted block mb-1">Daily Sales Target ({currency})</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={store.dailyTarget > 0 ? (store.dailyTarget / 100).toFixed(2) : ""}
+                  placeholder="0 = disabled"
+                  onChange={(e) => store.setDailyTarget(Math.round(parseFloat(e.target.value || "0") * 100))}
+                  className="w-full bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-pos-fg"
+                />
+                <p className="text-[10px] text-pos-muted mt-1">Set 0 to disable the sales goal tracker</p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-pos-muted block mb-1">Tax Rate (%)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  defaultValue={store.taxRate > 0 ? store.taxRate : ""}
+                  placeholder="0 = no tax"
+                  onChange={(e) => store.setTaxRate(parseFloat(e.target.value || "0"))}
+                  className="w-full bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-pos-fg"
+                />
+                <p className="text-[10px] text-pos-muted mt-1">Applied automatically to all sales (e.g. 12.5 for VAT/NHIL)</p>
+              </div>
+              <button onClick={() => { setShowSettings(false); toast.success("Settings saved") }} className="pos-btn-success w-full">
+                Save Settings
+              </button>
             </div>
           </div>
         </div>
@@ -966,8 +1139,18 @@ function CartPanel({
           </div>
         )}
         <div className="flex justify-between text-base font-bold text-pos-fg pt-1.5 border-t border-pos-border">
+          <span>Subtotal</span>
+          <span>{formatCurrency(total, currency)}</span>
+        </div>
+        {store.taxRate > 0 && (
+          <div className="flex justify-between text-sm text-pos-muted">
+            <span>Tax ({store.taxRate}%)</span>
+            <span>+{formatCurrency(Math.round(total * store.taxRate / 100), currency)}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-base font-bold text-brand pt-1">
           <span>Total</span>
-          <span className="text-brand">{formatCurrency(total, currency)}</span>
+          <span>{formatCurrency(total + Math.round(total * store.taxRate / 100), currency)}</span>
         </div>
       </div>
 
@@ -1753,11 +1936,13 @@ function MobileBottomNav({
   store,
   router,
   onOpenCart,
+  onSettings,
 }: {
   can: (p: Parameters<typeof hasPermission>[1]) => boolean
   store: POSState
   router: any
   onOpenCart: () => void
+  onSettings: () => void
 }) {
   const [showMore, setShowMore] = useState(false)
 
@@ -1790,11 +1975,11 @@ function MobileBottomNav({
                 <UserCog className="w-4 h-4 text-pos-muted" /> Staff
               </button>
             )}
-            <button onClick={() => { setShowMore(false); router.push("/visual-novel") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
-              <BookOpen className="w-4 h-4 text-pos-muted" /> Visual Novel
-            </button>
             <button onClick={() => { setShowMore(false); router.push("/pin-login") }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
               <UserCheck className="w-4 h-4 text-pos-muted" /> Switch Staff
+            </button>
+            <button onClick={() => { setShowMore(false); onSettings() }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-pos-fg hover-subtle transition-colors">
+              <Settings className="w-4 h-4 text-pos-muted" /> Settings
             </button>
           </div>
         </div>

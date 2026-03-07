@@ -159,6 +159,19 @@ export async function getCollections(): Promise<{
 
 // ─── Customers ───────────────────────────────────────────────────────────────
 
+export async function getCustomers(params?: {
+  limit?: number
+  offset?: number
+  q?: string
+}): Promise<{ customers: any[]; count: number }> {
+  const searchParams = new URLSearchParams()
+  searchParams.set("limit", String(params?.limit || 50))
+  searchParams.set("offset", String(params?.offset || 0))
+  if (params?.q) searchParams.set("q", params.q)
+  const qs = searchParams.toString()
+  return medusaRequest(`/admin/customers?${qs}`)
+}
+
 export async function searchCustomers(q: string): Promise<{
   customers: any[]
 }> {
@@ -181,6 +194,14 @@ export async function getCustomer(
   id: string
 ): Promise<{ customer: any }> {
   return medusaRequest(`/admin/customers/${id}`)
+}
+
+export async function getCustomerOrders(
+  customerId: string,
+  params?: { limit?: number }
+): Promise<{ orders: any[]; count: number }> {
+  const limit = params?.limit || 10
+  return medusaRequest(`/admin/orders?customer_id=${customerId}&limit=${limit}`)
 }
 
 // ─── Draft Orders ────────────────────────────────────────────────────────────
