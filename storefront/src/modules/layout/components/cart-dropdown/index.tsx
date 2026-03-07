@@ -113,21 +113,21 @@ const CartDropdown = ({
 
             {/* Slide-out drawer */}
             <div
-              className={`fixed top-0 right-0 z-[80] h-full w-full small:w-[420px] bg-white/10 backdrop-blur-md border-l border-white/20 shadow-2xl transform transition-transform duration-300 ease-out ${
+              className={`fixed top-0 right-0 z-[80] h-full w-full small:w-[420px] bg-white/80 backdrop-blur-xl border-l border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
                 drawerOpen ? "translate-x-0" : "translate-x-full"
               }`}
               data-testid="nav-cart-dropdown"
             >
               <div className="flex h-full flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-white/30 px-5 py-4">
-                  <h3 className="text-[16px] font-semibold text-white">
+                <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+                  <h3 className="text-[16px] font-semibold text-gray-900">
                     Your Cart ({totalItems})
                   </h3>
                   <button
                     type="button"
                     onClick={close}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-white/70 hover:bg-white/20 hover:text-white transition"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition"
                     aria-label="Close cart"
                   >
                     <X size={18} />
@@ -150,7 +150,7 @@ const CartDropdown = ({
                           >
                             <LocalizedClientLink
                               href={`/products/${item.variant?.product?.handle}`}
-                              className="shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/20 bg-white/10"
+                              className="shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
                               onClick={close}
                             >
                               <Thumbnail
@@ -161,7 +161,7 @@ const CartDropdown = ({
                             </LocalizedClientLink>
                             <div className="flex flex-col justify-between flex-1 min-w-0">
                               <div>
-                                <h4 className="text-[14px] font-medium text-white truncate">
+                                <h4 className="text-[14px] font-medium text-gray-900 truncate">
                                   <LocalizedClientLink
                                     href={`/products/${item.variant?.product?.handle}`}
                                     data-testid="product-link"
@@ -176,7 +176,7 @@ const CartDropdown = ({
                                   data-value={item.variant}
                                 />
                                 <span
-                                  className="text-[13px] text-white/70"
+                                  className="text-[13px] text-gray-500 mt-1 block"
                                   data-testid="cart-item-quantity"
                                   data-value={item.quantity}
                                 >
@@ -199,14 +199,14 @@ const CartDropdown = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="border-t border-white/30 px-5 py-4 space-y-3">
+                    <div className="border-t border-gray-200 px-5 py-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[14px] font-semibold text-white">
+                        <span className="text-[14px] font-semibold text-gray-900">
                           Subtotal{" "}
-                          <span className="font-normal text-white/60">(excl. taxes)</span>
+                          <span className="font-normal text-gray-500">(excl. taxes)</span>
                         </span>
                         <span
-                          className="text-[16px] font-semibold text-white"
+                          className="text-[16px] font-semibold text-gray-900"
                           data-testid="cart-subtotal"
                           data-value={subtotal}
                         >
@@ -228,10 +228,10 @@ const CartDropdown = ({
                   </>
                 ) : (
                   <div className="flex flex-1 flex-col items-center justify-center gap-4 px-5">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15">
-                      <ShoppingBag size={28} className="text-white/60" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                      <ShoppingBag size={28} className="text-gray-400" />
                     </div>
-                    <p className="text-[15px] text-white/70">Your cart is empty</p>
+                    <p className="text-[15px] text-gray-500">Your cart is empty</p>
                     <LocalizedClientLink
                       href="/store"
                       onClick={close}
