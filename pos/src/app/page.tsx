@@ -1382,23 +1382,25 @@ function PaymentModal({
             { display_name: "Staff", variable_name: "staff", value: staffName },
           ],
         },
-        callback: async (transaction: any) => {
+        callback: function(transaction: any) {
           setStatusText("Payment confirmed! Creating order...")
-          try {
-            await createOrder(`paystack`, {
-              paystack_reference: transaction.reference,
+          // Execute the async order creation logic
+          createOrder(`paystack`, {
+            paystack_reference: transaction.reference,
+          })
+            .then(() => {
+              const receipt = buildReceipt(providerName, {
+                note: cartNote ? `${cartNote} | Ref: ${transaction.reference}` : `Ref: ${transaction.reference}`,
+              })
+              setProcessing(false)
+              onComplete(providerName, receipt)
             })
-            const receipt = buildReceipt(providerName, {
-              note: cartNote ? `${cartNote} | Ref: ${transaction.reference}` : `Ref: ${transaction.reference}`,
+            .catch((err: any) => {
+              setProcessing(false)
+              setError(err.message || "Failed to sync order after payment")
             })
-            setProcessing(false)
-            onComplete(providerName, receipt)
-          } catch (err: any) {
-            setProcessing(false)
-            setError(err.message || "Failed to sync order after payment")
-          }
         },
-        onClose: () => {
+        onClose: function() {
           setProcessing(false)
           setStatusText("")
           toast.error("Payment modal closed")
