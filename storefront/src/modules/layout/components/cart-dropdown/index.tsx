@@ -113,7 +113,7 @@ const CartDropdown = ({
 
             {/* Slide-out drawer */}
             <div
-              className={`fixed top-0 right-0 z-[80] h-full w-full small:w-[420px] bg-white/80 backdrop-blur-xl border-l border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
+              className={`fixed top-0 right-0 z-[80] h-full w-full small:w-[420px] bg-white border-l border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
                 drawerOpen ? "translate-x-0" : "translate-x-full"
               }`}
               data-testid="nav-cart-dropdown"

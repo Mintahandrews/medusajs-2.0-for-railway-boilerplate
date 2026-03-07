@@ -154,7 +154,7 @@ const SideMenu = ({
 
               {/* Slide-out drawer */}
               <div
-                className={`fixed top-0 left-0 z-[80] h-full w-[85vw] max-w-[400px] bg-white/30 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border-r border-white/20 transform transition-transform duration-300 ease-out ${
+                className={`fixed top-0 left-0 z-[80] h-full w-[85vw] max-w-[400px] bg-gray-900 shadow-2xl border-r border-gray-800 transform transition-transform duration-300 ease-out ${
                   drawerOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
                 data-testid="nav-menu-popup"
@@ -194,8 +194,8 @@ const SideMenu = ({
                       <label className="sr-only" htmlFor="drawer-search">
                         Search products
                       </label>
-                      <div className="flex h-[50px] items-center gap-x-3 rounded-full border border-white/30 bg-white/15 backdrop-blur-md px-5">
-                        <Search className="text-white/70 shrink-0" size={20} />
+                      <div className="flex h-[50px] items-center gap-x-3 rounded-full border border-gray-700 bg-gray-800 px-5">
+                        <Search className="text-gray-400 shrink-0" size={20} />
                         <input
                           id="drawer-search"
                           type="search"
@@ -215,7 +215,7 @@ const SideMenu = ({
                     <div className="space-y-3">
                       <Disclosure>
                         {({ open: disclosureOpen }) => (
-                          <div className="rounded-[16px] border border-white/20 bg-white/10">
+                          <div className="rounded-[16px] border border-gray-700 bg-gray-800">
                             <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
                               <span className="text-[15px] font-semibold text-white drop-shadow-sm">
                                 Shop
@@ -266,7 +266,7 @@ const SideMenu = ({
                                           <LocalizedClientLink
                                             key={item.href}
                                             href={item.href}
-                                            className="shrink-0 rounded-full border border-white/25 px-3 py-1 text-[13px] text-white bg-white/10"
+                                            className="shrink-0 rounded-full border border-gray-600 px-3 py-1 text-[13px] text-white bg-gray-700"
                                             onClick={close}
                                           >
                                             {item.name}
@@ -302,7 +302,7 @@ const SideMenu = ({
 
                       <Disclosure>
                         {({ open: disclosureOpen }) => (
-                          <div className="rounded-[16px] border border-white/20 bg-white/10">
+                          <div className="rounded-[16px] border border-gray-700 bg-gray-800">
                             <Disclosure.Button className="w-full px-5 py-4 flex items-center justify-between text-left">
                               <span className="text-[15px] font-semibold text-white drop-shadow-sm">
                                 Products
