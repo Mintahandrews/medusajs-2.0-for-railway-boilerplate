@@ -134,7 +134,7 @@ export default function ReportsPage() {
     })
     return Object.entries(days).map(([day, amount]) => ({
       day,
-      amount: amount / 100,
+      amount: amount,
     }))
   }, [orders, period])
 
@@ -151,7 +151,7 @@ export default function ReportsPage() {
     })
     return Object.entries(methods).map(([name, value]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      value: value / 100,
+      value: value,
     }))
   }, [orders])
 

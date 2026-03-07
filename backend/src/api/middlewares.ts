@@ -128,8 +128,13 @@ async function posRbacGuard(
         return next()
       }
 
+      // Allow specific POST operations for cashiers (creating draft orders & paying them)
+      if (req.method === "POST" && matchesAny(req.path, ["/admin/draft-orders"])) {
+        return next()
+      }
+
       // Block write operations for cashier
-      if (req.method !== "GET") {
+      if (req.method !== "GET" && req.method !== "OPTIONS") {
         res.status(403).json({
           message: `Access denied. Cashier role cannot perform write operations on this resource.`,
           type: "forbidden",
