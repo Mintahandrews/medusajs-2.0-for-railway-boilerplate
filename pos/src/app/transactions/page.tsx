@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArrowLeft, Search, Loader2, Package, ChevronRight,
@@ -10,8 +10,13 @@ import { getOrders } from "@/lib/medusa-client"
 import { formatCurrency } from "@/lib/utils"
 import { usePOSStore } from "@/lib/store"
 import { hasPermission } from "@/lib/rbac"
-import { format } from "date-fns"
+import { 
+  format,
+  startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth
+} from "date-fns"
 import { ThemeToggle } from "@/components/theme-toggle"
+
+type FilterPeriod = "all" | "today" | "week" | "month"
 
 export default function TransactionsPage() {
   const router = useRouter()
@@ -22,6 +27,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [methodFilter, setMethodFilter] = useState<string>("all")
+  const [period, setPeriod] = useState<FilterPeriod>("all")
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
 
   const canViewAll = hasPermission(store.staffRole, "pos.transactions.all")
@@ -37,10 +43,29 @@ export default function TransactionsPage() {
     }
   }, [router, store.staffRole])
 
+  // Date ranges
+  const dateRange = useMemo(() => {
+    const now = new Date()
+    switch (period) {
+      case "today":
+        return { gte: startOfDay(now).toISOString(), lte: endOfDay(now).toISOString() }
+      case "week":
+        return { gte: startOfWeek(now).toISOString(), lte: endOfWeek(now).toISOString() }
+      case "month":
+        return { gte: startOfMonth(now).toISOString(), lte: endOfMonth(now).toISOString() }
+      default:
+        return undefined
+    }
+  }, [period])
+
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getOrders({ limit: 100 })
+      const data = await getOrders({ 
+        limit: 100,
+        // Optional date filtering based on the toggle
+        ...(dateRange ? { created_at: dateRange } : {})
+      })
       let filtered = (data.orders || []).filter(
         (o: any) => o.metadata?.source === "pos"
       )
@@ -56,7 +81,7 @@ export default function TransactionsPage() {
     } finally {
       setLoading(false)
     }
-  }, [canViewAll, store.staffName, store.staffEmail])
+  }, [canViewAll, store.staffName, store.staffEmail, dateRange])
 
   useEffect(() => {
     fetchOrders()
@@ -132,6 +157,22 @@ export default function TransactionsPage() {
                 }`}
               >
                 {m.replace(/_/g, " ")}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex bg-pos-card rounded-lg p-0.5 border border-pos-border overflow-x-auto scrollbar-none">
+            {(["all", "today", "week", "month"] as FilterPeriod[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                  period === p
+                    ? "bg-brand text-white"
+                    : "text-pos-muted hover:text-pos-fg"
+                }`}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
               </button>
             ))}
           </div>
