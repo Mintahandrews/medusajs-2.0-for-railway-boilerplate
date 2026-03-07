@@ -1,4 +1,4 @@
-import { Text, clx } from "@medusajs/ui"
+import { Text } from "@medusajs/ui"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -7,7 +7,7 @@ import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import { getProductsById } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
-import { AlertTriangle, Ban } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 
 export default async function ProductPreview({
   product,
@@ -56,25 +56,36 @@ export default async function ProductPreview({
   const totalInventory = inventoryLevels.reduce((acc, qty) => acc + qty, 0)
   const hasManagedInventory = managedVariants.length > 0
   const isOutOfStock = hasManagedInventory && totalInventory <= 0
+  const allowedBackorder = managedVariants.some(
+    (variant: any) => variant?.allow_backorder
+  )
+  const isPreorder = isOutOfStock && allowedBackorder
+  const isStrictlyOutOfStock = isOutOfStock && !allowedBackorder
+
   const positiveStocks = inventoryLevels.filter((qty) => qty > 0)
   const minPositiveStock = positiveStocks.length ? Math.min(...positiveStocks) : null
   const isLowStock =
     hasManagedInventory && !isOutOfStock && minPositiveStock !== null && minPositiveStock <= lowStockThreshold
 
-  const CardWrapper = ({ children }: { children: React.ReactNode }) =>
-    isOutOfStock ? (
-      <div className="group cursor-not-allowed" aria-disabled="true">
-        {children}
-      </div>
-    ) : (
-      <LocalizedClientLink href={`/products/${product.handle}`} className="group">
-        {children}
-      </LocalizedClientLink>
-    )
+  const CardWrapper = ({ children }: { children: React.ReactNode }) => (
+    <LocalizedClientLink href={`/products/${product.handle}`} className="group">
+      {children}
+    </LocalizedClientLink>
+  )
 
   return (
     <div className="relative">
       <div className="absolute right-3 top-3 z-10 flex flex-col gap-2 items-end">
+        {isStrictlyOutOfStock && (
+          <span className="bg-red-600 text-white text-[12px] font-semibold px-2.5 py-1 rounded-[4px] shadow-sm">
+            Out of stock
+          </span>
+        )}
+        {isPreorder && (
+          <span className="bg-amber-600 text-white text-[12px] font-semibold px-2.5 py-1 rounded-[4px] shadow-sm">
+            Pre-order
+          </span>
+        )}
         {isLowStock && minPositiveStock !== null && (
           <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 shadow-sm">
             <AlertTriangle size={12} />
@@ -92,10 +103,7 @@ export default async function ProductPreview({
         />
       </div>
       <CardWrapper>
-        <div
-          data-testid="product-wrapper"
-          className={clx({ "opacity-60": isOutOfStock })}
-        >
+        <div data-testid="product-wrapper">
           <div className="relative">
             <Thumbnail
               thumbnail={product.thumbnail}
@@ -104,12 +112,6 @@ export default async function ProductPreview({
               isFeatured={isFeatured}
               alt={product.title}
             />
-            {isOutOfStock && (
-              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white text-xs font-semibold gap-1">
-                <Ban size={18} />
-                <span>Out of stock</span>
-              </div>
-            )}
           </div>
           <div className="flex txt-compact-medium mt-4 justify-between">
             <Text className="text-ui-fg-subtle" data-testid="product-title">

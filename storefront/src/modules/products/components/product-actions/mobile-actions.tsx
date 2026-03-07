@@ -22,6 +22,7 @@ type MobileActionsProps = {
   isAdding?: boolean
   show: boolean
   optionsDisabled: boolean
+  isPreorder?: boolean
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -34,6 +35,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   isAdding,
   show,
   optionsDisabled,
+  isPreorder,
 }) => {
   const { state, open, close } = useToggleState()
 
@@ -125,6 +127,8 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   ? "Select variant"
                   : !inStock
                   ? "Out of stock"
+                  : isPreorder
+                  ? "Pre-order"
                   : "Add to cart"}
               </Button>
             </div>

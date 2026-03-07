@@ -51,6 +51,16 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
           const stocks = managedVariants.map((v) => v.inventory_quantity ?? 0)
           const allZero = stocks.every((s) => (s ?? 0) <= 0)
           if (allZero) {
+            const anyBackorder = managedVariants.some((v) => v.allow_backorder)
+            if (anyBackorder) {
+              return (
+                <div className="mt-2">
+                  <span className="inline-flex items-center gap-2 px-2 py-1 rounded text-sm font-semibold bg-amber-50 text-amber-800 border border-amber-100">
+                    Pre-order
+                  </span>
+                </div>
+              )
+            }
             return (
               <div className="mt-2">
                 <span className="inline-flex items-center gap-2 px-2 py-1 rounded text-sm font-semibold bg-red-50 text-red-700 border border-red-100">

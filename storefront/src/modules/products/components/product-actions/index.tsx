@@ -4,12 +4,13 @@ import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { useIntersection } from "@lib/hooks/use-in-view"
+
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import WishlistButton from "@modules/common/components/wishlist-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Modal from "@modules/common/components/modal"
 
 import MobileActions from "./mobile-actions"
 import ProductPrice from "../product-price"
@@ -111,13 +112,32 @@ export default function ProductActions({
     return false
   }, [selectedVariant])
 
+  const isPreorder = useMemo(() => {
+    if (!selectedVariant) return false
+    if (!selectedVariant.manage_inventory) return false
+
+    // It is a preorder if we manage inventory, have no stock, but allow backorders
+    if (
+      selectedVariant.allow_backorder &&
+      (selectedVariant.inventory_quantity || 0) <= 0
+    ) {
+      return true
+    }
+    return false
+  }, [selectedVariant])
+
   const actionsRef = useRef<HTMLDivElement>(null)
+  
+  const [showPreorderModal, setShowPreorderModal] = useState(false)
 
   const inView = useIntersection(actionsRef, "0px")
 
-  // add the selected variant to the cart
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
+    if (isPreorder && !showPreorderModal) {
+      setShowPreorderModal(true)
+      return null
+    }
 
     setIsAdding(true)
 
@@ -135,10 +155,44 @@ export default function ProductActions({
     })
 
     setIsAdding(false)
+    setShowPreorderModal(false)
   }
 
   return (
     <>
+      <Modal
+        isOpen={showPreorderModal}
+        close={() => setShowPreorderModal(false)}
+        size="small"
+        data-testid="preorder-modal"
+      >
+        <Modal.Title>Acknowledge Pre-order</Modal.Title>
+        <Modal.Body>
+          <div className="flex flex-col gap-4 text-ui-fg-base mb-6 mt-4">
+            <p className="text-sm">
+              Please note that this item is currently on pre-order. Pre-orders take a maximum of 10 to 14 days to fulfill.
+            </p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowPreorderModal(false)}
+            data-testid="preorder-cancel-button"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleAddToCart}
+            isLoading={isAdding}
+            data-testid="preorder-confirm-button"
+          >
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
         <div className="flex items-start justify-between gap-4">
           <ProductPrice product={product} variant={selectedVariant} />
@@ -178,13 +232,15 @@ export default function ProductActions({
           disabled={!inStock || !selectedVariant || !!disabled || isAdding}
           variant="primary"
           className="w-full h-10"
-          isLoading={isAdding}
+          isLoading={isAdding && !showPreorderModal}
           data-testid="add-product-button"
         >
           {!selectedVariant
             ? "Select variant"
             : !inStock
             ? "Out of stock"
+            : isPreorder
+            ? "Pre-order"
             : "Add to cart"}
         </Button>
         {product.handle && isCustomizableCase(product) && (
@@ -202,9 +258,10 @@ export default function ProductActions({
           updateOptions={setOptionValue}
           inStock={inStock}
           handleAddToCart={handleAddToCart}
-          isAdding={isAdding}
+          isAdding={isAdding && !showPreorderModal}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
+          isPreorder={isPreorder}
         />
       </div>
     </>
