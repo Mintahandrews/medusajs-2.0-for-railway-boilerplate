@@ -1344,83 +1344,64 @@ function PaymentModal({
     onComplete("Cash", receipt)
   }
 
-  // ── Handle MoMo via Paystack Charge API ───────────────────────────────────
+  // ── Handle Paystack Inline (Popup) ────────────────────────────────────────
   const handleMoMoPay = async () => {
     setProcessing(true)
     setError("")
-    setStatusText("Sending payment prompt to phone...")
+    setStatusText("Opening Paystack checkout...")
 
     try {
-      // Dynamic import to avoid bundling on server
-      const { chargeMobileMoney, pollTransactionStatus, MOMO_PROVIDERS } = await import("@/lib/paystack")
+      const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+      if (!publicKey) {
+        throw new Error("Paystack Public Key missing. Add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local")
+      }
 
-      const providerName = MOMO_PROVIDERS.find((p) => p.code === momoProvider)?.name || "Mobile Money"
+      const { default: PaystackPop } = await import("@paystack/inline-js")
+      const paystack = new PaystackPop()
+
       const email = customer?.email || "pos@letscase.com"
       const reference = `pos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const providerName = "Paystack"
 
-      const chargeResult = await chargeMobileMoney({
+      paystack.newTransaction({
+        key: publicKey,
         email,
-        amount: total,
+        amount: Math.round(total * 100), // Paystack inline expects minor units (pesewas)
         currency: "GHS",
         reference,
-        mobile_money: {
-          phone: momoPhone,
-          provider: momoProvider,
-        },
+        channels: ['mobile_money', 'card'],
         metadata: {
-          source: "pos",
-          staff: staffName,
           custom_fields: [
             { display_name: "Source", variable_name: "source", value: "POS" },
             { display_name: "Staff", variable_name: "staff", value: staffName },
           ],
         },
+        onSuccess: async (transaction: any) => {
+          setStatusText("Payment confirmed! Creating order...")
+          try {
+            await createOrder(`paystack`, {
+              paystack_reference: transaction.reference,
+            })
+            const receipt = buildReceipt(providerName, {
+              note: cartNote ? `${cartNote} | Ref: ${transaction.reference}` : `Ref: ${transaction.reference}`,
+            })
+            setProcessing(false)
+            onComplete(providerName, receipt)
+          } catch (err: any) {
+            setProcessing(false)
+            setError(err.message || "Failed to sync order after payment")
+          }
+        },
+        onCancel: () => {
+          setProcessing(false)
+          setStatusText("")
+          toast.error("Payment cancelled by customer")
+        },
       })
-
-      if (chargeResult.data.status === "pay_offline") {
-        setStatusText(chargeResult.data.display_text || "Waiting for customer to authorize on phone...")
-
-        // Poll until success or failure (up to 3 min)
-        await pollTransactionStatus(reference, {
-          intervalMs: 4000,
-          timeoutMs: 190000,
-          onPoll: (s) => {
-            if (s === "pending") setStatusText("Waiting for authorization...")
-          },
-        })
-
-        // Success — create the order
-        setStatusText("Payment confirmed! Creating order...")
-        await createOrder(`momo_${momoProvider}`, {
-          paystack_reference: reference,
-          momo_phone: momoPhone,
-          momo_provider: momoProvider,
-        })
-
-        const receipt = buildReceipt(`${providerName}`, {
-          note: cartNote ? `${cartNote} | Ref: ${reference}` : `Ref: ${reference}`,
-        })
-        setProcessing(false)
-        onComplete(providerName, receipt)
-      } else if (chargeResult.data.status === "success") {
-        // Instant success (unlikely for MoMo but handle it)
-        await createOrder(`momo_${momoProvider}`, {
-          paystack_reference: reference,
-          momo_phone: momoPhone,
-          momo_provider: momoProvider,
-        })
-        const receipt = buildReceipt(`${providerName}`, {
-          note: cartNote ? `${cartNote} | Ref: ${reference}` : `Ref: ${reference}`,
-        })
-        setProcessing(false)
-        onComplete(providerName, receipt)
-      } else {
-        throw new Error(chargeResult.data.display_text || chargeResult.message || "Charge failed")
-      }
     } catch (err: any) {
       setProcessing(false)
       setStatusText("")
-      setError(err.message || "Mobile Money payment failed")
+      setError(err.message || "Failed to load Paystack")
     }
   }
 
@@ -1556,43 +1537,14 @@ function PaymentModal({
 
           {/* ── MoMo Panel (Paystack) ──────────────────────────────────────── */}
           {method === "momo" && (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs text-pos-muted mb-1.5">Network Provider</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {([
-                    { code: "mtn" as const, name: "MTN", bg: "bg-yellow-500/20 border-yellow-500/50 text-yellow-700 dark:text-yellow-300" },
-                    { code: "vod" as const, name: "Telecel", bg: "bg-red-500/20 border-red-500/50 text-red-700 dark:text-red-300" },
-                    { code: "tgo" as const, name: "AirtelTigo", bg: "bg-pink-500/20 border-pink-500/50 text-pink-700 dark:text-pink-300" },
-                  ]).map((p) => (
-                    <button
-                      key={p.code}
-                      onClick={() => setMomoProvider(p.code)}
-                      className={`p-2 rounded-lg border text-xs font-semibold transition-all ${
-                        momoProvider === p.code ? p.bg : "border-pos-border text-pos-muted hover:text-pos-fg"
-                      }`}
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs text-pos-muted mb-1">Customer Phone Number</label>
-                <input
-                  type="tel"
-                  value={momoPhone}
-                  onChange={(e) => setMomoPhone(e.target.value.replace(/[^0-9]/g, ""))}
-                  className="pos-input w-full text-center text-lg font-bold h-12"
-                  placeholder="0551234567"
-                  autoFocus
-                  maxLength={10}
-                />
-              </div>
-              <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-3 text-center">
-                <Smartphone className="w-6 h-6 text-teal-600 dark:text-teal-400 mx-auto mb-1" />
-                <p className="text-xs text-teal-600 dark:text-teal-400">
-                  Customer will receive a payment prompt on their phone via Paystack
+            <div className="space-y-3 text-center">
+              <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-6">
+                <Smartphone className="w-10 h-10 text-teal-600 dark:text-teal-400 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
+                  Pay with Mobile Money or Card
+                </p>
+                <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 max-w-[250px] mx-auto">
+                  A secure Paystack popup will open to process the payment directly on this device.
                 </p>
               </div>
             </div>
