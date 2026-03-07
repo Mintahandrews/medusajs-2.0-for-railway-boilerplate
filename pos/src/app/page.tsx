@@ -1241,10 +1241,6 @@ function PaymentModal({
   const [error, setError] = useState("")
   const [statusText, setStatusText] = useState("")
 
-  // MoMo fields
-  const [momoPhone, setMomoPhone] = useState("")
-  const [momoProvider, setMomoProvider] = useState<"mtn" | "vod" | "tgo">("mtn")
-
   // Telecel Agent fields
   const [agentCode, setAgentCode] = useState("")
   const [agentPhone, setAgentPhone] = useState("")
@@ -1260,7 +1256,7 @@ function PaymentModal({
     method === "cash"
       ? cashAmount >= total
       : method === "momo"
-      ? momoPhone.length >= 10
+      ? true // Validation handled by Paystack popup
       : method === "telecel_agent"
       ? agentCode.trim().length > 0 && agentPhone.length >= 10
       : false
@@ -1448,7 +1444,7 @@ function PaymentModal({
     if (method === "momo") return handleMoMoPay()
     if (method === "telecel_agent") return handleAgentPay()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [method, cashAmount, total, momoPhone, momoProvider, agentCode, agentPhone, agentTxnRef])
+  }, [method, cashAmount, total, agentCode, agentPhone, agentTxnRef])
 
   // Enter key to submit payment
   useEffect(() => {
