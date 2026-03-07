@@ -200,7 +200,7 @@ export const usePOSStore = create<POSState>()(
             if (i.id !== id) return i
             const discountAmount =
               type === "percentage"
-                ? Math.round((i.unit_price * i.quantity * value) / 100)
+                ? parseFloat(((i.unit_price * i.quantity * value) / 100).toFixed(2))
                 : value
             return {
               ...i,
@@ -379,7 +379,7 @@ export const usePOSStore = create<POSState>()(
         )
         const afterItemDiscounts = subtotal - itemDiscounts
         if (cartDiscount.type === "percentage") {
-          return Math.round((afterItemDiscounts * cartDiscount.value) / 100)
+          return parseFloat(((afterItemDiscounts * cartDiscount.value) / 100).toFixed(2))
         }
         return cartDiscount.value
       },

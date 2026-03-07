@@ -254,7 +254,7 @@ function RefundModal({
   // Account for any previous refunds
   const previousRefunds = (order.refunds || []).reduce((sum: number, r: any) => sum + (r.amount || 0), 0)
   const maxRefund = Math.max(0, (order.total || 0) - previousRefunds)
-  const refundAmount = Math.round((parseFloat(amount) || 0) * 100)
+  const refundAmount = parseFloat(amount) || 0
 
   const handleRefund = async () => {
     if (refundAmount <= 0) {
@@ -329,11 +329,11 @@ function RefundModal({
               className="pos-input w-full text-xl text-center h-14 font-bold"
               placeholder="0.00"
               step="0.01"
-              max={maxRefund / 100}
+              max={maxRefund}
               autoFocus
             />
             <button
-              onClick={() => setAmount((maxRefund / 100).toFixed(2))}
+              onClick={() => setAmount(Number(maxRefund).toFixed(2))}
               className="mt-2 pos-btn-secondary text-xs w-full"
             >
               Full Refund — {formatCurrency(maxRefund, currency)}

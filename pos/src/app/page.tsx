@@ -852,7 +852,7 @@ export default function POSTerminal() {
                 const form = e.target as HTMLFormElement
                 const name = (form.elements.namedItem("customName") as HTMLInputElement).value.trim()
                 const priceStr = (form.elements.namedItem("customPrice") as HTMLInputElement).value
-                const price = Math.round(parseFloat(priceStr) * 100)
+                const price = Math.round(parseFloat(priceStr) * 100) / 100
                 if (!name || isNaN(price) || price <= 0) {
                   toast.error("Enter a valid name and price"); return
                 }
@@ -907,9 +907,9 @@ export default function POSTerminal() {
                   type="number"
                   step="0.01"
                   min="0"
-                  defaultValue={store.dailyTarget > 0 ? (store.dailyTarget / 100).toFixed(2) : ""}
+                  defaultValue={store.dailyTarget > 0 ? Number(store.dailyTarget).toFixed(2) : ""}
                   placeholder="0 = disabled"
-                  onChange={(e) => store.setDailyTarget(Math.round(parseFloat(e.target.value || "0") * 100))}
+                  onChange={(e) => store.setDailyTarget(parseFloat(e.target.value || "0"))}
                   className="w-full bg-pos-bg border border-pos-border rounded-lg px-3 py-2 text-sm text-pos-fg"
                 />
                 <p className="text-[10px] text-pos-muted mt-1">Set 0 to disable the sales goal tracker</p>
@@ -1145,12 +1145,12 @@ function CartPanel({
         {store.taxRate > 0 && (
           <div className="flex justify-between text-sm text-pos-muted">
             <span>Tax ({store.taxRate}%)</span>
-            <span>+{formatCurrency(Math.round(total * store.taxRate / 100), currency)}</span>
+            <span>+{formatCurrency(total * store.taxRate / 100, currency)}</span>
           </div>
         )}
         <div className="flex justify-between text-base font-bold text-brand pt-1">
           <span>Total</span>
-          <span>{formatCurrency(total + Math.round(total * store.taxRate / 100), currency)}</span>
+          <span>{formatCurrency(total + (total * store.taxRate / 100), currency)}</span>
         </div>
       </div>
 
@@ -1244,7 +1244,7 @@ function PaymentModal({
   const [agentPhone, setAgentPhone] = useState("")
   const [agentTxnRef, setAgentTxnRef] = useState("")
 
-  const cashAmount = parseFloat(cashReceived) * 100 || 0
+  const cashAmount = parseFloat(cashReceived) || 0
   const change = Math.max(0, cashAmount - total)
 
   const canPay =
@@ -1471,9 +1471,10 @@ function PaymentModal({
   // Quick cash buttons
   const quickAmounts = [
     total,
-    Math.ceil(total / 500) * 500,
-    Math.ceil(total / 1000) * 1000,
-    Math.ceil(total / 5000) * 5000,
+    Math.ceil(total / 10) * 10,
+    Math.ceil(total / 20) * 20,
+    Math.ceil(total / 50) * 50,
+    Math.ceil(total / 100) * 100,
   ].filter((v, i, a) => a.indexOf(v) === i && v >= total)
 
   return (
@@ -1537,8 +1538,8 @@ function PaymentModal({
                 {quickAmounts.map((amt) => (
                   <button
                     key={amt}
-                    onClick={() => setCashReceived((amt / 100).toFixed(2))}
-                    className="pos-btn-secondary text-xs"
+                    onClick={() => setCashReceived(Number(amt).toFixed(2))}
+                    className="flex-1 min-w-[30%] py-2 px-3 border border-pos-border rounded-xl text-center font-bold text-pos-fg hover-subtle transition-colors shrink-0"
                   >
                     {formatCurrency(amt, currency)}
                   </button>
@@ -1736,11 +1737,11 @@ function DiscountModal({
     }
 
     if (targetItemId) {
-      const fixedVal = type === "fixed" ? Math.round(numVal * 100) : numVal
+      const fixedVal = numVal
       store.setItemDiscount(targetItemId, type, fixedVal)
       toast.success("Item discount applied")
     } else {
-      const fixedVal = type === "fixed" ? Math.round(numVal * 100) : numVal
+      const fixedVal = numVal
       store.setCartDiscount({ type, value: fixedVal })
       toast.success("Cart discount applied")
     }

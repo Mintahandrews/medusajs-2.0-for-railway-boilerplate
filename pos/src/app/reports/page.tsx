@@ -119,7 +119,7 @@ export default function ReportsPage() {
     })
     return Object.entries(hours).map(([hour, amount]) => ({
       hour,
-      amount: amount / 100,
+      amount: amount,
     }))
   }, [orders])
 

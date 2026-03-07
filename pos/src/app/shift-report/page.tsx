@@ -118,7 +118,7 @@ export default function ShiftReportPage() {
         orderCount: stats.orderCount,
         totalSales: stats.totalSales,
         drawerBalance: stats.drawerBalance,
-        cashCount: Math.round((parseFloat(cashCount) || 0) * 100),
+        cashCount: parseFloat(cashCount) || 0,
       },
     })
     store.endShift()
@@ -132,7 +132,7 @@ export default function ShiftReportPage() {
   const shiftHours = Math.floor(shiftDuration / 60)
   const shiftMins = shiftDuration % 60
 
-  const actualCash = Math.round((parseFloat(cashCount) || 0) * 100)
+  const actualCash = parseFloat(cashCount) || 0
   const expectedCash = stats.drawerBalance
   const cashDiff = actualCash - expectedCash
 
