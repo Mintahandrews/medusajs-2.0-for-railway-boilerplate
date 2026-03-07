@@ -92,7 +92,7 @@ export default function ReportsPage() {
   // ─── Computed Stats ──────────────────────────────────────────────────────
 
   const stats = useMemo(() => {
-    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0)
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || o.summary?.current_order_total || 0), 0)
     const totalOrders = orders.length
     const avgOrderValue = totalOrders ? Math.round(totalRevenue / totalOrders) : 0
     const totalItems = orders.reduce(
@@ -114,7 +114,7 @@ export default function ReportsPage() {
       const hour = new Date(o.created_at).getHours()
       const key = `${hour}:00`
       if (hours[key] !== undefined) {
-        hours[key] += o.total || 0
+        hours[key] += o.total || o.summary?.current_order_total || 0
       }
     })
     return Object.entries(hours).map(([hour, amount]) => ({
@@ -130,7 +130,7 @@ export default function ReportsPage() {
     const days: Record<string, number> = {}
     orders.forEach((o) => {
       const day = format(parseISO(o.created_at), "MMM dd")
-      days[day] = (days[day] || 0) + (o.total || 0)
+      days[day] = (days[day] || 0) + (o.total || o.summary?.current_order_total || 0)
     })
     return Object.entries(days).map(([day, amount]) => ({
       day,
@@ -384,7 +384,7 @@ export default function ReportsPage() {
                           </span>
                         </td>
                         <td className="py-2.5 text-pos-fg font-semibold text-right">
-                          {formatCurrency(order.total || 0, currency)}
+                          {formatCurrency(order.total || order.summary?.current_order_total || 0, currency)}
                         </td>
                       </tr>
                     ))}
@@ -426,7 +426,7 @@ export default function ReportsPage() {
                         </p>
                       </div>
                       <p className="text-sm font-bold text-pos-fg shrink-0">
-                        {formatCurrency(order.total || 0, currency)}
+                        {formatCurrency(order.total || order.summary?.current_order_total || 0, currency)}
                       </p>
                     </div>
                   ))
