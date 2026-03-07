@@ -600,15 +600,15 @@ export default function POSTerminal() {
               </div>
             ) : (
               <>
-              {/* Custom Item Button */}
-              <button
-                onClick={() => setShowCustomItem(true)}
-                className="pos-card p-2.5 text-center hover:border-brand/40 transition-all flex flex-col items-center justify-center gap-2 border-dashed border-2 border-pos-border"
-              >
-                <PlusCircle className="w-8 h-8 text-brand" />
-                <p className="text-xs font-medium text-brand">Custom Item</p>
-              </button>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                {/* Custom Item Button */}
+                <button
+                  onClick={() => setShowCustomItem(true)}
+                  className="pos-card p-2.5 text-center hover:border-brand/40 transition-all flex flex-col items-center justify-center gap-2 border-dashed border-2 border-pos-border h-full min-h-[140px]"
+                >
+                  <PlusCircle className="w-8 h-8 text-brand" />
+                  <p className="text-xs font-medium text-brand">Custom Item</p>
+                </button>
                 {products.flatMap((product) =>
                   (product.variants || []).map((variant) => ({ product, variant }))
                 )
