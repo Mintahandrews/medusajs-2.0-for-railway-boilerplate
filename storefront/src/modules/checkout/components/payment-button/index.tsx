@@ -284,7 +284,7 @@ const PaystackPaymentButton = ({
   )
 
   const params = useParams()
-  const countryCode = (params.countryCode as string) || window.location.pathname.split("/")[1] || ""
+  const countryCode = (params.countryCode as string) || (typeof window !== "undefined" ? window.location.pathname.split("/")[1] : "gh")
 
   const loadScript = (src: string) =>
     new Promise<void>((resolve, reject) => {
