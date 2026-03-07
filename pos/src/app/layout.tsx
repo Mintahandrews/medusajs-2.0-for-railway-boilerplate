@@ -6,6 +6,29 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "Letscase POS",
   description: "Point of Sale System for Letscase",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Letscase POS",
+    description: "Point of Sale System for Letscase",
+    siteName: "Letscase POS",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Letscase Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Letscase POS",
+    description: "Point of Sale System for Letscase",
+    images: ["/logo.png"],
+  },
 }
 
 export default function RootLayout({

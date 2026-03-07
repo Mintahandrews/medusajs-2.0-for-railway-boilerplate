@@ -385,7 +385,7 @@ export default function POSTerminal() {
   const total = store.getTotal()
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-pos-bg">
+    <div className="flex flex-col h-[100dvh] bg-pos-bg overflow-hidden relative">
       {/* Header */}
       <header className="pos-page-header">
         <div className="flex items-center gap-3">
@@ -1471,7 +1471,7 @@ function PaymentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={processing ? undefined : onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[90dvh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border sticky top-0 bg-pos-card z-10 rounded-t-2xl">
           <h2 className="text-lg font-bold text-pos-fg">Payment</h2>
           <button onClick={onClose} className="text-pos-muted hover:text-pos-fg" disabled={processing}>
@@ -1648,7 +1648,7 @@ function ReceiptModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-sm mx-4 shadow-modal max-h-[90dvh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border shrink-0">
           <h2 className="text-lg font-bold text-pos-fg flex items-center gap-2">
             <Receipt className="w-5 h-5 text-brand" />
@@ -1834,7 +1834,7 @@ function HeldSalesModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[80dvh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border shrink-0">
           <h2 className="text-lg font-bold text-pos-fg">Held Sales ({store.heldSales.length})</h2>
           <button onClick={onClose} className="text-pos-muted hover:text-pos-fg">
