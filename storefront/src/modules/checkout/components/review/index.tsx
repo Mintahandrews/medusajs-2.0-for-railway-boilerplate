@@ -1,6 +1,6 @@
 "use client"
 
-import { Heading, Text, clx, Button } from "@medusajs/ui"
+import { Heading, Text, clx } from "@medusajs/ui"
 
 import PaymentButton from "../payment-button"
 import { useSearchParams } from "next/navigation"
@@ -33,7 +33,7 @@ const Review = ({ cart }: { cart: any }) => {
           Review
         </Heading>
       </div>
-      {isOpen && (
+      {isOpen && previousStepsCompleted && (
         <>
           <div className="flex items-start gap-x-1 w-full mb-6">
             <div className="w-full">
@@ -45,19 +45,7 @@ const Review = ({ cart }: { cart: any }) => {
               </Text>
             </div>
           </div>
-          
-          {!previousStepsCompleted ? (
-            <div className="mb-4">
-              <Text className="text-rose-500 text-small-regular mb-4">
-                Oops! Looks like some checkout steps are incomplete. Please verify your delivery and payment details before proceeding.
-                {!cart.shipping_methods?.length && " (Missing Delivery Method)"}
-                {!cart.payment_collection && " (Missing Payment Collection)"}
-              </Text>
-              <Button disabled size="large">Make payment</Button>
-            </div>
-          ) : (
-            <PaymentButton cart={cart} data-testid="submit-order-button" />
-          )}
+          <PaymentButton cart={cart} data-testid="submit-order-button" />
         </>
       )}
     </div>
