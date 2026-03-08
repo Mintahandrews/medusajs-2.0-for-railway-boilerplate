@@ -218,7 +218,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 value={areaSearch}
                 onChange={(e) => setAreaSearch(e.target.value)}
                 placeholder="Type your area name…"
-                className="w-full pl-9 pr-9 py-2.5 text-sm border border-ui-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-ui-bg-field transition-all"
+                className="w-full pl-9 pr-9 py-2.5 text-sm border border-ui-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand bg-brand-pink-50 transition-all hover:bg-brand-pink-100"
                 data-testid="delivery-area-search"
               />
               {areaSearch && (

@@ -76,14 +76,14 @@ export default async function ProductPreview({
   return (
     <div className="relative">
       <div className="absolute right-3 top-3 z-10 flex flex-col gap-2 items-end">
-        {isStrictlyOutOfStock && (
+        {isOutOfStock && (
           <span className="bg-red-600 text-white text-[12px] font-semibold px-2.5 py-1 rounded-[4px] shadow-sm">
             Out of stock
           </span>
         )}
         {isPreorder && (
-          <span className="bg-amber-600 text-white text-[12px] font-semibold px-2.5 py-1 rounded-[4px] shadow-sm">
-            Pre-order
+          <span className="bg-brand-900 text-white text-[12px] font-semibold px-2.5 py-1 rounded-[4px] shadow-sm">
+            Preorder available
           </span>
         )}
         {isLowStock && minPositiveStock !== null && (

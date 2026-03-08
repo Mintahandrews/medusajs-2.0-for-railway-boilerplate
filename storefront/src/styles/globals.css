@@ -2,11 +2,38 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "tailwindcss/utilities";
+
+@layer base {
+  body {
+    @apply bg-white text-brand-900;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-brand-950;
+  }
+}
 
 :root {
+  /* Letscase Typography / Layout overrides */
+  --fg-base: rgba(35, 72, 71, 1);       /* brand-900 */
+  --fg-subtle: rgba(42, 88, 86, 1);     /* brand-800 */
+  --fg-muted: rgba(51, 111, 108, 1);    /* brand-700 */
+  --bg-base: rgba(255, 255, 255, 1);    /* white */
+  --bg-subtle: rgba(240, 250, 249, 1);  /* brand-50 */
+  
+  /* Brand Pink */
+  --pink-subtle: rgba(253, 242, 248, 1); /* brand-pink-50 */
+  --pink-base: rgba(252, 231, 243, 1);   /* brand-pink-100 */
+
+  /* Interactive Controls */
   --bg-interactive: rgba(93, 171, 166, 1);
   --bg-interactive-hover: rgba(61, 139, 135, 1);
   --bg-interactive-pressed: rgba(61, 139, 135, 1);
+
+  /* Field / Input Backgrounds (Fill-ins) */
+  --bg-field: rgba(253, 242, 248, 1);        /* brand-pink-50 */
+  --bg-field-hover: rgba(252, 231, 243, 1);  /* brand-pink-100 */
+  --bg-subtle: rgba(253, 242, 248, 1);       /* brand-pink-50 */
 
   --fg-interactive: rgba(93, 171, 166, 1);
   --fg-interactive-hover: rgba(61, 139, 135, 1);
@@ -28,6 +55,7 @@
   --buttons-inverted-focus: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(93, 171, 166, 1), 0px 0px 0px 2px rgba(255, 255, 255, 1), 0px 0px 0px 4px rgba(93, 171, 166, 0.6);
   --buttons-neutral-focus: 0px 1px 2px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 0px 0px 2px rgba(255, 255, 255, 1), 0px 0px 0px 4px rgba(93, 171, 166, 0.6);
   --buttons-danger-focus: 0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset, 0px 1px 2px 0px rgba(190, 18, 60, 0.4), 0px 0px 0px 1px rgba(190, 18, 60, 1), 0px 0px 0px 2px rgba(255, 255, 255, 1), 0px 0px 0px 4px rgba(93, 171, 166, 0.6);
+
 }
 
 .dark {
@@ -37,6 +65,13 @@
 
   --fg-interactive: rgba(93, 171, 166, 1);
   --fg-interactive-hover: rgba(61, 139, 135, 1);
+
+  /* Letscase Typography / Layout overrides */
+  --fg-base: rgba(35, 72, 71, 1);
+  --fg-subtle: rgba(42, 88, 86, 1);
+  --fg-muted: rgba(51, 111, 108, 1);
+  --bg-base: rgba(255, 255, 255, 1);
+  --bg-subtle: rgba(240, 250, 249, 1);
 
   --border-interactive: rgba(93, 171, 166, 1);
   --border-interactive-hover: rgba(61, 139, 135, 1);

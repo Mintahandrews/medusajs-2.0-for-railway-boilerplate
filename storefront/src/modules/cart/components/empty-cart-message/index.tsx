@@ -15,7 +15,7 @@ const EmptyCartMessage = () => {
         You don&apos;t have anything in your cart. Let&apos;s change that, use
         the link below to start browsing our products.
       </Text>
-      <div>
+      <div className="mt-8">
         <InteractiveLink href="/store">Explore products</InteractiveLink>
       </div>
     </div>

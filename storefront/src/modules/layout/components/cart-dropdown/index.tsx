@@ -219,7 +219,7 @@ const CartDropdown = ({
                       <LocalizedClientLink
                         href="/cart"
                         onClick={close}
-                        className="flex w-full items-center justify-center rounded-lg bg-ui-bg-interactive text-ui-fg-on-color h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-interactive-hover transition-colors"
+                        className="flex w-full items-center justify-center rounded-lg bg-brand text-white h-10 px-5 text-[14px] font-semibold hover:bg-brand-600 transition-colors"
                         data-testid="go-to-cart-button"
                       >
                         View Cart & Checkout
@@ -235,7 +235,7 @@ const CartDropdown = ({
                     <LocalizedClientLink
                       href="/store"
                       onClick={close}
-                      className="flex items-center justify-center rounded-lg bg-ui-bg-interactive text-ui-fg-on-color h-10 px-5 text-[14px] font-semibold hover:bg-ui-bg-interactive-hover transition-colors"
+                      className="flex items-center justify-center rounded-lg bg-brand text-white h-10 px-5 text-[14px] font-semibold hover:bg-brand-600 transition-colors"
                     >
                       Explore Products
                     </LocalizedClientLink>

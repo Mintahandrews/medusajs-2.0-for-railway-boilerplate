@@ -54,9 +54,12 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
             const anyBackorder = managedVariants.some((v) => v.allow_backorder)
             if (anyBackorder) {
               return (
-                <div className="mt-2">
-                  <span className="inline-flex items-center gap-2 px-2 py-1 rounded text-sm font-semibold bg-amber-50 text-amber-800 border border-amber-100">
-                    Pre-order
+                <div className="mt-2 flex flex-col gap-2 items-start">
+                  <span className="inline-flex items-center gap-2 px-2 py-1 rounded text-sm font-semibold bg-red-50 text-red-700 border border-red-100">
+                    Out of stock
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-2 py-1 rounded text-sm font-semibold bg-brand-900 text-white border border-brand-900 shadow-sm">
+                    Preorder available
                   </span>
                 </div>
               )

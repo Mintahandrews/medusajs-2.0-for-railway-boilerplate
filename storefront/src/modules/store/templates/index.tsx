@@ -43,27 +43,6 @@ const StoreTemplate = ({
         </h1>
         <p className="mt-2 text-[14px] text-grey-50">{resolvedSubtitle}</p>
 
-        <div className="mt-5 grid grid-cols-1 small:grid-cols-3 gap-3">
-          <div className="rounded-[14px] border border-grey-20 bg-white px-4 py-3">
-            <p className="text-[14px] font-semibold text-grey-90">Fast delivery</p>
-            <p className="mt-1 text-[13px] text-grey-50">
-              Quick dispatch with reliable tracking.
-            </p>
-          </div>
-          <div className="rounded-[14px] border border-grey-20 bg-white px-4 py-3">
-            <p className="text-[14px] font-semibold text-grey-90">Easy returns</p>
-            <p className="mt-1 text-[13px] text-grey-50">
-              See our returns &amp; refunds policy.
-            </p>
-          </div>
-          <div className="rounded-[14px] border border-grey-20 bg-white px-4 py-3">
-            <p className="text-[14px] font-semibold text-grey-90">Support that helps</p>
-            <p className="mt-1 text-[13px] text-grey-50">
-              Reach us quickly via the Contact page.
-            </p>
-          </div>
-        </div>
-
         {quickLinks?.length ? (
           <div className="mt-6 flex flex-wrap gap-2">
             {quickLinks.map((l) => (
@@ -91,6 +70,27 @@ const StoreTemplate = ({
               countryCode={countryCode}
             />
           </Suspense>
+        </div>
+      </div>
+
+      <div className="mt-12 grid grid-cols-1 small:grid-cols-3 gap-3">
+        <div className="rounded-[14px] border border-grey-20 bg-white px-4 py-3">
+          <p className="text-[14px] font-semibold text-grey-90">Fast delivery</p>
+          <p className="mt-1 text-[13px] text-grey-50">
+            Quick dispatch with reliable tracking.
+          </p>
+        </div>
+        <div className="rounded-[14px] border border-grey-20 bg-white px-4 py-3">
+          <p className="text-[14px] font-semibold text-grey-90">Easy returns</p>
+          <p className="mt-1 text-[13px] text-grey-50">
+            See our returns &amp; refunds policy.
+          </p>
+        </div>
+        <div className="rounded-[14px] border border-grey-20 bg-white px-4 py-3">
+          <p className="text-[14px] font-semibold text-grey-90">Support that helps</p>
+          <p className="mt-1 text-[13px] text-grey-50">
+            Reach us quickly via the Contact page.
+          </p>
         </div>
       </div>
     </div>
