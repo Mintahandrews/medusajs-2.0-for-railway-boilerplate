@@ -69,6 +69,10 @@ const Payment = ({
   )
   const [selectedPaystackChannel, setSelectedPaystackChannel] =
     useState<PaystackChannel | null>(null)
+  const activeSessionProviderId = activeSession?.provider_id ?? ""
+  const activePaystackChannel = Array.isArray(activeSession?.data?.channels)
+    ? (activeSession.data.channels[0] as PaystackChannel | undefined)
+    : null
 
   /** True when the only (or selected) provider is Paystack */
   const paystackSelected = isPaystack(selectedPaymentMethod)
@@ -83,7 +87,7 @@ const Payment = ({
 
   const isOpen = searchParams.get("step") === "payment"
 
-  const isStripe = isStripeFunc(activeSession?.provider_id)
+  const stripeSelected = isStripeFunc(selectedPaymentMethod)
   const stripeReady = useContext(StripeContext)
 
   const paidByGiftcard =
@@ -129,8 +133,19 @@ const Payment = ({
     setIsLoading(true)
     setError(null)
     try {
-      const shouldInputCard =
-        isStripeFunc(selectedPaymentMethod) && !activeSession
+      if (!selectedPaymentMethod) {
+        setError("Please choose a payment method.")
+        setIsLoading(false)
+        return
+      }
+
+      const shouldInitializeSession =
+        !activeSession ||
+        activeSessionProviderId !== selectedPaymentMethod ||
+        (paystackSelected &&
+          !!selectedPaystackChannel &&
+          activePaystackChannel !== selectedPaystackChannel)
+      const shouldInputCard = stripeSelected && shouldInitializeSession
 
       // Require a channel selection when Paystack is selected
       if (paystackSelected && !selectedPaystackChannel) {
@@ -139,7 +154,7 @@ const Payment = ({
         return
       }
 
-      if (!activeSession) {
+      if (shouldInitializeSession) {
         const callbackUrl = isPaystack(selectedPaymentMethod)
           ? `${window.location.origin}/${pathname.split("/")[1]}/checkout/paystack/verify`
           : undefined
@@ -153,6 +168,9 @@ const Payment = ({
           }
           if (cart?.email) {
             paymentData.email = cart.email
+          }
+          if (cart?.shipping_address?.phone) {
+            paymentData.phone = cart.shipping_address.phone
           }
           // Pass the selected Paystack channel so the backend can forward it
           if (paystackSelected && selectedPaystackChannel) {
@@ -190,6 +208,18 @@ const Payment = ({
   useEffect(() => {
     setError(null)
   }, [isOpen])
+
+  useEffect(() => {
+    if (activeSessionProviderId) {
+      setSelectedPaymentMethod(activeSessionProviderId)
+    }
+  }, [activeSessionProviderId])
+
+  useEffect(() => {
+    if (paystackSelected && activePaystackChannel) {
+      setSelectedPaystackChannel(activePaystackChannel)
+    }
+  }, [paystackSelected, activePaystackChannel])
 
   // Auto-select Paystack provider when it is the only available method
   useEffect(() => {
@@ -304,7 +334,7 @@ const Payment = ({
                   />
                 </div>
               )}
-              {isStripe && stripeReady && (
+              {stripeSelected && stripeReady && (
                 <div className="mt-5 transition-all duration-150 ease-in-out">
                   <Text className="txt-medium-plus text-ui-fg-base mb-1">
                     Enter your card details:
@@ -351,7 +381,7 @@ const Payment = ({
             onClick={handleSubmit}
             isLoading={isLoading}
             disabled={
-              (isStripe && !cardComplete) ||
+              (stripeSelected && !cardComplete) ||
               (!selectedPaymentMethod && !paidByGiftcard) ||
               (paystackSelected && !selectedPaystackChannel)
             }

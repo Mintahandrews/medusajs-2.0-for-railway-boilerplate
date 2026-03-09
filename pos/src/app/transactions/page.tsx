@@ -16,7 +16,7 @@ import {
 } from "date-fns"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-type FilterPeriod = "all" | "today" | "week" | "month"
+type FilterPeriod = "all" | "today" | "week" | "month" | "custom"
 
 export default function TransactionsPage() {
   const router = useRouter()
@@ -28,6 +28,8 @@ export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [methodFilter, setMethodFilter] = useState<string>("all")
   const [period, setPeriod] = useState<FilterPeriod>("all")
+  const [customFrom, setCustomFrom] = useState("")
+  const [customTo, setCustomTo] = useState("")
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
 
   const canViewAll = hasPermission(store.staffRole, "pos.transactions.all")
@@ -53,10 +55,22 @@ export default function TransactionsPage() {
         return { gte: startOfWeek(now).toISOString(), lte: endOfWeek(now).toISOString() }
       case "month":
         return { gte: startOfMonth(now).toISOString(), lte: endOfMonth(now).toISOString() }
+      case "custom": {
+        if (!customFrom && !customTo) {
+          return undefined
+        }
+        const gte = customFrom
+          ? startOfDay(new Date(customFrom)).toISOString()
+          : undefined
+        const lte = customTo
+          ? endOfDay(new Date(customTo)).toISOString()
+          : undefined
+        return gte || lte ? { gte, lte } : undefined
+      }
       default:
         return undefined
     }
-  }, [period])
+  }, [period, customFrom, customTo])
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -162,7 +176,7 @@ export default function TransactionsPage() {
           </div>
 
           <div className="flex bg-pos-card rounded-lg p-0.5 border border-pos-border overflow-x-auto scrollbar-none">
-            {(["all", "today", "week", "month"] as FilterPeriod[]).map((p) => (
+            {(["all", "today", "week", "month", "custom"] as FilterPeriod[]).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
@@ -176,6 +190,35 @@ export default function TransactionsPage() {
               </button>
             ))}
           </div>
+
+          {period === "custom" && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type="date"
+                value={customFrom}
+                onChange={(e) => setCustomFrom(e.target.value)}
+                className="pos-input h-9 text-xs"
+              />
+              <span className="text-xs text-pos-muted">to</span>
+              <input
+                type="date"
+                value={customTo}
+                onChange={(e) => setCustomTo(e.target.value)}
+                className="pos-input h-9 text-xs"
+              />
+              {(customFrom || customTo) && (
+                <button
+                  onClick={() => {
+                    setCustomFrom("")
+                    setCustomTo("")
+                  }}
+                  className="pos-btn-ghost text-xs px-2.5 py-1.5"
+                >
+                  Clear dates
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Orders List */}

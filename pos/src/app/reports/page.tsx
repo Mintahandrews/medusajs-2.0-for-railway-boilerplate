@@ -44,7 +44,12 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState<FilterPeriod>("today")
 
-  const [inventoryStats, setInventoryStats] = useState({ count: 0, costPrice: 0, sellingPrice: 0 })
+  const [inventoryStats, setInventoryStats] = useState({
+    productCount: 0,
+    unitCount: 0,
+    costPrice: 0,
+    sellingPrice: 0,
+  })
   const [loadingInventory, setLoadingInventory] = useState(true)
 
   // Auth + RBAC check
@@ -101,31 +106,54 @@ export default function ReportsPage() {
         const data = await getProducts({ limit: 1000 })
         const products = data.products || []
         
-        let totalCount = 0
+        let totalProductCount = 0
+        let totalUnitCount = 0
         let totalCost = 0
         let totalSelling = 0
-        
+
+        const toAmount = (value: unknown) => {
+          if (typeof value === "number") return value
+          if (typeof value === "string") {
+            const parsed = Number(value)
+            return Number.isFinite(parsed) ? parsed : 0
+          }
+          return 0
+        }
+
         products.forEach((p: any) => {
           const variants = p.variants || []
-          variants.forEach((v: any) => {
+          const inStockVariants = variants.filter((v: any) => (v.inventory_quantity || 0) > 0)
+
+          if (inStockVariants.length > 0) {
+            totalProductCount += 1
+          }
+
+          inStockVariants.forEach((v: any) => {
             const qty = v.inventory_quantity || 0
-            if (qty > 0) {
-              totalCount += qty
-              // Medusa v2 doesn't return cost natively on variant without explicit expansion sometimes,
-              // but we map it if available. Fallback to 0 if not.
-              // We assume 'GHS' or default currency for prices
-              const priceObj = v.prices?.find((pr: any) => pr.currency_code === currency.toLowerCase())
-              const price = priceObj?.amount || 0
-              
-              // As a placeholder, assuming cost might be stored or omitted. Medusa normally doesn't have a strict cost_price 
-              // on the variant object returned by the store API. We'll represent it 0 if missing.
-              totalSelling += (price * qty)
-              // If there's a custom metadata cost price, we could parse it, but standard Medusa doesn't provide it by default on the basic API call.
-            }
+            totalUnitCount += qty
+
+            const priceObj = v.prices?.find(
+              (pr: any) => pr.currency_code === currency.toLowerCase()
+            )
+            const sellingPrice = toAmount(priceObj?.amount)
+            const costPrice =
+              toAmount(v?.cost_price) ||
+              toAmount(v?.metadata?.cost_price) ||
+              toAmount(v?.metadata?.costPrice) ||
+              toAmount(v?.metadata?.purchase_price) ||
+              toAmount(v?.metadata?.purchasePrice)
+
+            totalSelling += sellingPrice * qty
+            totalCost += costPrice * qty
           })
         })
-        
-        setInventoryStats({ count: totalCount, costPrice: 0, sellingPrice: totalSelling })
+
+        setInventoryStats({
+          productCount: totalProductCount,
+          unitCount: totalUnitCount,
+          costPrice: totalCost,
+          sellingPrice: totalSelling,
+        })
 
       } catch (err) {
         console.error("Failed to fetch inventory:", err)
@@ -209,6 +237,36 @@ export default function ReportsPage() {
   const drawerBalance = store.getDrawerBalance()
   const drawerEntries = store.drawerEntries
 
+  const productSoldRows = useMemo(() => {
+    const lines = new Map<
+      string,
+      { title: string; variant: string; sku: string; quantity: number; revenue: number }
+    >()
+
+    orders.forEach((order) => {
+      ;(order.items || []).forEach((item: any) => {
+        const title = item?.title || "Unknown item"
+        const variant = item?.variant_title || "Default"
+        const sku = item?.variant_sku || item?.sku || "N/A"
+        const key = `${item?.variant_id || item?.id || title}-${sku}`
+        const current = lines.get(key) || {
+          title,
+          variant,
+          sku,
+          quantity: 0,
+          revenue: 0,
+        }
+        const quantity = item?.quantity || 0
+        const lineTotal = item?.total ?? (item?.unit_price || 0) * quantity
+        current.quantity += quantity
+        current.revenue += lineTotal
+        lines.set(key, current)
+      })
+    })
+
+    return Array.from(lines.values()).sort((a, b) => b.quantity - a.quantity)
+  }, [orders])
+
   // ─── Export CSV ──────────────────────────────────────────────────────────
 
   const handleExportCSV = () => {
@@ -234,6 +292,37 @@ export default function ReportsPage() {
     const url = URL.createObjectURL(blob)
     link.setAttribute("href", url)
     link.setAttribute("download", `letscase-orders-${format(new Date(), "yyyy-MM-dd")}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const handleExportProductSoldCSV = () => {
+    if (productSoldRows.length === 0) return
+
+    const headers = ["Product", "Variant", "SKU", "Quantity Sold", "Total Revenue"]
+    const rows = productSoldRows.map((row) => [
+      row.title,
+      row.variant,
+      row.sku,
+      row.quantity,
+      row.revenue,
+    ])
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute(
+      "download",
+      `letscase-product-sold-${format(new Date(), "yyyy-MM-dd")}.csv`
+    )
     link.style.visibility = "hidden"
     document.body.appendChild(link)
     link.click()
@@ -435,16 +524,20 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-pos-bg rounded-lg p-4 border border-pos-border">
                     <p className="text-xs text-pos-muted flex items-center gap-2 mb-1">
-                      <PackageCheck className="w-4 h-4 text-brand" /> Available Items
+                      <PackageCheck className="w-4 h-4 text-brand" /> Available Products
                     </p>
-                    <p className="text-2xl font-bold text-pos-fg">{inventoryStats.count}</p>
+                    <p className="text-2xl font-bold text-pos-fg">{inventoryStats.productCount}</p>
+                    <p className="text-[11px] text-pos-muted mt-1">
+                      {inventoryStats.unitCount} total units in stock
+                    </p>
                   </div>
-                  <div className="bg-pos-bg rounded-lg p-4 border border-pos-border hidden">
-                    {/* Cost tracking is hidden by default unless Medusa Admin defines a cost_price metadata field */}
+                  <div className="bg-pos-bg rounded-lg p-4 border border-pos-border">
                     <p className="text-xs text-pos-muted flex items-center gap-2 mb-1">
                       <DollarSign className="w-4 h-4 text-red-500" /> Total Cost Price
                     </p>
-                    <p className="text-2xl font-bold text-pos-fg">{formatCurrency(inventoryStats.costPrice, currency)}</p>
+                    <p className="text-2xl font-bold text-pos-fg">
+                      {formatCurrency(inventoryStats.costPrice, currency)}
+                    </p>
                   </div>
                   <div className="bg-pos-bg rounded-lg p-4 border border-pos-border">
                     <p className="text-xs text-pos-muted flex items-center gap-2 mb-1">
@@ -462,14 +555,24 @@ export default function ReportsPage() {
             <div className="pos-card p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-pos-fg">Recent Orders</h3>
-                <button
-                  onClick={handleExportCSV}
-                  disabled={orders.length === 0}
-                  className="pos-btn-secondary text-xs px-3 py-1.5 flex items-center gap-2"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Export CSV</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleExportProductSoldCSV}
+                    disabled={productSoldRows.length === 0}
+                    className="pos-btn-secondary text-xs px-3 py-1.5 flex items-center gap-2"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Export Product Sold</span>
+                  </button>
+                  <button
+                    onClick={handleExportCSV}
+                    disabled={orders.length === 0}
+                    className="pos-btn-secondary text-xs px-3 py-1.5 flex items-center gap-2"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Export Orders CSV</span>
+                  </button>
+                </div>
               </div>
 
               {/* Desktop table */}

@@ -99,7 +99,7 @@ const Addresses = ({
                           <p className={clx("text-base font-medium", checked ? "text-brand-900" : "text-ui-fg-base")}>
                             Delivery
                           </p>
-                          <p className="text-sm text-ui-fg-subtle">We'll deliver to your address</p>
+                          <p className="text-sm text-ui-fg-subtle">We&apos;ll deliver to your address</p>
                         </div>
                       </>
                     )}

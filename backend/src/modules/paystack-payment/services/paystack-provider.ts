@@ -95,6 +95,32 @@ function toNumber(value: any): number {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function normalizePhone(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  return trimmed
+}
+
+function makeGuestEmailFromPhone(phone?: string): string | undefined {
+  if (!phone) {
+    return undefined
+  }
+
+  const digits = phone.replace(/\D/g, "")
+  if (!digits) {
+    return undefined
+  }
+
+  return `${digits}@guest.local`
+}
+
 class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
   static identifier = "paystack"
 
@@ -219,16 +245,23 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
     data,
     context,
   }: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
-
-
+    const phone =
+      normalizePhone((context as any)?.customer?.phone) ??
+      normalizePhone((context as any)?.shipping_address?.phone) ??
+      normalizePhone((context as any)?.billing_address?.phone) ??
+      normalizePhone((context as any)?.phone) ??
+      normalizePhone((data as any)?.phone) ??
+      normalizePhone((data as any)?.shipping_address?.phone) ??
+      normalizePhone((data as any)?.billing_address?.phone)
     const email =
       (context as any)?.customer?.email ??
       (context as any)?.email ??
-      (data as any)?.email
+      (data as any)?.email ??
+      makeGuestEmailFromPhone(phone)
 
     if (!email) {
       throw new Error(
-        "Paystack initiatePayment requires customer email (missing in context/data)"
+        "Paystack initiatePayment requires email or phone (missing in context/data)"
       )
     }
 
@@ -255,6 +288,7 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
       metadata: {
         ...metadata,
         session_id: (data as any)?.session_id,
+        ...(phone ? { phone } : {}),
       },
     }
 

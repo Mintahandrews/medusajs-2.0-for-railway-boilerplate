@@ -25,7 +25,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart ||
     !cart.shipping_address ||
     !cart.billing_address ||
-    !cart.email ||
+    !cart.shipping_address?.phone ||
     (cart.shipping_methods?.length ?? 0) < 1
 
   // TODO: Add this once gift cards are implemented
@@ -36,7 +36,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   //   return <GiftCardPaymentButton />
   // }
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (session) => session.status === "pending"
+  )
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
@@ -284,7 +286,7 @@ const PaystackPaymentButton = ({
   )
 
   const params = useParams()
-  const countryCode = (params.countryCode as string) || window.location.pathname.split("/")[1] || ""
+  const countryCode = (params.countryCode as string) || ""
 
   const loadScript = (src: string) =>
     new Promise<void>((resolve, reject) => {
@@ -304,6 +306,14 @@ const PaystackPaymentButton = ({
 
     const url = session?.data?.authorization_url as string | undefined
     const reference = session?.data?.reference as string | undefined
+    const channels = Array.isArray(session?.data?.channels)
+      ? (session?.data?.channels as string[])
+      : undefined
+    const paystackEmail =
+      cart.email ||
+      `${String(cart.shipping_address?.phone ?? "")
+        .replace(/\D/g, "")
+        .trim() || "guest"}@guest.local`
 
     // If a public key is available, open Paystack inline modal (keeps user on-site).
     if (PAYSTACK_PUBLIC_KEY && reference) {
@@ -314,13 +324,16 @@ const PaystackPaymentButton = ({
 
         const handler = paystack.setup({
           key: PAYSTACK_PUBLIC_KEY,
-          email: cart.email,
+          email: paystackEmail,
           amount: session?.data?.amount ?? undefined, // amount is smallest unit (kobo)
           currency: (String(session?.data?.currency ?? "")).toUpperCase(),
           ref: reference,
+          ...(channels?.length ? { channels } : {}),
           callback: function (res: any) {
             // Redirect to existing verify route which will complete the order
-            window.location.href = `${window.location.origin}/${countryCode}/checkout/paystack/verify?reference=${res.reference}`
+            const resolvedCountryCode =
+              countryCode || window.location.pathname.split("/")[1] || "gh"
+            window.location.href = `${window.location.origin}/${resolvedCountryCode}/checkout/paystack/verify?reference=${res.reference}`
           },
           onClose: function () {
             setSubmitting(false)
