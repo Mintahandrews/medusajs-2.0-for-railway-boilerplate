@@ -1,36 +1,49 @@
 import { loadEnv, Modules, defineConfig } from '@medusajs/utils';
 import { letscaseBrandingPlugin } from './vite-plugin-branding.js';
-import {
-  ADMIN_CORS,
-  AUTH_CORS,
-  BACKEND_URL,
-  COOKIE_SECRET,
-  DATABASE_URL,
-  JWT_SECRET,
-  REDIS_URL,
-  RESEND_API_KEY,
-  RESEND_FROM_EMAIL,
-  SENDGRID_API_KEY,
-  SENDGRID_FROM_EMAIL,
-  SHOULD_DISABLE_ADMIN,
-  STORE_CORS,
-  STRIPE_API_KEY,
-  STRIPE_WEBHOOK_SECRET,
-  PAYSTACK_SECRET_KEY,
-  PAYSTACK_CALLBACK_URL,
-  WORKER_MODE,
-  MINIO_ENDPOINT,
-  MINIO_ACCESS_KEY,
-  MINIO_SECRET_KEY,
-  MINIO_BUCKET,
-  MEILISEARCH_HOST,
-  MEILISEARCH_ADMIN_KEY,
-  ARONIUM_POS_ENABLED,
-  ARONIUM_POS_API_KEY,
-  POSTHOG_EVENTS_API_KEY,
-  POSTHOG_HOST,
-} from 'lib/constants';
 loadEnv(process.env.NODE_ENV, process.cwd());
+
+const required = (value, name) => {
+  if (!value) {
+    throw new Error(`Environment variable for ${name} is not set`)
+  }
+
+  return value
+}
+
+const BACKEND_URL =
+  process.env.BACKEND_PUBLIC_URL ??
+  process.env.RAILWAY_PUBLIC_DOMAIN_VALUE ??
+  'http://localhost:9000'
+const DATABASE_URL = required(process.env.DATABASE_URL, 'DATABASE_URL')
+const REDIS_URL = process.env.REDIS_URL
+const ADMIN_CORS = process.env.ADMIN_CORS
+const AUTH_CORS = process.env.AUTH_CORS
+const STORE_CORS = process.env.STORE_CORS
+const JWT_SECRET = required(process.env.JWT_SECRET, 'JWT_SECRET')
+const COOKIE_SECRET = required(process.env.COOKIE_SECRET, 'COOKIE_SECRET')
+const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT
+const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY
+const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY
+const MINIO_BUCKET = process.env.MINIO_BUCKET
+const RESEND_API_KEY = process.env.RESEND_API_KEY
+const RESEND_FROM_EMAIL =
+  process.env.RESEND_FROM_EMAIL || process.env.RESEND_FROM
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY
+const SENDGRID_FROM_EMAIL =
+  process.env.SENDGRID_FROM_EMAIL || process.env.SENDGRID_FROM
+const STRIPE_API_KEY = process.env.STRIPE_API_KEY
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
+const PAYSTACK_CALLBACK_URL = process.env.PAYSTACK_CALLBACK_URL
+const WORKER_MODE =
+  process.env.MEDUSA_WORKER_MODE ?? 'shared'
+const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
+const ARONIUM_POS_ENABLED = process.env.ARONIUM_POS_ENABLED === 'true'
+const ARONIUM_POS_API_KEY = process.env.ARONIUM_POS_API_KEY
+const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST
+const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY
+const POSTHOG_EVENTS_API_KEY = process.env.POSTHOG_EVENTS_API_KEY
+const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
 
 const medusaConfig = {
   projectConfig: {

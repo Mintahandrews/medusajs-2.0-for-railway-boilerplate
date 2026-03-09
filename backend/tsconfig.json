@@ -15,6 +15,7 @@
     "rootDir": "./",
     "baseUrl": ".",
     "paths": {
+      "*": ["./src/*"],
       "@/*": ["./src/*"]
     },
     "jsx": "react-jsx",
