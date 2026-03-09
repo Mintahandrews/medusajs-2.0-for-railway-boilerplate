@@ -426,10 +426,14 @@ export async function initiatePaymentSession(
     const resp = await sdk.store.payment
       .initiatePaymentSession(cart, data, {}, await getAuthHeaders())
     revalidateTag("cart")
-    return resp
+    return { ok: true as const, response: resp }
   } catch (error: any) {
     console.error("Payment session initialization failed:", error)
-    throw new Error(error?.message || "Failed to initialize payment session. Please try again.")
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Failed to initialize payment session. Please try again."
+    return { ok: false as const, error: message }
   }
 }
 

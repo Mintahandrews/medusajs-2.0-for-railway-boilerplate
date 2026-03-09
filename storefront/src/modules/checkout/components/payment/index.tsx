@@ -177,10 +177,15 @@ const Payment = ({
             paymentData.channels = [selectedPaystackChannel]
           }
 
-          await initiatePaymentSession(cart, {
+          const sessionInit = await initiatePaymentSession(cart, {
             provider_id: selectedPaymentMethod,
             data: Object.keys(paymentData).length ? paymentData : undefined,
           })
+          if (!sessionInit.ok) {
+            setError(sessionInit.error || "Failed to initialize payment. Please try again.")
+            setIsLoading(false)
+            return
+          }
         } catch (sessionErr: any) {
           console.error("Payment session error:", sessionErr)
           setError(sessionErr?.message || "Failed to initialize payment. Please try again.")

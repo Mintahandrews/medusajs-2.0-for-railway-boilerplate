@@ -6,12 +6,16 @@ import { useEffect } from "react"
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com"
+const VALID_POSTHOG_KEY =
+  typeof POSTHOG_KEY === "string" &&
+  POSTHOG_KEY.startsWith("phc_") &&
+  POSTHOG_KEY !== "phc_your_project_api_key"
 
 export default function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    if (!POSTHOG_KEY) return
+    if (!VALID_POSTHOG_KEY) return
 
-    posthog.init(POSTHOG_KEY, {
+    posthog.init(POSTHOG_KEY as string, {
       api_host: POSTHOG_HOST,
       person_profiles: "identified_only",
       capture_pageview: false, // we handle this manually for SPA navigations
@@ -20,7 +24,7 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
     })
   }, [])
 
-  if (!POSTHOG_KEY) {
+  if (!VALID_POSTHOG_KEY) {
     return <>{children}</>
   }
 
