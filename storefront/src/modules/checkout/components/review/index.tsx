@@ -15,11 +15,14 @@ const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
-  const baseStepsCompleted =
-    cart.shipping_address &&
-    cart.shipping_methods.length > 0 &&
-    true
-  const hasPaymentContext = Boolean(cart.payment_collection || paidByGiftcard)
+  const hasAddress = Boolean(cart?.shipping_address)
+  const hasShippingMethod = Boolean((cart?.shipping_methods?.length ?? 0) > 0)
+  const hasPendingPaymentSession = Boolean(
+    cart?.payment_collection?.payment_sessions?.some(
+      (session: any) => session?.status === "pending"
+    )
+  )
+  const canRenderPlaceOrder = paidByGiftcard || hasPendingPaymentSession
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams)
     params.set(name, value)
@@ -41,7 +44,7 @@ const Review = ({ cart }: { cart: any }) => {
           Review
         </Heading>
       </div>
-      {isOpen && baseStepsCompleted && (
+      {isOpen && hasAddress && hasShippingMethod && (
         <>
           <div className="flex items-start gap-x-1 w-full mb-6">
             <div className="w-full">
@@ -53,22 +56,45 @@ const Review = ({ cart }: { cart: any }) => {
               </Text>
             </div>
           </div>
-          {hasPaymentContext ? (
+          {canRenderPlaceOrder ? (
             <PaymentButton cart={cart} data-testid="submit-order-button" />
           ) : (
-            <button
-              onClick={() =>
-                router.push(pathname + "?" + createQueryString("step", "payment"), {
-                  scroll: false,
-                })
-              }
-              className="px-4 py-2 rounded-md bg-black text-white text-sm font-medium"
-              data-testid="go-to-payment-button"
-            >
-              Select payment method first
-            </button>
+            <div className="flex flex-col items-start gap-3">
+              <Text className="text-sm text-ui-fg-subtle">
+                Payment session is not active yet. Choose Paystack and continue again to initialize payment.
+              </Text>
+              <button
+                onClick={() =>
+                  router.push(pathname + "?" + createQueryString("step", "payment"), {
+                    scroll: false,
+                  })
+                }
+                className="px-4 py-2 rounded-md bg-black text-white text-sm font-medium"
+                data-testid="go-to-payment-button"
+              >
+                Back to payment
+              </button>
+            </div>
           )}
         </>
+      )}
+      {isOpen && (!hasAddress || !hasShippingMethod) && (
+        <div className="flex flex-col items-start gap-3">
+          <Text className="text-sm text-ui-fg-subtle">
+            Complete delivery information before reviewing payment.
+          </Text>
+          <button
+            onClick={() =>
+              router.push(pathname + "?" + createQueryString("step", "address"), {
+                scroll: false,
+              })
+            }
+            className="px-4 py-2 rounded-md bg-black text-white text-sm font-medium"
+            data-testid="go-to-address-button"
+          >
+            Back to address
+          </button>
+        </div>
       )}
     </div>
   )

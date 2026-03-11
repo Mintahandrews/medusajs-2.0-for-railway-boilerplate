@@ -22,8 +22,8 @@
   --bg-subtle: rgba(240, 250, 249, 1);  /* brand-50 */
   
   /* Brand Pink */
-  --pink-subtle: rgba(254, 249, 249, 1); /* brand-pink-50 */
-  --pink-base: rgba(253, 242, 242, 1);   /* brand-pink-100 */
+  --pink-subtle: rgba(255, 181, 195, 1);
+  --pink-base: rgba(255, 181, 195, 1);
 
   /* Interactive Controls */
   --bg-interactive: rgba(93, 171, 166, 1);
@@ -31,9 +31,9 @@
   --bg-interactive-pressed: rgba(61, 139, 135, 1);
 
   /* Field / Input Backgrounds (Fill-ins) */
-  --bg-field: rgba(254, 249, 249, 1);        /* brand-pink-50 */
-  --bg-field-hover: rgba(253, 242, 242, 1);  /* brand-pink-100 */
-  --bg-subtle: rgba(254, 249, 249, 1);       /* brand-pink-50 */
+  --bg-field: rgba(255, 181, 195, 1);
+  --bg-field-hover: rgba(255, 181, 195, 1);
+  --bg-subtle: rgba(255, 181, 195, 1);
 
   --fg-interactive: rgba(93, 171, 166, 1);
   --fg-interactive-hover: rgba(61, 139, 135, 1);

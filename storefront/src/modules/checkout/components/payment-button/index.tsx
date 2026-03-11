@@ -5,7 +5,7 @@ import { OnApproveActions, OnApproveData } from "@paypal/paypal-js"
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import React, { useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
@@ -67,8 +67,22 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     default:
-      return <Button disabled>Select a payment method</Button>
+      return <MissingPaymentSessionButton />
   }
+}
+
+const MissingPaymentSessionButton = () => {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const goToPayment = () => {
+    const params = new URLSearchParams(searchParams)
+    params.set("step", "payment")
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  return <Button onClick={goToPayment}>Select payment method</Button>
 }
 
 const GiftCardPaymentButton = () => {
@@ -370,7 +384,7 @@ const PaystackPaymentButton = ({
         size="large"
         data-testid={dataTestId}
       >
-        Make payment
+        Pay with Paystack
       </Button>
       <ErrorMessage error={errorMessage} data-testid="paystack-payment-error-message" />
     </>

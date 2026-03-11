@@ -120,15 +120,15 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <div className="grid grid-cols-3 gap-2 pt-2">
               <div className="flex flex-col items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-3 text-center">
                 <FastDelivery />
-                <span className="text-ui-fg-subtle text-xs">Fast delivery</span>
+                <span className="text-black text-xs">Fast delivery</span>
               </div>
               <div className="flex flex-col items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-3 text-center">
                 <Refresh />
-                <span className="text-ui-fg-subtle text-xs">Easy returns</span>
+                <span className="text-black text-xs">Easy returns</span>
               </div>
               <div className="flex flex-col items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-3 text-center">
                 <ShieldCheck />
-                <span className="text-ui-fg-subtle text-xs">Secure checkout</span>
+                <span className="text-black text-xs">Secure checkout</span>
               </div>
             </div>
           </div>
