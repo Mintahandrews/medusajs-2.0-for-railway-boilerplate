@@ -5,6 +5,7 @@ import ScrollToTop from "@modules/common/components/scroll-to-top"
 import WebsiteJsonLd from "@modules/seo/components/website-jsonld"
 import PostHogProvider from "@lib/posthog/provider"
 import PostHogPageView from "@lib/posthog/pageview"
+import ExtensionErrorGuard from "@modules/common/components/extension-error-guard"
 import "../styles/globals.css"
 
 const inter = Inter({
@@ -92,6 +93,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <PostHogProvider>
+          <ExtensionErrorGuard />
           <PostHogPageView />
           <ScrollToTop />
           <main id="top" className="relative">{props.children}</main>

@@ -207,55 +207,9 @@ export default function POSTerminal() {
   const barcodeBuffer = useRef("")
   const barcodeTimer = useRef<NodeJS.Timeout | null>(null)
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input
-      const target = e.target as HTMLElement
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return
-
-      if (e.key === "Enter" && barcodeBuffer.current.length >= 4) {
-        const barcode = barcodeBuffer.current
-        barcodeBuffer.current = ""
-        handleBarcodeScanned(barcode)
-        return
-      }
-
-      if (e.key.length === 1) {
-        barcodeBuffer.current += e.key
-        if (barcodeTimer.current) clearTimeout(barcodeTimer.current)
-        barcodeTimer.current = setTimeout(() => {
-          barcodeBuffer.current = ""
-        }, 100)
-      }
-    }
-
-    window.addEventListener("keypress", handleKeyPress)
-    return () => window.removeEventListener("keypress", handleKeyPress)
-  }, [])
-
-  const handleBarcodeScanned = async (barcode: string) => {
-    try {
-      playBeep()
-      const data = await getProductByBarcode(barcode)
-      if (data.products?.length) {
-        const product = data.products[0]
-        const variant = product.variants?.[0]
-        if (variant) {
-          addProductToCart(product, variant)
-          toast.success(`Added: ${product.title}`)
-          return
-        }
-      }
-      toast.error(`Product not found for barcode: ${barcode}`)
-    } catch {
-      toast.error("Barcode lookup failed")
-    }
-  }
-
   // ─── Add to Cart ───────────────────────────────────────────────────────────
 
-  const addProductToCart = (product: Product, variant: ProductVariant) => {
-    // Block out-of-stock items
+  const addProductToCart = useCallback((product: Product, variant: ProductVariant) => {
     if (variant.inventory_quantity != null && variant.inventory_quantity <= 0) {
       toast.error(`${product.title} is out of stock`)
       return
@@ -286,7 +240,51 @@ export default function POSTerminal() {
       inventory_quantity: variant.inventory_quantity,
     })
     playBeep()
-  }
+  }, [currency, store])
+
+  const handleBarcodeScanned = useCallback(async (barcode: string) => {
+    try {
+      playBeep()
+      const data = await getProductByBarcode(barcode)
+      if (data.products?.length) {
+        const product = data.products[0]
+        const variant = product.variants?.[0]
+        if (variant) {
+          addProductToCart(product, variant)
+          toast.success(`Added: ${product.title}`)
+          return
+        }
+      }
+      toast.error(`Product not found for barcode: ${barcode}`)
+    } catch {
+      toast.error("Barcode lookup failed")
+    }
+  }, [addProductToCart])
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return
+
+      if (e.key === "Enter" && barcodeBuffer.current.length >= 4) {
+        const barcode = barcodeBuffer.current
+        barcodeBuffer.current = ""
+        handleBarcodeScanned(barcode)
+        return
+      }
+
+      if (e.key.length === 1) {
+        barcodeBuffer.current += e.key
+        if (barcodeTimer.current) clearTimeout(barcodeTimer.current)
+        barcodeTimer.current = setTimeout(() => {
+          barcodeBuffer.current = ""
+        }, 100)
+      }
+    }
+
+    window.addEventListener("keypress", handleKeyPress)
+    return () => window.removeEventListener("keypress", handleKeyPress)
+  }, [handleBarcodeScanned])
 
   // ─── Keyboard Shortcuts ────────────────────────────────────────────────────
 
