@@ -167,7 +167,11 @@ export const usePOSStore = create<POSState>()(
       },
 
       removeItem: (id) => {
-        set({ items: get().items.filter((i) => i.id !== id) })
+        const nextItems = get().items.filter((i) => i.id !== id)
+        set({
+          items: nextItems,
+          ...(nextItems.length === 0 ? { cartDiscount: null } : {}),
+        })
       },
 
       updateQuantity: (id, quantity) => {
