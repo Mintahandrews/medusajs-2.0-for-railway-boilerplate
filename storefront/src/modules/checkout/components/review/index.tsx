@@ -83,7 +83,7 @@ const Review = ({ cart }: { cart: any }) => {
           Review
         </Heading>
       </div>
-      {isOpen && hasAddress && hasShippingMethod && (
+      {isOpen && hasAddress && (
         <>
           {/* Order summary row */}
           {(hasPendingPaymentSession || formattedTotal) && (
@@ -144,7 +144,7 @@ const Review = ({ cart }: { cart: any }) => {
           )}
         </>
       )}
-      {isOpen && (!hasAddress || !hasShippingMethod) && (
+      {isOpen && !hasAddress && (
         <div className="flex flex-col items-start gap-3 rounded-xl border border-ui-border-base bg-ui-bg-subtle px-5 py-4">
           <Text className="text-sm text-ui-fg-subtle">
             Please complete your delivery information before placing an order.

@@ -93,8 +93,10 @@ const Payment = ({
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
-  const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
+  // paymentReady: an active payment session is sufficient — shipping is
+  // auto-selected in setAddresses; don't block the summary on shipping_methods
+  // being stale/missing in the cart prop.
+  const paymentReady = Boolean(activeSession) || paidByGiftcard
 
   const useOptions: StripeCardElementOptions = useMemo(() => {
     return {

@@ -592,6 +592,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           selectedMethod = methods[0]
         }
         await sdk.store.cart.addShippingMethod(cartId, { option_id: selectedMethod.id }, {}, await getAuthHeaders())
+        // Invalidate cart cache AFTER shipping method is attached so the next
+        // render gets a cart that includes shipping_methods.
+        revalidateTag("cart")
       }
     } catch (e) {
       console.warn("Could not auto-select shipping method", e)
