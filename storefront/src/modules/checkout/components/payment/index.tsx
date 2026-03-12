@@ -393,7 +393,13 @@ const Payment = ({
             data-testid="submit-payment-button"
           >
             {!activeSession && isStripeFunc(selectedPaymentMethod)
-              ? " Enter card details"
+              ? "Enter card details"
+              : paystackSelected && selectedPaystackChannel
+              ? `Continue with ${
+                  { mobile_money: "Mobile Money", card: "Card", bank: "Bank" }[
+                    selectedPaystackChannel
+                  ] ?? "Paystack"
+                }`
               : "Continue to review"}
           </Button>
         </div>

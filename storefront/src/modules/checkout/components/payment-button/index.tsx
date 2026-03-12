@@ -4,13 +4,14 @@ import { Button } from "@medusajs/ui"
 import { OnApproveActions, OnApproveData } from "@paypal/paypal-js"
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { isManual, isPaypal, isPaystack, isStripe, PAYSTACK_PUBLIC_KEY } from "@lib/constants"
+import { convertToLocale } from "@lib/util/money"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -283,6 +284,13 @@ const PayPalPaymentButton = ({
   return null
 }
 
+/** Channel labels for the Paystack button */
+const paystackChannelLabels: Record<string, string> = {
+  mobile_money: "Mobile Money",
+  card: "Card",
+  bank: "Bank",
+}
+
 const PaystackPaymentButton = ({
   cart,
   notReady,
@@ -294,6 +302,7 @@ const PaystackPaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [dismissed, setDismissed] = useState(false)
 
   const session = cart.payment_collection?.payment_sessions?.find(
     (s) => s.status === "pending"
@@ -301,6 +310,30 @@ const PaystackPaymentButton = ({
 
   const params = useParams()
   const countryCode = (params.countryCode as string) || ""
+
+  // Derive channel-aware button label
+  const channels = Array.isArray(session?.data?.channels)
+    ? (session?.data?.channels as string[])
+    : undefined
+  const channelLabel = channels?.[0]
+    ? paystackChannelLabels[channels[0]] || "Paystack"
+    : "Paystack"
+
+  // Format cart total for the button
+  const formattedTotal =
+    cart.total != null && cart.currency_code
+      ? convertToLocale({
+          amount: cart.total,
+          currency_code: cart.currency_code,
+        })
+      : null
+
+  // Auto-clear the "dismissed" message after a few seconds
+  useEffect(() => {
+    if (!dismissed) return
+    const t = setTimeout(() => setDismissed(false), 4000)
+    return () => clearTimeout(t)
+  }, [dismissed])
 
   const loadScript = (src: string) =>
     new Promise<void>((resolve, reject) => {
@@ -316,13 +349,11 @@ const PaystackPaymentButton = ({
 
   const handlePayment = async () => {
     setErrorMessage(null)
+    setDismissed(false)
     setSubmitting(true)
 
     const url = session?.data?.authorization_url as string | undefined
     const reference = session?.data?.reference as string | undefined
-    const channels = Array.isArray(session?.data?.channels)
-      ? (session?.data?.channels as string[])
-      : undefined
     const paystackEmail =
       cart.email ||
       `${String(cart.shipping_address?.phone ?? "")
@@ -339,35 +370,33 @@ const PaystackPaymentButton = ({
         const handler = paystack.setup({
           key: PAYSTACK_PUBLIC_KEY,
           email: paystackEmail,
-          amount: session?.data?.amount ?? undefined, // amount is smallest unit (kobo)
+          amount: session?.data?.amount ?? undefined,
           currency: (String(session?.data?.currency ?? "")).toUpperCase(),
           ref: reference,
           ...(channels?.length ? { channels } : {}),
           callback: function (res: any) {
-            // Redirect to existing verify route which will complete the order
             const resolvedCountryCode =
               countryCode || window.location.pathname.split("/")[1] || "gh"
             window.location.href = `${window.location.origin}/${resolvedCountryCode}/checkout/paystack/verify?reference=${res.reference}`
           },
           onClose: function () {
             setSubmitting(false)
+            setDismissed(true)
           },
         })
 
-        // open the inline iframe/modal
         if (handler && typeof handler.openIframe === "function") {
           handler.openIframe()
           return
         }
       } catch (err: any) {
-        // fallback to redirect if inline fails
         console.warn("Paystack inline failed, falling back to redirect:", err)
       }
     }
 
-    // Fallback: redirect to Paystack host (existing behavior)
+    // Fallback: redirect to Paystack hosted page
     if (!url) {
-      setErrorMessage("Missing Paystack authorization URL. Please reselect Paystack.")
+      setErrorMessage("Missing Paystack authorization URL. Please go back and reselect your payment method.")
       setSubmitting(false)
       return
     }
@@ -377,14 +406,22 @@ const PaystackPaymentButton = ({
 
   return (
     <>
+      {dismissed && (
+        <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Payment window was closed. Click the button below to try again.
+        </div>
+      )}
       <Button
-        disabled={notReady}
+        disabled={notReady || submitting}
         isLoading={submitting}
         onClick={handlePayment}
         size="large"
+        className="w-full"
         data-testid={dataTestId}
       >
-        Pay with Paystack
+        {submitting
+          ? "Processing…"
+          : `Pay${formattedTotal ? ` ${formattedTotal}` : ""} with ${channelLabel}`}
       </Button>
       <ErrorMessage error={errorMessage} data-testid="paystack-payment-error-message" />
     </>
