@@ -26,8 +26,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     !cart ||
     !cart.shipping_address ||
     !cart.billing_address ||
-    !cart.shipping_address?.phone ||
-    (cart.shipping_methods?.length ?? 0) < 1
+    !cart.shipping_address?.phone
 
   // TODO: Add this once gift cards are implemented
   // const paidByGiftcard =

@@ -33,7 +33,11 @@ export async function retrieveCart() {
   }
 
   return await sdk.store.cart
-    .retrieve(cartId, {}, { next: { tags: ["cart"] }, ...(await getAuthHeaders()) })
+    .retrieve(
+      cartId,
+      { fields: "+shipping_methods,+shipping_methods.shipping_option" },
+      { next: { tags: ["cart"] }, ...(await getAuthHeaders()) }
+    )
     .then(({ cart }) => cart)
     .catch(async (error) => {
       // If cart is completed or not found, clear the cookie
