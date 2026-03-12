@@ -287,7 +287,7 @@ const PayPalPaymentButton = ({
 const paystackChannelLabels: Record<string, string> = {
   mobile_money: "Mobile Money",
   card: "Card",
-  bank: "Bank",
+  bank: "Bank Transfer",
 }
 
 const PaystackPaymentButton = ({

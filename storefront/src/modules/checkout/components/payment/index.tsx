@@ -22,7 +22,7 @@ import { initiatePaymentSession } from "@lib/data/cart"
 const channelLabels: Record<PaystackChannel, string> = {
   mobile_money: "Mobile Money",
   card: "Card Payment",
-  bank: "Bank Payment",
+  bank: "Bank Transfer",
 }
 
 const Payment = ({
@@ -398,7 +398,7 @@ const Payment = ({
               ? "Enter card details"
               : paystackSelected && selectedPaystackChannel
               ? `Continue with ${
-                  { mobile_money: "Mobile Money", card: "Card", bank: "Bank" }[
+                  { mobile_money: "Mobile Money", card: "Card", bank: "Bank Transfer" }[
                     selectedPaystackChannel
                   ] ?? "Paystack"
                 }`

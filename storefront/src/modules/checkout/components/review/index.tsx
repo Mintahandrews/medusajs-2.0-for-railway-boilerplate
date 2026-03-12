@@ -33,7 +33,7 @@ const Review = ({ cart }: { cart: any }) => {
   const channelLabels: Record<string, string> = {
     mobile_money: "Mobile Money",
     card: "Card Payment",
-    bank: "Bank Payment",
+    bank: "Bank Transfer",
   }
   const paymentMethodLabel = isPaystack(providerId)
     ? paystackChannels[0]
