@@ -50,6 +50,15 @@ export default function ReportsPage() {
     costPrice: 0,
     sellingPrice: 0,
   })
+
+  interface CategoryStat {
+    id: string
+    name: string
+    productCount: number
+    unitCount: number
+    sellingPrice: number
+  }
+  const [categoryStats, setCategoryStats] = useState<CategoryStat[]>([])
   const [loadingInventory, setLoadingInventory] = useState(true)
 
   // Auth + RBAC check
@@ -120,12 +129,32 @@ export default function ReportsPage() {
           return 0
         }
 
+        const catMap = new Map<string, { id: string; name: string; productCount: number; unitCount: number; sellingPrice: number }>()
+
         products.forEach((p: any) => {
           const variants = p.variants || []
           const inStockVariants = variants.filter((v: any) => (v.inventory_quantity || 0) > 0)
 
           if (inStockVariants.length > 0) {
             totalProductCount += 1
+
+            // Use first category (or Uncategorized) to avoid double-counting
+            const cats: Array<{ id: string; name: string }> = p.categories?.length > 0
+              ? p.categories.map((c: any) => ({ id: c.id, name: c.name }))
+              : [{ id: "__uncategorized__", name: "Uncategorized" }]
+            const cat = cats[0]
+            if (!catMap.has(cat.id)) {
+              catMap.set(cat.id, { id: cat.id, name: cat.name, productCount: 0, unitCount: 0, sellingPrice: 0 })
+            }
+            const catStat = catMap.get(cat.id)!
+            catStat.productCount += 1
+
+            inStockVariants.forEach((v: any) => {
+              const qty = v.inventory_quantity || 0
+              catStat.unitCount += qty
+              const priceObj2 = v.prices?.find((pr: any) => pr.currency_code === currency.toLowerCase())
+              catStat.sellingPrice += toAmount(priceObj2?.amount) * qty
+            })
           }
 
           inStockVariants.forEach((v: any) => {
@@ -154,6 +183,9 @@ export default function ReportsPage() {
           costPrice: totalCost,
           sellingPrice: totalSelling,
         })
+        setCategoryStats(
+          Array.from(catMap.values()).sort((a, b) => b.productCount - a.productCount)
+        )
 
       } catch (err) {
         console.error("Failed to fetch inventory:", err)
@@ -520,7 +552,8 @@ export default function ReportsPage() {
                  <div className="flex items-center justify-center h-24">
                    <Loader2 className="w-6 h-6 text-brand animate-spin" />
                  </div>
-              ) : (
+      ) : (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-pos-bg rounded-lg p-4 border border-pos-border">
                     <p className="text-xs text-pos-muted flex items-center gap-2 mb-1">
@@ -548,6 +581,32 @@ export default function ReportsPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* By Category */}
+                {categoryStats.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-pos-muted mb-2">By Category</p>
+                    <div className="space-y-1.5">
+                      {categoryStats.map((cat) => (
+                        <div
+                          key={cat.id}
+                          className="flex items-center justify-between bg-pos-bg rounded-lg px-3 py-2 border border-pos-border"
+                        >
+                          <div>
+                            <p className="text-xs font-medium text-pos-fg">{cat.name}</p>
+                            <p className="text-[10px] text-pos-muted">
+                              {cat.productCount} product{cat.productCount !== 1 ? "s" : ""} &middot; {cat.unitCount} units
+                            </p>
+                          </div>
+                          <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(cat.sellingPrice, currency)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                </>
               )}
             </div>
 

@@ -9,14 +9,15 @@ import {
   BarChart3, LogOut, ScanBarcode, Package, Shield, ClipboardList,
   X, Loader2, Receipt, Printer, Clock, UserCheck, UserCog,
   RefreshCw, MoreHorizontal, Star, Wifi, WifiOff, Settings, PlusCircle,
-  AlertTriangle, Split, Percent,
+  AlertTriangle, Split, Percent, PhoneCall, Info,
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { usePOSStore, type POSCartItem, type POSState } from "@/lib/store"
 import { getProducts, getCategories, getProductByBarcode, createDraftOrder, markDraftOrderPaid, getRegions, getShippingOptions } from "@/lib/medusa-client"
 import { hasPermission, getRoleBadgeClasses, getRoleLabel } from "@/lib/rbac"
 import { useAuditStore } from "@/lib/audit"
-import { formatCurrency, playBeep } from "@/lib/utils"
+import { formatCurrency, playBeep, playPurchaseSuccess } from "@/lib/utils"
+import * as Tooltip from "@radix-ui/react-tooltip"
 import ReceiptPrint, { type ReceiptData } from "@/components/receipt"
 import { useReactToPrint } from "react-to-print"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -383,6 +384,7 @@ export default function POSTerminal() {
   const total = store.getTotal()
 
   return (
+    <Tooltip.Provider delayDuration={400}>
     <div className="flex flex-col h-[100dvh] bg-pos-bg overflow-hidden relative">
       {/* Header */}
       <header className="pos-page-header">
@@ -429,60 +431,71 @@ export default function POSTerminal() {
               </button>
             )}
             {can("pos.shift_report") && (
-              <button onClick={() => router.push("/shift-report")} className="pos-btn-ghost text-xs px-2.5">
-                <Clock className="w-3.5 h-3.5" />
-              </button>
+              <Tip label="Shift Report">
+                <button onClick={() => router.push("/shift-report")} className="pos-btn-ghost text-xs px-2.5">
+                  <Clock className="w-3.5 h-3.5" />
+                </button>
+              </Tip>
             )}
             {can("pos.audit_log") && (
-              <button onClick={() => router.push("/audit")} className="pos-btn-ghost text-xs px-2.5">
-                <Shield className="w-3.5 h-3.5" />
-              </button>
+              <Tip label="Audit Log">
+                <button onClick={() => router.push("/audit")} className="pos-btn-ghost text-xs px-2.5">
+                  <Shield className="w-3.5 h-3.5" />
+                </button>
+              </Tip>
             )}
             {can("pos.manage_staff") && (
-              <button onClick={() => router.push("/staff")} className="pos-btn-ghost text-xs px-2.5">
-                <UserCog className="w-3.5 h-3.5" />
-              </button>
+              <Tip label="Manage Staff">
+                <button onClick={() => router.push("/staff")} className="pos-btn-ghost text-xs px-2.5">
+                  <UserCog className="w-3.5 h-3.5" />
+                </button>
+              </Tip>
             )}
           </nav>
           <div className="hidden lg:block h-5 w-px bg-pos-border mx-1" />
-          <button
-            onClick={() => {
-              if (store.heldSales.length) setShowHeldSales(true)
-              else toast("No held sales")
-            }}
-            className="pos-btn-ghost text-xs px-2 relative"
-          >
-            <Pause className="w-3.5 h-3.5" />
-            {store.heldSales.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-orange-500 rounded-full text-[10px] text-white flex items-center justify-center font-semibold">
-                {store.heldSales.length}
-              </span>
-            )}
-          </button>
+          <Tip label="Held Sales">
+            <button
+              onClick={() => {
+                if (store.heldSales.length) setShowHeldSales(true)
+                else toast("No held sales")
+              }}
+              className="pos-btn-ghost text-xs px-2 relative"
+            >
+              <Pause className="w-3.5 h-3.5" />
+              {store.heldSales.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-orange-500 rounded-full text-[10px] text-white flex items-center justify-center font-semibold">
+                  {store.heldSales.length}
+                </span>
+              )}
+            </button>
+          </Tip>
           <ThemeToggle />
-          <button
-            onClick={() => router.push("/pin-login")}
-            className="pos-btn-ghost text-xs px-2 hidden sm:flex"
-            title="Switch staff (PIN)"
-          >
-            <UserCheck className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => {
-              audit.addEntry({
-                action: "logout",
-                staffName: store.staffName,
-                staffRole: getRoleLabel(store.staffRole),
-                detail: "Logged out",
-              })
-              localStorage.removeItem("pos_admin_token")
-              store.clearSession()
-              router.push("/login")
-            }}
-            className="pos-btn-ghost text-xs px-2 text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-          </button>
+          <Tip label="Switch Staff (PIN)">
+            <button
+              onClick={() => router.push("/pin-login")}
+              className="pos-btn-ghost text-xs px-2 hidden sm:flex"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+            </button>
+          </Tip>
+          <Tip label="Log Out">
+            <button
+              onClick={() => {
+                audit.addEntry({
+                  action: "logout",
+                  staffName: store.staffName,
+                  staffRole: getRoleLabel(store.staffRole),
+                  detail: "Logged out",
+                })
+                localStorage.removeItem("pos_admin_token")
+                store.clearSession()
+                router.push("/login")
+              }}
+              className="pos-btn-ghost text-xs px-2 text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </Tip>
         </div>
       </header>
 
@@ -940,6 +953,27 @@ export default function POSTerminal() {
         </div>
       )}
     </div>
+    </Tooltip.Provider>
+  )
+}
+
+// ─── Tooltip helper ──────────────────────────────────────────────────────────
+
+function Tip({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          side="bottom"
+          sideOffset={4}
+          className="z-[200] bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md px-2 py-1 text-xs shadow-md pointer-events-none"
+        >
+          {label}
+          <Tooltip.Arrow className="fill-zinc-900 dark:fill-zinc-100" />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
   )
 }
 
@@ -1135,10 +1169,19 @@ function CartPanel({
         )}
         {cartDiscountAmt > 0 && (
           <div className="flex justify-between text-sm text-orange-600 dark:text-orange-400">
-            <span>
-              Cart Discount
-              {store.cartDiscount?.type === "percentage" && ` (${store.cartDiscount.value}%)`}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span>
+                Cart Discount
+                {store.cartDiscount?.type === "percentage" && ` (${store.cartDiscount.value}%)`}
+              </span>
+              <button
+                onClick={() => store.setCartDiscount(null)}
+                className="w-4 h-4 rounded-full bg-orange-600/20 hover:bg-orange-600/40 transition-colors flex items-center justify-center"
+                title="Remove cart discount"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </div>
             <span>-{formatCurrency(cartDiscountAmt, currency)}</span>
           </div>
         )}
@@ -1204,7 +1247,15 @@ function CartPanel({
 
 // ─── Payment Modal ───────────────────────────────────────────────────────────
 
-type PayMethod = "cash" | "momo" | "telecel_agent"
+type PayMethod = "cash" | "paystack" | "merchant_momo" | "telecel_agent"
+
+interface SplitEntry {
+  id: string
+  method: PayMethod
+  amount: number
+  label: string
+  meta?: Record<string, string>
+}
 
 function PaymentModal({
   items,
@@ -1243,23 +1294,39 @@ function PaymentModal({
   const [agentCode, setAgentCode] = useState("")
   const [agentPhone, setAgentPhone] = useState("")
   const [agentTxnRef, setAgentTxnRef] = useState("")
-  
+
+  // Split payment
+  const [splitMode, setSplitMode] = useState(false)
+  const [splitEntries, setSplitEntries] = useState<SplitEntry[]>([])
+  const [splitAmount, setSplitAmount] = useState("")
+
   // Make sure Paystack script is always loaded when Payment Modal is open
   usePaystack()
 
   const cashAmount = parseFloat(cashReceived) || 0
   const change = Math.max(0, cashAmount - total)
 
-  const canPay =
-    method === "cash"
-      ? cashAmount >= total
-      : method === "momo"
-      ? true // Validation handled by Paystack popup
-      : method === "telecel_agent"
-      ? agentCode.trim().length > 0 && agentPhone.length >= 10
-      : false
+  // Split derived
+  const totalPaid = splitEntries.reduce((s, e) => s + e.amount, 0)
+  const splitRemaining = Math.max(0, total - totalPaid)
+  const splitDone = splitRemaining < 0.005
+  const splitEntryAmt = parseFloat(splitAmount) || 0
 
-  // ── Create draft order in Medusa ──────────────────────────────────────────
+  const merchantMomoNumber = process.env.NEXT_PUBLIC_MERCHANT_MOMO_NUMBER || "Not configured"
+
+  const canPaySingle =
+    method === "cash" ? cashAmount >= total
+    : method === "paystack" ? true
+    : method === "merchant_momo" ? true
+    : method === "telecel_agent" ? agentCode.trim().length > 0 && agentPhone.length >= 10
+    : false
+
+  const canPay = splitMode ? (splitDone && !processing) : (canPaySingle && !processing)
+
+  const canAddSplit = !processing && !splitDone && splitEntryAmt > 0.009 && splitEntryAmt <= splitRemaining + 0.005 &&
+    (method !== "telecel_agent" || (agentCode.trim().length > 0 && agentPhone.length >= 10))
+
+  // ── Create draft order in Medusa ────────────────────────────────────────────
   const createOrder = async (paymentMethod: string, paymentMeta: Record<string, string> = {}) => {
     try {
       const regionsData = await getRegions()
@@ -1316,7 +1383,7 @@ function PaymentModal({
     }
   }
 
-  // ── Build receipt data ────────────────────────────────────────────────────
+  // ── Build receipt data ────────────────────────────────────────────────
   const buildReceipt = (methodLabel: string, extra?: Partial<ReceiptData>): ReceiptData => ({
     items: [...items],
     subtotal,
@@ -1339,120 +1406,152 @@ function PaymentModal({
     setProcessing(true)
     setError("")
     await createOrder("cash")
-    const receipt = buildReceipt("Cash", {
-      cashReceived: cashAmount,
-      change,
-    })
+    const receipt = buildReceipt("Cash", { cashReceived: cashAmount, change })
+    playPurchaseSuccess()
     setProcessing(false)
     onComplete("Cash", receipt)
   }
 
-  // ── Handle Paystack Inline (Popup) ────────────────────────────────────────
-  const handleMoMoPay = async () => {
+  // ── Handle Paystack Inline (Popup) ────────────────────────────────────────────
+  const handlePaystackPay = async () => {
     setProcessing(true)
     setError("")
     setStatusText("Opening Paystack checkout...")
-
     try {
       const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
-      if (!publicKey) {
-        throw new Error("Paystack Public Key missing. Add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local")
-      }
-
-      if (typeof window === "undefined" || !window.PaystackPop) {
-        throw new Error("Paystack is still loading. Please try again in a moment.")
-      }
+      if (!publicKey) throw new Error("Paystack Public Key missing. Add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local")
+      if (typeof window === "undefined" || !window.PaystackPop) throw new Error("Paystack is still loading. Please try again.")
 
       const email = customer?.email || "pos@letscase.com"
       const reference = `pos-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       const providerName = "Paystack"
 
-      const handler = window.PaystackPop.setup({
-        key: publicKey,
-        email,
-        amount: Math.round(total * 100), // Paystack inline expects minor units (pesewas)
-        currency: "GHS",
-        reference,
-        channels: ['mobile_money', 'card'],
-        metadata: {
-          custom_fields: [
-            { display_name: "Source", variable_name: "source", value: "POS" },
-            { display_name: "Staff", variable_name: "staff", value: staffName },
-          ],
-        },
-        callback: function(transaction: any) {
+      window.PaystackPop.setup({
+        key: publicKey, email,
+        amount: Math.round(total * 100),
+        currency: "GHS", reference,
+        channels: ["mobile_money", "card"],
+        metadata: { custom_fields: [
+          { display_name: "Source", variable_name: "source", value: "POS" },
+          { display_name: "Staff", variable_name: "staff", value: staffName },
+        ]},
+        callback: (transaction: any) => {
           setStatusText("Payment confirmed! Creating order...")
-          // Execute the async order creation logic
-          createOrder(`paystack`, {
-            paystack_reference: transaction.reference,
-          })
+          createOrder("paystack", { paystack_reference: transaction.reference })
             .then(() => {
               const receipt = buildReceipt(providerName, {
                 note: cartNote ? `${cartNote} | Ref: ${transaction.reference}` : `Ref: ${transaction.reference}`,
               })
+              playPurchaseSuccess()
               setProcessing(false)
               onComplete(providerName, receipt)
             })
-            .catch((err: any) => {
-              setProcessing(false)
-              setError(err.message || "Failed to sync order after payment")
-            })
+            .catch((err: any) => { setProcessing(false); setError(err.message || "Failed to sync order") })
         },
-        onClose: function() {
-          setProcessing(false)
-          setStatusText("")
-          toast.error("Payment modal closed")
-        },
-      })
-      handler.openIframe()
+        onClose: () => { setProcessing(false); setStatusText(""); toast.error("Payment modal closed") },
+      }).openIframe()
     } catch (err: any) {
-      console.error("Paystack Checkout Error:", err)
-      setProcessing(false)
-      setStatusText("")
+      setProcessing(false); setStatusText("")
       setError(err.message || "Failed to load Paystack")
       toast.error(err.message || "Failed to load Paystack")
     }
   }
 
-  // ── Handle Telecel Agent (manual tracking) ────────────────────────────────
+  // ── Handle Merchant MoMo (manual) ─────────────────────────────────────────
+  const handleMerchantMomoPay = async () => {
+    setProcessing(true); setError("")
+    await createOrder("merchant_momo")
+    const receipt = buildReceipt("Merchant MoMo")
+    playPurchaseSuccess()
+    setProcessing(false)
+    onComplete("Merchant MoMo", receipt)
+  }
+
+  // ── Handle Telecel Agent (manual tracking) ───────────────────────────────────────────
   const handleAgentPay = async () => {
-    setProcessing(true)
-    setError("")
-
+    setProcessing(true); setError("")
     await createOrder("telecel_agent", {
-      agent_code: agentCode.trim(),
-      agent_phone: agentPhone.trim(),
-      agent_txn_ref: agentTxnRef.trim(),
+      agent_code: agentCode.trim(), agent_phone: agentPhone.trim(), agent_txn_ref: agentTxnRef.trim(),
     })
-
     const receipt = buildReceipt("Telecel Agent", {
-      note: [
-        cartNote,
-        `Agent: ${agentCode}`,
-        `Agent Phone: ${agentPhone}`,
-        agentTxnRef ? `Txn Ref: ${agentTxnRef}` : "",
-      ]
-        .filter(Boolean)
-        .join(" | "),
+      note: [cartNote, `Agent: ${agentCode}`, `Agent Phone: ${agentPhone}`, agentTxnRef ? `Txn Ref: ${agentTxnRef}` : ""]
+        .filter(Boolean).join(" | "),
     })
+    playPurchaseSuccess()
     setProcessing(false)
     onComplete("Telecel Agent", receipt)
   }
 
+  // ── Add split payment entry ─────────────────────────────────────────────────
+  const handleAddSplitEntry = useCallback(async () => {
+    if (!canAddSplit) return
+    const amt = parseFloat(splitAmount) || 0
+
+    if (method === "paystack") {
+      setProcessing(true); setStatusText("Opening Paystack checkout...")
+      try {
+        const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+        if (!publicKey || !window.PaystackPop) throw new Error("Paystack not ready")
+        const reference = `pos-split-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+        window.PaystackPop.setup({
+          key: publicKey, email: customer?.email || "pos@letscase.com",
+          amount: Math.round(amt * 100), currency: "GHS", reference,
+          channels: ["mobile_money", "card"],
+          callback: (transaction: any) => {
+            setSplitEntries(prev => [...prev, { id: transaction.reference, method: "paystack", amount: amt, label: "Paystack", meta: { paystack_reference: transaction.reference } }])
+            setSplitAmount("")
+            setProcessing(false); setStatusText("")
+            toast.success(`Paystack — ${formatCurrency(amt, currency)} added`)
+          },
+          onClose: () => { setProcessing(false); setStatusText(""); toast("Paystack payment cancelled") },
+        }).openIframe()
+      } catch (err: any) { setProcessing(false); setStatusText(""); setError(err.message || "Paystack error") }
+      return
+    }
+
+    const methodLabels: Record<PayMethod, string> = { cash: "Cash", paystack: "Paystack", merchant_momo: "Merchant MoMo", telecel_agent: "Telecel Agent" }
+    const label = methodLabels[method]
+    const meta = method === "telecel_agent" && agentCode.trim()
+      ? { agent_code: agentCode.trim(), agent_phone: agentPhone.trim(), agent_txn_ref: agentTxnRef.trim() }
+      : undefined
+    setSplitEntries(prev => [...prev, { id: `split-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, method, amount: amt, label, ...(meta ? { meta } : {}) }])
+    setSplitAmount("")
+    toast.success(`${label} — ${formatCurrency(amt, currency)} added`)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canAddSplit, method, splitAmount, customer, currency, agentCode, agentPhone, agentTxnRef])
+
+  // ── Complete split payment ──────────────────────────────────────────────────
+  const handleCompleteSplitPayment = async () => {
+    setProcessing(true); setError("")
+    const methodLabel = [...new Set(splitEntries.map(e => e.label))].join(" + ")
+    const combinedMeta: Record<string, string> = {}
+    splitEntries.forEach((e, i) => {
+      combinedMeta[`split_${i}_method`] = e.method
+      combinedMeta[`split_${i}_amount`] = String(e.amount)
+      if (e.meta) Object.entries(e.meta).forEach(([k, v]) => { combinedMeta[`split_${i}_${k}`] = v })
+    })
+    await createOrder(methodLabel, combinedMeta)
+    const receipt = buildReceipt(methodLabel, {
+      splitPayments: splitEntries.map(e => ({ method: e.label, amount: e.amount }))
+    })
+    playPurchaseSuccess()
+    setProcessing(false)
+    onComplete(methodLabel, receipt)
+  }
+
   const handlePay = useCallback(() => {
+    if (splitMode) { handleCompleteSplitPayment(); return }
     if (method === "cash") return handleCashPay()
-    if (method === "momo") return handleMoMoPay()
+    if (method === "paystack") return handlePaystackPay()
+    if (method === "merchant_momo") return handleMerchantMomoPay()
     if (method === "telecel_agent") return handleAgentPay()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [method, cashAmount, total, agentCode, agentPhone, agentTxnRef])
+  }, [splitMode, method, cashAmount, total, agentCode, agentPhone, agentTxnRef, splitEntries, splitDone])
 
   // Enter key to submit payment
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && canPay && !processing) {
-        e.preventDefault()
-        handlePay()
-      }
+      if (e.key === "Enter" && canPay && !processing) { e.preventDefault(); handlePay() }
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
@@ -1467,70 +1566,74 @@ function PaymentModal({
     Math.ceil(total / 100) * 100,
   ].filter((v, i, a) => a.indexOf(v) === i && v >= total)
 
+  const methodTabs: Array<{ key: PayMethod; label: string; icon: React.ReactNode }> = [
+    { key: "cash", label: "Cash", icon: <DollarSign className="w-4 h-4" /> },
+    { key: "paystack", label: "Paystack", icon: <Smartphone className="w-4 h-4" /> },
+    { key: "merchant_momo", label: "MoMo Pay", icon: <PhoneCall className="w-4 h-4" /> },
+    { key: "telecel_agent", label: "Agent", icon: <Users className="w-4 h-4" /> },
+  ]
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={processing ? undefined : onClose}>
       <div className="bg-pos-card border border-pos-border rounded-2xl w-full max-w-md mx-4 shadow-modal max-h-[90dvh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-pos-border sticky top-0 bg-pos-card z-10 rounded-t-2xl">
           <h2 className="text-lg font-bold text-pos-fg">Payment</h2>
-          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg" disabled={processing}>
-            <X className="w-5 h-5" />
-          </button>
+          <button onClick={onClose} className="text-pos-muted hover:text-pos-fg" disabled={processing}><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-4 space-y-4">
+          {/* Total */}
           <div className="text-center">
             <p className="text-pos-muted text-sm">Total Amount</p>
             <p className="text-3xl font-bold text-brand">{formatCurrency(total, currency)}</p>
           </div>
 
-          {/* Payment Method Toggle */}
-          <div className="grid grid-cols-3 gap-1.5">
-            {([
-              { key: "cash" as PayMethod, label: "Cash", icon: <DollarSign className="w-5 h-5" /> },
-              { key: "momo" as PayMethod, label: "MoMo", icon: <Smartphone className="w-5 h-5" /> },
-              { key: "telecel_agent" as PayMethod, label: "Agent", icon: <Users className="w-5 h-5" /> },
-            ]).map((m) => (
+          {/* Split toggle */}
+          <div className="flex items-center justify-between bg-pos-bg-subtle rounded-xl px-3 py-2">
+            <div className="flex items-center gap-2 text-sm text-pos-muted">
+              <Split className="w-4 h-4" />
+              <span className="font-medium text-pos-fg">Split Payment</span>
+              <span className="text-xs hidden sm:inline">— multiple methods</span>
+            </div>
+            <button
+              onClick={() => { const n = !splitMode; setSplitMode(n); setSplitEntries([]); setSplitAmount(n ? total.toFixed(2) : ""); setError("") }}
+              disabled={processing}
+              className={`relative w-10 h-5 rounded-full transition-colors ${splitMode ? "bg-brand" : "bg-pos-border"}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${splitMode ? "translate-x-5" : "translate-x-0.5"}`} />
+            </button>
+          </div>
+
+          {/* Payment Method Tabs */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {methodTabs.map((m) => (
               <button
                 key={m.key}
-                onClick={() => { setMethod(m.key); setError(""); setStatusText("") }}
+                onClick={() => { setMethod(m.key); setError(""); setStatusText(""); if (splitMode) setSplitAmount(splitRemaining.toFixed(2)) }}
                 disabled={processing}
-                className={`p-2.5 rounded-xl border text-center transition-all ${
-                  method === m.key
-                    ? "border-brand bg-brand/10 text-brand"
-                    : "border-pos-border text-pos-muted hover:text-pos-fg"
+                className={`p-2 rounded-xl border text-center transition-all ${
+                  method === m.key ? "border-brand bg-brand/10 text-brand" : "border-pos-border text-pos-muted hover:text-pos-fg"
                 }`}
               >
                 <div className="mx-auto mb-0.5 flex justify-center">{m.icon}</div>
-                <span className="text-xs font-medium">{m.label}</span>
+                <span className="text-[11px] font-medium leading-tight">{m.label}</span>
               </button>
             ))}
           </div>
 
-          {/* ── Cash Panel ──────────────────────────────────────────────────── */}
-          {method === "cash" && (
+          {/* ── Single-mode panels (hidden when split mode is active) ────────────────── */}
+          {!splitMode && method === "cash" && (
             <div className="space-y-3">
               <div>
                 <label className="block text-sm text-pos-muted mb-1">Cash Received</label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={cashReceived}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    if (v === "" || /^\d*\.?\d{0,2}$/.test(v)) setCashReceived(v)
-                  }}
-                  className="pos-input w-full text-xl text-center h-14 font-bold"
-                  placeholder="0.00"
-                  autoFocus
-                />
+                <input type="text" inputMode="decimal" value={cashReceived}
+                  onChange={(e) => { const v = e.target.value; if (v === "" || /^\d*\.?\d{0,2}$/.test(v)) setCashReceived(v) }}
+                  className="pos-input w-full text-xl text-center h-14 font-bold" placeholder="0.00" autoFocus />
               </div>
               <div className="flex gap-2 flex-wrap">
                 {quickAmounts.map((amt) => (
-                  <button
-                    key={amt}
-                    onClick={() => setCashReceived(Number(amt).toFixed(2))}
-                    className="flex-1 min-w-[30%] py-2 px-3 border border-pos-border rounded-xl text-center font-bold text-pos-fg hover-subtle transition-colors shrink-0"
-                  >
+                  <button key={amt} onClick={() => setCashReceived(Number(amt).toFixed(2))}
+                    className="flex-1 min-w-[30%] py-2 px-3 border border-pos-border rounded-xl text-center font-bold text-pos-fg hover-subtle transition-colors shrink-0">
                     {formatCurrency(amt, currency)}
                   </button>
                 ))}
@@ -1544,62 +1647,108 @@ function PaymentModal({
             </div>
           )}
 
-          {/* ── MoMo Panel (Paystack) ──────────────────────────────────────── */}
-          {method === "momo" && (
+          {!splitMode && method === "paystack" && (
             <div className="space-y-3 text-center">
               <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-6">
                 <Smartphone className="w-10 h-10 text-teal-600 dark:text-teal-400 mx-auto mb-3" />
-                <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
-                  Pay with Mobile Money or Card
-                </p>
-                <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 max-w-[250px] mx-auto">
-                  A secure Paystack popup will open to process the payment directly on this device.
-                </p>
+                <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">Pay with Mobile Money or Card</p>
+                <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 max-w-[250px] mx-auto">A secure Paystack popup will open to process the payment directly on this device.</p>
               </div>
             </div>
           )}
 
-          {/* ── Telecel Agent Panel ────────────────────────────────────────── */}
-          {method === "telecel_agent" && (
+          {!splitMode && method === "merchant_momo" && (
+            <div className="space-y-3 text-center">
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-5">
+                <PhoneCall className="w-10 h-10 text-orange-600 dark:text-orange-400 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-orange-800 dark:text-orange-200 mb-1">Merchant MoMo Payment</p>
+                <p className="text-xs text-orange-700 dark:text-orange-300">Ask the customer to send</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 my-2">{formatCurrency(total, currency)}</p>
+                <p className="text-xs text-orange-700 dark:text-orange-300 mb-1">to this number:</p>
+                <p className="text-xl font-bold text-orange-600 dark:text-orange-400 tracking-wider">{merchantMomoNumber}</p>
+                <p className="text-[10px] text-orange-600/70 dark:text-orange-400/70 mt-2">Confirm receipt on your phone before clicking Complete Payment</p>
+              </div>
+            </div>
+          )}
+
+          {!splitMode && method === "telecel_agent" && (
             <div className="space-y-3">
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
                 <p className="text-xs text-red-700 dark:text-red-300 font-semibold mb-1">Telecel Agent Payment</p>
-                <p className="text-[10px] text-red-700/70 dark:text-red-300/70">
-                  Record payment details from the Telecel agent transaction.
-                  The agent dials *110# and processes the payment using their agent SIM.
-                </p>
+                <p className="text-[10px] text-red-700/70 dark:text-red-300/70">Record payment details from the Telecel agent transaction. The agent dials *110# and processes the payment using their agent SIM.</p>
               </div>
-              <div>
-                <label className="block text-xs text-pos-muted mb-1">Agent Code *</label>
-                <input
-                  type="text"
-                  value={agentCode}
-                  onChange={(e) => setAgentCode(e.target.value)}
-                  className="pos-input w-full"
-                  placeholder="e.g. TC-12345"
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-pos-muted mb-1">Agent Phone Number *</label>
-                <input
-                  type="tel"
-                  value={agentPhone}
-                  onChange={(e) => setAgentPhone(e.target.value)}
-                  className="pos-input w-full"
-                  placeholder="050 123 4567"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-pos-muted mb-1">Transaction Reference (from SMS)</label>
-                <input
-                  type="text"
-                  value={agentTxnRef}
-                  onChange={(e) => setAgentTxnRef(e.target.value)}
-                  className="pos-input w-full"
-                  placeholder="Optional — enter the reference from the confirmation SMS"
-                />
-              </div>
+              <div><label className="block text-xs text-pos-muted mb-1">Agent Code *</label>
+                <input type="text" value={agentCode} onChange={(e) => setAgentCode(e.target.value)} className="pos-input w-full" placeholder="e.g. TC-12345" autoFocus /></div>
+              <div><label className="block text-xs text-pos-muted mb-1">Agent Phone Number *</label>
+                <input type="tel" value={agentPhone} onChange={(e) => setAgentPhone(e.target.value)} className="pos-input w-full" placeholder="050 123 4567" /></div>
+              <div><label className="block text-xs text-pos-muted mb-1">Transaction Reference (from SMS)</label>
+                <input type="text" value={agentTxnRef} onChange={(e) => setAgentTxnRef(e.target.value)} className="pos-input w-full" placeholder="Optional — enter the reference from the confirmation SMS" /></div>
+            </div>
+          )}
+
+          {/* ── Split Mode UI ────────────────────────────────────────────────── */}
+          {splitMode && (
+            <div className="space-y-3">
+              {splitEntries.length > 0 && (
+                <div className="bg-pos-bg rounded-xl p-3 space-y-1.5">
+                  {splitEntries.map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${
+                          entry.method === "cash" ? "bg-emerald-500"
+                          : entry.method === "paystack" ? "bg-teal-500"
+                          : entry.method === "merchant_momo" ? "bg-orange-500"
+                          : "bg-red-500"
+                        }`} />
+                        <span className="text-pos-fg font-medium">{entry.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-pos-fg font-semibold">{formatCurrency(entry.amount, currency)}</span>
+                        <button
+                          onClick={() => { setSplitEntries(prev => prev.filter(e => e.id !== entry.id)); setSplitAmount((splitRemaining + entry.amount).toFixed(2)) }}
+                          className="text-pos-muted hover:text-red-500 transition-colors"
+                        ><X className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t border-pos-border pt-1.5 flex justify-between text-sm font-bold">
+                    <span className="text-pos-muted">Remaining</span>
+                    <span className={splitDone ? "text-emerald-600 dark:text-emerald-400" : "text-brand"}>
+                      {splitDone ? "✔ Fully Paid" : formatCurrency(splitRemaining, currency)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {!splitDone && (
+                <div className="space-y-2">
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <label className="text-xs text-pos-muted block mb-1">
+                        Amount ({method === "cash" ? "Cash" : method === "paystack" ? "Paystack" : method === "merchant_momo" ? "MoMo" : "Agent"})
+                      </label>
+                      <input type="text" inputMode="decimal" value={splitAmount}
+                        onChange={(e) => { const v = e.target.value; if (v === "" || /^\d*\.?\d{0,2}$/.test(v)) setSplitAmount(v) }}
+                        className="pos-input w-full text-center font-bold" placeholder={splitRemaining.toFixed(2)} />
+                    </div>
+                    <button onClick={handleAddSplitEntry} disabled={!canAddSplit} className="pos-btn-primary h-10 px-4 shrink-0">
+                      <Plus className="w-4 h-4" /> Add
+                    </button>
+                  </div>
+                  {method === "merchant_momo" && splitAmount && (
+                    <p className="text-xs text-orange-600 dark:text-orange-400 text-center">
+                      Customer sends {formatCurrency(parseFloat(splitAmount) || 0, currency)} to <strong>{merchantMomoNumber}</strong>
+                    </p>
+                  )}
+                  {method === "telecel_agent" && (
+                    <div className="space-y-1.5">
+                      <input type="text" value={agentCode} onChange={(e) => setAgentCode(e.target.value)} className="pos-input w-full text-xs" placeholder="Agent Code *" />
+                      <input type="tel" value={agentPhone} onChange={(e) => setAgentPhone(e.target.value)} className="pos-input w-full text-xs" placeholder="Agent Phone Number *" />
+                      <input type="text" value={agentTxnRef} onChange={(e) => setAgentTxnRef(e.target.value)} className="pos-input w-full text-xs" placeholder="Transaction Ref (optional)" />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1614,16 +1763,10 @@ function PaymentModal({
             <p className="text-xs text-red-600 dark:text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg p-2">{error}</p>
           )}
 
-          <button
-            onClick={handlePay}
-            disabled={!canPay || processing}
-            className="pos-btn-success w-full h-12 text-base font-bold"
-          >
-            {processing ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>Complete Payment</>
-            )}
+          <button onClick={handlePay} disabled={!canPay || processing} className="pos-btn-success w-full h-12 text-base font-bold">
+            {processing ? <Loader2 className="w-5 h-5 animate-spin" />
+              : splitMode && splitDone ? <>Complete Split Payment</>
+              : <>Complete Payment</>}
           </button>
         </div>
       </div>
