@@ -16,9 +16,9 @@ const BACKEND_URL =
   'http://localhost:9000'
 const DATABASE_URL = required(process.env.DATABASE_URL, 'DATABASE_URL')
 const REDIS_URL = process.env.REDIS_URL
-const ADMIN_CORS = process.env.ADMIN_CORS
-const AUTH_CORS = process.env.AUTH_CORS
-const STORE_CORS = process.env.STORE_CORS
+const ADMIN_CORS = process.env.ADMIN_CORS || 'http://localhost:7000,http://localhost:7001,http://localhost:3001,https://pos.letscasegh.com'
+const AUTH_CORS = process.env.AUTH_CORS || 'http://localhost:7000,http://localhost:7001,http://localhost:3001,https://pos.letscasegh.com'
+const STORE_CORS = process.env.STORE_CORS || 'http://localhost:8000,http://localhost:3000,http://localhost:3001,https://pos.letscasegh.com'
 const JWT_SECRET = required(process.env.JWT_SECRET, 'JWT_SECRET')
 const COOKIE_SECRET = required(process.env.COOKIE_SECRET, 'COOKIE_SECRET')
 const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT

@@ -121,8 +121,16 @@ const CATEGORY_IMAGES: Record<string, string> = {
   watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=1000&fit=crop&q=80",
   // Smartwatch — Apple Watch on wrist
   smartwatch: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&h=1000&fit=crop&q=80",
+  // Apple Watch accessories — watch with band and tech accessories top-down
+  "apple watch": "https://images.unsplash.com/photo-1510017803350-5f39f0ffa5f0?w=800&h=1000&fit=crop&q=80",
+  "watch accessories": "https://images.unsplash.com/photo-1510017803350-5f39f0ffa5f0?w=800&h=1000&fit=crop&q=80",
   // Tablets — iPad on desk
   tablets: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&h=1000&fit=crop&q=80",
+  // Laptop accessories — illuminated RGB keyboard and gaming peripherals
+  "laptop accessories": "https://images.unsplash.com/photo-1563297007-0686b7003af7?w=800&h=1000&fit=crop&q=80",
+  // Content accessories — camera, tripod, creator gear flat lay
+  "content accessories": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=1000&fit=crop&q=80",
+  "content": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=1000&fit=crop&q=80",
   // Accessories — tech accessories flat lay
   accessories: "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=800&h=1000&fit=crop&q=80",
   // Default — general tech gadgets

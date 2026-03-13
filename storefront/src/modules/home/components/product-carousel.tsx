@@ -247,9 +247,9 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
           {loopItems.map((item, idx) => (
             <div
               key={`${item.id}-${idx}`}
-              className="group relative shrink-0 w-[240px] small:w-[250px] bg-grey-10 rounded-[16px] p-4 transition duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 select-none"
+              className="group relative shrink-0 w-[240px] small:w-[250px] select-none"
             >
-              <div className="absolute right-7 top-7 z-10">
+              <div className="absolute right-3 top-3 z-10">
                 <WishlistButton
                   item={{
                     id: item.id,
@@ -269,27 +269,25 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
                 }}
                 className="block"
               >
-                <div className="relative bg-white rounded-[14px] overflow-hidden mb-4">
-                  <div className="relative aspect-square w-full">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      sizes="280px"
-                      loading="lazy"
-                      className="object-contain scale-[1.12] pointer-events-none"
-                      draggable={false}
-                    />
-                  </div>
+                <div className="relative w-full overflow-hidden p-4 bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150 aspect-[3/4]">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="280px"
+                    loading="lazy"
+                    className="absolute inset-0 object-cover object-center pointer-events-none"
+                    draggable={false}
+                  />
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <div className="text-[15px] font-medium text-grey-90 line-clamp-2 min-h-[46px]">
+                <div className="flex txt-compact-medium mt-4 justify-between">
+                  <span className="text-ui-fg-subtle line-clamp-1">
                     {item.title}
-                  </div>
-                  <div className="text-[18px] font-semibold text-grey-90">
+                  </span>
+                  <span className="text-ui-fg-base font-semibold whitespace-nowrap ml-2">
                     {item.price}
-                  </div>
+                  </span>
                 </div>
               </LocalizedClientLink>
             </div>

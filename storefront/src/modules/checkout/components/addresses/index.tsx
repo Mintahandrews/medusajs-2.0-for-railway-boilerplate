@@ -1,7 +1,7 @@
 "use client"
 
 import { CheckCircle2, Store, Truck } from "lucide-react"
-import { Heading, Text, useToggleState, clx } from "@medusajs/ui"
+import { Heading, Text, clx } from "@medusajs/ui"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { RadioGroup } from "@headlessui/react"
 
@@ -9,10 +9,8 @@ import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 
 import { setAddresses } from "@lib/data/cart"
-import compareAddresses from "@lib/util/compare-addresses"
 import { HttpTypes } from "@medusajs/types"
 import { useActionState, useState } from "react"
-import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
@@ -31,12 +29,6 @@ const Addresses = ({
   const isOpen = searchParams.get("step") === "address"
 
   const [deliveryOption, setDeliveryOption] = useState<"delivery" | "pickup">("delivery")
-
-  const { state: sameAsBilling, toggle: toggleSameAsBilling } = useToggleState(
-    cart?.shipping_address && cart?.billing_address
-      ? compareAddresses(cart?.shipping_address, cart?.billing_address)
-      : true
-  )
 
   const handleEdit = () => {
     router.push(pathname + "?step=address")
@@ -143,23 +135,8 @@ const Addresses = ({
               <>
                 <ShippingAddress
                   customer={customer}
-                  checked={sameAsBilling}
-                  onChange={toggleSameAsBilling}
                   cart={cart}
                 />
-
-                {!sameAsBilling && (
-                  <div>
-                    <Heading
-                      level="h2"
-                      className="text-3xl-regular gap-x-4 pb-6 pt-8"
-                    >
-                      Billing address
-                    </Heading>
-
-                    <BillingAddress cart={cart} />
-                  </div>
-                )}
               </>
             ) : (
               <div className="p-6 border border-ui-border-base rounded-xl bg-ui-bg-subtle mb-6">
@@ -239,38 +216,6 @@ const Addresses = ({
                     </Text>
                 </div>
 
-                <div
-                  className="flex flex-col"
-                  data-testid="billing-address-summary"
-                >
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Billing Address
-                    </Text>
-
-                    {sameAsBilling ? (
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        Billing- and delivery address are the same.
-                      </Text>
-                    ) : (
-                      <>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.first_name}{" "}
-                          {cart.billing_address?.last_name}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.address_1}{" "}
-                          {cart.billing_address?.address_2}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.postal_code},{" "}
-                          {cart.billing_address?.city}
-                        </Text>
-                        <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.billing_address?.country_code?.toUpperCase()}
-                        </Text>
-                      </>
-                    )}
-                </div>
               </div>
             ) : (
               <div>

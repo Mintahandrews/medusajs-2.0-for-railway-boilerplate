@@ -11,10 +11,8 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
 
   useEffect(() => {
     setFormData({
-      "billing_address.first_name": cart?.billing_address?.first_name || "",
-      "billing_address.last_name": cart?.billing_address?.last_name || "",
+      "billing_address.full_name": [cart?.billing_address?.first_name, cart?.billing_address?.last_name].filter(Boolean).join(" ") || "",
       "billing_address.address_1": cart?.billing_address?.address_1 || "",
-      "billing_address.company": cart?.billing_address?.company || "",
       "billing_address.postal_code": cart?.billing_address?.postal_code || "",
       "billing_address.city": cart?.billing_address?.city || "",
       "billing_address.country_code": cart?.billing_address?.country_code || "",
@@ -56,24 +54,17 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="First name"
-          name="billing_address.first_name"
-          autoComplete="given-name"
-          value={formData["billing_address.first_name"]}
-          onChange={handleChange}
-          required
-          data-testid="billing-first-name-input"
-        />
-        <Input
-          label="Last name"
-          name="billing_address.last_name"
-          autoComplete="family-name"
-          value={formData["billing_address.last_name"]}
-          onChange={handleChange}
-          required
-          data-testid="billing-last-name-input"
-        />
+        <div className="col-span-2">
+          <Input
+            label="Full name"
+            name="billing_address.full_name"
+            autoComplete="name"
+            value={formData["billing_address.full_name"]}
+            onChange={handleChange}
+            required
+            data-testid="billing-full-name-input"
+          />
+        </div>
         <Input
           label="Address"
           name="billing_address.address_1"
@@ -82,23 +73,6 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           onChange={handleChange}
           required
           data-testid="billing-address-input"
-        />
-        <Input
-          label="Company"
-          name="billing_address.company"
-          value={formData["billing_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-          data-testid="billing-company-input"
-        />
-        <Input
-          label="Email (optional)"
-          name="billing_address.email"
-          type="text"
-          autoComplete="email"
-          value={formData["billing_address.email"]}
-          onChange={handleChange}
-          data-testid="billing-email-input"
         />
         <Input
           label="GPS Address"

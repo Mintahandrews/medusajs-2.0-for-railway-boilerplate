@@ -2,7 +2,6 @@
 
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
-import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import GPSLocationButton, { type AddressFromGPS } from "@modules/common/components/gps-location-button"
 import { mapKeys } from "lodash"
@@ -13,13 +12,9 @@ import CountrySelect from "../country-select"
 const ShippingAddress = ({
   customer,
   cart,
-  checked,
-  onChange,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
-  checked: boolean
-  onChange: () => void
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({})
 
@@ -44,10 +39,8 @@ const ShippingAddress = ({
     address &&
       setFormData((prevState: Record<string, any>) => ({
         ...prevState,
-        "shipping_address.first_name": address?.first_name || "",
-        "shipping_address.last_name": address?.last_name || "",
+        "shipping_address.full_name": [address?.first_name, address?.last_name].filter(Boolean).join(" ") || "",
         "shipping_address.address_1": address?.address_1 || "",
-        "shipping_address.company": address?.company || "",
         "shipping_address.postal_code": address?.postal_code || "",
         "shipping_address.city": address?.city || "",
         "shipping_address.country_code": address?.country_code || "",
@@ -123,24 +116,17 @@ const ShippingAddress = ({
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="First name"
-          name="shipping_address.first_name"
-          autoComplete="given-name"
-          value={formData["shipping_address.first_name"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-first-name-input"
-        />
-        <Input
-          label="Last name"
-          name="shipping_address.last_name"
-          autoComplete="family-name"
-          value={formData["shipping_address.last_name"]}
-          onChange={handleChange}
-          required
-          data-testid="shipping-last-name-input"
-        />
+        <div className="col-span-2">
+          <Input
+            label="Full name"
+            name="shipping_address.full_name"
+            autoComplete="name"
+            value={formData["shipping_address.full_name"]}
+            onChange={handleChange}
+            required
+            data-testid="shipping-full-name-input"
+          />
+        </div>
         <Input
           label="Address"
           name="shipping_address.address_1"
@@ -149,14 +135,6 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
           data-testid="shipping-address-input"
-        />
-        <Input
-          label="Company"
-          name="shipping_address.company"
-          value={formData["shipping_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-          data-testid="shipping-company-input"
         />
         <Input
           label="GPS Address"
@@ -194,27 +172,6 @@ const ShippingAddress = ({
           required
           data-testid="shipping-province-input"
         />
-      </div>
-      <div className="my-8">
-        <Checkbox
-          label="Billing address same as shipping address"
-          name="same_as_billing"
-          checked={checked}
-          onChange={onChange}
-          data-testid="billing-address-checkbox"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label="Email (optional)"
-          name="email"
-          type="text"
-          title="Enter a valid email address if you wish to receive updates."
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          data-testid="shipping-email-input"
-        />
         <Input
           label="Phone"
           name="shipping_address.phone"
@@ -224,6 +181,20 @@ const ShippingAddress = ({
           required
           data-testid="shipping-phone-input"
         />
+      </div>
+      <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
+        <div className="col-span-2">
+          <Input
+            label="Email (optional)"
+            name="email"
+            type="text"
+            title="Enter a valid email address if you wish to receive updates."
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+            data-testid="shipping-email-input"
+          />
+        </div>
       </div>
     </>
   )

@@ -1,5 +1,6 @@
 import { getProductsListWithSort } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
+import { getCollectionProducts } from "@lib/data/collections"
 import ProductPreview from "@modules/products/components/product-preview"
 import { Pagination } from "@modules/store/components/pagination"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -38,6 +39,41 @@ export default async function PaginatedProducts({
 }) {
   const queryParams: PaginatedProductsParams = {
     limit: 12,
+  }
+
+  // Multi-collection: use custom route that includes metadata.additional_collections
+  if (collectionId && !categoryId && !productsIds && !searchQuery) {
+    const region = await getRegion(countryCode)
+    if (!region) return null
+
+    const limit = queryParams.limit
+    const offset = (page - 1) * limit
+    const { products: collectionProducts, count: collectionCount } =
+      await getCollectionProducts(collectionId, limit, offset)
+
+    const totalPages = Math.ceil(collectionCount / PRODUCT_LIMIT)
+
+    return (
+      <>
+        <ul
+          className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8"
+          data-testid="products-list"
+        >
+          {collectionProducts.map((p: any) => (
+            <li key={p.id}>
+              <ProductPreview product={p} region={region} />
+            </li>
+          ))}
+        </ul>
+        {totalPages > 1 && (
+          <Pagination
+            data-testid="product-pagination"
+            page={page}
+            totalPages={totalPages}
+          />
+        )}
+      </>
+    )
   }
 
   if (collectionId) {

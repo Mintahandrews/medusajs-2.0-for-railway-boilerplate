@@ -200,7 +200,7 @@ export default async function Nav() {
             <DesktopSearch />
 
             <LocalizedClientLink
-              href="/account/wishlist"
+              href="/wishlist"
               className="hidden small:inline-flex hover:text-brand transition-transform duration-200 hover:scale-110"
               aria-label="Wishlist"
             >

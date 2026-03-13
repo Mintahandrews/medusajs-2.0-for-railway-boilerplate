@@ -173,10 +173,12 @@ export const addCustomerAddress = async (
   _currentState: unknown,
   formData: FormData
 ): Promise<any> => {
+  const fullName = (formData.get("full_name") as string || "").trim()
+  const nameParts = fullName.split(/\s+/)
   const address = {
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
+    first_name: nameParts[0] || (formData.get("first_name") as string) || "",
+    last_name: nameParts.slice(1).join(" ") || (formData.get("last_name") as string) || "",
+    company: "",
     address_1: formData.get("address_1") as string,
     address_2: formData.get("address_2") as string,
     city: formData.get("city") as string,
@@ -217,10 +219,12 @@ export const updateCustomerAddress = async (
 ): Promise<any> => {
   const addressId = currentState.addressId as string
 
+  const fullName = (formData.get("full_name") as string || "").trim()
+  const nameParts = fullName.split(/\s+/)
   const address = {
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    company: formData.get("company") as string,
+    first_name: nameParts[0] || (formData.get("first_name") as string) || "",
+    last_name: nameParts.slice(1).join(" ") || (formData.get("last_name") as string) || "",
+    company: "",
     address_1: formData.get("address_1") as string,
     address_2: formData.get("address_2") as string,
     city: formData.get("city") as string,

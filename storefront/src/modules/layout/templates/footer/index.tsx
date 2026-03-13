@@ -73,7 +73,7 @@ export default async function Footer() {
                 { label: "Shop All", href: "/store" },
                 { label: "Best Sellers", href: "/best-sellers" },
                 { label: "New Arrivals", href: "/new-arrivals" },
-                { label: "Wishlist", href: "/account/wishlist" },
+                { label: "Wishlist", href: "/wishlist" },
                 { label: "Deals", href: "/deals" },
                 { label: "About", href: "/about-us" },
               ].map((l) => (

@@ -526,8 +526,20 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     let phone = formData.get("shipping_address.phone") as string | null
 
     let isPickup = deliveryOption === "pickup"
+
+    // Helper: split "Full name" into first_name + last_name for the API
+    const splitName = (full: string) => {
+      const parts = (full || "").trim().split(/\s+/)
+      return {
+        first_name: parts[0] || "",
+        last_name: parts.slice(1).join(" ") || "",
+      }
+    }
     
     // For Pickup: override fields with dummy Store location so Cart validates
+    const shippingFullName = formData.get("shipping_address.full_name") as string || ""
+    const { first_name: sFN, last_name: sLN } = splitName(shippingFullName)
+
     let shippingAddress = isPickup
       ? {
           first_name: "Pickup",
@@ -542,11 +554,11 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           phone: "0550723834",
         }
       : {
-          first_name: formData.get("shipping_address.first_name"),
-          last_name: formData.get("shipping_address.last_name"),
+          first_name: sFN,
+          last_name: sLN,
           address_1: formData.get("shipping_address.address_1"),
           address_2: "",
-          company: formData.get("shipping_address.company"),
+          company: "",
           postal_code: formData.get("shipping_address.postal_code"),
           city: formData.get("shipping_address.city"),
           country_code: formData.get("shipping_address.country_code"),
@@ -558,26 +570,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
     const data = {
       shipping_address: shippingAddress,
+      billing_address: shippingAddress,
       email,
     } as any
-
-    const sameAsBilling = formData.get("same_as_billing")
-    if (sameAsBilling === "on" || isPickup) {
-      data.billing_address = data.shipping_address
-    } else {
-      data.billing_address = {
-        first_name: formData.get("billing_address.first_name"),
-        last_name: formData.get("billing_address.last_name"),
-        address_1: formData.get("billing_address.address_1"),
-        address_2: "",
-        company: formData.get("billing_address.company"),
-        postal_code: formData.get("billing_address.postal_code"),
-        city: formData.get("billing_address.city"),
-        country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
-        phone: formData.get("billing_address.phone"),
-      }
-    }
 
     await updateCart(data)
 
