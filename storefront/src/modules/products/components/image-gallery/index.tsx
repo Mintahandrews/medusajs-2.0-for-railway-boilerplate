@@ -47,7 +47,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
       <div className="flex flex-col gap-4">
         {/* Main image with hover zoom */}
         <Container
-          className="relative aspect-square w-full overflow-hidden bg-ui-bg-subtle rounded-lg cursor-zoom-in group"
+          className="relative aspect-[3/4] w-full overflow-hidden bg-ui-bg-subtle rounded-lg cursor-zoom-in group"
           onClick={() => setLightboxOpen(true)}
         >
           <Image
