@@ -18,6 +18,7 @@ export interface ReceiptData {
   customerName?: string
   staffName: string
   note?: string
+  splitPayments?: Array<{ method: string; amount: number }>
 }
 
 const Receipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
@@ -128,6 +129,16 @@ const Receipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
             <span>Payment</span>
             <span>{data.paymentMethod}</span>
           </div>
+          {data.splitPayments && data.splitPayments.length > 1 && (
+            <div className="pl-2 space-y-0.5">
+              {data.splitPayments.map((sp, idx) => (
+                <div key={idx} className="flex justify-between text-[10px] text-gray-600">
+                  <span>{sp.method}</span>
+                  <span>{formatCurrency(sp.amount, data.currency)}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {data.cashReceived != null && data.cashReceived > 0 && (
             <>
               <div className="flex justify-between">
@@ -157,6 +168,7 @@ const Receipt = forwardRef<HTMLDivElement, { data: ReceiptData }>(
         <div className="text-center text-[10px] text-gray-500 space-y-0.5">
           <p>Thank you for your purchase!</p>
           <p>{storeName}</p>
+          <p className="font-medium">www.letscasegh.com</p>
         </div>
       </div>
     )

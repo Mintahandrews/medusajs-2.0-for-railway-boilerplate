@@ -37,3 +37,35 @@ export function playBeep() {
     // silent fail
   }
 }
+
+/**
+ * Play a loud, distinctive success chime for completed purchases.
+ * Three ascending tones at high volume.
+ */
+export function playPurchaseSuccess() {
+  if (typeof window === "undefined") return
+  try {
+    const ctx = new AudioContext()
+
+    const notes = [
+      { freq: 523.25, start: 0, duration: 0.15 },    // C5
+      { freq: 659.25, start: 0.15, duration: 0.15 },  // E5
+      { freq: 783.99, start: 0.30, duration: 0.3 },   // G5 (held longer)
+    ]
+
+    notes.forEach(({ freq, start, duration }) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = "sine"
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0.35, ctx.currentTime + start)
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + start + duration)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(ctx.currentTime + start)
+      osc.stop(ctx.currentTime + start + duration)
+    })
+  } catch {
+    // silent fail
+  }
+}

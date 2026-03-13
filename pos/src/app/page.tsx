@@ -411,24 +411,32 @@ export default function POSTerminal() {
         <div className="flex items-center gap-1">
           <nav className="hidden lg:flex items-center gap-0.5">
             {can("pos.customers") && (
-              <button onClick={() => router.push("/customers")} className="pos-btn-ghost text-xs px-2.5">
-                <Users className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Customers</span>
-              </button>
+              <Tip label="Customers">
+                <button onClick={() => router.push("/customers")} className="pos-btn-ghost text-xs px-2.5">
+                  <Users className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Customers</span>
+                </button>
+              </Tip>
             )}
             {can("pos.refund") && (
-              <button onClick={() => router.push("/refunds")} className="pos-btn-ghost text-xs px-2.5">
-                <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Refunds</span>
-              </button>
+              <Tip label="Refunds">
+                <button onClick={() => router.push("/refunds")} className="pos-btn-ghost text-xs px-2.5">
+                  <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Refunds</span>
+                </button>
+              </Tip>
             )}
             {can("pos.transactions") && (
-              <button onClick={() => router.push("/transactions")} className="pos-btn-ghost text-xs px-2.5">
-                <ClipboardList className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Sales</span>
-              </button>
+              <Tip label="Sales History">
+                <button onClick={() => router.push("/transactions")} className="pos-btn-ghost text-xs px-2.5">
+                  <ClipboardList className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Sales</span>
+                </button>
+              </Tip>
             )}
             {can("pos.reports") && (
-              <button onClick={() => router.push("/reports")} className="pos-btn-ghost text-xs px-2.5">
-                <BarChart3 className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Reports</span>
-              </button>
+              <Tip label="Reports & Analytics">
+                <button onClick={() => router.push("/reports")} className="pos-btn-ghost text-xs px-2.5">
+                  <BarChart3 className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Reports</span>
+                </button>
+              </Tip>
             )}
             {can("pos.shift_report") && (
               <Tip label="Shift Report">

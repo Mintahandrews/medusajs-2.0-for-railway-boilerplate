@@ -31,9 +31,9 @@
   --bg-interactive-pressed: rgba(61, 139, 135, 1);
 
   /* Field / Input Backgrounds (Fill-ins) */
-  --bg-field: rgba(235, 202, 207, 1);
-  --bg-field-hover: rgba(235, 202, 207, 1);
-  --bg-subtle: rgba(235, 202, 207, 1);
+  --bg-field: rgba(240, 250, 249, 1);
+  --bg-field-hover: rgba(230, 245, 244, 1);
+  --bg-subtle: rgba(255, 255, 255, 1);
 
   --fg-interactive: rgba(93, 171, 166, 1);
   --fg-interactive-hover: rgba(61, 139, 135, 1);
