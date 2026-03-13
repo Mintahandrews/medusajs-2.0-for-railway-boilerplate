@@ -612,28 +612,69 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   redirect(`/${countryCode}/checkout?step=payment`)
 }
 
-export async function placeOrder() {
+/** Complete the cart and redirect to the order confirmation page.
+ * Returns `{ error: string }` for recoverable failures; throws only for missing cartId.
+ * On success it calls `redirect()` so the function never returns to the caller.
+ */
+export async function placeOrder(): Promise<{ error: string } | undefined> {
   const cartId = await getCartId()
   if (!cartId) {
-    throw new Error("No existing cart found when placing an order")
+    return { error: "No cart found. Your session may have expired — please return to the store and try again." }
   }
 
-  const cartRes = await sdk.store.cart
-    .complete(cartId, {}, await getAuthHeaders())
-    .then((cartRes) => {
-      revalidateTag("cart")
-      revalidateTag("order")
-      return cartRes
-    })
-    .catch(medusaError)
+  // ── Attempt to complete the cart ────────────────────────────────────────────
+  let cartRes: any
+  try {
+    cartRes = await sdk.store.cart
+      .complete(cartId, {}, await getAuthHeaders())
+      .then((res) => {
+        revalidateTag("cart")
+        revalidateTag("order")
+        return res
+      })
+  } catch (err: any) {
+    const msg: string = err?.message || ""
 
+    // ── Cart already completed (webhook race condition) ──────────────────────
+    // Paystack's charge.success webhook may have already created the order
+    // before the browser arrived at the verify page. Recover by redirecting to
+    // the existing order instead of showing an error.
+    if (
+      msg.toLowerCase().includes("completed") ||
+      msg.toLowerCase().includes("already")
+    ) {
+      try {
+        const { orders } = await sdk.store.order.list(
+          { cart_id: cartId } as any,
+          { next: { tags: ["order"] }, ...(await getAuthHeaders()) }
+        )
+        const existing = orders?.[0]
+        if (existing) {
+          const cc = existing.shipping_address?.country_code?.toLowerCase() || "gh"
+          await removeCartId()
+          revalidateTag("order")
+          redirect(`/${cc}/order/confirmed/${existing.id}`)
+        }
+      } catch (lookupErr: any) {
+        // ignore — fall through to return the original error
+        console.warn("[placeOrder] Could not look up existing order:", lookupErr?.message)
+      }
+    }
+
+    console.error("[placeOrder] cart.complete failed:", msg)
+    return {
+      error: msg || "Payment processing failed. Your payment may have been received — please check your email or contact support.",
+    }
+  }
+
+  // ── Order created ────────────────────────────────────────────────────────────
   if (cartRes?.type === "order") {
     const countryCode =
-      cartRes.order.shipping_address?.country_code?.toLowerCase()
+      cartRes.order.shipping_address?.country_code?.toLowerCase() || "gh"
     await removeCartId()
     revalidateTag("order")
 
-    // ── SMS order confirmation (fire-and-forget) ──
+    // SMS order confirmation (fire-and-forget)
     const orderPhone =
       cartRes.order.shipping_address?.phone ||
       cartRes.order.customer?.phone
@@ -647,10 +688,16 @@ export async function placeOrder() {
       )
     }
 
-    redirect(`/${countryCode}/order/confirmed/${cartRes?.order.id}`)
+    redirect(`/${countryCode}/order/confirmed/${cartRes.order.id}`)
   }
 
-  return cartRes.cart
+  // ── Payment not yet authorized ───────────────────────────────────────────────
+  // Medusa returns { type: "cart", errors: [...] } when authorizePayment
+  // doesn't confirm the payment (e.g. transaction still pending).
+  const paymentError = (cartRes?.errors as any[])?.[0]?.message
+  return {
+    error: paymentError || "Payment not yet confirmed. Please wait a moment and try again, or contact support if the problem persists.",
+  }
 }
 
 /**

@@ -5,6 +5,8 @@ import Link from "next/link"
 import { useParams, useSearchParams } from "next/navigation"
 import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 
+const MAX_AUTO_RETRIES = 1
+
 function PaystackVerifyContent() {
   const params = useParams()
   const searchParams = useSearchParams()
@@ -15,19 +17,30 @@ function PaystackVerifyContent() {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading")
   const [errorMessage, setErrorMessage] = useState<string>("")
   const [retrying, setRetrying] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   // Guard against double invocation (React strict mode, re-renders)
   const calledRef = useRef(false)
 
   const completeOrder = useCallback(async () => {
+    setStatus("loading")
+    setErrorMessage("")
+
     try {
-      setStatus("loading")
-      setErrorMessage("")
-      await placeOrder()
-      // placeOrder() calls redirect() internally — if we reach here, it succeeded
+      const result = await placeOrder()
+
+      // placeOrder() calls redirect() on success — if it returns, check for error
+      if (result?.error) {
+        setStatus("error")
+        setErrorMessage(result.error)
+        return
+      }
+
+      // Returned without error and without redirect — treat as success
       setStatus("success")
     } catch (error: any) {
-      // NEXT_REDIRECT is thrown by Next.js redirect() — this is expected behavior
+      // NEXT_REDIRECT is thrown by some Next.js versions when redirect() is used
+      // inside a Server Action. This is expected and means the order was created.
       if (
         error?.message?.includes("NEXT_REDIRECT") ||
         error?.digest?.includes("NEXT_REDIRECT")
@@ -35,10 +48,12 @@ function PaystackVerifyContent() {
         setStatus("success")
         return
       }
-      console.error("Paystack verify - placeOrder failed:", error)
+
+      // Generic Next.js production error — the actual message is hidden server-side
+      console.error("Paystack verify - placeOrder threw:", error)
       setStatus("error")
       setErrorMessage(
-        error?.message || "An error occurred while completing your order."
+        "An unexpected error occurred while completing your order. Your payment may have been received — please check your email or contact support."
       )
     } finally {
       setRetrying(false)
@@ -61,6 +76,7 @@ function PaystackVerifyContent() {
 
   const handleRetry = () => {
     setRetrying(true)
+    setRetryCount((c) => c + 1)
     completeOrder()
   }
 
@@ -87,6 +103,7 @@ function PaystackVerifyContent() {
   }
 
   if (status === "error") {
+    const canRetry = retryCount < MAX_AUTO_RETRIES
     return (
       <div className="content-container py-16 flex flex-col items-center text-center">
         <div className="flex items-center justify-center w-14 h-14 rounded-full bg-red-50 mb-5">
@@ -105,33 +122,35 @@ function PaystackVerifyContent() {
           </svg>
         </div>
         <h1 className="text-xl font-semibold text-red-600">
-          Payment Verification Failed
+          Order Completion Issue
         </h1>
         <p className="mt-2 text-ui-fg-subtle max-w-md">{errorMessage}</p>
         {reference && (
-          <p className="mt-2 text-xs text-ui-fg-muted">
-            Reference: {reference}
+          <p className="mt-3 text-xs text-ui-fg-muted">
+            Payment Reference: <span className="font-mono">{reference}</span>
           </p>
         )}
         <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
-          <button
-            onClick={handleRetry}
-            disabled={retrying}
-            className="px-6 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+          {canRetry && (
+            <button
+              onClick={handleRetry}
+              disabled={retrying}
+              className="px-6 py-2.5 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
+            >
+              {retrying ? "Retrying…" : "Try Again"}
+            </button>
+          )}
+          <Link
+            href="mailto:support@letscasegh.com"
+            className="px-6 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            {retrying ? "Retrying…" : "Try Again"}
-          </button>
+            Contact Support
+          </Link>
           <Link
             href={`/${countryCode}/checkout`}
             className="text-sm text-ui-fg-interactive hover:text-ui-fg-interactive-hover underline"
           >
             Return to Checkout
-          </Link>
-          <Link
-            href={`/${countryCode}/cart`}
-            className="text-sm text-ui-fg-subtle hover:text-ui-fg-base underline"
-          >
-            Return to Cart
           </Link>
         </div>
       </div>

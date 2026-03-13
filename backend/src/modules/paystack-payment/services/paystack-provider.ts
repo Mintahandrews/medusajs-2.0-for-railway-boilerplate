@@ -329,7 +329,19 @@ class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
   async authorizePayment(
     input: AuthorizePaymentInput
   ): Promise<AuthorizePaymentOutput> {
-    return await this.getPaymentStatus(input)
+    try {
+      return await this.getPaymentStatus(input)
+    } catch (err: any) {
+      // If the Paystack API call fails (network error, invalid reference, etc.),
+      // return ERROR status so Medusa returns { type: "cart" } instead of a 500.
+      return {
+        status: PaymentSessionStatus.ERROR,
+        data: {
+          ...(input.data || {}),
+          authorization_error: err?.message || "Paystack verification failed",
+        },
+      }
+    }
   }
 
   async cancelPayment({ data }: CancelPaymentInput): Promise<CancelPaymentOutput> {

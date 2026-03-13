@@ -14,15 +14,14 @@ import PaymentContainer from "@modules/checkout/components/payment-container"
 import PaystackChannelPicker, {
   type PaystackChannel,
 } from "@modules/checkout/components/paystack-channel-picker"
-import { isManual, isPaystack, isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
+import { isManual, isPaystack, isStripe as isStripeFunc, paymentInfoMap, PAYSTACK_PUBLIC_KEY } from "@lib/constants"
 import { StripeContext } from "@modules/checkout/components/payment-wrapper"
 import { initiatePaymentSession } from "@lib/data/cart"
 
-/** Human-readable labels for the Paystack channel summary */
+  /** Human-readable labels for the Paystack channel summary */
 const channelLabels: Record<PaystackChannel, string> = {
   mobile_money: "Mobile Money",
   card: "Card Payment",
-  bank: "Bank Transfer",
 }
 
 const Payment = ({
@@ -151,10 +150,12 @@ const Payment = ({
 
       // Require a channel selection when Paystack is selected
       if (paystackSelected && !selectedPaystackChannel) {
-        setError("Please select a payment channel (Mobile Money, Card, or Bank).")
+        setError("Please select a payment channel (Mobile Money or Card).")
         setIsLoading(false)
         return
       }
+
+      let freshSessionData: Record<string, unknown> | null = null
 
       if (shouldInitializeSession) {
         const callbackUrl = isPaystack(selectedPaymentMethod)
@@ -162,22 +163,12 @@ const Payment = ({
           : undefined
 
         try {
-          // Paystack requires email and callback_url in data field
           const paymentData: Record<string, unknown> = {}
-          
-          if (callbackUrl) {
-            paymentData.callback_url = callbackUrl
-          }
-          if (cart?.email) {
-            paymentData.email = cart.email
-          }
-          if (cart?.shipping_address?.phone) {
-            paymentData.phone = cart.shipping_address.phone
-          }
-          // Pass the selected Paystack channel so the backend can forward it
-          if (paystackSelected && selectedPaystackChannel) {
-            paymentData.channels = [selectedPaystackChannel]
-          }
+
+          if (callbackUrl) paymentData.callback_url = callbackUrl
+          if (cart?.email) paymentData.email = cart.email
+          if (cart?.shipping_address?.phone) paymentData.phone = cart.shipping_address.phone
+          if (paystackSelected && selectedPaystackChannel) paymentData.channels = [selectedPaystackChannel]
 
           const sessionInit = await initiatePaymentSession(cart, {
             provider_id: selectedPaymentMethod,
@@ -188,6 +179,11 @@ const Payment = ({
             setIsLoading(false)
             return
           }
+
+          // Capture the fresh session data so we can read the reference below
+          freshSessionData = (sessionInit.response as any)
+            ?.payment_collection?.payment_sessions
+            ?.find((s: any) => s.status === "pending")?.data ?? null
         } catch (sessionErr: any) {
           console.error("Payment session error:", sessionErr)
           setError(sessionErr?.message || "Failed to initialize payment. Please try again.")
@@ -197,11 +193,63 @@ const Payment = ({
       }
 
       if (!shouldInputCard) {
+        // ── Paystack: open inline modal directly ──────────────────────────────────────
+        if (paystackSelected && PAYSTACK_PUBLIC_KEY) {
+          // Use the fresh session response when we just initiated, otherwise read from cart
+          const sessionData: any =
+            freshSessionData ??
+            (cart.payment_collection?.payment_sessions?.find(
+              (s: any) => s.status === "pending"
+            ) as any)?.data
+
+          const reference = sessionData?.reference as string | undefined
+
+          if (reference) {
+            try {
+              // Load the Paystack inline script if not already on the page
+              await new Promise<void>((resolve, reject) => {
+                if ((window as any).PaystackPop) return resolve()
+                const sc = document.createElement("script")
+                sc.src = "https://js.paystack.co/v1/inline.js"
+                sc.async = true
+                sc.onload = () => resolve()
+                sc.onerror = () => reject(new Error("Paystack script failed to load"))
+                document.body.appendChild(sc)
+              })
+
+              const paystackEmail =
+                cart.email ||
+                `${String(cart.shipping_address?.phone ?? "")
+                  .replace(/\D/g, "")
+                  .trim() || "guest"}@guest.local`
+              const countryPrefix = pathname.split("/")[1] || "gh"
+
+              ;(window as any).PaystackPop.setup({
+                key: PAYSTACK_PUBLIC_KEY,
+                email: paystackEmail,
+                amount: sessionData?.amount ?? undefined,
+                currency: String(sessionData?.currency ?? "GHS").toUpperCase(),
+                ref: reference,
+                ...(selectedPaystackChannel ? { channels: [selectedPaystackChannel] } : {}),
+                callback: (res: any) => {
+                  window.location.href = `${window.location.origin}/${countryPrefix}/checkout/paystack/verify?reference=${res.reference}`
+                },
+                onClose: () => {
+                  setIsLoading(false)
+                },
+              }).openIframe()
+              return
+            } catch (psErr: any) {
+              console.warn("Paystack inline failed, falling back to review step:", psErr)
+              // Fall through to review navigation
+            }
+          }
+        }
+
+        // Default / fallback: navigate to review step
         return router.push(
           pathname + "?" + createQueryString("step", "review"),
-          {
-            scroll: false,
-          }
+          { scroll: false }
         )
       }
     } catch (err: any) {
@@ -398,8 +446,8 @@ const Payment = ({
               ? "Enter card details"
               : paystackSelected && selectedPaystackChannel
               ? `Continue with ${
-                  { mobile_money: "Mobile Money", card: "Card", bank: "Bank Transfer" }[
-                    selectedPaystackChannel
+                  { mobile_money: "Mobile Money", card: "Card" }[
+                    selectedPaystackChannel as string
                   ] ?? "Paystack"
                 }`
               : "Continue to review"}
