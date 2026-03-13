@@ -70,7 +70,22 @@ const medusaConfig = {
     vite: (config) => {
       return {
         ...config,
-        plugins: [...(config.plugins || []), letscaseBrandingPlugin()],
+        plugins: [
+          ...(config.plugins || []),
+          letscaseBrandingPlugin(),
+          // Patch admin dashboard upload limit from 1MB to 4MB
+          {
+            name: 'letscase-upload-limit',
+            transform(code, id) {
+              if (id.includes('@medusajs/dashboard') && code.includes('DEFAULT_MAX_FILE_SIZE')) {
+                return code.replace(
+                  /var\s+DEFAULT_MAX_FILE_SIZE\s*=\s*1024\s*\*\s*1024/,
+                  'var DEFAULT_MAX_FILE_SIZE = 4 * 1024 * 1024'
+                )
+              }
+            },
+          },
+        ],
       }
     },
   },
