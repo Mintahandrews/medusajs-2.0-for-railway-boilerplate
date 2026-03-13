@@ -121,9 +121,9 @@ const CATEGORY_IMAGES: Record<string, string> = {
   watches: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=1000&fit=crop&q=80",
   // Smartwatch — Apple Watch on wrist
   smartwatch: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&h=1000&fit=crop&q=80",
-  // Apple Watch accessories — watch with band and tech accessories top-down
-  "apple watch": "https://images.unsplash.com/photo-1510017803350-5f39f0ffa5f0?w=800&h=1000&fit=crop&q=80",
-  "watch accessories": "https://images.unsplash.com/photo-1510017803350-5f39f0ffa5f0?w=800&h=1000&fit=crop&q=80",
+  // Apple Watch accessories — Apple Watch with bands and charger top-down
+  "apple watch": "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=800&h=1000&fit=crop&q=80",
+  "watch accessories": "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=800&h=1000&fit=crop&q=80",
   // Tablets — iPad on desk
   tablets: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&h=1000&fit=crop&q=80",
   // Laptop accessories — illuminated RGB keyboard and gaming peripherals
