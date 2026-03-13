@@ -566,7 +566,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           phone: phone,
         }
 
-    const email = rawEmail?.trim() || `${shippingAddress.phone?.toString().replace(/\D/g, "") || "guest"}@guest.local`
+    const email = rawEmail?.trim() || `${shippingAddress.phone?.toString().replace(/\D/g, "") || "guest"}@letscasegh.com`
 
     const data = {
       shipping_address: shippingAddress,

@@ -44,6 +44,8 @@ const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST
 const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY
 const POSTHOG_EVENTS_API_KEY = process.env.POSTHOG_EVENTS_API_KEY
 const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
+const SMSONLINEGH_API_KEY = process.env.SMSONLINEGH_API_KEY
+const SMSONLINEGH_SENDER_ID = process.env.SMSONLINEGH_SENDER_ID || 'LetsCase'
 
 const medusaConfig = {
   projectConfig: {
@@ -131,7 +133,7 @@ const medusaConfig = {
         }
       }
     }] : []),
-    ...(SENDGRID_API_KEY && SENDGRID_FROM_EMAIL || RESEND_API_KEY && RESEND_FROM_EMAIL ? [{
+    ...((SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) || (RESEND_API_KEY && RESEND_FROM_EMAIL) || SMSONLINEGH_API_KEY ? [{
       key: Modules.NOTIFICATION,
       resolve: '@medusajs/notification',
       options: {
@@ -152,6 +154,15 @@ const medusaConfig = {
               channels: ['email'],
               api_key: RESEND_API_KEY,
               from: RESEND_FROM_EMAIL,
+            },
+          }] : []),
+          ...(SMSONLINEGH_API_KEY ? [{
+            resolve: './src/modules/sms-notifications',
+            id: 'smsonlinegh',
+            options: {
+              channels: ['sms'],
+              api_key: SMSONLINEGH_API_KEY,
+              sender_id: SMSONLINEGH_SENDER_ID,
             },
           }] : []),
         ]

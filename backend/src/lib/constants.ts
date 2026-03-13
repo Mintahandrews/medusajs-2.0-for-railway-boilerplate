@@ -132,3 +132,32 @@ export const ARONIUM_POS_API_KEY = process.env.ARONIUM_POS_API_KEY
  */
 export const POSTHOG_EVENTS_API_KEY = process.env.POSTHOG_EVENTS_API_KEY
 export const POSTHOG_HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
+
+/**
+ * (optional) SMSOnlineGH configuration for SMS notifications
+ * SMSONLINEGH_API_KEY: your API key from portal.smsonlinegh.com
+ * SMSONLINEGH_SENDER_ID: registered sender name (e.g. "LetsCase")
+ */
+export const SMSONLINEGH_API_KEY = process.env.SMSONLINEGH_API_KEY
+export const SMSONLINEGH_SENDER_ID = process.env.SMSONLINEGH_SENDER_ID || 'LetsCase'
+
+/**
+ * Guest email detection.
+ * Phone-only customers get a generated email like `233599470437@letscasegh.com`.
+ * These are not real mailboxes — skip email sending for them.
+ */
+const GUEST_EMAIL_RE = /^\d+@letscasegh\.com$/i
+export function isGuestEmail(email?: string | null): boolean {
+  if (!email) return false
+  return GUEST_EMAIL_RE.test(email.trim())
+}
+
+/**
+ * Extract phone digits from a guest email (e.g. "233599470437@letscasegh.com" → "233599470437").
+ * Returns undefined for non-guest emails.
+ */
+export function phoneFromGuestEmail(email?: string | null): string | undefined {
+  if (!email) return undefined
+  const match = email.trim().match(/^(\d+)@letscasegh\.com$/i)
+  return match ? match[1] : undefined
+}

@@ -2,7 +2,7 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/framework'
 import { EmailTemplates } from '../modules/email-notifications/templates'
-import { STOREFRONT_URL, SUPPORT_EMAIL, POSTHOG_EVENTS_API_KEY } from '../lib/constants'
+import { STOREFRONT_URL, SUPPORT_EMAIL, POSTHOG_EVENTS_API_KEY, isGuestEmail, phoneFromGuestEmail, SMSONLINEGH_API_KEY } from '../lib/constants'
 import { trackOrderPlacedWorkflow } from '../workflows/track-order-placed'
 
 export default async function orderPlacedHandler({
@@ -16,28 +16,53 @@ export default async function orderPlacedHandler({
     const order = await orderModuleService.retrieveOrder(data.id, { relations: ['items', 'summary', 'shipping_address'] })
     const shippingAddress = (order as any).shipping_address
 
-    // Send confirmation to customer
-    await notificationModuleService.createNotifications({
-      to: order.email,
-      channel: 'email',
-      template: EmailTemplates.ORDER_PLACED,
-      data: {
-        emailOptions: {
-          replyTo: SUPPORT_EMAIL,
-          subject: 'Your Letscase order confirmation'
-        },
-        order,
-        shippingAddress,
-        orderUrl: STOREFRONT_URL
-          ? `${STOREFRONT_URL}`.replace(/\/$/, '') +
-            `/${(shippingAddress?.country_code ?? 'bf').toLowerCase()}/order/confirmed/${order.id}`
-          : undefined,
-        supportEmail: SUPPORT_EMAIL,
-        preview: 'Thank you for your order!'
-      }
-    })
+    const orderUrl = STOREFRONT_URL
+      ? `${STOREFRONT_URL}`.replace(/\/$/, '') +
+        `/${(shippingAddress?.country_code ?? 'gh').toLowerCase()}/order/confirmed/${order.id}`
+      : undefined
 
-    // Send notification to admin/support
+    const notificationData = {
+      order,
+      shippingAddress,
+      orderUrl,
+      supportEmail: SUPPORT_EMAIL,
+      preview: 'Thank you for your order!'
+    }
+
+    // Send email to customer (skip for phone-based guest emails)
+    if (!isGuestEmail(order.email)) {
+      await notificationModuleService.createNotifications({
+        to: order.email,
+        channel: 'email',
+        template: EmailTemplates.ORDER_PLACED,
+        data: {
+          emailOptions: {
+            replyTo: SUPPORT_EMAIL,
+            subject: 'Your Letscase order confirmation'
+          },
+          ...notificationData,
+        }
+      })
+    }
+
+    // Send SMS to customer phone (if SMS is configured)
+    if (SMSONLINEGH_API_KEY) {
+      const phone = shippingAddress?.phone || phoneFromGuestEmail(order.email)
+      if (phone) {
+        try {
+          await notificationModuleService.createNotifications({
+            to: phone.replace(/\D/g, ''),
+            channel: 'sms',
+            template: EmailTemplates.ORDER_PLACED,
+            data: notificationData,
+          })
+        } catch (smsErr) {
+          console.warn('[order-placed] SMS send failed (non-fatal):', (smsErr as any)?.message)
+        }
+      }
+    }
+
+    // Send notification to admin/support (always email)
     if (SUPPORT_EMAIL) {
       await notificationModuleService.createNotifications({
         to: SUPPORT_EMAIL,
@@ -48,14 +73,8 @@ export default async function orderPlacedHandler({
             replyTo: SUPPORT_EMAIL,
             subject: 'New order received on Letscase'
           },
-          order,
-          shippingAddress,
-          orderUrl: STOREFRONT_URL
-            ? `${STOREFRONT_URL}`.replace(/\/$/, '') +
-              `/${(shippingAddress?.country_code ?? 'bf').toLowerCase()}/order/confirmed/${order.id}`
-            : undefined,
-          supportEmail: SUPPORT_EMAIL,
-          preview: 'A new order was placed.'
+          ...notificationData,
+          preview: 'A new order was placed.',
         }
       })
     }

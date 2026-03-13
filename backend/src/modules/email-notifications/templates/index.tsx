@@ -11,6 +11,9 @@ import {
   ORDER_CANCELLED
 } from './order-status'
 import { ContactFormEmail, CONTACT_FORM, isContactFormData } from './contact-form'
+import { CustomerWelcomeTemplate, CUSTOMER_WELCOME, isCustomerWelcomeData } from './customer-welcome'
+import { OrderRefundTemplate, ORDER_REFUND, isOrderRefundData } from './order-refund'
+import { ReturnCreatedTemplate, RETURN_CREATED, isReturnCreatedData } from './return-created'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -19,6 +22,9 @@ export const EmailTemplates = {
   ORDER_DELIVERED,
   ORDER_CANCELLED,
   CONTACT_FORM,
+  CUSTOMER_WELCOME,
+  ORDER_REFUND,
+  RETURN_CREATED,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -59,6 +65,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <ContactFormEmail {...data} />
 
+    case EmailTemplates.CUSTOMER_WELCOME:
+      if (!isCustomerWelcomeData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.CUSTOMER_WELCOME}"`
+        )
+      }
+      return <CustomerWelcomeTemplate {...data} />
+
+    case EmailTemplates.ORDER_REFUND:
+      if (!isOrderRefundData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.ORDER_REFUND}"`
+        )
+      }
+      return <OrderRefundTemplate {...data} />
+
+    case EmailTemplates.RETURN_CREATED:
+      if (!isReturnCreatedData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.RETURN_CREATED}"`
+        )
+      }
+      return <ReturnCreatedTemplate {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -67,4 +100,11 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
   }
 }
 
-export { InviteUserEmail, OrderPlacedTemplate, ContactFormEmail }
+export {
+  InviteUserEmail,
+  OrderPlacedTemplate,
+  ContactFormEmail,
+  CustomerWelcomeTemplate,
+  OrderRefundTemplate,
+  ReturnCreatedTemplate,
+}

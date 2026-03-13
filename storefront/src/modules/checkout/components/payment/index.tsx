@@ -221,7 +221,7 @@ const Payment = ({
                 cart.email ||
                 `${String(cart.shipping_address?.phone ?? "")
                   .replace(/\D/g, "")
-                  .trim() || "guest"}@guest.local`
+                  .trim() || "guest"}@letscasegh.com`
               const countryPrefix = pathname.split("/")[1] || "gh"
 
               ;(window as any).PaystackPop.setup({

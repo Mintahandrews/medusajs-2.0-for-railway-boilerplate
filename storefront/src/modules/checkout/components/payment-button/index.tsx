@@ -356,7 +356,7 @@ const PaystackPaymentButton = ({
       cart.email ||
       `${String(cart.shipping_address?.phone ?? "")
         .replace(/\D/g, "")
-        .trim() || "guest"}@guest.local`
+        .trim() || "guest"}@letscasegh.com`
 
     // If a public key is available, open Paystack inline modal (keeps user on-site).
     if (PAYSTACK_PUBLIC_KEY && reference) {

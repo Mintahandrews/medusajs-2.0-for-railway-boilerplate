@@ -118,7 +118,7 @@ function makeGuestEmailFromPhone(phone?: string): string | undefined {
     return undefined
   }
 
-  return `${digits}@guest.local`
+  return `${digits}@letscasegh.com`
 }
 
 class PaystackProviderService extends AbstractPaymentProvider<PaystackOptions> {
