@@ -165,6 +165,10 @@ export default defineMiddlewares({
       bodyParser: { sizeLimit: "10mb" },
     },
     {
+      matcher: "/admin/uploads",
+      bodyParser: { sizeLimit: "4mb" },
+    },
+    {
       matcher: "/admin/*",
       middlewares: [posRbacGuard],
     },
