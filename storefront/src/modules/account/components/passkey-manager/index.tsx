@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { browserSupportsWebAuthn, startRegistration } from "@simplewebauthn/browser"
+import { Button, Badge } from "@medusajs/ui"
 import {
   getRegistrationOptions,
   verifyRegistration,
@@ -24,7 +24,12 @@ export default function PasskeyManager() {
   const [success, setSuccess] = useState<string | null>(null)
 
   useEffect(() => {
-    setSupported(browserSupportsWebAuthn())
+    // Dynamically check WebAuthn support on the client only
+    import("@simplewebauthn/browser").then((mod) => {
+      setSupported(mod.browserSupportsWebAuthn())
+    }).catch(() => {
+      setSupported(false)
+    })
   }, [])
 
   const fetchPasskeys = useCallback(async () => {
@@ -34,7 +39,7 @@ export default function PasskeyManager() {
         setPasskeys(data.passkeys || [])
       }
     } catch {
-      // Silently fail — user might not have any
+      // Silently fail
     } finally {
       setLoading(false)
     }
@@ -56,9 +61,10 @@ export default function PasskeyManager() {
         return
       }
 
+      const { startRegistration } = await import("@simplewebauthn/browser")
       const regResponse = await startRegistration({ optionsJSON: regOpts.options })
 
-      // Try to detect device name
+      // Detect device name from user agent
       const ua = navigator.userAgent
       let deviceName = "Unknown device"
       if (/iPhone/.test(ua)) deviceName = "iPhone"
@@ -105,44 +111,57 @@ export default function PasskeyManager() {
     []
   )
 
+  // Don't render anything until we know if passkeys are supported
   if (!supported) {
     return (
-      <div>
-        <h2 className="text-base-semi">Biometric Sign-in</h2>
-        <p className="text-small-regular text-ui-fg-subtle mt-1">
-          Your browser or device doesn&apos;t support passkeys.
-        </p>
+      <div className="text-small-regular">
+        <div className="flex flex-col">
+          <span className="uppercase text-ui-fg-base">Biometric Sign-in</span>
+          <span className="text-ui-fg-subtle mt-1">
+            Your browser or device doesn&apos;t support passkeys.
+          </span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base-semi">Biometric Sign-in</h2>
-          <p className="text-small-regular text-ui-fg-subtle mt-1">
+    <div className="text-small-regular">
+      <div className="flex items-end justify-between">
+        <div className="flex flex-col">
+          <span className="uppercase text-ui-fg-base">Biometric Sign-in</span>
+          <span className="text-ui-fg-subtle mt-1">
             Use Face ID, Touch ID, or your device PIN to sign in faster.
-          </p>
+          </span>
         </div>
-        <button
-          onClick={handleRegister}
-          disabled={registering}
-          className="text-sm font-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover disabled:opacity-50"
-        >
-          {registering ? "Registering..." : "+ Add passkey"}
-        </button>
+        <div>
+          <Button
+            variant="secondary"
+            className="w-[140px] min-h-[25px] py-1"
+            onClick={handleRegister}
+            disabled={registering}
+            type="button"
+            data-testid="add-passkey-button"
+          >
+            {registering ? "Registering..." : "Add passkey"}
+          </Button>
+        </div>
       </div>
 
       {error && (
-        <p className="text-rose-500 text-small-regular mt-3">{error}</p>
+        <Badge className="p-2 my-4" color="red">
+          <span>{error}</span>
+        </Badge>
       )}
+
       {success && (
-        <p className="text-green-600 text-small-regular mt-3">{success}</p>
+        <Badge className="p-2 my-4" color="green">
+          <span>{success}</span>
+        </Badge>
       )}
 
       {loading ? (
-        <p className="text-small-regular text-ui-fg-muted mt-4">Loading...</p>
+        <p className="text-ui-fg-muted mt-4">Loading...</p>
       ) : passkeys.length > 0 ? (
         <div className="mt-4 flex flex-col gap-3">
           {passkeys.map((pk) => (
@@ -156,17 +175,19 @@ export default function PasskeyManager() {
                   Added {new Date(pk.created_at).toLocaleDateString()}
                 </p>
               </div>
-              <button
+              <Button
+                variant="secondary"
+                className="min-h-[25px] py-1 text-xs"
                 onClick={() => handleDelete(pk.id)}
-                className="text-xs text-rose-500 hover:text-rose-700 font-medium"
+                type="button"
               >
                 Remove
-              </button>
+              </Button>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-small-regular text-ui-fg-muted mt-4">
+        <p className="text-ui-fg-muted mt-4">
           No passkeys registered yet. Add one to enable biometric sign-in.
         </p>
       )}
