@@ -30,7 +30,9 @@ export default function PasskeyManager() {
   const fetchPasskeys = useCallback(async () => {
     try {
       const data = await listPasskeys()
-      setPasskeys(data.passkeys || [])
+      if (!data?.error) {
+        setPasskeys(data.passkeys || [])
+      }
     } catch {
       // Silently fail — user might not have any
     } finally {
@@ -48,8 +50,13 @@ export default function PasskeyManager() {
     setError(null)
     setSuccess(null)
     try {
-      const { options, challengeId } = await getRegistrationOptions()
-      const regResponse = await startRegistration({ optionsJSON: options })
+      const regOpts = await getRegistrationOptions()
+      if (regOpts?.error) {
+        setError(regOpts.error)
+        return
+      }
+
+      const regResponse = await startRegistration({ optionsJSON: regOpts.options })
 
       // Try to detect device name
       const ua = navigator.userAgent
@@ -61,7 +68,12 @@ export default function PasskeyManager() {
       else if (/Windows/.test(ua)) deviceName = "Windows"
       else if (/Linux/.test(ua)) deviceName = "Linux"
 
-      await verifyRegistration(challengeId, regResponse, deviceName)
+      const verifyResult = await verifyRegistration(regOpts.challengeId, regResponse, deviceName)
+      if (verifyResult?.error) {
+        setError(verifyResult.error)
+        return
+      }
+
       setSuccess("Passkey registered! You can now sign in with biometric.")
       fetchPasskeys()
     } catch (err: any) {
@@ -80,7 +92,11 @@ export default function PasskeyManager() {
     async (id: string) => {
       if (!confirm("Remove this passkey? You won't be able to use it for biometric sign-in.")) return
       try {
-        await deletePasskey(id)
+        const result = await deletePasskey(id)
+        if (result?.error) {
+          setError(result.error)
+          return
+        }
         setPasskeys((prev) => prev.filter((p) => p.id !== id))
       } catch (err: any) {
         setError(err?.message || "Failed to remove passkey")

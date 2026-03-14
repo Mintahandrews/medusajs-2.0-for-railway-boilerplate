@@ -6,23 +6,31 @@ import { revalidateTag } from "next/cache"
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
+/**
+ * Safe fetch wrapper that never throws — returns { error } on failure.
+ * This prevents Next.js from returning 500 for server action errors.
+ */
 async function passkeyFetch(path: string, options?: RequestInit) {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options?.headers as Record<string, string>),
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options?.headers as Record<string, string>),
+    }
+
+    const res = await fetch(`${BACKEND_URL}${path}`, {
+      ...options,
+      headers,
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      return { error: body.error || `Request failed: ${res.status}` }
+    }
+
+    return await res.json()
+  } catch (err: any) {
+    return { error: err?.message || "Network error" }
   }
-
-  const res = await fetch(`${BACKEND_URL}${path}`, {
-    ...options,
-    headers,
-  })
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error || `Request failed: ${res.status}`)
-  }
-
-  return res.json()
 }
 
 /**
@@ -69,6 +77,8 @@ export async function verifyLogin(challengeId: string, response: any) {
     method: "POST",
     body: JSON.stringify({ challengeId, response }),
   })
+
+  if (result?.error) return result
 
   if (result.token) {
     await setAuthToken(result.token)

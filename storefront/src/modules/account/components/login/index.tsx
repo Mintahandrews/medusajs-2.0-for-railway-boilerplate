@@ -29,9 +29,20 @@ const Login = ({ setCurrentView }: Props) => {
     setPasskeyLoading(true)
     setPasskeyError(null)
     try {
-      const { options, challengeId } = await getLoginOptions()
-      const authResponse = await startAuthentication({ optionsJSON: options })
-      await verifyLogin(challengeId, authResponse)
+      const loginOpts = await getLoginOptions()
+      if (loginOpts?.error) {
+        setPasskeyError("Biometric sign-in is not available right now. Please use your password.")
+        return
+      }
+
+      const authResponse = await startAuthentication({ optionsJSON: loginOpts.options })
+
+      const verifyResult = await verifyLogin(loginOpts.challengeId, authResponse)
+      if (verifyResult?.error) {
+        setPasskeyError(verifyResult.error)
+        return
+      }
+
       // Token is set by verifyLogin — reload to pick up the authenticated state
       window.location.reload()
     } catch (err: any) {
