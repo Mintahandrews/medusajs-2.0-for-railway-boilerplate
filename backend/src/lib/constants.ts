@@ -152,22 +152,33 @@ export const WEBAUTHN_RP_ID = process.env.WEBAUTHN_RP_ID || 'letscasegh.com'
 export const WEBAUTHN_ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://letscasegh.com'
 
 /**
- * Guest email detection.
- * Phone-only customers get a generated email like `233599470437@letscasegh.com`.
- * These are not real mailboxes — skip email sending for them.
+ * Guest / synthetic email detection.
+ * Phone-only customers get a generated email in one of two formats:
+ *   - Legacy:     `233599470437@letscasegh.com`
+ *   - Storefront: `phone_233599470437@sms.letscase.com`
+ * Neither is a real mailbox — skip email sending for them.
  */
-const GUEST_EMAIL_RE = /^\d+@letscasegh\.com$/i
+const GUEST_EMAIL_LEGACY_RE = /^\d+@letscasegh\.com$/i
+const GUEST_EMAIL_PHONE_RE = /^phone_\d+@sms\.letscase\.com$/i
 export function isGuestEmail(email?: string | null): boolean {
   if (!email) return false
-  return GUEST_EMAIL_RE.test(email.trim())
+  const trimmed = email.trim()
+  return GUEST_EMAIL_LEGACY_RE.test(trimmed) || GUEST_EMAIL_PHONE_RE.test(trimmed)
 }
 
 /**
- * Extract phone digits from a guest email (e.g. "233599470437@letscasegh.com" → "233599470437").
- * Returns undefined for non-guest emails.
+ * Extract phone digits from a synthetic email.
+ * Handles both formats:
+ *   - `233599470437@letscasegh.com`       → `233599470437`
+ *   - `phone_233599470437@sms.letscase.com` → `233599470437`
+ * Returns undefined for non-synthetic emails.
  */
 export function phoneFromGuestEmail(email?: string | null): string | undefined {
   if (!email) return undefined
-  const match = email.trim().match(/^(\d+)@letscasegh\.com$/i)
-  return match ? match[1] : undefined
+  const trimmed = email.trim()
+  const legacyMatch = trimmed.match(/^(\d+)@letscasegh\.com$/i)
+  if (legacyMatch) return legacyMatch[1]
+  const phoneMatch = trimmed.match(/^phone_(\d+)@sms\.letscase\.com$/i)
+  if (phoneMatch) return phoneMatch[1]
+  return undefined
 }
