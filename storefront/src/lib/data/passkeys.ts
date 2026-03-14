@@ -5,6 +5,8 @@ import { revalidateTag } from "next/cache"
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+const PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
 
 /**
  * Safe fetch wrapper that never throws — returns { error } on failure.
@@ -14,6 +16,7 @@ async function passkeyFetch(path: string, options?: RequestInit) {
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      ...(PUBLISHABLE_KEY ? { "x-publishable-api-key": PUBLISHABLE_KEY } : {}),
       ...(options?.headers as Record<string, string>),
     }
 
