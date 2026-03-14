@@ -140,11 +140,12 @@ const Addresses = ({
               </>
             ) : (
               <div className="p-6 border border-ui-border-base rounded-xl bg-ui-bg-subtle mb-6">
-                <Heading level="h3" className="mb-2 text-xl-semi text-ui-fg-base">Letscase HQ</Heading>
+                <Heading level="h3" className="mb-2 text-xl-semi text-ui-fg-base">Letscase Display Suite</Heading>
                 <div className="flex flex-col gap-1 text-ui-fg-subtle">
-                  <Text>Santa Maria, Accra</Text>
-                  <Text>Ghana</Text>
-                  <Text className="mt-2 font-medium">Contact: 055 072 3834</Text>
+                  <Text>Neoplan, New Achimota</Text>
+                  <Text>Accra, Ghana</Text>
+                  <Text className="mt-2 font-medium">Contact: 054 045 1001</Text>
+                  <Text className="text-small-regular text-ui-fg-muted">letscasegh@gmail.com</Text>
                   <Text className="text-small-regular mt-2">Available for pickup during regular business hours (9 AM - 6 PM).</Text>
                 </div>
               </div>
@@ -174,10 +175,10 @@ const Addresses = ({
                           In-store Pickup
                         </Text>
                         <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.shipping_address.address_1}
+                          Letscase Display Suite
                         </Text>
                         <Text className="txt-medium text-ui-fg-subtle">
-                          {cart.shipping_address.city}, {cart.shipping_address.country_code?.toUpperCase()}
+                          Neoplan, New Achimota, Accra
                         </Text>
                       </>
                     ) : (

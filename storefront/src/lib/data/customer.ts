@@ -161,6 +161,69 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
+/**
+ * Request a password reset token. Medusa emits `auth.password_reset`
+ * which triggers the backend subscriber to send an email.
+ */
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const identifier = ((formData.get("identifier") as string) || "").trim()
+  if (!identifier) {
+    return { success: false, error: "Please enter your email or phone number." }
+  }
+
+  const authEmail = isPhoneNumber(identifier)
+    ? phoneToSyntheticEmail(identifier)
+    : identifier
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: authEmail,
+    })
+    return { success: true, error: null }
+  } catch (error: any) {
+    // Always return success to avoid leaking whether the email exists
+    console.warn("[requestPasswordReset]", error?.message)
+    return { success: true, error: null }
+  }
+}
+
+/**
+ * Reset the password using the token from the email link.
+ */
+export async function resetPasswordWithToken(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const token = (formData.get("token") as string) || ""
+  const email = (formData.get("email") as string) || ""
+  const password = (formData.get("password") as string) || ""
+  const confirmPassword = (formData.get("confirm_password") as string) || ""
+
+  if (!token || !email) {
+    return "Invalid or expired reset link. Please request a new one."
+  }
+  if (!password || password.length < 6) {
+    return "Password must be at least 6 characters."
+  }
+  if (password !== confirmPassword) {
+    return "Passwords do not match."
+  }
+
+  try {
+    await sdk.auth.updateProvider("customer", "emailpass", { password }, token)
+    return null // success
+  } catch (error: any) {
+    const msg = error?.message || ""
+    if (msg.toLowerCase().includes("expired") || msg.toLowerCase().includes("invalid")) {
+      return "This reset link has expired. Please request a new one."
+    }
+    return msg || "Failed to reset password. Please try again."
+  }
+}
+
 export async function signout(countryCode: string) {
   await sdk.auth.logout()
   await removeAuthToken()

@@ -14,6 +14,7 @@ import { ContactFormEmail, CONTACT_FORM, isContactFormData } from './contact-for
 import { CustomerWelcomeTemplate, CUSTOMER_WELCOME, isCustomerWelcomeData } from './customer-welcome'
 import { OrderRefundTemplate, ORDER_REFUND, isOrderRefundData } from './order-refund'
 import { ReturnCreatedTemplate, RETURN_CREATED, isReturnCreatedData } from './return-created'
+import { PasswordResetEmail, PASSWORD_RESET, isPasswordResetData } from './password-reset'
 
 export const EmailTemplates = {
   INVITE_USER,
@@ -25,6 +26,7 @@ export const EmailTemplates = {
   CUSTOMER_WELCOME,
   ORDER_REFUND,
   RETURN_CREATED,
+  PASSWORD_RESET,
 } as const
 
 export type EmailTemplateType = keyof typeof EmailTemplates
@@ -92,6 +94,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <ReturnCreatedTemplate {...data} />
 
+    case EmailTemplates.PASSWORD_RESET:
+      if (!isPasswordResetData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.PASSWORD_RESET}"`
+        )
+      }
+      return <PasswordResetEmail {...data} />
+
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
@@ -107,4 +118,5 @@ export {
   CustomerWelcomeTemplate,
   OrderRefundTemplate,
   ReturnCreatedTemplate,
+  PasswordResetEmail,
 }

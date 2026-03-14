@@ -200,6 +200,10 @@ const medusaConfig = {
         apiKey: ARONIUM_POS_API_KEY,
       },
     }] : []),
+    {
+      key: "passkeyModuleService",
+      resolve: './src/modules/passkey',
+    },
     ...(POSTHOG_EVENTS_API_KEY ? [{
       key: Modules.ANALYTICS,
       resolve: '@medusajs/medusa/analytics',

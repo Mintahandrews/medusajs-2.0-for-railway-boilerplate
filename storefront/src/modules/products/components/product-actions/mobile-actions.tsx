@@ -73,7 +73,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           <div
             className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
             data-testid="mobile-actions"
-            data-whatsapp-obstruction={show ? "bottom-right" : undefined}
+            data-whatsapp-obstruction={show ? "bottom-right,bottom-left" : undefined}
           >
             <div className="flex items-center gap-x-2">
               <span data-testid="mobile-title">{product.title}</span>

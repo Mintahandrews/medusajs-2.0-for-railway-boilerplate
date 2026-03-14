@@ -142,6 +142,16 @@ export const SMSONLINEGH_API_KEY = process.env.SMSONLINEGH_API_KEY
 export const SMSONLINEGH_SENDER_ID = process.env.SMSONLINEGH_SENDER_ID || 'LetsCase'
 
 /**
+ * (optional) WebAuthn / Passkey configuration
+ * WEBAUTHN_RP_NAME: human-readable site name shown in passkey prompts
+ * WEBAUTHN_RP_ID: must match the domain (e.g. "letscasegh.com")
+ * WEBAUTHN_ORIGIN: full origin URL (e.g. "https://letscasegh.com")
+ */
+export const WEBAUTHN_RP_NAME = process.env.WEBAUTHN_RP_NAME || 'Lets Case'
+export const WEBAUTHN_RP_ID = process.env.WEBAUTHN_RP_ID || 'letscasegh.com'
+export const WEBAUTHN_ORIGIN = process.env.WEBAUTHN_ORIGIN || 'https://letscasegh.com'
+
+/**
  * Guest email detection.
  * Phone-only customers get a generated email like `233599470437@letscasegh.com`.
  * These are not real mailboxes — skip email sending for them.

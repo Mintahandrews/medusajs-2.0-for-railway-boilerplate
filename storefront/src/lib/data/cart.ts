@@ -544,14 +544,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       ? {
           first_name: "Pickup",
           last_name: "Customer",
-          address_1: "Letscase HQ",
-          address_2: "Santa Maria",
+          address_1: "Letscase Display Suite",
+          address_2: "Neoplan, New Achimota",
           company: "",
           postal_code: "00000",
           city: "Accra",
           country_code: formData.get("shipping_address.country_code") || "gh",
           province: "Greater Accra Region",
-          phone: "0550723834",
+          phone: "0540451001",
         }
       : {
           first_name: sFN,
@@ -576,27 +576,45 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
     await updateCart(data)
 
-    // Auto-select shipping method
+    // Auto-select shipping method — call SDK directly (bypass React cache)
+    // to ensure fresh results after the address update above.
     try {
-      const methods = await listCartShippingMethods(cartId)
-      if (methods && methods.length > 0) {
-        // Try to match the method name to the option (pickup vs delivery)
-        let selectedMethod = methods.find(m => 
-          isPickup 
-            ? (m.name?.toLowerCase().includes("pickup") || m.name?.toLowerCase().includes("store"))
-            : (!m.name?.toLowerCase().includes("pickup") && !m.name?.toLowerCase().includes("store"))
+      const { shipping_options: methods } =
+        await sdk.store.fulfillment.listCartOptions({ cart_id: cartId })
+
+      if (!methods || methods.length === 0) {
+        throw new Error(
+          "No delivery options are available for this address. Please update your address or contact support."
         )
-        // Fallback to first available
-        if (!selectedMethod) {
-          selectedMethod = methods[0]
-        }
-        await sdk.store.cart.addShippingMethod(cartId, { option_id: selectedMethod.id }, {}, await getAuthHeaders())
-        // Invalidate cart cache AFTER shipping method is attached so the next
-        // render gets a cart that includes shipping_methods.
-        revalidateTag("cart")
       }
-    } catch (e) {
-      console.warn("Could not auto-select shipping method", e)
+
+      // Try to match the method name to the option (pickup vs delivery)
+      let selectedMethod = methods.find((m: any) =>
+        isPickup
+          ? m.name?.toLowerCase().includes("pickup") ||
+            m.name?.toLowerCase().includes("store")
+          : !m.name?.toLowerCase().includes("pickup") &&
+            !m.name?.toLowerCase().includes("store")
+      )
+      // Fallback to first available
+      if (!selectedMethod) {
+        selectedMethod = methods[0]
+      }
+
+      await sdk.store.cart.addShippingMethod(
+        cartId,
+        { option_id: selectedMethod.id },
+        {},
+        await getAuthHeaders()
+      )
+      // Invalidate cart cache AFTER shipping method is attached so the next
+      // render gets a cart that includes shipping_methods.
+      revalidateTag("cart")
+    } catch (e: any) {
+      console.error("[setAddresses] Failed to set shipping method:", e)
+      throw new Error(
+        e?.message || "Could not set a delivery method. Please try again."
+      )
     }
 
   } catch (e: any) {
