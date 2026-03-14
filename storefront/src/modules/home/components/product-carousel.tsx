@@ -281,11 +281,11 @@ export default function ProductCarousel({ items, autoScroll = true }: { items: C
                   />
                 </div>
 
-                <div className="flex txt-compact-medium mt-4 justify-between">
-                  <span className="text-ui-fg-subtle line-clamp-1">
+                <div className="flex items-center txt-compact-medium mt-4 justify-between gap-x-2">
+                  <span className="text-ui-fg-subtle truncate min-w-0">
                     {item.title}
                   </span>
-                  <span className="text-ui-fg-base font-semibold whitespace-nowrap ml-2">
+                  <span className="text-ui-fg-base font-semibold whitespace-nowrap shrink-0">
                     {item.price}
                   </span>
                 </div>

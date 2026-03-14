@@ -129,7 +129,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 data-testid="full-name-input"
               />
               <Input
-                label="Address"
+                label="Address / Location"
                 name="address_1"
                 required
                 autoComplete="address-line1"

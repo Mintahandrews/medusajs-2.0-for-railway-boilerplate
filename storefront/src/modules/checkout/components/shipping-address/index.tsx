@@ -128,7 +128,7 @@ const ShippingAddress = ({
           />
         </div>
         <Input
-          label="Address"
+          label="Address / Location"
           name="shipping_address.address_1"
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"]}

@@ -65,7 +65,6 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
         <span>
           {billingAddress.first_name} {billingAddress.last_name}
         </span>
-        <span>{billingAddress.company}</span>
         <span>
           {billingAddress.address_1}
           {billingAddress.address_2 ? `, ${billingAddress.address_2}` : ""}
@@ -106,13 +105,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
             />
           </div>
           <Input
-            label="Company"
-            name="billing_address.company"
-            defaultValue={billingAddress?.company || undefined}
-            data-testid="billing-company-input"
-          />
-          <Input
-            label="Address"
+            label="Address / Location"
             name="billing_address.address_1"
             defaultValue={billingAddress?.address_1 || undefined}
             required

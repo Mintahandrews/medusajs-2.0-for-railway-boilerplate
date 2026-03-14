@@ -74,13 +74,7 @@ const AddAddress = ({ region }: { region: HttpTypes.StoreRegion }) => {
                 />
               </div>
               <Input
-                label="Company"
-                name="company"
-                autoComplete="organization"
-                data-testid="company-input"
-              />
-              <Input
-                label="Address"
+                label="Address / Location"
                 name="address_1"
                 required
                 autoComplete="address-line1"
