@@ -1,10 +1,8 @@
-import { ModuleProviderExports } from '@medusajs/framework/types'
+import { ModuleProvider, Modules } from '@medusajs/framework/utils'
 import { SmsonlineghNotificationService } from './services/smsonlinegh'
 
 const services = [SmsonlineghNotificationService]
 
-const providerExport: ModuleProviderExports = {
+export default ModuleProvider(Modules.NOTIFICATION, {
   services,
-}
-
-export default providerExport
+})

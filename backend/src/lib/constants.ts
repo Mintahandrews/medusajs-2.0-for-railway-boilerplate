@@ -118,14 +118,6 @@ export const WORKER_MODE =
 export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === 'true'
 
 /**
- * (optional) Aronium POS integration
- * ARONIUM_POS_ENABLED: set to "true" to enable POS sync module
- * ARONIUM_POS_API_KEY: shared secret for authenticating POS sync agent requests
- */
-export const ARONIUM_POS_ENABLED = process.env.ARONIUM_POS_ENABLED === 'true'
-export const ARONIUM_POS_API_KEY = process.env.ARONIUM_POS_API_KEY
-
-/**
  * (optional) PostHog analytics configuration
  * POSTHOG_EVENTS_API_KEY: your PostHog project API key
  * POSTHOG_HOST: PostHog API host (defaults to https://us.i.posthog.com)
