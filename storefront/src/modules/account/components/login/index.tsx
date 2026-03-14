@@ -39,7 +39,7 @@ const Login = ({ setCurrentView }: Props) => {
       if (msg.includes("cancelled") || msg.includes("AbortError")) {
         // User cancelled the prompt — not an error
       } else {
-        setPasskeyError(msg || "Biometric sign-in failed. Please use your password.")
+        setPasskeyError("Biometric sign-in failed. Please use your password.")
       }
     } finally {
       setPasskeyLoading(false)
