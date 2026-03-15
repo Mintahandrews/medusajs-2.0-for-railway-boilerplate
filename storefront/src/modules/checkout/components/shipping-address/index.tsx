@@ -8,6 +8,7 @@ import { mapKeys } from "lodash"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
+import RegionSelect from "../region-select"
 
 const ShippingAddress = ({
   customer,
@@ -17,6 +18,7 @@ const ShippingAddress = ({
   cart: HttpTypes.StoreCart | null
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({})
+  const [saveAddress, setSaveAddress] = useState(true)
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -136,13 +138,11 @@ const ShippingAddress = ({
           required
           data-testid="shipping-address-input"
         />
-        <Input
-          label="GPS Address"
+        {/* GPS / postal code — stored silently, not shown to customer */}
+        <input
+          type="hidden"
           name="shipping_address.postal_code"
-          autoComplete="postal-code"
-          value={formData["shipping_address.postal_code"]}
-          onChange={handleChange}
-          required
+          value={formData["shipping_address.postal_code"] || "00000"}
           data-testid="shipping-postal-code-input"
         />
         <Input
@@ -163,8 +163,7 @@ const ShippingAddress = ({
           required
           data-testid="shipping-country-select"
         />
-        <Input
-          label="Region"
+        <RegionSelect
           name="shipping_address.province"
           autoComplete="address-level1"
           value={formData["shipping_address.province"]}
@@ -196,6 +195,19 @@ const ShippingAddress = ({
           />
         </div>
       </div>
+      {/* Save address opt-out */}
+      <label className="flex items-center gap-2 cursor-pointer select-none mt-2 mb-2">
+        <input
+          type="checkbox"
+          name="save_address"
+          checked={saveAddress}
+          onChange={(e) => setSaveAddress(e.target.checked)}
+          className="h-4 w-4 rounded border-ui-border-base text-brand accent-brand focus:ring-brand"
+        />
+        <span className="text-sm text-ui-fg-subtle">
+          Save this address for next time
+        </span>
+      </label>
     </>
   )
 }

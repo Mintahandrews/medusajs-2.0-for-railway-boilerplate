@@ -22,11 +22,15 @@ export const getCategoriesList = cache(async function (
 export const getCategoryByHandle = cache(async function (
   categoryHandle: string[]
 ) {
-
   return sdk.store.category.list(
-    // TODO: Look into fixing the type
-    // @ts-ignore
-    { handle: categoryHandle },
+    // Pass a single string when only one handle segment to avoid array
+    // serialisation issues with some Medusa SDK versions.
+    {
+      handle:
+        categoryHandle.length === 1
+          ? categoryHandle[0]
+          : (categoryHandle as any),
+    },
     { next: { tags: ["categories"] } }
   )
 })

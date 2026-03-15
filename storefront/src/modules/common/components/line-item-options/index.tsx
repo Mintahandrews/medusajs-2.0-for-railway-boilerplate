@@ -12,13 +12,24 @@ const LineItemOptions = ({
   "data-testid": dataTestid,
   "data-value": dataValue,
 }: LineItemOptionsProps) => {
+  const title = variant?.title?.trim()
+
+  // Hide the variant label for products without meaningful variants
+  if (
+    !title ||
+    title.toLowerCase() === "default" ||
+    title.toLowerCase() === "default variant"
+  ) {
+    return null
+  }
+
   return (
     <Text
       data-testid={dataTestid}
       data-value={dataValue}
       className="inline-block txt-medium text-ui-fg-subtle w-full overflow-hidden text-ellipsis"
     >
-      Variant: {variant?.title}
+      {title}
     </Text>
   )
 }

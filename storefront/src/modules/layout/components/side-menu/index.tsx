@@ -58,13 +58,6 @@ const PRIMARY_LINKS: Array<{ name: string; href: string; testId: string }> = [
   { name: "Order Tracking", href: "/order-tracking", testId: "order-tracking-link" },
 ]
 
-const SHOP_LINKS: Array<{ name: string; href: string }> = [
-  { name: "All Products", href: "/store" },
-  { name: "Cases", href: "/store" },
-  { name: "Screen Protectors", href: "/store" },
-  { name: "Earphones/Buds", href: "/store" },
-  { name: "Chargers", href: "/store" },
-]
 
 const TRENDING_LINKS: Array<{ name: string; href: string }> = [
   { name: "Best Sellers", href: "/store" },
@@ -277,23 +270,6 @@ const SideMenu = ({
                                   </>
                                 ) : null}
 
-                                {SHOP_LINKS.length ? (
-                                  <>
-                                    <div className="pt-4 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                                      Shop essentials
-                                    </div>
-                                    {SHOP_LINKS.map((item) => (
-                                      <LocalizedClientLink
-                                        key={item.name}
-                                        href={item.href}
-                                        className="py-1 hover:text-gray-900"
-                                        onClick={close}
-                                      >
-                                        {item.name}
-                                      </LocalizedClientLink>
-                                    ))}
-                                  </>
-                                ) : null}
                               </div>
                             </Disclosure.Panel>
                           </div>
