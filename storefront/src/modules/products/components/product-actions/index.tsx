@@ -129,6 +129,7 @@ export default function ProductActions({
   const actionsRef = useRef<HTMLDivElement>(null)
   
   const [showPreorderModal, setShowPreorderModal] = useState(false)
+  const [preorderModel, setPreorderModel] = useState("")
 
   const inView = useIntersection(actionsRef, "0px")
 
@@ -145,6 +146,7 @@ export default function ProductActions({
       variantId: selectedVariant.id,
       quantity: 1,
       countryCode,
+      metadata: isPreorder && preorderModel.trim() ? { preorder_model: preorderModel.trim() } : undefined,
     })
 
     trackAddToCart({
@@ -156,6 +158,7 @@ export default function ProductActions({
 
     setIsAdding(false)
     setShowPreorderModal(false)
+    setPreorderModel("")
   }
 
   return (
@@ -172,12 +175,32 @@ export default function ProductActions({
             <p className="text-sm">
               Please note that this item is currently on pre-order. Pre-orders take a maximum of 10 to 14 days to fulfill.
             </p>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="preorder-model" className="text-sm font-medium">
+                Model/Variant you want (optional)
+              </label>
+              <input
+                id="preorder-model"
+                type="text"
+                value={preorderModel}
+                onChange={(e) => setPreorderModel(e.target.value)}
+                placeholder="e.g. iPhone 15 Pro Max, Samsung S24 Ultra"
+                className="w-full px-3 py-2 text-sm border border-ui-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-ui-border-interactive focus:border-ui-border-interactive"
+                data-testid="preorder-model-input"
+              />
+              <p className="text-xs text-ui-fg-muted">
+                Enter the specific phone model or variant you need this item for.
+              </p>
+            </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() => setShowPreorderModal(false)}
+            onClick={() => {
+              setShowPreorderModal(false)
+              setPreorderModel("")
+            }}
             data-testid="preorder-cancel-button"
           >
             Cancel

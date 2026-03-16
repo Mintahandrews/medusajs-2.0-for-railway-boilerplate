@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s | Letscase",
   },
   description:
-    "Shop premium phone cases, custom designer cases, laptop bags, chargers and tech accessories in Ghana. Fast delivery across Accra & nationwide. Free shipping over GH\u20B5200.",
+    "Shop premium phone cases, custom designer cases, laptop bags, chargers and tech accessories in Ghana. Fast delivery across Accra & nationwide.",
   keywords: [
     "phone cases Ghana",
     "iPhone cases Accra",

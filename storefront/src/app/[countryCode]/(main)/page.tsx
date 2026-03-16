@@ -8,7 +8,7 @@ import { getProductsList } from "@lib/data/products"
 export const metadata: Metadata = {
   title: "Letscase Ghana - Premium Phone Cases & Tech Accessories",
   description:
-    "Shop authentic iPhone cases, Android accessories, laptop bags, chargers and more in Accra. Fast delivery across Ghana. Free shipping over GH₵200.",
+    "Shop authentic iPhone cases, Android accessories, laptop bags, chargers and more in Accra. Fast delivery across Ghana.",
 }
 
 export default async function Home({

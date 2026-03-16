@@ -353,10 +353,7 @@ const PaystackPaymentButton = ({
     const url = session?.data?.authorization_url as string | undefined
     const reference = session?.data?.reference as string | undefined
     const paystackEmail =
-      cart.email ||
-      `${String(cart.shipping_address?.phone ?? "")
-        .replace(/\D/g, "")
-        .trim() || "guest"}@letscasegh.com`
+      cart.email || "guest@letscasegh.com"
 
     // If a public key is available, open Paystack inline modal (keeps user on-site).
     if (PAYSTACK_PUBLIC_KEY && reference) {

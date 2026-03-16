@@ -3,7 +3,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
 
 type ImageGalleryProps = {
@@ -21,6 +21,11 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
+  // Touch swipe state
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
+  const minSwipeDistance = 50
+
   const selected = safeImages[Math.min(selectedIndex, safeImages.length - 1)]
 
   const goNext = useCallback(() => {
@@ -30,6 +35,31 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   const goPrev = useCallback(() => {
     setSelectedIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length)
   }, [safeImages.length])
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX
+    touchEndX.current = null
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return
+    const distance = touchStartX.current - touchEndX.current
+    const isSwipe = Math.abs(distance) > minSwipeDistance
+
+    if (isSwipe && safeImages.length > 1) {
+      if (distance > 0) {
+        goNext() // Swipe left → next
+      } else {
+        goPrev() // Swipe right → previous
+      }
+    }
+    touchStartX.current = null
+    touchEndX.current = null
+  }
 
   useEffect(() => {
     if (!lightboxOpen) return
@@ -45,10 +75,13 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   return (
     <>
       <div className="flex flex-col gap-4">
-        {/* Main image with hover zoom */}
+        {/* Main image with hover zoom and swipe support */}
         <Container
           className="relative aspect-[3/4] w-full overflow-hidden bg-ui-bg-subtle rounded-lg cursor-zoom-in group"
           onClick={() => setLightboxOpen(true)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <Image
             src={(selected as any)?.url}
@@ -61,6 +94,29 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
               objectFit: "contain",
             }}
           />
+          
+          {/* Navigation arrows on main image */}
+          {safeImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); goPrev() }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 border border-grey-20 text-grey-60 opacity-0 group-hover:opacity-100 transition-opacity hover:text-brand hover:bg-white"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); goNext() }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 border border-grey-20 text-grey-60 opacity-0 group-hover:opacity-100 transition-opacity hover:text-brand hover:bg-white"
+                aria-label="Next image"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </>
+          )}
+          
           <button
             type="button"
             onClick={(e) => {

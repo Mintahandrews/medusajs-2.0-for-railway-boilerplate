@@ -218,10 +218,7 @@ const Payment = ({
               })
 
               const paystackEmail =
-                cart.email ||
-                `${String(cart.shipping_address?.phone ?? "")
-                  .replace(/\D/g, "")
-                  .trim() || "guest"}@letscasegh.com`
+                cart.email || "guest@letscasegh.com"
               const countryPrefix = pathname.split("/")[1] || "gh"
 
               ;(window as any).PaystackPop.setup({

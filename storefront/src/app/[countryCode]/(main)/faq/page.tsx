@@ -204,7 +204,7 @@ export default function FaqPage() {
       category: "Support",
       question: "What are your business hours?",
       answer:
-        "Our online store is open 24/7. Customer support is available Monday to Saturday, 9:00 AM – 6:00 PM GMT. Messages received outside these hours will be responded to the next business day.",
+        "Our online store is open 24/7. Customer support is available Monday to Saturday, 8:00 AM – 8:00 PM GMT. Messages received outside these hours will be responded to the next business day.",
     },
     {
       category: "Support",

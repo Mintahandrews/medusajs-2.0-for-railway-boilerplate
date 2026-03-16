@@ -96,10 +96,12 @@ export async function addToCart({
   variantId,
   quantity,
   countryCode,
+  metadata,
 }: {
   variantId: string
   quantity: number
   countryCode: string
+  metadata?: Record<string, string>
 }) {
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
@@ -116,6 +118,7 @@ export async function addToCart({
       {
         variant_id: variantId,
         quantity,
+        metadata,
       },
       {},
       await getAuthHeaders()
@@ -566,7 +569,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
           phone: phone,
         }
 
-    const email = rawEmail?.trim() || `${shippingAddress.phone?.toString().replace(/\D/g, "") || "guest"}@letscasegh.com`
+    const email = rawEmail?.trim() || "guest@letscasegh.com"
 
     const data = {
       shipping_address: shippingAddress,

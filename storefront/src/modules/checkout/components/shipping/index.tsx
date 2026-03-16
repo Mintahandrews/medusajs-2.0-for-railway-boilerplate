@@ -38,13 +38,12 @@ function isPickupOption(option: HttpTypes.StoreCartShippingOption): boolean {
   )
 }
 
-/** Safely format a shipping price – returns "Free" for 0 and "—" for null/undefined */
+/** Safely format a shipping price – returns formatted price or "—" for null/undefined */
 function formatShippingPrice(
   amount: number | null | undefined,
   currencyCode: string
 ): string {
   if (amount == null || isNaN(Number(amount))) return "—"
-  if (amount === 0) return "Free"
   return convertToLocale({ amount, currency_code: currencyCode })
 }
 
@@ -320,8 +319,7 @@ const Shipping: React.FC<ShippingProps> = ({
                             className={clx(
                               "text-sm font-semibold whitespace-nowrap",
                               {
-                                "text-brand-700": isSelected && price === "Free",
-                                "text-brand-900": isSelected && price !== "Free",
+                                "text-brand-900": isSelected,
                                 "text-ui-fg-base": !isSelected && price !== "—",
                                 "text-ui-fg-muted italic":
                                   !isSelected && price === "—",

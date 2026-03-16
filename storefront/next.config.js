@@ -58,6 +58,7 @@ const KNOWN_IMAGE_DOMAINS = new Set([
   "medusa-public-images.s3.eu-west-1.amazonaws.com",
   "medusa-server-testing.s3.amazonaws.com",
   "medusa-server-testing.s3.us-east-1.amazonaws.com",
+  "bucket-production-530c.up.railway.app",
 ])
 
 const addDynamicDomain = (value) => {
@@ -187,6 +188,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "*.up.railway.app",
+      },
+      {
+        protocol: "https",
+        hostname: "bucket-production-530c.up.railway.app",
       },
       ...(addDynamicDomain(process.env.NEXT_PUBLIC_MINIO_ENDPOINT)
         ? [addDynamicDomain(process.env.NEXT_PUBLIC_MINIO_ENDPOINT)]

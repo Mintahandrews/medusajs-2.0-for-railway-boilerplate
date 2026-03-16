@@ -146,7 +146,7 @@ const Addresses = ({
                   <Text>Accra, Ghana</Text>
                   <Text className="mt-2 font-medium">Contact: 054 045 1001</Text>
                   <Text className="text-small-regular text-ui-fg-muted">letscasegh@gmail.com</Text>
-                  <Text className="text-small-regular mt-2">Available for pickup during regular business hours (9 AM - 6 PM).</Text>
+                  <Text className="text-small-regular mt-2">Available for pickup during regular business hours (8 AM - 8 PM).</Text>
                 </div>
               </div>
             )}
