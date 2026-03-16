@@ -20,7 +20,7 @@ export default async function checkRegions({ container }: ExecArgs) {
   
   for (const option of shippingOptions) {
     logger.info(`Shipping Option: ${option.name} (${option.id})`);
-    logger.info(`  Prices: ${JSON.stringify(option.prices)}`);
+    logger.info(`  Type: ${option.price_type}`);
   }
 
   logger.info("\nDone checking database.");
